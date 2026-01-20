@@ -1,0 +1,452 @@
+```html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOLO CONSTRUCTION - Surveillance et Sauvetage Espace Clos | Montréal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+            color: white;
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #ffd700;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(26, 54, 93, 0.8), rgba(44, 82, 130, 0.8)), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><rect fill="%23f8f9fa" width="1200" height="600"/><circle fill="%23e9ecef" cx="400" cy="200" r="80"/><circle fill="%23dee2e6" cx="800" cy="150" r="60"/><circle fill="%23ced4da" cx="600" cy="350" r="100"/></svg>');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: white;
+            margin-top: 70px;
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .hero-content h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            font-weight: 300;
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: #ff6b35;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .cta-button:hover {
+            background: #e55a2b;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        /* Sections */
+        section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #1a365d;
+        }
+
+        /* Services */
+        .services {
+            background: #f8f9fa;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .service-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .service-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .service-card h3 {
+            color: #1a365d;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        /* About */
+        .about {
+            background: white;
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .about-features {
+            list-style: none;
+            margin-top: 2rem;
+        }
+
+        .about-features li {
+            padding: 0.5rem 0;
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .about-features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #ff6b35;
+            font-weight: bold;
+        }
+
+        .about-image {
+            background: linear-gradient(135deg, #1a365d, #2c5282);
+            border-radius: 10px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+
+        /* Contact */
+        .contact {
+            background: linear-gradient(135deg, #1a365d, #2c5282);
+            color: white;
+        }
+
+        .contact .section-title {
+            color: white;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+        }
+
+        .contact-info {
+            space-y: 2rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .contact-icon {
+            width: 50px;
+            height: 50px;
+            background: #ff6b35;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            color: white;
+            font-weight: bold;
+        }
+
+        .contact-form {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            background: #ff6b35;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #e55a2b;
+        }
+
+        /* Footer */
+        footer {
+            background: #1a1a1a;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-content h2 {
+                font-size: 1.4rem;
+            }
+
+            .about-content,
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">VOLO CONSTRUCTION</div>
+            <ul class="nav-links">
+                <li><a href="#accueil">Accueil</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#apropos">À propos</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="accueil" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>VOLO CONSTRUCTION</h1>
+                <h2>Surveillance & Sauvetage Espace Clos</h2>
+                <p>Experts en sécurité pour espaces confinés à Montréal. Nous assurons la surveillance professionnelle et les interventions de sauvetage selon les plus hauts standards de sécurité.</p>
+                <a href="#contact" class="cta-button">Demandez un devis</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="services" class="services">
+        <div class="container">
+            <h2 class="section-title">Nos Services</h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">S</div>
+                    <h3>Surveillance d'Espace Clos</h3>
+                    <p>Surveillance continue et professionnelle lors de travaux en espaces confinés. Nos équipes formées assurent une veille sécuritaire 24h/7j.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">R</div>
+                    <h3>Sauvetage d'Urgence</h3>
+                    <p>Interventions rapides et efficaces en cas d'urgence. Équipes spécialisées avec matériel de pointe pour tous types de sauvetage.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">F</div>
+                    <h3>Formation & Conseil</h3>
+                    <p>Formation du personnel aux protocoles de sécurité et conseil pour l'amélioration de vos procédures de travail en espace clos.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">E</div>
+                    <h3>Évaluation des Risques</h3>
+                    <p>Analyse complète des risques liés aux espaces confinés et élaboration de plans de sécurité personnalisés pour vos projets.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="apropos" class="about">
+        <div class="container">
+            <h2 class="section-title">À Propos de VOLO CONSTRUCTION</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>VOLO CONSTRUCTION est une entreprise spécialisée dans la surveillance et le sauvetage en espaces clos basée à Montréal. Forte de plusieurs années d'expérience, notre équipe d'experts certifiés garantit la sécurité de vos équipes lors de travaux en espaces confinés.</p>
+                    
+                    <p>Nous intervenons sur tous types de chantiers : réservoirs, canalisations, fosses, silos, et tout autre espace présentant des risques particuliers. Notre approche rigoureuse et notre matériel de pointe nous permettent d'offrir un service de qualité supérieure.</p>
+
+                    <ul class="about-features">
+                        <li>Équipes certifiées et formées régulièrement</li>
+                        <li>Matériel de surveillance et sauvetage dernière génération</li>
+                        <li>Disponibilité 24h/7j pour les urgences</li>
+                        <li>Respect strict des normes de sécurité</li>
+                        <li>Service personnalisé selon vos besoins</li>
+                    </ul>
+                </div>
+                <div class="about-image">
+                    🏗️
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="section-title">Contactez-nous</h2>
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">📍</div>
+                        <div>
+                            <h3>Adresse</h3>
+                            <p>Montréal, Québec<br>Canada</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">📞</div>
+                        <div>
+                            <h3>Téléphone</h3>
+                            <p>+1 (514) XXX-XXXX</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">✉️</div>
+                        <div>
+                            <h3>Email</h3>
+                            <p>info@voloconstruction.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">🕒</div>
+                        <div>
+                            <h3>Heures d'ouverture</h3>
+                            <p>24h/7j pour les urgences<br>Lun-Ven: 8h-17h (bureau)</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <h3>Demande de
