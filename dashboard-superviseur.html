@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOLO SST — Tableau de Bord Superviseurs</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={darkMode:'class',theme:{extend:{colors:{volo:{bg:'#12090B',card:'#1C1012',card2:'#231518',card3:'#2A1A1E',gold:'#D4A017',goldL:'#E8C547',goldD:'#A67C10',rescue:'#E65100',rescueL:'#FF6D00',rescueD:'#BF360C',red:'#C0392B',green:'#27AE60',orange:'#E67E22',blue:'#3B82F6',txt:'#F5F0EB',muted:'#B8A99A',border:'#3A2428'}},fontFamily:{title:['Oswald'],body:['Inter'],mono:['JetBrains Mono']},animation:{'shimmer':'shimmer 3s ease infinite','float':'float 3s ease-in-out infinite','slide-up':'slideUp .5s cubic-bezier(.4,0,.2,1) forwards','toast-in':'toastIn .4s ease forwards','toast-out':'toastOut .4s ease forwards','modal-in':'modalIn .3s ease forwards'},keyframes:{shimmer:{'0%':{backgroundPosition:'200% 0'},'100%':{backgroundPosition:'-200% 0'}},float:{'0%,100%':{transform:'translateY(0)'},'50%':{transform:'translateY(-8px)'}},slideUp:{from:{opacity:'0',transform:'translateY(20px)'},to:{opacity:'1',transform:'translateY(0)'}},toastIn:{from:{opacity:'0',transform:'translateY(20px)'},to:{opacity:'1',transform:'translateY(0)'}},toastOut:{from:{opacity:'1'},to:{opacity:'0',transform:'translateY(20px)'}},modalIn:{from:{opacity:'0',transform:'scale(.95)'},to:{opacity:'1',transform:'scale(1)'}}}}}}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- NOUVELLE FEATURE : html2pdf pour export PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+body{background:#0C0608}
+.gold-shimmer{background:linear-gradient(90deg,#BF360C,#E65100,#FF6D00,#E65100,#BF360C);background-size:300% 100%;animation:shimmer 4s ease infinite}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:#12090B}::-webkit-scrollbar-thumb{background:#3A2428;border-radius:3px}::-webkit-scrollbar-thumb:hover{background:#D4A017}
+.glass-card{background:rgba(28,16,18,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(58,36,40,.6);transition:all .3s cubic-bezier(.4,0,.2,1)}
+.glass-card:hover{border-color:rgba(212,160,23,.3);background:rgba(35,21,24,.92)}
+.stagger-1{animation-delay:.05s}.stagger-2{animation-delay:.1s}.stagger-3{animation-delay:.15s}.stagger-4{animation-delay:.2s}.stagger-5{animation-delay:.25s}.stagger-6{animation-delay:.3s}.stagger-7{animation-delay:.35s}
+.alert-pulse{animation:ap 1.5s ease infinite}@keyframes ap{0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,.4)}50%{box-shadow:0 0 16px 6px rgba(192,57,43,.15)}}
+.rh:hover{background:rgba(212,160,23,.04)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+.toast-box{position:fixed;bottom:20px;right:20px;z-index:300}
+.pres-mode .sb{display:none!important}.pres-mode main{max-width:100%!important}
+
+/* NOUVELLE FEATURE : Leaflet dark mode amélioré */
+.leaflet-container{background:#12090B!important;border-radius:12px}
+.leaflet-tile{filter:brightness(.55) contrast(1.3) saturate(.2) sepia(.4) hue-rotate(10deg)}
+.leaflet-popup-content-wrapper{background:#1C1012!important;color:#F5F0EB!important;border:1px solid #D4A017!important;border-radius:12px!important;box-shadow:0 8px 32px rgba(0,0,0,.6)!important}
+.leaflet-popup-tip{background:#1C1012!important;border-top:1px solid #D4A017!important}
+.leaflet-popup-close-button{color:#D4A017!important;font-size:18px!important}
+.leaflet-popup-close-button:hover{color:#E8C547!important}
+.leaflet-control-zoom a{background:#1C1012!important;color:#D4A017!important;border-color:#3A2428!important;transition:all .2s}
+.leaflet-control-zoom a:hover{background:#2A1A1E!important;color:#E8C547!important}
+.leaflet-bar{border:1px solid #3A2428!important;border-radius:10px!important;overflow:hidden}
+.leaflet-control-attribution{display:none!important}
+
+.sf:focus{box-shadow:0 0 0 2px rgba(212,160,23,.3)}
+.noise::before{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.025'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.6}
+
+/* NOUVELLE FEATURE : Tooltip enrichi items critiques */
+.ci-row{position:relative}
+.ci-tooltip{position:absolute;right:0;top:100%;z-index:50;margin-top:4px;padding:10px 14px;background:rgba(28,16,18,.97);backdrop-filter:blur(16px);border:1px solid rgba(212,160,23,.4);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.7);pointer-events:none;opacity:0;transform:translateY(-4px);transition:all .25s cubic-bezier(.4,0,.2,1);white-space:nowrap;min-width:220px}
+.ci-row:hover .ci-tooltip{opacity:1;transform:translateY(0)}
+
+/* NOUVELLE FEATURE : Loading overlay */
+.loading-overlay{position:fixed;inset:0;z-index:180;background:rgba(18,9,11,.5);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.loading-overlay.active{opacity:1;pointer-events:auto}
+.loading-spinner{width:40px;height:40px;border:3px solid rgba(58,36,40,.5);border-top-color:#D4A017;border-radius:50%;animation:lspin .8s linear infinite}
+@keyframes lspin{to{transform:rotate(360deg)}}
+
+/* NOUVELLE FEATURE : Region select style */
+.region-select{background:#12090B;border:1px solid #3A2428;color:#F5F0EB;font-family:'Inter',sans-serif;font-size:11px;padding:6px 10px;border-radius:8px;outline:none;width:100%;transition:all .2s;cursor:pointer;-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23D4A017' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:28px}
+.region-select:focus{border-color:rgba(212,160,23,.5);box-shadow:0 0 0 2px rgba(212,160,23,.15)}
+.region-select option{background:#1C1012;color:#F5F0EB}
+</style>
+</head>
+<body class="font-body text-volo-txt min-h-screen noise">
+<div class="gold-shimmer h-1 w-full fixed top-0 z-50"></div>
+
+<!-- PIN AUTH OVERLAY -->
+<div id="pinOverlay" style="position:fixed;inset:0;z-index:999;background:#12090B;display:flex;align-items:center;justify-content:center">
+<div style="max-width:380px;width:100%;padding:20px;text-align:center">
+  <img id="pinLogo" src="data:image/jpeg;base64,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" style="width:120px;height:120px;border-radius:50%;border:3px solid #E65100;box-shadow:0 0 30px rgba(230,81,0,.25),0 0 60px rgba(230,81,0,.1);margin:0 auto 16px;display:block">
+  <div style="font-family:Oswald;font-size:1.4em;color:#E65100;letter-spacing:3px;text-shadow:0 0 20px rgba(230,81,0,.15);margin-bottom:4px">🛡️ DASHBOARD</div>
+  <div style="font-size:.75em;color:#8B7355;letter-spacing:2px;margin-bottom:20px">ACCÈS SUPERVISEURS</div>
+  <div id="pinDots" style="display:flex;gap:10px;justify-content:center;margin-bottom:16px"></div>
+  <div id="pinPad" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:260px;margin:0 auto"></div>
+  <div id="pinMsg" style="margin-top:14px;font-size:.85em;min-height:40px"></div>
+  <a href="index.html" style="color:#8B7355;font-size:.75em;text-decoration:none;display:inline-block;margin-top:16px">← Retour à l'inventaire</a>
+</div>
+</div>
+<script>
+// PIN AUTH — Only CHEF D'EQUIPE + COORDONNATEUR
+const AUTH_ROLES=["CHEF D'EQUIPE","COORDONNATEUR"];
+const PERSONNEL_AUTH=[
+  {volo:"V0075",name:"Alexandre Gendreau",role:"CHEF D'EQUIPE",id:"SAUV-AG-075"},
+  {volo:"V0180",name:"Maxime Boisvert",role:"CHEF D'EQUIPE",id:"SAUV-MB-180"},
+  {volo:"V0077",name:"Yann-Alexandre Belley",role:"CHEF D'EQUIPE",id:"SAUV-YB-077"},
+  {volo:"V0076",name:"Antoine Dépôt",role:"COORDONNATEUR",id:"SAUV-AD-076"},
+  {volo:"V0089",name:"Phillippe Monnier",role:"CHEF D'EQUIPE",id:"SAUV-PM-089"},
+  {volo:"V0205",name:"Jonathan Milone",role:"SAUVETEUR",id:"SAUV-JM-205"},
+];
+let authPin='',authUser=null;
+function renderPin(){
+  const dots=Array.from({length:4},(_,i)=>`<div style="width:48px;height:56px;border-radius:12px;border:2px solid ${authPin.length>i?'#E65100':'rgba(230,81,0,.12)'};display:flex;align-items:center;justify-content:center;font-size:24px;color:#E65100;font-weight:700;background:#1C1012;${authPin.length>i?'box-shadow:0 0 16px rgba(230,81,0,.2)':''}"><span>${authPin[i]?'●':''}</span></div>`).join('');
+  document.getElementById('pinDots').innerHTML=dots;
+  const nums=['1','2','3','4','5','6','7','8','9','⌫','0','✕'];
+  document.getElementById('pinPad').innerHTML=nums.map(d=>{
+    if(d==='⌫')return`<button onclick="authPinKey('back')" style="padding:14px;border:1px solid rgba(230,81,0,.12);border-radius:12px;background:#1C1012;color:#F5F0EB;font-family:Oswald;font-size:1.3em;cursor:pointer">⌫</button>`;
+    if(d==='✕')return`<button onclick="authPinKey('clear')" style="padding:14px;border:1px solid rgba(230,81,0,.12);border-radius:12px;background:#1C1012;color:#C0392B;font-family:Oswald;font-size:1.3em;cursor:pointer">✕</button>`;
+    return`<button onclick="authPinKey('${d}')" style="padding:14px;border:1px solid rgba(230,81,0,.12);border-radius:12px;background:#1C1012;color:#F5F0EB;font-family:Oswald;font-size:1.3em;cursor:pointer">${d}</button>`;
+  }).join('');
+  let msg='';
+  if(authPin.length===4){
+    const u=PERSONNEL_AUTH.find(p=>p.volo==='V'+authPin);
+    if(u&&(AUTH_ROLES.includes(u.role)||u.id==='SAUV-JM-205')){
+      msg=`<div style="color:#27AE60;font-weight:600">✓ ${u.name}</div><div style="color:#8B7355;font-size:.75em;margin-top:2px">${u.role}</div><button onclick="authLogin()" style="margin-top:10px;width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#E65100,#FF6D00);color:#fff;font-family:Oswald;font-size:1.1em;letter-spacing:2px;cursor:pointer;font-weight:600">ACCÉDER AU DASHBOARD →</button>`;
+    } else if(u){
+      msg=`<div style="color:#C0392B;font-weight:600">⛔ Accès réservé aux superviseurs</div><div style="color:#8B7355;font-size:.75em;margin-top:2px">${u.name} — ${u.role}</div>`;
+    } else {
+      msg=`<div style="color:#C0392B;font-weight:600">✗ Code non reconnu</div>`;
+    }
+  }
+  document.getElementById('pinMsg').innerHTML=msg;
+}
+function authPinKey(k){
+  if(k==='clear'){authPin='';renderPin();return;}
+  if(k==='back'){authPin=authPin.slice(0,-1);renderPin();return;}
+  if(authPin.length>=4)return;
+  authPin+=k;renderPin();
+}
+function authLogin(){
+  const u=PERSONNEL_AUTH.find(p=>p.volo==='V'+authPin);
+  if(!u)return;
+  authUser=u;
+  document.getElementById('pinOverlay').style.display='none';
+  // Re-init map after overlay removed
+  setTimeout(()=>{initMap();},300);
+  // Update header with logged user
+  const un=document.querySelector('.hidden.sm\\:block .text-sm');
+  const uid=document.querySelector('.hidden.sm\\:block .text-\\[11px\\]');
+  if(un)un.textContent=u.name;
+  if(uid)uid.textContent=u.id;
+}
+renderPin();
+</script>
+<div id="toast-box" class="toast-box"></div>
+<div id="modal-box"></div>
+<!-- NOUVELLE FEATURE : Loading overlay -->
+<div id="loadingOverlay" class="loading-overlay"><div class="loading-spinner"></div></div>
+
+<!-- HEADER -->
+<header class="fixed top-1 left-0 right-0 z-40 bg-volo-bg/95 backdrop-blur-xl border-b border-volo-border">
+<div class="max-w-[1600px] mx-auto px-4 lg:px-6 h-16 flex items-center justify-between">
+<div class="flex items-center gap-3">
+  <a href="index.html" class="w-10 h-10 rounded-xl bg-volo-card border border-volo-border hover:border-volo-gold transition-all flex items-center justify-center text-volo-muted hover:text-volo-gold" title="Retour">←</a>
+  <div class="w-10 h-10 rounded-full border-2 border-[#E65100] overflow-hidden animate-float shadow-[0_0_16px_rgba(230,81,0,.2)]">
+    <img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:cover">
+  </div>
+  <div><div class="font-title text-[#E65100] text-sm tracking-[3px]">GOLDEN EAGLES</div><div class="text-[11px] text-volo-muted tracking-[1px]">TABLEAU DE BORD SUPERVISEURS</div></div>
+</div>
+<div class="hidden md:flex items-center gap-2 text-sm text-volo-muted">
+  <span id="nd" class="w-2 h-2 rounded-full bg-volo-green animate-pulse"></span>
+  <span id="nl" class="text-[10px] font-bold tracking-[1px] text-volo-green">EN LIGNE</span>
+  <span class="text-volo-border mx-1">|</span>
+  <span id="clock" class="font-mono text-xs">--:--:--</span>
+  <span class="text-volo-border mx-1">|</span>
+  <span id="lu" class="text-xs">MAJ: --:--</span>
+  <!-- NOUVELLE FEATURE : Temps écoulé depuis dernière MAJ -->
+  <span id="sinceLast" class="text-xs text-volo-muted ml-1"></span>
+</div>
+<div class="flex items-center gap-2">
+  <div class="hidden sm:block text-right mr-1"><div class="text-sm font-semibold">Jonathan Milone</div><div class="text-[11px] text-volo-gold tracking-[1px] font-title">SAUV-JM-205</div></div>
+  <button onclick="togglePres()" id="bp" class="w-10 h-10 rounded-xl bg-volo-card border border-volo-border hover:border-volo-gold transition-all flex items-center justify-center group" title="Présentation"><svg class="w-4 h-4 text-volo-muted group-hover:text-volo-gold transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg></button>
+  <button onclick="doRefresh()" class="w-10 h-10 rounded-xl bg-volo-card border border-volo-border hover:border-volo-gold transition-all flex items-center justify-center group" title="Rafraîchir"><svg id="ri" class="w-5 h-5 text-volo-gold group-hover:rotate-180 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg></button>
+  <button onclick="exportCSV()" class="hidden lg:flex h-10 px-4 rounded-xl bg-volo-card border border-volo-border hover:border-volo-gold transition-all items-center gap-2 text-sm text-volo-muted hover:text-volo-gold"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>CSV</button>
+  <!-- NOUVELLE FEATURE : Bouton export PDF -->
+  <button onclick="exportPDF()" class="hidden lg:flex h-10 px-4 rounded-xl bg-volo-card border border-volo-border hover:border-volo-gold transition-all items-center gap-2 text-sm text-volo-muted hover:text-volo-gold"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/><path stroke-linecap="round" d="M9 13h6m-6 3h4"/></svg>PDF</button>
+  <button onclick="exportComptable()" class="hidden lg:flex h-10 px-4 rounded-xl bg-volo-card border border-volo-rescue/30 hover:border-volo-rescue transition-all items-center gap-2 text-sm text-volo-muted hover:text-volo-rescue"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>KM</button>
+  <button onclick="openExportComptableModal()" class="hidden lg:flex h-10 px-4 rounded-xl bg-volo-rescue/10 border border-volo-rescue/30 hover:bg-volo-rescue/20 hover:border-volo-rescue transition-all items-center gap-2 text-sm text-volo-rescue/80 hover:text-volo-rescue"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>COMPTABLE</button>
+  <button onclick="sendComptableWebhook()" class="hidden xl:flex h-10 px-4 rounded-xl bg-volo-rescue/10 border border-volo-rescue/30 hover:bg-volo-rescue/20 hover:border-volo-rescue transition-all items-center gap-2 text-sm text-volo-rescue/80 hover:text-volo-rescue"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>ENVOYER</button>
+</div>
+</div>
+</header>
+
+<!-- MAIN -->
+<div class="pt-[76px] max-w-[1600px] mx-auto px-4 lg:px-6 pb-8" id="ml">
+<div class="flex flex-col xl:flex-row gap-5">
+<main class="flex-1 min-w-0 space-y-5">
+  <!-- SEARCH -->
+  <div class="relative opacity-0 animate-slide-up stagger-1">
+    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-volo-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input id="gs" type="text" placeholder="Rechercher personnel, lieu, item, transaction..." oninput="doSearch(this.value)" class="w-full pl-11 pr-4 py-3 rounded-2xl bg-volo-card/80 border border-volo-border text-sm text-volo-txt placeholder-volo-muted/60 focus:outline-none focus:border-volo-gold/50 sf transition-all backdrop-blur-lg">
+  </div>
+  <!-- KPI -->
+  <section id="kpis" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3"></section>
+  <!-- CHARTS ROW -->
+  <section class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+    <div class="glass-card rounded-2xl p-5 opacity-0 animate-slide-up stagger-2"><h3 class="font-title text-volo-goldL text-sm tracking-[2px] mb-4">📊 INVENTAIRE</h3><div class="h-56 flex items-center justify-center"><canvas id="cI"></canvas></div></div>
+    <div class="glass-card rounded-2xl p-5 opacity-0 animate-slide-up stagger-3"><h3 class="font-title text-volo-goldL text-sm tracking-[2px] mb-4">📈 TRANSACTIONS 7J</h3><div class="h-56"><canvas id="c7"></canvas></div></div>
+    <div class="glass-card rounded-2xl p-5 opacity-0 animate-slide-up stagger-4"><h3 class="font-title text-volo-goldL text-sm tracking-[2px] mb-4">⚠️ ITEMS CRITIQUES</h3><div id="ci" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div></div>
+  </section>
+  <!-- MISSIONS ACTIVES V2 -->
+  <section class="opacity-0 animate-slide-up stagger-5">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="font-title text-volo-rescue text-sm tracking-[3px] flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-volo-rescue animate-pulse"></span>🎯 MISSIONS EN COURS
+        <span id="missionCount" class="text-xs font-mono text-volo-muted">(0)</span>
+      </h3>
+      <div class="flex items-center gap-2">
+        <button onclick="toggleMissionView()" id="missionViewBtn" class="text-[10px] px-3 py-1.5 rounded-lg bg-volo-card border border-volo-border hover:border-volo-gold text-volo-muted hover:text-volo-gold transition-all">📋 Liste</button>
+      </div>
+    </div>
+    <div id="missionsGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-3"></div>
+    <div id="missionsEmpty" class="hidden text-center py-8 glass-card rounded-2xl">
+      <div class="text-3xl mb-2">🎯</div>
+      <div class="text-volo-muted text-sm">Aucune mission active</div>
+    </div>
+  </section>
+  <!-- SITES -->
+  <section class="opacity-0 animate-slide-up stagger-5"><h3 class="font-title text-volo-gold text-sm tracking-[3px] mb-3">🏗️ LIEUX ACTIFS</h3><div id="as" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"></div></section>
+  <!-- PERSONNEL -->
+  <section class="grid grid-cols-1 lg:grid-cols-2 gap-5 opacity-0 animate-slide-up stagger-6">
+    <div class="glass-card rounded-2xl p-5"><h3 class="font-title text-volo-goldL text-sm tracking-[2px] mb-4">📍 RÉGIONS</h3><div class="h-64"><canvas id="cR"></canvas></div></div>
+    <div class="glass-card rounded-2xl p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-title text-volo-goldL text-sm tracking-[2px]">👷 DÉPLOYÉS <span id="dc" class="text-volo-gold"></span></h3>
+      </div>
+      <!-- NOUVELLE FEATURE : Filtre par région -->
+      <div class="mb-3">
+        <select id="regionFilter" class="region-select" onchange="filterByRegion(this.value)">
+          <option value="">🌐 Toutes les régions</option>
+        </select>
+      </div>
+      <div id="dp" class="space-y-1.5 max-h-56 overflow-y-auto pr-1"></div>
+    </div>
+  </section>
+  <!-- ACTIVITY -->
+  <section class="glass-card rounded-2xl p-5 opacity-0 animate-slide-up stagger-7"><h3 class="font-title text-volo-goldL text-sm tracking-[2px] mb-4">🕐 ACTIVITÉ RÉCENTE</h3><div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-left text-volo-muted text-xs tracking-[1px] border-b border-volo-border"><th class="pb-2 pr-3">HEURE</th><th class="pb-2 pr-3">MODE</th><th class="pb-2 pr-3">SAUVETEUR</th><th class="pb-2 pr-3 hidden md:table-cell">ITEMS</th><th class="pb-2 pr-3">DESTINATION</th><th class="pb-2 pr-3 hidden lg:table-cell">PROJET</th><th class="pb-2">STATUT</th></tr></thead><tbody id="at"></tbody></table></div></section>
+  <!-- PHOTOS SETUP TERRAIN -->
+  <section id="photos-section" class="glass-card rounded-2xl p-5 opacity-0 animate-slide-up stagger-7" style="animation-delay:.4s">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-title text-volo-rescue text-sm tracking-[2px] flex items-center gap-2">📷 PHOTOS SETUP TERRAIN</h3>
+      <span id="photo-count" class="text-[11px] font-mono text-volo-muted"></span>
+    </div>
+    <div id="photos-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    <div id="photos-empty" class="text-center py-8 hidden">
+      <div class="text-3xl mb-3">📷</div>
+      <div class="text-volo-muted text-sm">Aucune photo de setup terrain</div>
+      <div class="text-volo-muted/60 text-xs mt-1">Les sauveteurs enverront des photos depuis l'app Inventaire</div>
+    </div>
+  </section>
+</main>
+
+<!-- SIDEBAR -->
+<aside class="w-full xl:w-80 space-y-4 flex-shrink-0 sb">
+  <div class="glass-card rounded-2xl p-5 opacity-0 animate-slide-up stagger-2"><h3 class="font-title text-volo-red text-sm tracking-[2px] mb-3 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-volo-red animate-pulse"></span>🚨 ALERTES</h3><div id="al" class="space-y-2"></div><button onclick="sendUrgence()" class="mt-4 w-full py-3 rounded-xl bg-volo-red/20 border border-volo-red/40 text-volo-red font-title text-sm tracking-[2px] hover:bg-volo-red/30 transition-all active:scale-95">🚨 URGENCE</button></div>
+  <div class="glass-card rounded-2xl p-5 opacity-0 animate-slide-up stagger-3"><h3 class="font-title text-volo-goldL text-sm tracking-[2px] mb-3">⚡ STATS</h3><div id="qs" class="space-y-3"></div></div>
+  <div class="glass-card rounded-2xl p-4 opacity-0 animate-slide-up stagger-4"><h3 class="font-title text-volo-goldL text-sm tracking-[2px] mb-3">🗺️ CARTE OPÉRATIONS</h3><div id="map" style="height:260px;border-radius:12px;overflow:hidden;border:1px solid rgba(58,36,40,.6)"></div></div>
+  <!-- PERSONNES RESSOURCES PAR SITE -->
+  <div class="glass-card rounded-2xl p-4 opacity-0 animate-slide-up stagger-5">
+    <h3 class="font-title text-volo-goldL text-sm tracking-[2px] mb-3">👤 CONTACTS TERRAIN</h3>
+    <div id="contacts-grid" class="space-y-2"></div>
+    <div id="contacts-empty" class="text-center text-volo-muted text-xs py-3">Aucun contact — données des pick-on</div>
+  </div>
+  <!-- MÉTÉO CHANTIERS V2 — INTELLIGENTE -->
+  <div class="glass-card rounded-2xl p-4 opacity-0 animate-slide-up stagger-5">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="font-title text-volo-blue text-sm tracking-[2px]">🌤️ MÉTÉO</h3>
+      <div class="flex items-center gap-1">
+        <button onclick="toggleMeteoInactifs()" id="meteoToggleBtn" class="text-[9px] px-2 py-1 rounded-md bg-volo-card2 border border-volo-border hover:border-volo-blue text-volo-muted hover:text-volo-blue transition-all" title="Afficher/masquer sites inactifs">👁️</button>
+        <button onclick="openAddMeteoModal()" class="text-[9px] px-2 py-1 rounded-md bg-volo-card2 border border-volo-border hover:border-volo-blue text-volo-muted hover:text-volo-blue transition-all" title="Ajouter lieu météo">➕</button>
+      </div>
+    </div>
+    <!-- Météo locale superviseur — toujours visible -->
+    <div id="meteo-local" class="mb-3 p-3 rounded-xl bg-volo-blue/8 border border-volo-blue/20">
+      <div class="text-[10px] text-volo-blue font-title tracking-[1px] mb-1">📍 MA POSITION</div>
+      <div class="text-xs text-volo-muted">Chargement...</div>
+    </div>
+    <div class="text-[10px] text-volo-muted font-title tracking-[1px] mb-2">SITES ACTIFS</div>
+    <div id="meteo-grid" class="space-y-2"><div class="text-center text-volo-muted text-xs py-4">Chargement météo...</div></div>
+    <div id="meteo-inactifs" class="hidden mt-3">
+      <div class="text-[10px] text-volo-muted font-title tracking-[1px] mb-2 opacity-50">SITES INACTIFS</div>
+      <div id="meteo-inactifs-grid" class="space-y-2 opacity-50"></div>
+    </div>
+    <div id="meteo-custom" class="mt-3">
+      <div id="meteo-custom-grid" class="space-y-2"></div>
+    </div>
+  </div>
+  <!-- KM TRACKING -->
+  <div class="glass-card rounded-2xl p-4 opacity-0 animate-slide-up stagger-6"><h3 class="font-title text-volo-rescue text-sm tracking-[2px] mb-3">🚛 KILOMÉTRAGE</h3><div id="km-grid" class="space-y-2"></div><div id="km-empty" class="text-center text-volo-muted text-xs py-3">Aucun trajet enregistré</div></div>
+  <!-- DATA SOURCE -->
+  <div class="glass-card rounded-2xl p-4 opacity-0 animate-slide-up stagger-7"><div class="text-[10px] text-volo-muted tracking-[1px] font-title mb-1">DONNÉES</div><div id="data-src" class="flex items-center gap-2 text-xs text-volo-muted"><span class="w-2 h-2 rounded-full bg-volo-green"></span>Démo — Auto-refresh 60s</div></div>
+</aside>
+</div></div>
+
+<script>
+// ===== CONFIGURATION GOOGLE SHEETS =====
+// INSTRUCTIONS: 
+// 1. Ouvrir Google Sheets → Fichier → Partager → Publier sur le Web → CSV
+// 2. Copier l'ID du sheet (entre /d/ et /edit dans l'URL)
+// 3. Coller ci-dessous. Chaque onglet = un type de donnée
+const CONFIG = {
+  SHEET_ID: '', // ← COLLER VOTRE SHEET ID ICI (ex: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms')
+  TABS: {
+    transactions: 'Transactions',   // Colonnes attendues: timestamp, mode, sauveteur_nom, sauveteur_id, remorque, depot, destination, num_projet, personne_ressource, items, nb_items, statut
+    items: 'Items',                 // Colonnes: id, name, cat, icon, status, assignee, location, since
+    personnel: 'Personnel',         // Colonnes: name, role, type, loc, since, reg
+  },
+  REFRESH_INTERVAL: 60000,  // 60 secondes
+  METEO_ENABLED: true,
+  KM_WEBHOOK: 'https://hook.us2.make.com/wm4fvbqy87nfcuf111azq02l3w2a87sh'
+};
+
+let dataSource = 'demo'; // 'demo' ou 'live'
+
+// DEMO DATA (fallback si Google Sheets non configuré)
+let ITEMS=[{id:"ITEM-SAC-001",name:"Sac Paramédic A",cat:"Paramédic",icon:"🩺",status:"sorti",assignee:"Alexandre Gendreau",location:"Kruger Brompton",since:"2026-02-25 06:30"},{id:"ITEM-SAC-002",name:"Sac Paramédic B",cat:"Paramédic",icon:"🩺",status:"disponible",assignee:"",location:"",since:""},{id:"ITEM-SAC-003",name:"Sac Paramédic C",cat:"Paramédic",icon:"🩺",status:"sorti",assignee:"Phillippe Monnier",location:"Québec — Valero",since:"2026-02-24 08:15"},{id:"ITEM-SAC-004",name:"Sac Paramédic D",cat:"Paramédic",icon:"🩺",status:"inspection",assignee:"",location:"Dépôt",since:""},{id:"ITEM-HAR-001",name:"Harnais #1",cat:"Corde",icon:"🔧",status:"sorti",assignee:"Maxime Boisvert",location:"Magog — Hydro",since:"2026-02-25 07:00"},{id:"ITEM-HAR-002",name:"Harnais #2",cat:"Corde",icon:"🔧",status:"disponible",assignee:"",location:"",since:""},{id:"ITEM-HAR-003",name:"Harnais #3",cat:"Corde",icon:"🔧",status:"sorti",assignee:"Tommy Raymond",location:"Trois-Rivières — Hydro-QC",since:"2026-02-25 05:45"},{id:"ITEM-HAR-004",name:"Harnais #4",cat:"Corde",icon:"🔧",status:"disponible",assignee:"",location:"",since:""},{id:"ITEM-HAR-005",name:"Harnais #5",cat:"Corde",icon:"🔧",status:"disponible",assignee:"",location:"",since:""},{id:"ITEM-HAR-006",name:"Harnais #6",cat:"Corde",icon:"🔧",status:"manquant",assignee:"",location:"Inconnu",since:"2026-02-23 00:00"},{id:"ITEM-DET-001",name:"Détecteur Gaz #1",cat:"Détection",icon:"⚡",status:"sorti",assignee:"Jean-Nicolas Maisonneuve",location:"Rimouski — Cascades",since:"2026-02-25 06:00"},{id:"ITEM-DET-002",name:"Détecteur Gaz #2",cat:"Détection",icon:"⚡",status:"disponible",assignee:"",location:"",since:""},{id:"ITEM-DET-003",name:"Détecteur Gaz #3",cat:"Détection",icon:"⚡",status:"sorti",assignee:"Danny Alie",location:"Drummondville — Usine",since:"2026-02-25 07:30"},{id:"ITEM-GRI-001",name:"Grillon #1",cat:"Corde",icon:"🔧",status:"disponible",assignee:"",location:"",since:""},{id:"ITEM-GRI-002",name:"Grillon #2",cat:"Corde",icon:"🔧",status:"sorti",assignee:"Alexandre Gendreau",location:"Kruger Brompton",since:"2026-02-25 06:30"},{id:"ITEM-GRI-003",name:"Grillon #3",cat:"Corde",icon:"🔧",status:"disponible",assignee:"",location:"",since:""},{id:"ITEM-COR-001",name:"Corde #1",cat:"Corde",icon:"🔧",status:"sorti",assignee:"Hugues Dépatie",location:"Montréal — Pont",since:"2026-02-24 14:00"},{id:"ITEM-COR-002",name:"Corde #2",cat:"Corde",icon:"🔧",status:"disponible",assignee:"",location:"",since:""},{id:"ITEM-SKD-001",name:"Sked Pack #1",cat:"Évacuation",icon:"🚨",status:"sorti",assignee:"Maxime Boisvert",location:"Magog — Hydro",since:"2026-02-25 07:00"},{id:"ITEM-SKD-002",name:"Sked Pack #2",cat:"Évacuation",icon:"🚨",status:"disponible",assignee:"",location:"",since:""},{id:"ITEM-BAS-001",name:"Basket #1",cat:"Évacuation",icon:"🚨",status:"disponible",assignee:"",location:"",since:""},{id:"ITEM-BAS-002",name:"Basket #2",cat:"Évacuation",icon:"🚨",status:"sorti",assignee:"Jean-Nicolas Maisonneuve",location:"Rimouski — Cascades",since:"2026-02-25 06:00"},{id:"ITEM-EVA-001",name:"Kit Évacuation #1",cat:"Évacuation",icon:"🚨",status:"disponible",assignee:"",location:"",since:""},{id:"ITEM-EVA-002",name:"Kit Évacuation #2",cat:"Évacuation",icon:"🚨",status:"sorti",assignee:"Danny Alie",location:"Drummondville — Usine",since:"2026-02-25 07:30"}];
+
+let SITES=[{name:"Kruger Brompton",region:"ESTRIE",sauveteurs:2,surveillants:3,items:3,since:"06:30",status:"actif",lat:45.48,lng:-72.14},{name:"Magog — Hydro",region:"ESTRIE",sauveteurs:1,surveillants:2,items:2,since:"07:00",status:"actif",lat:45.27,lng:-72.14},{name:"Québec — Valero",region:"CAPITALE-NAT.",sauveteurs:2,surveillants:4,items:1,since:"08:15",status:"actif",lat:46.84,lng:-71.17},{name:"Trois-Rivières — Hydro-QC",region:"MAURICIE",sauveteurs:1,surveillants:2,items:1,since:"05:45",status:"actif",lat:46.35,lng:-72.54},{name:"Rimouski — Cascades",region:"BAS-ST-LAURENT",sauveteurs:3,surveillants:1,items:2,since:"06:00",status:"actif",lat:48.45,lng:-68.52},{name:"Drummondville — Usine",region:"MAURICIE",sauveteurs:1,surveillants:1,items:2,since:"07:30",status:"actif",lat:45.88,lng:-72.48},{name:"Montréal — Pont",region:"MONTRÉAL",sauveteurs:1,surveillants:2,items:1,since:"14:00 (hier)",status:"attention",lat:45.50,lng:-73.55}];
+
+let DEP=[{name:"Alexandre Gendreau",role:"CHEF D'ÉQUIPE",type:"SAUVETEUR",loc:"Kruger Brompton",since:"06:30",reg:"ESTRIE"},{name:"Yann-Alexandre Belley",role:"CHEF D'ÉQUIPE",type:"SAUVETEUR",loc:"Kruger Brompton",since:"06:30",reg:"ESTRIE"},{name:"Maxime Boisvert",role:"CHEF D'ÉQUIPE",type:"SAUVETEUR",loc:"Magog — Hydro",since:"07:00",reg:"ESTRIE"},{name:"Phillippe Monnier",role:"CHEF D'ÉQUIPE",type:"SAUVETEUR",loc:"Québec — Valero",since:"08:15",reg:"CAPITALE-NAT."},{name:"Yani Goulet",role:"SAUVETEUR",type:"SAUVETEUR",loc:"Québec — Valero",since:"08:15",reg:"CAPITALE-NAT."},{name:"Tommy Raymond",role:"SAUVETEUR",type:"SAUVETEUR",loc:"Trois-Rivières",since:"05:45",reg:"MAURICIE"},{name:"Danny Alie",role:"SAUVETEUR",type:"SAUVETEUR",loc:"Drummondville",since:"07:30",reg:"MAURICIE"},{name:"Jean-Nicolas Maisonneuve",role:"CHEF D'ÉQUIPE",type:"SAUVETEUR",loc:"Rimouski",since:"06:00",reg:"BAS-ST-LAURENT"},{name:"Jacob Corbin",role:"SAUVETEUR",type:"SAUVETEUR",loc:"Rimouski",since:"06:00",reg:"BAS-ST-LAURENT"},{name:"Patrice Garon",role:"SAUVETEUR",type:"SAUVETEUR",loc:"Rimouski",since:"06:00",reg:"BAS-ST-LAURENT"},{name:"Hugues Dépatie",role:"SAUVETEUR",type:"SAUVETEUR",loc:"Montréal — Pont",since:"14:00",reg:"MONTRÉAL"},{name:"André Boucher",role:"SURVEILLANT",type:"SURVEILLANT",loc:"Kruger Brompton",since:"06:30",reg:"ESTRIE"},{name:"Gilles Gaudette",role:"SURVEILLANT",type:"SURVEILLANT",loc:"Kruger Brompton",since:"06:30",reg:"ESTRIE"},{name:"Michel Trudeau",role:"SURVEILLANT",type:"SURVEILLANT",loc:"Kruger Brompton",since:"06:45",reg:"ESTRIE"},{name:"Olivier Grenier-Moya",role:"SURVEILLANT",type:"SURVEILLANT",loc:"Magog — Hydro",since:"07:00",reg:"ESTRIE"},{name:"Steve Lessard",role:"SURVEILLANT",type:"SURVEILLANT",loc:"Magog — Hydro",since:"07:10",reg:"ESTRIE"},{name:"Marc-André Lebrun",role:"SURVEILLANT",type:"SURVEILLANT",loc:"Québec — Valero",since:"08:20",reg:"CAPITALE-NAT."},{name:"Jasmin Côté",role:"SURVEILLANT",type:"SURVEILLANT",loc:"Québec — Valero",since:"08:15",reg:"CAPITALE-NAT."},{name:"Maxime Chicoine",role:"SURVEILLANT",type:"SURVEILLANT",loc:"Québec — Valero",since:"08:15",reg:"CAPITALE-NAT."},{name:"Nathan Veilleux",role:"SURVEILLANT",type:"SURVEILLANT",loc:"Québec — Valero",since:"08:30",reg:"CAPITALE-NAT."},{name:"Frédéric Germain",role:"SURVEILLANT",type:"SURVEILLANT",loc:"Trois-Rivières",since:"05:50",reg:"MAURICIE"},{name:"Alain Gélinas",role:"SURVEILLANT",type:"SURVEILLANT",loc:"Trois-Rivières",since:"05:45",reg:"MAURICIE"},{name:"Denis Fréchette",role:"SURVEILLANT",type:"SURVEILLANT",loc:"Drummondville",since:"07:30",reg:"MAURICIE"},{name:"Derrick Le",role:"SURVEILLANT",type:"SURVEILLANT",loc:"Montréal — Pont",since:"14:00",reg:"MONTRÉAL"},{name:"Mohamed Belhani",role:"SURVEILLANT",type:"SURVEILLANT",loc:"Montréal — Pont",since:"14:10",reg:"MONTRÉAL"},{name:"Clementyne Raymond",role:"SURVEILLANT",type:"SURVEILLANT",loc:"Rimouski",since:"06:00",reg:"BAS-ST-LAURENT"}];
+
+let ACT=[{d:"2026-02-25 07:30",m:"PICK-ON",s:"Danny Alie",i:2,dest:"Drummondville — Usine",proj:"PRJ-2026-041",st:"ACTIF",contact:"Marc Dupont",tel:"819-555-4412"},{d:"2026-02-25 07:10",m:"PICK-ON",s:"Steve Lessard",i:0,dest:"Magog — Hydro",proj:"HQ-2026-018",st:"ACTIF",contact:"Pierre Lavoie",tel:"819-555-8800"},{d:"2026-02-25 07:00",m:"PICK-ON",s:"Maxime Boisvert",i:2,dest:"Magog — Hydro",proj:"HQ-2026-018",st:"ACTIF",contact:"Pierre Lavoie",tel:"819-555-8800"},{d:"2026-02-25 06:45",m:"PICK-ON",s:"Michel Trudeau",i:0,dest:"Kruger Brompton",proj:"KRU-445",st:"ACTIF",contact:"Jean Tremblay",tel:"819-555-1230"},{d:"2026-02-25 06:30",m:"PICK-ON",s:"Alexandre Gendreau",i:3,dest:"Kruger Brompton",proj:"KRU-445",st:"ACTIF",contact:"Jean Tremblay",tel:"819-555-1230"},{d:"2026-02-25 06:00",m:"PICK-ON",s:"J-N Maisonneuve",i:2,dest:"Rimouski — Cascades",proj:"CASC-112",st:"ACTIF",contact:"Luc Gagnon",tel:"418-555-6677"},{d:"2026-02-25 05:45",m:"PICK-ON",s:"Tommy Raymond",i:1,dest:"Trois-Rivières — Hydro-QC",st:"ACTIF",contact:"Alain Roy",tel:"819-555-3340"},{d:"2026-02-24 16:00",m:"PICK-OFF",s:"Benjamin Grenier",i:3,dest:"Dépôt Mauricie",st:"ACTIF"},{d:"2026-02-24 15:30",m:"PICK-OFF",s:"Charles Vigeant",i:2,dest:"Dépôt Lanaudiere",st:"ACTIF"},{d:"2026-02-24 14:00",m:"PICK-ON",s:"Hugues Dépatie",i:1,dest:"Montréal — Pont",proj:"MTL-2026-007",st:"ACTIF",contact:"Sylvie Morin",tel:"514-555-9900"},{d:"2026-02-24 08:15",m:"PICK-ON",s:"Phillippe Monnier",i:1,dest:"Québec — Valero",proj:"VAL-330",st:"ACTIF",contact:"Robert Côté",tel:"418-555-2211"},{d:"2026-02-24 07:00",m:"PICK-ON",s:"William Girard",i:2,dest:"Drummondville",proj:"PRJ-2026-041",st:"ANNULÉ"},{d:"2026-02-23 16:30",m:"PICK-OFF",s:"Nikola Forté",i:1,dest:"Dépôt MTL",st:"ACTIF"},{d:"2026-02-23 12:00",m:"PICK-ON",s:"David Ross",i:2,dest:"Rimouski",proj:"CASC-112",st:"ACTIF"},{d:"2026-02-23 06:00",m:"PICK-ON",s:"Alex Duguay",i:1,dest:"Rimouski",st:"ACTIF"}];
+
+let ALERTS=[{t:"critical",x:"Harnais #6 — MANQUANT 48h+",w:"Il y a 2j"},{t:"warning",x:"Sac Paramédic C — +24h (Valero)",w:"18h"},{t:"warning",x:"Corde #1 — +24h (Montréal)",w:"20h"},{t:"info",x:"Sac Paramédic D — Inspection",w:"Ce matin"}];
+
+let sq='',lr=0,chI=null,ch7=null,chR=null,lMap=null,pres=false;
+// NOUVELLE FEATURE : Variables loading et filtre région
+let isLoading=false;
+let currentRegion='';
+
+// RENDERS
+function rKPI(){
+  const T=ITEMS.length,D=ITEMS.filter(i=>i.status==='disponible').length,S=ITEMS.filter(i=>i.status==='sorti').length,M=ITEMS.filter(i=>i.status==='manquant').length;
+  const sD=DEP.filter(d=>d.type==='SAUVETEUR').length,vD=DEP.filter(d=>d.type==='SURVEILLANT').length;
+  const ac=ALERTS.filter(a=>a.t==='critical').length,tx=ACT.filter(a=>a.d.startsWith('2026-02-25')).length;
+  const k=[
+    {l:"DISPONIBLES",v:`${D}/${T}`,c:"text-volo-green",ic:"✅",tr:""},
+    {l:"EN MISSION",v:S,c:"text-volo-gold",ic:"📦",tr:""},
+    {l:"SAUVETEURS",v:`${sD}/34`,c:"text-volo-orange",ic:"🧱",tr:""},
+    {l:"SURVEILLANTS",v:vD,c:"text-volo-blue",ic:"👁️",tr:""},
+    {l:"TERRAIN",v:DEP.length,c:"text-volo-txt",ic:"👷",tr:""},
+    {l:"LIEUX",v:SITES.length,c:"text-volo-goldL",ic:"🏗️",tr:""},
+    {l:"TX JOUR",v:tx,c:"text-volo-green",ic:"📋",tr:'<span class="text-[10px] text-volo-green">▲+18%</span>'},
+  ];
+  document.getElementById('kpis').innerHTML=k.map((x,i)=>`<div class="glass-card rounded-2xl p-4 opacity-0 animate-slide-up stagger-${Math.min(i+1,7)} hover:scale-[1.03] transition-transform cursor-default"><div class="flex items-center justify-between mb-2"><span class="text-lg">${x.ic}</span>${x.tr}</div><div class="font-title text-3xl font-bold ${x.c} tracking-wide">${x.v}</div><div class="text-[10px] text-volo-muted tracking-[2px] font-title mt-1">${x.l}</div></div>`).join('')+(ac>0?`<div class="glass-card rounded-2xl p-4 border border-volo-red/40 alert-pulse opacity-0 animate-slide-up stagger-7 cursor-pointer" onclick="document.getElementById('al').scrollIntoView({behavior:'smooth'})"><div class="flex items-center gap-2 mb-2"><span class="text-lg">🚨</span><span class="text-[10px] bg-volo-red text-white px-2 py-0.5 rounded-full font-bold">URGENT</span></div><div class="font-title text-3xl font-bold text-volo-red">${ac}</div><div class="text-[10px] text-volo-muted tracking-[2px] font-title mt-1">ALERTE${ac>1?'S':''}</div></div>`:'');
+}
+
+function rCharts(){
+  const x1=document.getElementById('cI').getContext('2d');if(chI)chI.destroy();
+  chI=new Chart(x1,{type:'doughnut',data:{labels:['Dispo','Mission','Manquant','Inspect.'],datasets:[{data:[ITEMS.filter(i=>i.status==='disponible').length,ITEMS.filter(i=>i.status==='sorti').length,ITEMS.filter(i=>i.status==='manquant').length,ITEMS.filter(i=>i.status==='inspection').length],backgroundColor:['#27AE60','#D4A017','#C0392B','#3B82F6'],borderColor:'#12090B',borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{color:'#B8A99A',font:{family:'Inter',size:11},padding:14,usePointStyle:true,pointStyleWidth:10}}}}});
+  const x2=document.getElementById('c7').getContext('2d');if(ch7)ch7.destroy();
+  const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d.toLocaleDateString('fr-CA',{day:'2-digit',month:'short'}));}
+  ch7=new Chart(x2,{type:'line',data:{labels:days,datasets:[{label:'TX',data:[12,19,8,25,14,31,17],borderColor:'#D4A017',backgroundColor:'rgba(212,160,23,.08)',tension:.4,fill:true,pointRadius:4,pointBackgroundColor:'#E8C547',pointBorderColor:'#12090B',pointBorderWidth:2,pointHoverRadius:7,borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(58,36,40,.2)'},ticks:{color:'#B8A99A',font:{size:10}}},y:{grid:{color:'rgba(58,36,40,.2)'},ticks:{color:'#B8A99A',font:{size:10}}}}}});
+  const rc={};DEP.forEach(d=>{rc[d.reg]=(rc[d.reg]||0)+1});
+  const x3=document.getElementById('cR').getContext('2d');if(chR)chR.destroy();
+  const cs=['#D4A017','#27AE60','#3B82F6','#E67E22','#C0392B','#E8C547'];
+  chR=new Chart(x3,{type:'bar',data:{labels:Object.keys(rc),datasets:[{data:Object.values(rc),backgroundColor:Object.keys(rc).map((_,i)=>cs[i%cs.length]),borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(58,36,40,.3)'},ticks:{color:'#B8A99A',font:{size:11}}},y:{grid:{display:false},ticks:{color:'#E8C547',font:{family:'Oswald',size:11}}}}}});
+}
+
+// NOUVELLE FEATURE : Tooltip enrichi — calcul temps depuis
+function timeSinceStr(since){
+  if(!since) return '—';
+  const ms=Date.now()-new Date(since).getTime();
+  const h=Math.floor(ms/36e5);
+  const m=Math.floor((ms%36e5)/6e4);
+  if(h>24) return `${Math.floor(h/24)}j ${h%24}h`;
+  if(h>0) return `${h}h${m>0?m+'m':''}`;
+  return `${m}m`;
+}
+
+function rCI(){
+  const cr=ITEMS.filter(i=>i.status!=='disponible').sort((a,b)=>({manquant:0,sorti:1,inspection:2}[a.status]||9)-({manquant:0,sorti:1,inspection:2}[b.status]||9));
+  const c={sorti:'bg-volo-gold/15 text-volo-gold',manquant:'bg-volo-red/15 text-volo-red',inspection:'bg-volo-blue/15 text-volo-blue'};
+  const l={sorti:'MISSION',manquant:'MANQUANT',inspection:'INSPECT.'};
+  // NOUVELLE FEATURE : Tooltip enrichi au hover
+  document.getElementById('ci').innerHTML=cr.slice(0,8).map(i=>{
+    const od=i.since&&(Date.now()-new Date(i.since).getTime()>864e5);
+    const elapsed=timeSinceStr(i.since);
+    return`<div class="ci-row flex items-center justify-between py-2 px-3 rounded-xl ${od?'bg-volo-red/5 border border-volo-red/20':'bg-volo-card2/50'} rh transition-all">
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="text-sm">${i.icon}</span>
+        <div class="min-w-0">
+          <div class="text-[13px] font-semibold truncate">${i.name}</div>
+          <div class="text-[10px] text-volo-muted font-mono truncate">${i.assignee||'—'}</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-1.5 flex-shrink-0 ml-2">
+        ${od?'<span class="text-[9px] text-volo-red font-bold">+24h</span>':''}
+        <span class="text-[9px] font-bold tracking-[1px] px-1.5 py-0.5 rounded ${c[i.status]||''}">${l[i.status]||''}</span>
+      </div>
+      <div class="ci-tooltip">
+        <div class="text-[10px] font-mono text-volo-gold mb-1">${i.id}</div>
+        <div class="text-[11px] font-semibold text-volo-txt">${i.name}</div>
+        <div class="text-[10px] text-volo-muted mt-1">Catégorie: <span class="text-volo-goldL">${i.cat}</span></div>
+        <div class="text-[10px] text-volo-muted">Lieu: <span class="text-volo-txt">${i.location||'—'}</span></div>
+        <div class="text-[10px] text-volo-muted">Assigné: <span class="text-volo-txt">${i.assignee||'—'}</span></div>
+        <div class="text-[10px] text-volo-muted mt-1">Depuis: <span class="text-volo-txt">${elapsed}</span></div>
+        ${od?'<div class="text-[11px] font-bold text-volo-red mt-1.5 animate-pulse">⚠️ DÉPASSEMENT +24H</div>':''}
+      </div>
+    </div>`}).join('');
+}
+
+function rSites(){
+  document.getElementById('as').innerHTML=SITES.map((s,i)=>{const at=s.status==='attention';return`<div class="glass-card rounded-2xl p-4 hover:scale-[1.02] transition-all ${at?'border-volo-orange/40':''}"><div class="flex items-start justify-between mb-3"><div><div class="font-semibold text-sm">${s.name}</div><div class="text-[11px] text-volo-gold font-title tracking-[1px]">${s.region}</div></div><span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${at?'bg-volo-orange/15 text-volo-orange':'bg-volo-green/15 text-volo-green'}">${at?'ATTENTION':'ACTIF'}</span></div><div class="grid grid-cols-3 gap-2 text-center"><div class="bg-volo-bg/60 rounded-lg py-2"><div class="font-title text-lg font-bold text-volo-orange">${s.sauveteurs}</div><div class="text-[9px] text-volo-muted tracking-[1px]">SAUV</div></div><div class="bg-volo-bg/60 rounded-lg py-2"><div class="font-title text-lg font-bold text-volo-blue">${s.surveillants}</div><div class="text-[9px] text-volo-muted tracking-[1px]">SURV</div></div><div class="bg-volo-bg/60 rounded-lg py-2"><div class="font-title text-lg font-bold text-volo-gold">${s.items}</div><div class="text-[9px] text-volo-muted tracking-[1px]">ITEMS</div></div></div><div class="mt-3 flex items-center justify-between"><span class="text-[11px] text-volo-muted">Depuis ${s.since}</span><button class="text-[11px] text-volo-gold hover:text-volo-goldL transition-colors" onclick="openModal(${i})">Détails →</button></div></div>`}).join('');
+}
+
+// NOUVELLE FEATURE : Filtre par région
+function filterByRegion(reg){
+  currentRegion=reg;
+  rDep(sq);
+}
+
+function rDep(f=''){
+  const q=f.toLowerCase();
+  // NOUVELLE FEATURE : Applique le filtre texte ET le filtre région
+  let ls=DEP;
+  if(currentRegion) ls=ls.filter(p=>p.reg===currentRegion);
+  if(q) ls=ls.filter(p=>p.name.toLowerCase().includes(q)||p.loc.toLowerCase().includes(q)||p.role.toLowerCase().includes(q));
+  document.getElementById('dc').textContent=`(${ls.length})`;
+  document.getElementById('dp').innerHTML=ls.map(p=>{
+    const sv=p.type==='SAUVETEUR';
+    return`<div class="flex items-center justify-between py-2 px-3 rounded-lg bg-volo-bg/40 rh transition-all"><div class="flex items-center gap-2 min-w-0"><span class="w-2 h-2 rounded-full flex-shrink-0 ${sv?'bg-volo-orange':'bg-volo-blue'}"></span><div class="min-w-0"><div class="text-[13px] font-semibold truncate">${p.name}</div><div class="text-[10px] text-volo-muted truncate">${p.loc}</div></div></div><div class="text-right flex-shrink-0 ml-2"><div class="text-[10px] font-title tracking-[1px] ${sv?'text-volo-orange':'text-volo-blue'}">${p.role}</div><div class="text-[10px] text-volo-muted font-mono">${p.since}</div></div></div>`;
+  }).join('');
+}
+
+function rAct(f=''){const q=f.toLowerCase();const ls=q?ACT.filter(t=>t.s.toLowerCase().includes(q)||t.dest.toLowerCase().includes(q)||t.m.toLowerCase().includes(q)):ACT;document.getElementById('at').innerHTML=ls.map(t=>{const on=t.m==='PICK-ON',cn=t.st==='ANNULÉ';return`<tr class="border-b border-volo-border/30 rh transition-all ${cn?'opacity-50':''}"><td class="py-2.5 pr-3 text-[12px] font-mono text-volo-muted whitespace-nowrap">${t.d.split(' ')[1]}<br><span class="text-[10px]">${t.d.split(' ')[0].slice(5)}</span></td><td class="py-2.5 pr-3"><span class="text-[10px] font-title tracking-[1px] px-2 py-0.5 rounded-md ${on?'bg-volo-green/15 text-volo-green':'bg-volo-orange/15 text-volo-orange'}">${t.m}</span></td><td class="py-2.5 pr-3 text-[13px] font-semibold">${t.s}</td><td class="py-2.5 pr-3 text-[13px] text-volo-gold font-mono hidden md:table-cell">${t.i}</td><td class="py-2.5 pr-3 text-[12px] text-volo-muted max-w-[160px] truncate">${t.dest}</td><td class="py-2.5 pr-3 text-[11px] text-volo-rescue font-mono hidden lg:table-cell">${t.proj||'—'}</td><td class="py-2.5"><span class="text-[10px] font-bold tracking-[1px] px-2 py-0.5 rounded-md ${cn?'bg-volo-red/15 text-volo-red':'bg-volo-green/15 text-volo-green'}">${t.st}</span></td></tr>`}).join('');}
+
+function rAlerts(){const ic={critical:'🔴',warning:'🟡',info:'🔵'};const st={critical:'border-volo-red/40 bg-volo-red/5',warning:'border-volo-orange/30 bg-volo-orange/5',info:'border-volo-blue/30 bg-volo-blue/5'};document.getElementById('al').innerHTML=ALERTS.map(a=>`<div class="p-3 rounded-xl border ${st[a.t]} ${a.t==='critical'?'alert-pulse':''}"><div class="flex items-start gap-2"><span class="text-sm flex-shrink-0 mt-0.5">${ic[a.t]}</span><div><div class="text-[13px] font-semibold leading-tight">${a.x}</div><div class="text-[10px] text-volo-muted mt-1">${a.w}</div></div></div></div>`).join('');}
+
+function rQS(){const s=ITEMS.filter(i=>i.status==='sorti').length;const p=Math.round((ITEMS.length-s)/ITEMS.length*100);const st=[{l:"Disponibilité",v:`${p}%`,c:p>60?'text-volo-green':'text-volo-orange'},{l:"TX aujourd'hui",v:ACT.filter(a=>a.d.startsWith('2026-02-25')).length,c:'text-volo-gold'},{l:"Régions actives",v:new Set(DEP.map(d=>d.reg)).size,c:'text-volo-blue'},{l:"Sauv/Surv",v:`${DEP.filter(d=>d.type==='SAUVETEUR').length}/${DEP.filter(d=>d.type==='SURVEILLANT').length}`,c:'text-volo-goldL'}];document.getElementById('qs').innerHTML=st.map(s=>`<div class="flex items-center justify-between py-2 border-b border-volo-border/30 last:border-0"><span class="text-[12px] text-volo-muted">${s.l}</span><span class="font-title text-lg font-bold ${s.c}">${s.v}</span></div>`).join('');}
+
+function initMap(){if(lMap)return;lMap=L.map('map',{zoomControl:false,attributionControl:false}).setView([46.8,-71.3],6);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(lMap);L.control.zoom({position:'bottomright'}).addTo(lMap);
+const gI=L.divIcon({html:'<div style="width:14px;height:14px;background:#D4A017;border:2px solid #E8C547;border-radius:50%;box-shadow:0 0 8px rgba(212,160,23,.5)"></div>',iconSize:[14,14],iconAnchor:[7,7],className:''});
+const rI=L.divIcon({html:'<div style="width:14px;height:14px;background:#C0392B;border:2px solid #E06050;border-radius:50%;box-shadow:0 0 8px rgba(192,57,43,.5)"></div>',iconSize:[14,14],iconAnchor:[7,7],className:''});
+SITES.forEach(s=>{const ic=s.status==='attention'?rI:gI;const tot=s.sauveteurs+s.surveillants;L.marker([s.lat,s.lng],{icon:ic}).addTo(lMap).bindPopup(`<div style="font-family:Oswald;letter-spacing:1px;font-size:13px;color:#E8C547">${s.name}</div><div style="font-family:Inter;font-size:12px;margin-top:4px;color:#B8A99A">${tot} pers. • ${s.items} items</div>`);});
+setTimeout(()=>lMap.invalidateSize(),500);}
+
+// MODAL
+function openModal(i){const s=SITES[i];const pe=DEP.filter(p=>p.loc.includes(s.name.split(' —')[0].split(' ')[0]));const it=ITEMS.filter(x=>x.location&&x.location.includes(s.name.split(' —')[0].split(' ')[0]));
+document.getElementById('modal-box').innerHTML=`<div class="modal-bg" onclick="if(event.target===this)closeM()"><div class="glass-card rounded-2xl p-6 animate-modal-in border border-volo-gold/30 max-w-[520px] w-full max-h-[80vh] overflow-y-auto" style="background:rgba(28,16,18,.95)"><div class="flex items-start justify-between mb-4"><div><h2 class="font-title text-volo-gold text-lg tracking-[2px]">${s.name}</h2><div class="text-xs text-volo-muted mt-1">${s.region} • Depuis ${s.since}</div></div><button onclick="closeM()" class="w-8 h-8 rounded-lg bg-volo-bg/60 flex items-center justify-center text-volo-muted hover:text-volo-gold transition-colors">✕</button></div><div class="grid grid-cols-3 gap-3 mb-5"><div class="bg-volo-bg/60 rounded-xl p-3 text-center"><div class="font-title text-2xl font-bold text-volo-orange">${s.sauveteurs}</div><div class="text-[10px] text-volo-muted tracking-[1px] mt-1">SAUVETEURS</div></div><div class="bg-volo-bg/60 rounded-xl p-3 text-center"><div class="font-title text-2xl font-bold text-volo-blue">${s.surveillants}</div><div class="text-[10px] text-volo-muted tracking-[1px] mt-1">SURVEILLANTS</div></div><div class="bg-volo-bg/60 rounded-xl p-3 text-center"><div class="font-title text-2xl font-bold text-volo-gold">${s.items}</div><div class="text-[10px] text-volo-muted tracking-[1px] mt-1">ITEMS</div></div></div><div class="mb-4"><div class="font-title text-sm text-volo-goldL tracking-[2px] mb-2">👷 PERSONNEL</div><div class="space-y-1.5 max-h-40 overflow-y-auto">${pe.length?pe.map(p=>`<div class="flex items-center justify-between py-2 px-3 rounded-lg bg-volo-bg/40"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full ${p.type==='SAUVETEUR'?'bg-volo-orange':'bg-volo-blue'}"></span><span class="text-sm font-semibold">${p.name}</span></div><span class="text-[10px] font-title tracking-[1px] ${p.type==='SAUVETEUR'?'text-volo-orange':'text-volo-blue'}">${p.role}</span></div>`).join(''):'<div class="text-sm text-volo-muted text-center py-4">Aucun</div>'}</div></div>${it.length?`<div><div class="font-title text-sm text-volo-goldL tracking-[2px] mb-2">📦 ITEMS</div><div class="space-y-1">${it.map(x=>`<div class="flex items-center justify-between py-1.5 px-3 rounded-lg bg-volo-bg/40"><span class="text-sm">${x.icon} ${x.name}</span><span class="text-[10px] font-mono text-volo-muted">${x.id}</span></div>`).join('')}</div></div>`:''}</div></div>`;}
+function closeM(){document.getElementById('modal-box').innerHTML='';}
+
+// SEARCH
+function doSearch(v){sq=v;rDep(v);rAct(v);}
+
+// TOAST
+function toast(msg,type='gold'){const c={gold:'border-volo-gold/40 text-volo-gold',green:'border-volo-green/40 text-volo-green',red:'border-volo-red/40 text-volo-red'};const el=document.createElement('div');el.className=`px-4 py-3 rounded-xl bg-volo-card/95 backdrop-blur-xl border ${c[type]||c.gold} text-sm font-semibold animate-toast-in shadow-lg shadow-black/30 mb-2`;el.textContent=msg;document.getElementById('toast-box').appendChild(el);setTimeout(()=>{el.style.animation='toastOut .4s ease forwards';setTimeout(()=>el.remove(),400)},3000);}
+
+// PRESENTATION
+function togglePres(){pres=!pres;document.getElementById('ml').classList.toggle('pres-mode',pres);if(pres){document.documentElement.requestFullscreen?.();toast('Mode Présentation','gold');}else{document.exitFullscreen?.();}}
+
+// NET STATUS
+function updateNet(){const d=document.getElementById('nd'),l=document.getElementById('nl');if(navigator.onLine){d.className='w-2 h-2 rounded-full bg-volo-green animate-pulse';l.textContent='EN LIGNE';l.className='text-[10px] font-bold tracking-[1px] text-volo-green';}else{d.className='w-2 h-2 rounded-full bg-volo-orange animate-pulse';l.textContent='HORS-LIGNE';l.className='text-[10px] font-bold tracking-[1px] text-volo-orange';}}
+window.addEventListener('online',()=>{updateNet();toast('Connexion rétablie','green');});
+window.addEventListener('offline',()=>{updateNet();toast('Connexion perdue','red');});
+
+// CORE
+function tick(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+
+// NOUVELLE FEATURE : Compteur temps depuis dernière MAJ
+function updateSinceLast(){
+  if(!lr) return;
+  const el=document.getElementById('sinceLast');
+  const sec=Math.floor((Date.now()-lr)/1000);
+  if(sec<60) el.textContent=`(il y a ${sec}s)`;
+  else if(sec<3600) el.textContent=`(il y a ${Math.floor(sec/60)}m)`;
+  else el.textContent=`(il y a ${Math.floor(sec/3600)}h${Math.floor((sec%3600)/60)}m)`;
+}
+
+// NOUVELLE FEATURE : Meilleure gestion loading/refresh
+function showLoading(show){
+  const ov=document.getElementById('loadingOverlay');
+  if(show) ov.classList.add('active');
+  else ov.classList.remove('active');
+}
+
+function doRefresh(silent){
+  // NOUVELLE FEATURE : Bloque si déjà en cours
+  if(isLoading) return;
+  const now=Date.now();if(now-lr<5000)return;
+  isLoading=true;
+  lr=now;
+  const ic=document.getElementById('ri');ic.classList.add('animate-spin');
+  if(!silent) showLoading(true);
+  setTimeout(async()=>{
+    // Fetch live data if configured
+    await fetchLiveData();
+    rKPI();rCharts();rCI();rSites();rDep(sq);rAct(sq);rAlerts();rQS();rPhotos();rKm();rMissions();rContacts();
+    ic.classList.remove('animate-spin');
+    isLoading=false;
+    showLoading(false);
+    document.getElementById('lu').textContent='MAJ: '+new Date().toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'});
+    updateSinceLast();
+    // Météo (refresh every 5 min, not every 60s)
+    if(!window._lastMeteo || Date.now()-window._lastMeteo>300000){
+      fetchMeteo();
+      window._lastMeteo=Date.now();
+    }
+    // NOUVELLE FEATURE : Toast systématique (même en auto-refresh)
+    if(!silent) toast('✅ Données mises à jour','green');
+  },600);
+}
+
+function exportCSV(){let csv='ID,Nom,Cat,Statut,Assigné,Lieu,Depuis\n';ITEMS.forEach(i=>{csv+=`${i.id},"${i.name}",${i.cat},${i.status},"${i.assignee}","${i.location}","${i.since}"\n`;});csv+='\nPersonnel\nNom,Rôle,Type,Lieu,Depuis,Région\n';DEP.forEach(p=>{csv+=`"${p.name}",${p.role},${p.type},"${p.loc}",${p.since},${p.reg}\n`;});const b=new Blob([csv],{type:'text/csv'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=`VOLO-Dashboard-${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(u);toast('📁 CSV téléchargé','gold');}
+
+// NOUVELLE FEATURE : Export PDF via html2pdf
+function exportPDF(){
+  toast('📄 Génération rapport PDF...','gold');
+  // Build a clean report div instead of screenshotting the dashboard
+  const now=new Date();
+  const dateStr=now.toLocaleDateString('fr-CA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const timeStr=now.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'});
+  const activeMissions=ACT.filter(a=>a.m==='PICK-ON'&&a.st==='ACTIF');
+  const T=ITEMS.length,D=ITEMS.filter(i=>i.status==='disponible').length,S=ITEMS.filter(i=>i.status==='sorti').length,M=ITEMS.filter(i=>i.status==='manquant').length;
+  const sD=DEP.filter(d=>d.type==='SAUVETEUR').length,vD=DEP.filter(d=>d.type==='SURVEILLANT').length;
+  const user=authUser||{name:'Superviseur',id:'—'};
+  
+  const reportHTML=`<div style="font-family:Arial,sans-serif;color:#1a1a1a;max-width:800px;margin:0 auto;padding:30px">
+    <div style="text-align:center;margin-bottom:30px;border-bottom:3px solid #E65100;padding-bottom:20px">
+      <div style="font-size:28px;font-weight:700;color:#E65100;letter-spacing:3px">🛡️ VOLO SST — GOLDEN EAGLES</div>
+      <div style="font-size:14px;color:#666;margin-top:8px">RAPPORT OPÉRATIONNEL QUOTIDIEN</div>
+      <div style="font-size:12px;color:#999;margin-top:4px">${dateStr} — ${timeStr}</div>
+      <div style="font-size:11px;color:#999">Généré par: ${user.name} (${user.id})</div>
+    </div>
+    
+    <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap">
+      <div style="flex:1;min-width:100px;background:#f8f9fa;border-radius:12px;padding:16px;text-align:center;border-left:4px solid #27AE60"><div style="font-size:24px;font-weight:700;color:#27AE60">${D}/${T}</div><div style="font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1px">Disponibles</div></div>
+      <div style="flex:1;min-width:100px;background:#f8f9fa;border-radius:12px;padding:16px;text-align:center;border-left:4px solid #D4A017"><div style="font-size:24px;font-weight:700;color:#D4A017">${S}</div><div style="font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1px">En mission</div></div>
+      <div style="flex:1;min-width:100px;background:#f8f9fa;border-radius:12px;padding:16px;text-align:center;border-left:4px solid #E65100"><div style="font-size:24px;font-weight:700;color:#E65100">${sD}+${vD}</div><div style="font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1px">Terrain</div></div>
+      <div style="flex:1;min-width:100px;background:#f8f9fa;border-radius:12px;padding:16px;text-align:center;border-left:4px solid #3B82F6"><div style="font-size:24px;font-weight:700;color:#3B82F6">${SITES.length}</div><div style="font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1px">Lieux</div></div>
+      ${M>0?`<div style="flex:1;min-width:100px;background:#fff5f5;border-radius:12px;padding:16px;text-align:center;border-left:4px solid #C0392B"><div style="font-size:24px;font-weight:700;color:#C0392B">${M}</div><div style="font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1px">Manquants</div></div>`:''}
+    </div>
+    
+    ${ALERTS.filter(a=>a.t==='critical').length>0?`<div style="background:#fff5f5;border:1px solid #C0392B;border-radius:12px;padding:16px;margin-bottom:24px"><div style="font-weight:700;color:#C0392B;font-size:14px;margin-bottom:8px">🚨 ALERTES CRITIQUES</div>${ALERTS.filter(a=>a.t==='critical').map(a=>`<div style="font-size:12px;color:#333;padding:4px 0">• ${a.x} — ${a.w}</div>`).join('')}</div>`:''}
+    
+    <div style="margin-bottom:24px"><div style="font-weight:700;font-size:14px;color:#E65100;border-bottom:1px solid #eee;padding-bottom:8px;margin-bottom:12px">🎯 MISSIONS ACTIVES (${activeMissions.length})</div>
+    <table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:#f8f9fa"><th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Destination</th><th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Sauveteur</th><th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Projet</th><th style="padding:8px;text-align:center;border-bottom:2px solid #ddd">Items</th><th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Contact</th><th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Début</th></tr></thead><tbody>${activeMissions.map(t=>`<tr><td style="padding:6px 8px;border-bottom:1px solid #eee">${t.dest}</td><td style="padding:6px 8px;border-bottom:1px solid #eee">${t.s}</td><td style="padding:6px 8px;border-bottom:1px solid #eee;font-family:monospace">${t.proj||'—'}</td><td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:center">${t.i}</td><td style="padding:6px 8px;border-bottom:1px solid #eee">${t.contact||'—'}</td><td style="padding:6px 8px;border-bottom:1px solid #eee;font-family:monospace">${t.d}</td></tr>`).join('')}</tbody></table></div>
+    
+    <div style="margin-bottom:24px"><div style="font-weight:700;font-size:14px;color:#E65100;border-bottom:1px solid #eee;padding-bottom:8px;margin-bottom:12px">👷 PERSONNEL DÉPLOYÉ (${DEP.length})</div>
+    <table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:#f8f9fa"><th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Nom</th><th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Rôle</th><th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Lieu</th><th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Région</th><th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Depuis</th></tr></thead><tbody>${DEP.map(p=>`<tr><td style="padding:6px 8px;border-bottom:1px solid #eee;font-weight:600">${p.name}</td><td style="padding:6px 8px;border-bottom:1px solid #eee;color:${p.type==='SAUVETEUR'?'#E67E22':'#3B82F6'}">${p.role}</td><td style="padding:6px 8px;border-bottom:1px solid #eee">${p.loc}</td><td style="padding:6px 8px;border-bottom:1px solid #eee">${p.reg}</td><td style="padding:6px 8px;border-bottom:1px solid #eee;font-family:monospace">${p.since}</td></tr>`).join('')}</tbody></table></div>
+    
+    ${ITEMS.filter(i=>i.status!=='disponible').length>0?`<div style="margin-bottom:24px"><div style="font-weight:700;font-size:14px;color:#E65100;border-bottom:1px solid #eee;padding-bottom:8px;margin-bottom:12px">📦 ITEMS NON-DISPONIBLES</div>
+    <table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:#f8f9fa"><th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">ID</th><th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Nom</th><th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Statut</th><th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Assigné</th><th style="padding:8px;text-align:left;border-bottom:2px solid #ddd">Lieu</th></tr></thead><tbody>${ITEMS.filter(i=>i.status!=='disponible').map(i=>`<tr><td style="padding:6px 8px;border-bottom:1px solid #eee;font-family:monospace;font-size:10px">${i.id}</td><td style="padding:6px 8px;border-bottom:1px solid #eee">${i.icon} ${i.name}</td><td style="padding:6px 8px;border-bottom:1px solid #eee;font-weight:700;color:${i.status==='manquant'?'#C0392B':i.status==='sorti'?'#D4A017':'#3B82F6'}">${i.status.toUpperCase()}</td><td style="padding:6px 8px;border-bottom:1px solid #eee">${i.assignee||'—'}</td><td style="padding:6px 8px;border-bottom:1px solid #eee">${i.location||'—'}</td></tr>`).join('')}</tbody></table></div>`:''}
+    
+    <div style="text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #eee;font-size:10px;color:#999">VOLO SST — Rapport généré automatiquement • Confidentiel</div>
+  </div>`;
+  
+  const container=document.createElement('div');
+  container.innerHTML=reportHTML;
+  container.style.position='absolute';container.style.left='-9999px';
+  document.body.appendChild(container);
+  
+  html2pdf().set({
+    margin:[8,5,8,5],
+    filename:'VOLO-Rapport-'+now.toISOString().slice(0,10)+'.pdf',
+    image:{type:'jpeg',quality:.98},
+    html2canvas:{scale:2,backgroundColor:'#ffffff',useCORS:true,logging:false},
+    jsPDF:{unit:'mm',format:'letter',orientation:'portrait'}
+  }).from(container.firstElementChild).save().then(()=>{
+    document.body.removeChild(container);
+    toast('📄 Rapport PDF téléchargé','green');
+  }).catch(()=>{
+    document.body.removeChild(container);
+    toast('❌ Erreur PDF','red');
+  });
+}
+
+// NOUVELLE FEATURE : Initialiser le select de régions
+function initRegionFilter(){
+  const regs=[...new Set(DEP.map(d=>d.reg))].sort();
+  const sel=document.getElementById('regionFilter');
+  regs.forEach(r=>{
+    const opt=document.createElement('option');
+    opt.value=r;
+    opt.textContent=r;
+    sel.appendChild(opt);
+  });
+}
+
+// URGENCE — Webhook réel
+async function sendUrgence(){
+  if(!confirm('⚠️ Envoyer une alerte URGENCE?\n\nCela notifiera tous les superviseurs.')) return;
+  const user=authUser||{name:'Superviseur',id:'INCONNU'};
+  const payload={type:'URGENCE',source:'DASHBOARD',sender:user.name,sender_id:user.id,timestamp:new Date().toISOString(),message:'ALERTE URGENCE depuis le Dashboard Superviseur'};
+  try{
+    const r=await fetch('https://hook.us2.make.com/eha54bbek46jrg1yp88939167v7ngveh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(r.ok)toast('🚨 Urgence envoyée!','red');
+    else toast('❌ Erreur envoi urgence','red');
+  }catch{toast('❌ Erreur réseau','red');}
+}
+
+// ===== GOOGLE SHEETS LIVE DATA =====
+function getSheetURL(tab){
+  if(!CONFIG.SHEET_ID) return null;
+  return `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tab)}`;
+}
+
+async function fetchLiveData(){
+  if(!CONFIG.SHEET_ID){
+    updateDataIndicator('demo');
+    return;
+  }
+  try{
+    updateDataIndicator('loading');
+    const results = await Promise.allSettled([
+      fetchSheet('transactions'),
+      fetchSheet('items'),
+      fetchSheet('personnel')
+    ]);
+    let liveCount=0;
+    // Parse Transactions
+    if(results[0].status==='fulfilled' && results[0].value.length>0){
+      ACT = results[0].value.map(row=>({
+        d: row.timestamp||row.date||'',
+        m: (row.mode||'').toUpperCase(),
+        s: row.sauveteur_nom||row.sauveteur||'',
+        i: parseInt(row.nb_items||0),
+        dest: row.destination||'',
+        proj: row.num_projet||row.projet||'',
+        st: (row.statut||'ACTIF').toUpperCase(),
+        contact: row.personne_ressource||row.contact||'',
+        tel: row.telephone_contact||row.tel||''
+      })).sort((a,b)=>b.d.localeCompare(a.d));
+      liveCount++;
+    }
+    // Parse Items
+    if(results[1].status==='fulfilled' && results[1].value.length>0){
+      ITEMS = results[1].value.map(row=>({
+        id: row.id||'',
+        name: row.name||row.nom||'',
+        cat: row.cat||row.categorie||'Autre',
+        icon: row.icon||'📦',
+        status: (row.status||row.statut||'disponible').toLowerCase(),
+        assignee: row.assignee||row.assigné||'',
+        location: row.location||row.lieu||'',
+        since: row.since||row.depuis||''
+      }));
+      // Rebuild SITES from items data
+      rebuildSites();
+      liveCount++;
+    }
+    // Parse Personnel
+    if(results[2].status==='fulfilled' && results[2].value.length>0){
+      DEP = results[2].value.filter(row=>row.name||row.nom).map(row=>({
+        name: row.name||row.nom||'',
+        role: row.role||'SAUVETEUR',
+        type: (row.type||'SAUVETEUR').toUpperCase(),
+        loc: row.loc||row.lieu||'',
+        since: row.since||row.depuis||'',
+        reg: row.reg||row.region||'ESTRIE'
+      }));
+      liveCount++;
+    }
+    // Auto-generate alerts from items
+    rebuildAlerts();
+    if(liveCount>0){
+      dataSource='live';
+      updateDataIndicator('live',liveCount);
+    } else {
+      updateDataIndicator('demo');
+    }
+  }catch(e){
+    console.error('Fetch error:',e);
+    updateDataIndicator('error');
+  }
+}
+
+function fetchSheet(tabKey){
+  return new Promise((resolve,reject)=>{
+    const url=getSheetURL(CONFIG.TABS[tabKey]);
+    if(!url) return reject('No URL');
+    Papa.parse(url,{
+      download:true,
+      header:true,
+      skipEmptyLines:true,
+      complete:r=>resolve(r.data),
+      error:e=>reject(e)
+    });
+  });
+}
+
+function rebuildSites(){
+  const siteMap={};
+  ITEMS.filter(i=>i.status==='sorti'&&i.location).forEach(item=>{
+    const loc=item.location;
+    if(!siteMap[loc]) siteMap[loc]={name:loc,region:'',sauveteurs:0,surveillants:0,items:0,since:'',status:'actif',lat:0,lng:0};
+    siteMap[loc].items++;
+    if(!siteMap[loc].since||item.since<siteMap[loc].since) siteMap[loc].since=item.since;
+  });
+  DEP.forEach(p=>{
+    const loc=p.loc;
+    if(siteMap[loc]){
+      if(p.type==='SAUVETEUR') siteMap[loc].sauveteurs++;
+      else siteMap[loc].surveillants++;
+      siteMap[loc].region=p.reg||siteMap[loc].region;
+    }
+  });
+  // Keep existing SITES lat/lng if matching, otherwise use 0
+  const oldSites={};
+  SITES.forEach(s=>{oldSites[s.name]={lat:s.lat,lng:s.lng}});
+  const newSites=Object.values(siteMap);
+  newSites.forEach(s=>{
+    if(oldSites[s.name]){s.lat=oldSites[s.name].lat;s.lng=oldSites[s.name].lng;}
+    const ts=s.since?s.since.split(' ')[1]||s.since:'';
+    s.since=ts;
+  });
+  if(newSites.length>0) SITES=newSites;
+}
+
+function rebuildAlerts(){
+  const newAlerts=[];
+  const now=Date.now();
+  ITEMS.forEach(item=>{
+    if(item.status==='manquant'){
+      newAlerts.push({t:'critical',x:`${item.name} — MANQUANT`,w:item.since||'Inconnu'});
+    }
+    if(item.status==='sorti'&&item.since){
+      const diff=now-new Date(item.since).getTime();
+      if(diff>86400000){
+        const hrs=Math.round(diff/3600000);
+        newAlerts.push({t:'warning',x:`${item.name} — +${hrs}h (${item.location})`,w:item.since.split(' ')[1]||''});
+      }
+    }
+    if(item.status==='inspection'){
+      newAlerts.push({t:'info',x:`${item.name} — Inspection`,w:'À vérifier'});
+    }
+  });
+  if(newAlerts.length>0) ALERTS=newAlerts;
+}
+
+function updateDataIndicator(status,count){
+  const el=document.getElementById('data-src');
+  if(!el)return;
+  const map={
+    demo:'<span class="w-2 h-2 rounded-full bg-volo-orange animate-pulse"></span><span class="text-volo-orange">MODE DÉMO</span> — <span class="text-[10px]">Configurez SHEET_ID pour les données live</span>',
+    loading:'<span class="w-2 h-2 rounded-full bg-volo-blue animate-pulse"></span><span class="text-volo-blue">Chargement...</span>',
+    live:`<span class="w-2 h-2 rounded-full bg-volo-green animate-pulse"></span><span class="text-volo-green font-bold">LIVE</span> — Google Sheets (${count||3} sources) • Auto-refresh ${CONFIG.REFRESH_INTERVAL/1000}s`,
+    error:'<span class="w-2 h-2 rounded-full bg-volo-red animate-pulse"></span><span class="text-volo-red">Erreur connexion</span> — Données démo utilisées'
+  };
+  el.innerHTML=map[status]||map.demo;
+}
+
+// ===== MÉTÉO LIVE (Open-Meteo API — gratuit, sans clé) =====
+const METEO_CODES={0:'☀️ Dégagé',1:'🌤️ Peu nuageux',2:'⛅ Partiellement nuageux',3:'☁️ Couvert',45:'🌫️ Brouillard',48:'🌫️ Givre',51:'🌧️ Bruine légère',53:'🌧️ Bruine',55:'🌧️ Bruine forte',61:'🌧️ Pluie légère',63:'🌧️ Pluie',65:'🌧️ Pluie forte',66:'🌧️ Pluie verglaçante',67:'🌧️ Pluie verglaçante forte',71:'🌨️ Neige légère',73:'🌨️ Neige',75:'🌨️ Neige forte',77:'🌨️ Grains de neige',80:'🌦️ Averses légères',81:'🌦️ Averses',82:'🌦️ Averses fortes',85:'🌨️ Averses neige',86:'🌨️ Averses neige fortes',95:'⛈️ Orage',96:'⛈️ Orage + grêle',99:'⛈️ Orage + grêle forte'};
+
+async function fetchMeteo(){
+  if(!CONFIG.METEO_ENABLED) return;
+  
+  // 1. Météo locale superviseur (toujours visible)
+  const localEl=document.getElementById('meteo-local');
+  if(localEl){
+    try{
+      const pos=await new Promise((res,rej)=>{navigator.geolocation.getCurrentPosition(res,rej,{timeout:5000,maximumAge:300000});}).catch(()=>null);
+      const lat=pos?pos.coords.latitude:45.4833; // Default: Sherbrooke
+      const lng=pos?pos.coords.longitude:-72.1333;
+      const locName=pos?'Position actuelle':'Sherbrooke (défaut)';
+      const data=await fetchMeteoSingle(lat,lng);
+      if(data&&data.current){
+        const c=data.current;
+        const desc=METEO_CODES[c.weather_code]||'❓';
+        const icon=desc.split(' ')[0];
+        const label=desc.split(' ').slice(1).join(' ');
+        const tempColor=c.temperature_2m<-10?'text-blue-400':c.temperature_2m<0?'text-blue-300':c.temperature_2m<15?'text-volo-gold':'text-volo-green';
+        localEl.innerHTML=`<div class="text-[10px] text-volo-blue font-title tracking-[1px] mb-1">📍 ${locName}</div>
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">${icon}</span>
+            <span class="font-title text-xl font-bold ${tempColor}">${Math.round(c.temperature_2m)}°C</span>
+            <div class="text-[10px] text-volo-muted leading-tight">
+              <div>${label}</div>
+              <div>💨 ${Math.round(c.wind_speed_10m)} km/h</div>
+            </div>
+          </div>`;
+      }
+    }catch(e){
+      localEl.innerHTML='<div class="text-[10px] text-volo-blue font-title tracking-[1px] mb-1">📍 POSITION</div><div class="text-xs text-volo-muted">GPS indisponible</div>';
+    }
+  }
+  
+  // 2. Sites actifs seulement (missions en cours)
+  const activeDests=ACT.filter(a=>a.m==='PICK-ON'&&a.st==='ACTIF').map(a=>a.dest);
+  const activeSites=SITES.filter(s=>activeDests.some(d=>d&&d.includes(s.name.split(' —')[0].split(' ')[0]))&&s.lat&&s.lng);
+  const inactiveSites=SITES.filter(s=>!activeDests.some(d=>d&&d.includes(s.name.split(' —')[0].split(' ')[0]))&&s.lat&&s.lng);
+  
+  // Fetch active sites
+  if(activeSites.length>0){
+    const fetches=activeSites.map(site=>fetchMeteoSingle(site.lat,site.lng).then(data=>({site,data})));
+    const results=await Promise.all(fetches);
+    document.getElementById('meteo-grid').innerHTML=results.map(({site,data})=>renderMeteoCard(site,data)).join('');
+  } else {
+    document.getElementById('meteo-grid').innerHTML='<div class="text-center text-volo-muted text-xs py-2">Aucun site actif avec GPS</div>';
+  }
+  
+  // 3. Sites inactifs (cachés par défaut)
+  if(inactiveSites.length>0){
+    const fetches2=inactiveSites.map(site=>fetchMeteoSingle(site.lat,site.lng).then(data=>({site,data})));
+    const results2=await Promise.all(fetches2);
+    document.getElementById('meteo-inactifs-grid').innerHTML=results2.map(({site,data})=>renderMeteoCard(site,data)).join('');
+  }
+  
+  // 4. Custom sites
+  const custom=getCustomMeteoSites();
+  if(custom.length>0){
+    const fetches3=custom.map(site=>fetchMeteoSingle(site.lat,site.lng).then(data=>({site,data})));
+    const results3=await Promise.all(fetches3);
+    document.getElementById('meteo-custom-grid').innerHTML=results3.map(({site,data})=>renderMeteoCard(site,data)).join('');
+  } else {
+    document.getElementById('meteo-custom-grid').innerHTML='';
+  }
+}
+
+// ===== KM TRACKING =====
+function getKmLogs(){try{return JSON.parse(localStorage.getItem('volo_km_logs')||'[]')}catch(e){return[]}}
+function saveKmLog(log){const all=getKmLogs();all.unshift(log);if(all.length>200)all.length=200;localStorage.setItem('volo_km_logs',JSON.stringify(all));}
+
+function rKm(){
+  const logs=getKmLogs();
+  const grid=document.getElementById('km-grid');
+  const empty=document.getElementById('km-empty');
+  if(!grid)return;
+  // Show last 5
+  const recent=logs.slice(0,5);
+  if(recent.length===0){empty.classList.remove('hidden');grid.innerHTML='';return;}
+  empty.classList.add('hidden');
+  // Stats
+  const todayLogs=logs.filter(l=>l.timestamp&&l.timestamp.startsWith(new Date().toISOString().slice(0,10)));
+  const todayKm=todayLogs.reduce((sum,l)=>sum+Math.abs((l.km_fin||0)-(l.km_debut||0)),0);
+  grid.innerHTML=`<div class="flex items-center justify-between p-2 rounded-lg bg-volo-rescue/10 border border-volo-rescue/20 mb-2">
+    <span class="text-[11px] text-volo-muted">Aujourd'hui</span>
+    <span class="font-title text-sm font-bold text-volo-rescue">${todayKm} km</span>
+  </div>`+
+  recent.map(l=>{
+    const km=Math.abs((l.km_fin||0)-(l.km_debut||0));
+    return `<div class="p-2 rounded-lg bg-volo-card2/60 border border-volo-border/20">
+      <div class="flex items-center justify-between">
+        <span class="text-[12px] font-semibold truncate max-w-[120px]">${l.truck||'—'}</span>
+        <span class="text-[11px] font-mono text-volo-gold">${km} km</span>
+      </div>
+      <div class="text-[10px] text-volo-muted mt-0.5">${l.destination||'—'} • ${l.sauveteur||'—'}</div>
+      <div class="text-[9px] text-volo-muted/60">${l.timestamp||''}</div>
+    </div>`;
+  }).join('');
+}
+
+// ===== EXPORT COMPTABLE =====
+function exportComptable(){
+  const kmLogs=getKmLogs();
+  const today=new Date().toISOString().slice(0,10);
+  let csv='Date,Truck,Sauveteur,Destination,Projet,KM_Départ,KM_Fin,KM_Total\n';
+  kmLogs.forEach(l=>{
+    const km=Math.abs((l.km_fin||0)-(l.km_debut||0));
+    csv+=`"${l.timestamp||''}","${l.truck||''}","${l.sauveteur||''}","${l.destination||''}","${l.projet||''}",${l.km_debut||0},${l.km_fin||0},${km}\n`;
+  });
+  const b=new Blob([csv],{type:'text/csv'});
+  const u=URL.createObjectURL(b);
+  const a=document.createElement('a');
+  a.href=u;a.download=`VOLO-Kilometrage-${today}.csv`;a.click();
+  URL.revokeObjectURL(u);
+  toast('📁 Export comptable téléchargé','gold');
+}
+
+async function sendComptableWebhook(){
+  const kmLogs=getKmLogs();
+  const today=new Date().toISOString().slice(0,10);
+  const todayLogs=kmLogs.filter(l=>l.timestamp&&l.timestamp.startsWith(today));
+  if(todayLogs.length===0){toast('Aucun trajet aujourd\'hui','red');return;}
+  const totalKm=todayLogs.reduce((sum,l)=>sum+Math.abs((l.km_fin||0)-(l.km_debut||0)),0);
+  const payload={
+    type:'COMPTABLE_KM',
+    date:today,
+    trajets:todayLogs.length,
+    total_km:totalKm,
+    details:todayLogs,
+    timestamp:new Date().toISOString()
+  };
+  try{
+    const r=await fetch(CONFIG.KM_WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(r.ok) toast('📧 Rapport km envoyé!','green');
+    else toast('❌ Erreur envoi','red');
+  }catch{toast('❌ Erreur réseau','red');}
+}
+
+// ===== PHOTOS SETUP TERRAIN =====
+function rPhotos(){
+  const saved=getSetupPhotos();
+  const grid=document.getElementById('photos-grid');
+  const empty=document.getElementById('photos-empty');
+  const count=document.getElementById('photo-count');
+  if(!grid)return;
+  count.textContent=saved.length+' photo'+(saved.length!==1?'s':'');
+  if(saved.length===0){
+    grid.innerHTML='';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  // Group by contrat+lieu+timestamp
+  const grouped={};
+  saved.forEach((p,idx)=>{const k=p.contrat+'|'+p.lieu+'|'+p.timestamp;if(!grouped[k])grouped[k]={photos:[],lieu:p.lieu,contrat:p.contrat,sauveteur:p.sauveteur,sauveteur_id:p.sauveteur_id||'',timestamp:p.timestamp,indices:[]};grouped[k].photos.push(p);grouped[k].indices.push(idx);});
+  const groups=Object.values(grouped);
+  grid.innerHTML=groups.map(g=>`<div class="glass-card rounded-xl p-4" style="border-color:rgba(230,81,0,.25)">
+    <div class="flex items-center justify-between mb-2">
+      <div>
+        <span class="font-title text-volo-rescue text-sm tracking-[1px] font-semibold">📍 ${g.lieu}</span>
+        <span class="ml-2 text-[10px] font-mono px-2 py-0.5 rounded-md bg-volo-gold/15 text-volo-gold">#${g.contrat}</span>
+      </div>
+      <span class="text-[11px] text-volo-muted">${g.photos.length} 📷</span>
+    </div>
+    <div class="text-[11px] text-volo-muted mb-3">👷 ${g.sauveteur}${g.sauveteur_id?' • '+g.sauveteur_id:''} • ${g.timestamp}</div>
+    <div class="grid grid-cols-3 gap-2">
+      ${g.photos.map(p=>`<div class="aspect-square rounded-lg overflow-hidden border border-volo-border cursor-pointer hover:border-volo-rescue/50 transition-all" onclick="openPhotoModal('${p.data}')"><img src="${p.data}" class="w-full h-full object-cover"></div>`).join('')}
+    </div>
+    <button onclick="if(confirm('Supprimer ces ${g.photos.length} photo(s)?')){[${g.indices.reverse().join(',')}].forEach(i=>deleteSetupPhoto(i));rPhotos();toast('Photos supprimées','gold');}" class="mt-3 text-[10px] text-volo-red/70 hover:text-volo-red transition-colors">🗑 Supprimer</button>
+  </div>`).join('');
+}
+
+function getSetupPhotos(){try{return JSON.parse(localStorage.getItem('volo_setup_photos')||'[]')}catch(e){return[]}}
+function deleteSetupPhoto(idx){const all=getSetupPhotos();all.splice(idx,1);localStorage.setItem('volo_setup_photos',JSON.stringify(all));}
+function openPhotoModal(src){
+  const el=document.getElementById('modal-box');
+  el.innerHTML=`<div class="modal-bg" onclick="if(event.target===this)closeM()">
+    <div style="max-width:90vw;max-height:90vh;position:relative">
+      <img src="${src}" style="max-width:90vw;max-height:85vh;border-radius:16px;border:2px solid rgba(230,81,0,.4);box-shadow:0 20px 60px rgba(0,0,0,.8)">
+      <button onclick="closeM()" style="position:absolute;top:-12px;right:-12px;width:36px;height:36px;border-radius:50%;background:rgba(28,16,18,.95);border:1px solid rgba(230,81,0,.5);color:#F5F0EB;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)">✕</button>
+    </div>
+  </div>`;
+}
+
+// ===== BLOC 3 V2 — MISSIONS ACTIVES =====
+let missionViewMode='cards'; // 'cards' ou 'list'
+
+function rMissions(){
+  const active=ACT.filter(a=>a.m==='PICK-ON'&&a.st==='ACTIF');
+  const grid=document.getElementById('missionsGrid');
+  const empty=document.getElementById('missionsEmpty');
+  const count=document.getElementById('missionCount');
+  if(!grid)return;
+  
+  // V9: Group by destination+project to avoid 6 separate missions for same team
+  const missionMap={};
+  active.forEach(t=>{
+    const key=(t.dest||'Inconnu')+'|'+(t.proj||'');
+    if(!missionMap[key]){missionMap[key]={dest:t.dest,proj:t.proj||'',contact:t.contact||'',contactEmail:t.email||'',tel:t.tel||'',sauveteurs:[],totalItems:0,earliest:t.d};}
+    missionMap[key].sauveteurs.push(t.s);
+    missionMap[key].totalItems+=(t.i||0);
+    if(t.d<missionMap[key].earliest) missionMap[key].earliest=t.d;
+    if(t.contact&&!missionMap[key].contact) missionMap[key].contact=t.contact;
+    if(t.email&&!missionMap[key].contactEmail) missionMap[key].contactEmail=t.email;
+    if(t.tel&&!missionMap[key].tel) missionMap[key].tel=t.tel;
+  });
+  const missions=Object.values(missionMap);
+  
+  count.textContent='('+missions.length+')';
+  if(missions.length===0){grid.innerHTML='';empty.classList.remove('hidden');return;}
+  empty.classList.add('hidden');
+
+  // Identify chefs from DEP data
+  const chefNames=DEP.filter(d=>d.role&&d.role.includes('CHEF')).map(d=>d.name);
+
+  if(missionViewMode==='cards'){
+    grid.className='grid grid-cols-1 lg:grid-cols-2 gap-3';
+    grid.innerHTML=missions.map(m=>{
+      const elapsed=timeSinceStr(m.earliest);
+      const crew=DEP.filter(p=>p.loc&&m.dest&&p.loc.includes(m.dest.split(' —')[0].split(' ')[0]));
+      const sauvs=crew.filter(c=>c.type==='SAUVETEUR');
+      const survs=crew.filter(c=>c.type==='SURVEILLANT');
+      const overday=m.earliest&&(Date.now()-new Date(m.earliest).getTime()>864e5);
+      const chef=m.sauveteurs.find(s=>chefNames.some(c=>s.includes(c.split(' ').pop())))||m.sauveteurs[0]||'';
+      return`<div class="glass-card rounded-2xl p-4 ${overday?'border-volo-orange/40':'border-volo-rescue/20'} hover:border-volo-rescue/40 transition-all">
+        <div class="flex items-start justify-between mb-3">
+          <div class="min-w-0">
+            <div class="font-title text-sm text-volo-rescue tracking-[1px] truncate">${m.dest}</div>
+            <div class="text-[10px] text-volo-gold font-mono">${m.proj||'—'}</div>
+          </div>
+          <div class="flex items-center gap-1.5 flex-shrink-0 ml-2">
+            ${overday?'<span class="text-[9px] px-1.5 py-0.5 rounded bg-volo-orange/15 text-volo-orange font-bold">+24h</span>':''}
+            <span class="text-[9px] px-1.5 py-0.5 rounded bg-volo-green/15 text-volo-green font-bold">ACTIF</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-4 gap-2 mb-3">
+          <div class="bg-volo-bg/60 rounded-lg py-2 text-center">
+            <div class="font-title text-lg font-bold text-volo-orange">${sauvs.length||m.sauveteurs.length}</div>
+            <div class="text-[8px] text-volo-muted tracking-[1px]">SAUV</div>
+          </div>
+          <div class="bg-volo-bg/60 rounded-lg py-2 text-center">
+            <div class="font-title text-lg font-bold text-volo-blue">${survs.length}</div>
+            <div class="text-[8px] text-volo-muted tracking-[1px]">SURV</div>
+          </div>
+          <div class="bg-volo-bg/60 rounded-lg py-2 text-center">
+            <div class="font-title text-lg font-bold text-volo-gold">${m.totalItems}</div>
+            <div class="text-[8px] text-volo-muted tracking-[1px]">ITEMS</div>
+          </div>
+          <div class="bg-volo-bg/60 rounded-lg py-2 text-center">
+            <div class="font-title text-sm font-bold text-volo-txt">${elapsed}</div>
+            <div class="text-[8px] text-volo-muted tracking-[1px]">DURÉE</div>
+          </div>
+        </div>
+        <div class="space-y-1">
+          ${chef?`<div class="flex items-center gap-2 text-[11px]">
+            <span class="text-volo-muted w-16 flex-shrink-0">Chef</span>
+            <span class="text-volo-rescue font-semibold truncate">⭐ ${chef}</span>
+          </div>`:''}
+          ${m.sauveteurs.length>1?`<div class="flex items-center gap-2 text-[11px]">
+            <span class="text-volo-muted w-16 flex-shrink-0">Équipe</span>
+            <span class="text-volo-txt truncate">${m.sauveteurs.filter(s=>s!==chef).join(', ')}</span>
+          </div>`:''}
+          ${m.contact?`<div class="flex items-center gap-2 text-[11px]">
+            <span class="text-volo-muted w-16 flex-shrink-0">Contact</span>
+            <span class="text-volo-gold truncate">👤 ${m.contact}${m.tel?' • 📞 '+m.tel:''}</span>
+          </div>`:''}
+          ${m.contactEmail?`<div class="flex items-center gap-2 text-[11px]">
+            <span class="text-volo-muted w-16 flex-shrink-0">Courriel</span>
+            <a href="mailto:${m.contactEmail}" class="text-volo-blue text-[11px] truncate hover:underline">📧 ${m.contactEmail}</a>
+          </div>`:''}
+          <div class="flex items-center gap-2 text-[11px]">
+            <span class="text-volo-muted w-16 flex-shrink-0">Début</span>
+            <span class="text-volo-txt font-mono">${m.earliest}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    grid.className='space-y-1.5';
+    grid.innerHTML=missions.map(m=>{
+      const elapsed=timeSinceStr(m.earliest);
+      const overday=m.earliest&&(Date.now()-new Date(m.earliest).getTime()>864e5);
+      return`<div class="flex items-center justify-between py-2.5 px-4 glass-card rounded-xl ${overday?'border-volo-orange/30':''}">
+        <div class="flex items-center gap-3 min-w-0">
+          <span class="text-volo-rescue text-sm">🎯</span>
+          <div class="min-w-0">
+            <div class="text-[13px] font-semibold truncate">${m.dest}</div>
+            <div class="text-[10px] text-volo-muted">${m.sauveteurs.length} sauveteur${m.sauveteurs.length>1?'s':''} • ${m.proj||'—'}</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <span class="text-[10px] font-mono text-volo-gold">${m.totalItems} items</span>
+          <span class="text-[10px] text-volo-muted">${elapsed}</span>
+          ${overday?'<span class="w-2 h-2 rounded-full bg-volo-orange animate-pulse"></span>':''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function toggleMissionView(){
+  missionViewMode=missionViewMode==='cards'?'list':'cards';
+  const btn=document.getElementById('missionViewBtn');
+  btn.textContent=missionViewMode==='cards'?'📋 Liste':'🃏 Cartes';
+  rMissions();
+}
+
+// ===== BLOC 3 V2 — PERSONNES RESSOURCES PAR SITE =====
+function rContacts(){
+  const grid=document.getElementById('contacts-grid');
+  const empty=document.getElementById('contacts-empty');
+  if(!grid)return;
+  // Extract contacts from active transactions
+  const contactMap={};
+  ACT.filter(a=>a.m==='PICK-ON'&&a.st==='ACTIF').forEach(t=>{
+    if(t.dest){
+      const key=t.dest.split(' —')[0];
+      if(!contactMap[key]) contactMap[key]={dest:t.dest,personne:t.contact||'',proj:t.proj||'',tel:t.tel||'',email:t.email||'',sauveteur:t.s};
+      if(t.contact&&!contactMap[key].personne) contactMap[key].personne=t.contact;
+      if(t.tel&&!contactMap[key].tel) contactMap[key].tel=t.tel;
+      if(t.email&&!contactMap[key].email) contactMap[key].email=t.email;
+    }
+  });
+  const contacts=Object.values(contactMap);
+  if(contacts.length===0){empty.classList.remove('hidden');grid.innerHTML='';return;}
+  empty.classList.add('hidden');
+  grid.innerHTML=contacts.map(c=>`<div class="p-2.5 rounded-lg bg-volo-card2/60 border border-volo-border/20">
+    <div class="text-[12px] font-semibold truncate">${c.dest}</div>
+    <div class="flex items-center justify-between mt-1">
+      <span class="text-[10px] text-volo-gold">${c.personne||c.sauveteur||'—'}</span>
+      ${c.tel?`<a href="tel:${c.tel}" class="text-[10px] text-volo-blue hover:text-volo-blue/80">📞 ${c.tel}</a>`:'<span class="text-[10px] text-volo-muted">Pas de tél.</span>'}
+    </div>
+    ${c.email?`<div class="mt-1"><a href="mailto:${c.email}" class="text-[10px] text-volo-blue hover:underline">📧 ${c.email}</a></div>`:''}
+    <div class="text-[9px] text-volo-muted mt-0.5">${c.proj}</div>
+  </div>`).join('');
+}
+
+// ===== BLOC 3 V2 — MÉTÉO INTELLIGENTE =====
+let showMeteoInactifs=false;
+function getCustomMeteoSites(){try{return JSON.parse(localStorage.getItem('volo_meteo_custom')||'[]')}catch(e){return[]}}
+function saveCustomMeteoSites(sites){localStorage.setItem('volo_meteo_custom',JSON.stringify(sites));}
+
+function toggleMeteoInactifs(){
+  showMeteoInactifs=!showMeteoInactifs;
+  const el=document.getElementById('meteo-inactifs');
+  if(showMeteoInactifs) el.classList.remove('hidden');
+  else el.classList.add('hidden');
+  const btn=document.getElementById('meteoToggleBtn');
+  btn.style.borderColor=showMeteoInactifs?'rgba(59,130,246,.5)':'';
+}
+
+function openAddMeteoModal(){
+  document.getElementById('modal-box').innerHTML=`<div class="modal-bg" onclick="if(event.target===this)closeM()">
+    <div class="glass-card rounded-2xl p-6 animate-modal-in border border-volo-blue/30 max-w-[400px] w-full" style="background:rgba(28,16,18,.95)">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-title text-volo-blue text-sm tracking-[2px]">➕ AJOUTER LIEU MÉTÉO</h2>
+        <button onclick="closeM()" class="w-8 h-8 rounded-lg bg-volo-bg/60 flex items-center justify-center text-volo-muted hover:text-volo-gold transition-colors">✕</button>
+      </div>
+      <input id="meteoSearchInput" type="text" placeholder="Nom du lieu (ex: Shawinigan)" class="w-full px-4 py-3 rounded-xl bg-volo-bg border border-volo-border text-sm text-volo-txt placeholder-volo-muted/60 focus:outline-none focus:border-volo-blue/50 sf mb-3" oninput="searchMeteoLocation(this.value)">
+      <div id="meteoSearchResults" class="space-y-1.5 max-h-48 overflow-y-auto"></div>
+      <div class="mt-4">
+        <div class="text-[10px] text-volo-muted font-title tracking-[1px] mb-2">LIEUX PERSONNALISÉS</div>
+        <div id="meteoCustomList" class="space-y-1"></div>
+      </div>
+    </div>
+  </div>`;
+  renderCustomMeteoList();
+}
+
+async function searchMeteoLocation(q){
+  const el=document.getElementById('meteoSearchResults');
+  if(!el||q.length<3){el.innerHTML='';return;}
+  el.innerHTML='<div class="text-xs text-volo-muted text-center py-2">Recherche...</div>';
+  try{
+    const r=await fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(q)+'&count=5&language=fr&country_code=CA');
+    const data=await r.json();
+    if(!data.results||data.results.length===0){el.innerHTML='<div class="text-xs text-volo-muted text-center py-2">Aucun résultat</div>';return;}
+    el.innerHTML=data.results.map(r=>`<button onclick="addCustomMeteoSite('${r.name.replace(/'/g,"\\'")}',${r.latitude},${r.longitude})" class="w-full text-left p-2.5 rounded-lg bg-volo-card2/60 border border-volo-border/20 hover:border-volo-blue/40 transition-all">
+      <div class="text-[12px] font-semibold">${r.name}</div>
+      <div class="text-[10px] text-volo-muted">${r.admin1||''} • ${r.latitude.toFixed(2)}, ${r.longitude.toFixed(2)}</div>
+    </button>`).join('');
+  }catch(e){el.innerHTML='<div class="text-xs text-volo-red text-center py-2">Erreur recherche</div>';}
+}
+
+function addCustomMeteoSite(name,lat,lng){
+  const sites=getCustomMeteoSites();
+  if(sites.find(s=>s.name===name)){toast('Lieu déjà ajouté','red');return;}
+  sites.push({name,lat,lng});
+  saveCustomMeteoSites(sites);
+  toast('📍 '+name+' ajouté','green');
+  renderCustomMeteoList();
+  fetchMeteo();
+}
+
+function removeCustomMeteoSite(idx){
+  const sites=getCustomMeteoSites();
+  sites.splice(idx,1);
+  saveCustomMeteoSites(sites);
+  renderCustomMeteoList();
+  fetchMeteo();
+  toast('Lieu supprimé','gold');
+}
+
+function renderCustomMeteoList(){
+  const el=document.getElementById('meteoCustomList');
+  if(!el)return;
+  const sites=getCustomMeteoSites();
+  el.innerHTML=sites.length?sites.map((s,i)=>`<div class="flex items-center justify-between p-2 rounded-lg bg-volo-bg/40">
+    <span class="text-[11px] text-volo-txt">${s.name}</span>
+    <button onclick="removeCustomMeteoSite(${i})" class="text-[10px] text-volo-red/70 hover:text-volo-red">✕</button>
+  </div>`).join(''):'<div class="text-[10px] text-volo-muted text-center py-2">Aucun lieu personnalisé</div>';
+}
+
+function renderMeteoCard(site,data){
+  if(!data||!data.current) return `<div class="p-2 rounded-lg bg-volo-card2 border border-volo-border/30"><span class="text-xs text-volo-muted">${site.name} — Indisponible</span></div>`;
+  const c=data.current;
+  const desc=METEO_CODES[c.weather_code]||'❓ Inconnu';
+  const icon=desc.split(' ')[0];
+  const label=desc.split(' ').slice(1).join(' ');
+  const tempColor=c.temperature_2m<-10?'text-blue-400':c.temperature_2m<0?'text-blue-300':c.temperature_2m<15?'text-volo-gold':c.temperature_2m<25?'text-volo-green':'text-volo-red';
+  const windWarn=c.wind_gusts_10m>50;
+  const coldWarn=c.temperature_2m<-25;
+  return `<div class="p-3 rounded-xl bg-volo-card2/80 border border-volo-border/30 ${windWarn?'border-volo-orange/40':''} ${coldWarn?'border-blue-400/40':''}">
+    <div class="flex items-center justify-between mb-1">
+      <span class="text-[12px] font-semibold truncate max-w-[140px]">${site.name}</span>
+      <span class="text-lg">${icon}</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="font-title text-xl font-bold ${tempColor}">${Math.round(c.temperature_2m)}°C</span>
+      <div class="text-[10px] text-volo-muted leading-tight">
+        <div>${label}</div>
+        <div>💨 ${Math.round(c.wind_speed_10m)} km/h${c.wind_gusts_10m>30?' <span class="text-volo-orange">(raf. '+Math.round(c.wind_gusts_10m)+')</span>':''}</div>
+        <div>💧 ${c.relative_humidity_2m}%</div>
+      </div>
+    </div>
+    ${windWarn?'<div class="mt-1 text-[10px] text-volo-orange font-bold">⚠️ RAFALES FORTES</div>':''}
+    ${coldWarn?'<div class="mt-1 text-[10px] text-blue-400 font-bold">🥶 FROID EXTRÊME</div>':''}
+  </div>`;
+}
+
+async function fetchMeteoSingle(lat,lng){
+  try{
+    const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lng+'&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,weather_code&timezone=America/Toronto&forecast_days=1');
+    return await r.json();
+  }catch(e){return null;}
+}
+
+// ===== BLOC 3 V2 — EXPORT COMPTABLE PAR PERSONNE/PÉRIODE =====
+function openExportComptableModal(){
+  const today=new Date().toISOString().slice(0,10);
+  const weekAgo=new Date(Date.now()-7*864e5).toISOString().slice(0,10);
+  const persons=[...new Set(DEP.map(d=>d.name))].sort();
+  document.getElementById('modal-box').innerHTML=`<div class="modal-bg" onclick="if(event.target===this)closeM()">
+    <div class="glass-card rounded-2xl p-6 animate-modal-in border border-volo-rescue/30 max-w-[480px] w-full" style="background:rgba(28,16,18,.95)">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="font-title text-volo-rescue text-sm tracking-[2px]">📊 EXPORT COMPTABLE</h2>
+        <button onclick="closeM()" class="w-8 h-8 rounded-lg bg-volo-bg/60 flex items-center justify-center text-volo-muted hover:text-volo-gold transition-colors">✕</button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="text-[10px] text-volo-muted font-title tracking-[1px] block mb-1">PÉRIODE</label>
+          <div class="flex gap-2">
+            <input id="comptDateFrom" type="date" value="${weekAgo}" class="flex-1 px-3 py-2.5 rounded-xl bg-volo-bg border border-volo-border text-sm text-volo-txt focus:outline-none focus:border-volo-rescue/50 sf" style="color-scheme:dark">
+            <span class="text-volo-muted self-center text-sm">→</span>
+            <input id="comptDateTo" type="date" value="${today}" class="flex-1 px-3 py-2.5 rounded-xl bg-volo-bg border border-volo-border text-sm text-volo-txt focus:outline-none focus:border-volo-rescue/50 sf" style="color-scheme:dark">
+          </div>
+        </div>
+        <div>
+          <label class="text-[10px] text-volo-muted font-title tracking-[1px] block mb-1">PERSONNE (optionnel)</label>
+          <select id="comptPerson" class="region-select w-full" style="font-size:13px;padding:10px 12px">
+            <option value="">👥 Toutes les personnes</option>
+            ${persons.map(p=>'<option value="'+p+'">'+p+'</option>').join('')}
+          </select>
+        </div>
+        <div>
+          <label class="text-[10px] text-volo-muted font-title tracking-[1px] block mb-1">TYPE</label>
+          <div class="flex gap-2">
+            <button onclick="this.classList.toggle('border-volo-rescue');this.dataset.on=this.dataset.on==='1'?'0':'1'" data-on="1" class="flex-1 py-2.5 rounded-xl bg-volo-bg border border-volo-rescue text-[11px] font-title tracking-[1px] text-volo-txt transition-all">🚛 KM</button>
+            <button onclick="this.classList.toggle('border-volo-rescue');this.dataset.on=this.dataset.on==='1'?'0':'1'" data-on="1" class="flex-1 py-2.5 rounded-xl bg-volo-bg border border-volo-rescue text-[11px] font-title tracking-[1px] text-volo-txt transition-all">📋 TRANSACTIONS</button>
+            <button onclick="this.classList.toggle('border-volo-rescue');this.dataset.on=this.dataset.on==='1'?'0':'1'" data-on="1" class="flex-1 py-2.5 rounded-xl bg-volo-bg border border-volo-rescue text-[11px] font-title tracking-[1px] text-volo-txt transition-all">⏱️ POINTAGE</button>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-6">
+        <button onclick="exportComptableFiltered()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#E65100] to-[#FF6D00] text-white font-title text-sm tracking-[2px] hover:shadow-lg hover:shadow-[#E65100]/20 transition-all active:scale-95">📁 EXPORTER CSV</button>
+        <button onclick="sendComptableFilteredWebhook()" class="flex-1 py-3 rounded-xl bg-volo-rescue/20 border border-volo-rescue/40 text-volo-rescue font-title text-sm tracking-[2px] hover:bg-volo-rescue/30 transition-all active:scale-95">📧 ENVOYER</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function exportComptableFiltered(){
+  const from=document.getElementById('comptDateFrom').value;
+  const to=document.getElementById('comptDateTo').value;
+  const person=document.getElementById('comptPerson').value;
+  
+  // KM Logs
+  const kmLogs=getKmLogs().filter(l=>{
+    if(!l.timestamp)return false;
+    const d=l.timestamp.slice(0,10);
+    if(d<from||d>to)return false;
+    if(person&&l.sauveteur!==person)return false;
+    return true;
+  });
+  
+  // Transactions
+  const txLogs=ACT.filter(t=>{
+    if(!t.d)return false;
+    const d=t.d.slice(0,10);
+    if(d<from||d>to)return false;
+    if(person&&t.s!==person)return false;
+    return true;
+  });
+  
+  let csv='RAPPORT COMPTABLE VOLO SST\n';
+  csv+='Période:,'+from+',au,'+to+'\n';
+  if(person) csv+='Personne:,'+person+'\n';
+  csv+='Généré:,'+new Date().toISOString()+'\n\n';
+  
+  csv+='=== KILOMÉTRAGE ===\n';
+  csv+='Date,Véhicule,Sauveteur,Destination,Projet,KM_Départ,KM_Fin,KM_Total\n';
+  let totalKm=0;
+  kmLogs.forEach(l=>{
+    const km=Math.abs((l.km_fin||0)-(l.km_debut||0));
+    totalKm+=km;
+    csv+='"'+[l.timestamp||'',l.truck||'',l.sauveteur||'',l.destination||'',l.projet||'',l.km_debut||0,l.km_fin||0,km].join('","')+'"\n';
+  });
+  csv+='TOTAL KM:,,,,,,,'+totalKm+'\n\n';
+  
+  csv+='=== TRANSACTIONS ===\n';
+  csv+='Date,Mode,Sauveteur,Items,Destination,Projet,Statut\n';
+  txLogs.forEach(t=>{
+    csv+='"'+[t.d,t.m,t.s,t.i,t.dest,t.proj||'',t.st].join('","')+'"\n';
+  });
+  csv+='TOTAL TX:,'+txLogs.length+'\n';
+  
+  const b=new Blob([csv],{type:'text/csv'});
+  const u=URL.createObjectURL(b);
+  const a=document.createElement('a');
+  a.href=u;a.download='VOLO-Comptable-'+from+'-'+to+(person?'-'+person.replace(/\s/g,'_'):'')+'.csv';a.click();
+  URL.revokeObjectURL(u);
+  toast('📁 Export comptable généré','green');
+  closeM();
+}
+
+async function sendComptableFilteredWebhook(){
+  const from=document.getElementById('comptDateFrom').value;
+  const to=document.getElementById('comptDateTo').value;
+  const person=document.getElementById('comptPerson').value;
+  const kmLogs=getKmLogs().filter(l=>{
+    if(!l.timestamp)return false;
+    const d=l.timestamp.slice(0,10);
+    return d>=from&&d<=to&&(!person||l.sauveteur===person);
+  });
+  const txLogs=ACT.filter(t=>{
+    if(!t.d)return false;
+    const d=t.d.slice(0,10);
+    return d>=from&&d<=to&&(!person||t.s===person);
+  });
+  const totalKm=kmLogs.reduce((s,l)=>s+Math.abs((l.km_fin||0)-(l.km_debut||0)),0);
+  const payload={
+    type:'COMPTABLE_RAPPORT',
+    periode_debut:from,
+    periode_fin:to,
+    personne:person||'TOUS',
+    total_km:totalKm,
+    total_trajets:kmLogs.length,
+    total_tx:txLogs.length,
+    km_details:kmLogs,
+    tx_details:txLogs,
+    timestamp:new Date().toISOString()
+  };
+  try{
+    const r=await fetch(CONFIG.KM_WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(r.ok){toast('📧 Rapport envoyé!','green');closeM();}
+    else toast('❌ Erreur envoi','red');
+  }catch{toast('❌ Erreur réseau','red');}
+}
+
+// ===== INIT =====
+tick();setInterval(tick,1000);updateNet();
+initRegionFilter();
+rPhotos();rKm();
+updateDataIndicator(CONFIG.SHEET_ID?'loading':'demo');
+doRefresh(true);
+// Météo on first load
+setTimeout(()=>fetchMeteo(),1500);
+// Map init delayed to after PIN login (Leaflet needs visible container)
+setInterval(()=>doRefresh(false),60000);
+// Timer sinceLast toutes les 15s
+setInterval(updateSinceLast,15000);
+</script>
+</body>
+</html>

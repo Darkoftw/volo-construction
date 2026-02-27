@@ -1,0 +1,2233 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0C0608">
+<title>VOLO SST — Inventaire Golden Eagles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#0C0608;--card:rgba(28,16,18,.90);--card2:rgba(38,22,26,.94);--cardSolid:#1C1012;
+--gold:#D4A017;--goldL:#E8C547;
+--rescue:#E65100;--rescueL:#FF6D00;--rescueD:#BF360C;--rescueGlow:rgba(230,81,0,.15);
+--red:#C0392B;--green:#27AE60;--orange:#E67E22;
+--txt:#F5F0EB;--muted:#B8A99A;--border:rgba(68,40,46,.55);--blue:#3B82F6;
+--glow:0 0 30px rgba(230,81,0,.08);
+--radius:14px;--radius-sm:10px;--radius-lg:18px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.025'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.6}
+.app{max-width:460px;margin:0 auto;min-height:100vh;position:relative;z-index:1}
+.gold-bar{height:4px;background:linear-gradient(90deg,var(--rescueD),var(--rescue),var(--rescueL),var(--rescue),var(--rescueD));background-size:300% 100%;animation:shimmer 4s ease infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* Ripple effect */
+.ripple{position:absolute;border-radius:50%;background:rgba(230,81,0,.25);transform:scale(0);animation:rippleAnim .6s ease-out;pointer-events:none}
+@keyframes rippleAnim{to{transform:scale(4);opacity:0}}
+.header{display:flex;align-items:center;justify-content:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);position:sticky;top:0;z-index:50;background:rgba(12,6,8,.94)}
+.header img{width:44px;height:44px;border-radius:50%;border:2px solid var(--rescue);box-shadow:0 0 16px rgba(230,81,0,.2);transition:all .3s cubic-bezier(.4,0,.2,1)}
+.header img:hover{transform:scale(1.12) rotate(3deg);box-shadow:0 0 24px rgba(230,81,0,.35)}
+.header .title{font-family:'Oswald',sans-serif;font-size:18px;letter-spacing:3px;color:var(--rescue);text-shadow:0 0 20px rgba(230,81,0,.15)}
+.header .step-label{font-size:13px;color:var(--muted);letter-spacing:1px}
+.screen{padding:20px;min-height:calc(100vh - 76px);animation:fadeSlide .4s cubic-bezier(.22,1,.36,1)}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(230,81,0,.4)}50%{box-shadow:0 0 20px 10px rgba(230,81,0,.1)}}
+@keyframes scanLine{0%{top:10%}100%{top:90%}}
+@keyframes stagger1{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+h2{font-family:'Oswald',sans-serif;font-size:22px;letter-spacing:3px;color:var(--rescue);margin-bottom:14px;text-align:center}
+h3{font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:2px;color:var(--goldL);margin-bottom:10px;text-align:center}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;cursor:pointer;transition:all .3s cubic-bezier(.22,1,.36,1);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(230,81,0,.15),transparent);opacity:0;transition:opacity .3s}
+.card:hover,.card.selected{border-color:var(--rescue);background:var(--card2);transform:translateY(-2px);box-shadow:0 8px 32px rgba(230,81,0,.08),0 0 0 1px rgba(230,81,0,.1)}
+.card:hover::before,.card.selected::before{opacity:1}
+.card.selected{border-color:var(--green);box-shadow:0 8px 32px rgba(39,174,96,.08)}
+.card:active{transform:scale(.98);transition-duration:.1s}
+.card .name{font-weight:600;font-size:16px}
+.card .sub{font-size:13px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px}
+.card .role{font-size:12px;color:var(--gold);letter-spacing:1px;font-weight:600}
+.btn{width:100%;padding:16px;border:none;border-radius:var(--radius);font-family:'Oswald',sans-serif;font-size:17px;letter-spacing:2px;cursor:pointer;transition:all .25s cubic-bezier(.22,1,.36,1);font-weight:600;position:relative;overflow:hidden}
+.btn-gold{background:linear-gradient(135deg,var(--rescue),var(--rescueD));color:#fff;box-shadow:0 4px 16px rgba(230,81,0,.2)}
+.btn-gold:hover{box-shadow:0 6px 24px rgba(230,81,0,.35);transform:translateY(-1px)}
+.btn-blue{background:linear-gradient(135deg,#3B82F6,#2563EB);color:#fff;box-shadow:0 4px 16px rgba(59,130,246,.2)}
+.btn-blue:hover{box-shadow:0 6px 24px rgba(59,130,246,.35);transform:translateY(-1px)}
+.btn-green{background:linear-gradient(135deg,#2ecc71,#1a8a47);color:#fff;box-shadow:0 4px 16px rgba(39,174,96,.2)}
+.btn-green:hover{box-shadow:0 6px 24px rgba(39,174,96,.35);transform:translateY(-1px)}
+.btn-orange{background:linear-gradient(135deg,var(--rescueL),var(--rescue));color:#fff;box-shadow:0 4px 16px rgba(255,109,0,.2)}
+.btn-orange:hover{box-shadow:0 6px 24px rgba(255,109,0,.35);transform:translateY(-1px)}
+.btn-red{background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;box-shadow:0 4px 16px rgba(192,57,43,.2)}
+.btn-outline{background:transparent;border:1px dashed var(--rescue);color:var(--rescue);padding:12px;font-size:14px;box-shadow:none}
+.btn-outline:hover{background:var(--rescueGlow);border-style:solid}
+.btn:active{transform:scale(.97);transition-duration:.1s}
+.btn-filter{flex:1;padding:8px 6px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1px;cursor:pointer;transition:all .25s}
+.btn-filter.active{border-color:var(--rescue);color:var(--rescue);background:var(--rescueGlow)}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100%);padding:12px 24px;border-radius:14px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;z-index:9999;pointer-events:none;max-width:90%;text-align:center;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);animation:toastIn .4s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes toastIn{from{transform:translateX(-50%) translateY(-100%)}to{transform:translateX(-50%) translateY(0)}}
+.toast-ok{background:rgba(39,174,96,.92);color:#fff}
+.toast-err{background:rgba(192,57,43,.92);color:#fff}
+.toast-off{background:rgba(230,126,34,.92);color:#fff}
+.toast-info{background:rgba(59,130,246,.92);color:#fff}
+.net-badge{position:fixed;top:8px;right:12px;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:1px;z-index:9998;font-family:'Inter',sans-serif}
+.net-on{background:var(--green);color:#fff}
+.net-off{background:var(--red);color:#fff;animation:pulse 2s infinite}
+.btn-sm{padding:14px;font-size:15px}
+.btn-nav{display:flex;gap:10px;margin-top:16px}
+.btn-nav .btn{flex:1}
+.stats-row{display:flex;gap:12px;margin:20px 0}
+.stat{flex:1;text-align:center;padding:16px 10px;border-radius:12px;background:var(--card)}
+.stat .num{font-family:'Oswald',sans-serif;font-size:36px;font-weight:700}
+.stat .label{font-size:11px;letter-spacing:2px;color:var(--muted);margin-top:4px}
+.check{color:var(--green);font-weight:700;font-size:18px}
+.badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:600;letter-spacing:1px}
+.badge-green{background:rgba(39,174,96,.12);color:var(--green);border:1px solid rgba(39,174,96,.2)}
+.badge-red{background:rgba(192,57,43,.12);color:var(--red);border:1px solid rgba(192,57,43,.2)}
+.badge-gold{background:var(--rescueGlow);color:var(--rescue);border:1px solid rgba(230,81,0,.2)}
+.badge-blue{background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.2)}
+.badge-orange{background:rgba(255,109,0,.12);color:var(--rescueL);border:1px solid rgba(255,109,0,.2)}
+.pin-row{display:flex;gap:10px;justify-content:center;margin:16px 0}
+.pin-dot{width:52px;height:60px;border-radius:12px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--rescue);font-weight:700;transition:all .25s cubic-bezier(.22,1,.36,1);background:var(--card)}
+.pin-dot.filled{border-color:var(--rescue);box-shadow:0 0 16px rgba(230,81,0,.2)}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:280px;margin:12px auto}
+.numpad button{height:54px;border-radius:12px;background:var(--card);border:1px solid var(--border);color:var(--txt);font-size:22px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
+.numpad button:active{background:var(--rescueGlow);transform:scale(.95);border-color:var(--rescue)}
+.scan-area{background:#000;border-radius:var(--radius);border:2px solid var(--rescue);padding:24px;text-align:center;position:relative;overflow:hidden;margin-bottom:14px;animation:glowPulse 3s ease infinite}
+.scan-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--rescue),transparent);animation:scanLine 2s linear infinite;opacity:.7}
+.item-scanned{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(39,174,96,.08);border:1px solid rgba(39,174,96,.3);border-radius:10px;margin-bottom:8px;font-size:15px}
+.item-scanned .id{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)}
+.item-btn{padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all .3s cubic-bezier(.22,1,.36,1)}
+.item-btn:hover{border-color:var(--rescue);transform:translateX(4px);box-shadow:0 4px 16px rgba(230,81,0,.06)}
+.item-btn:active{transform:scale(.98)}
+.item-btn .cat{margin-right:8px;font-size:18px}
+.confirm-block{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;backdrop-filter:blur(12px)}
+.confirm-row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px}
+.confirm-label{color:var(--muted);font-size:12px;letter-spacing:1px;margin-bottom:4px;margin-top:12px;text-align:center}
+.confirm-label:first-child{margin-top:0}
+.splash-logo{width:160px;height:160px;border-radius:50%;border:3px solid var(--rescue);display:block;margin:0 auto;box-shadow:0 0 40px rgba(230,81,0,.15),0 0 80px rgba(230,81,0,.05)}
+.remorque-tabs{display:flex;gap:10px;margin-bottom:14px}
+.remorque-tab{flex:1;padding:16px;border-radius:var(--radius-sm);text-align:center;font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;border:2px solid var(--border);background:var(--card);color:var(--muted);transition:all .25s}
+.remorque-tab.active{border-color:var(--rescue);color:var(--rescue);background:var(--rescueGlow)}
+.urgence-btn{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#e74c3c,#c0392b);border:none;color:#fff;font-size:24px;cursor:pointer;box-shadow:0 4px 20px rgba(192,57,43,.4);z-index:100;animation:pulse 2s infinite}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.88);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);animation:fadeSlide .2s ease}
+.modal{background:var(--cardSolid);border:2px solid var(--border);border-radius:var(--radius-lg);padding:20px;max-width:360px;width:100%;max-height:80vh;overflow-y:auto;animation:fadeIn .3s ease}
+.modal h3{color:var(--red);margin-bottom:14px;font-size:18px}
+.modal input,.modal select,.modal textarea{width:100%;padding:12px;border-radius:8px;background:var(--bg);border:1px solid var(--border);color:var(--txt);font-family:'Inter',sans-serif;font-size:15px;margin-bottom:12px;transition:border-color .2s}
+.modal input:focus,.modal select:focus,.modal textarea:focus{border-color:var(--rescue);outline:none;box-shadow:0 0 0 3px rgba(230,81,0,.1)}
+.hidden{display:none}
+/* Lock screen */
+.lock-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(12,6,8,.97);z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;backdrop-filter:blur(20px)}
+.lock-overlay .lock-icon{font-size:64px;animation:float 3s ease-in-out infinite}
+.lock-overlay .lock-text{font-family:'Oswald',sans-serif;font-size:18px;letter-spacing:3px;color:var(--rescue)}
+.lock-overlay .lock-sub{font-size:14px;color:var(--muted);text-align:center;max-width:280px}
+/* Dashboard */
+.dash-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;backdrop-filter:blur(12px)}
+.dash-item-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(58,36,40,.3)}
+.dash-item-row:last-child{border-bottom:none}
+.time-ago{font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 8px;border-radius:6px}
+.time-ok{background:rgba(39,174,96,.12);color:var(--green)}
+.time-warn{background:rgba(230,126,34,.12);color:var(--orange)}
+.time-alert{background:rgba(192,57,43,.12);color:var(--red)}
+/* History */
+.history-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;backdrop-filter:blur(12px);transition:all .25s}
+.history-item:hover{border-color:rgba(230,81,0,.2);background:var(--card2)}
+.h-mode{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;padding:3px 10px;border-radius:8px;display:inline-block}
+.h-pickon{background:rgba(39,174,96,.15);color:var(--green)}
+.h-pickoff{background:rgba(230,126,34,.15);color:var(--orange)}
+.h-cancelled{background:rgba(192,57,43,.15);color:var(--red)}
+/* Nav grid accueil */
+.nav-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.nav-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center;cursor:pointer;transition:all .3s cubic-bezier(.22,1,.36,1);backdrop-filter:blur(12px)}
+.nav-card:hover,.nav-card:active{border-color:var(--rescue);background:var(--card2);transform:translateY(-3px);box-shadow:0 8px 32px rgba(230,81,0,.1)}
+.nav-card .nav-icon{font-size:28px;margin-bottom:8px;display:block}
+.nav-card .nav-label{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;color:var(--muted)}
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--rescue);border-radius:4px}
+@keyframes slideInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 15px rgba(230,81,0,.15)}50%{box-shadow:0 0 30px rgba(230,81,0,.3)}}
+/* Photos */
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.photo-thumb{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--card)}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-thumb .del{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(192,57,43,.9);color:#fff;border:none;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);transition:transform .15s}
+.photo-thumb .del:active{transform:scale(.9)}
+.photo-add{aspect-ratio:1;border-radius:10px;border:2px dashed var(--rescue);background:rgba(230,81,0,.04);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .25s;color:var(--rescue);gap:4px}
+.photo-add:hover,.photo-add:active{background:rgba(230,81,0,.1);border-style:solid}
+.photo-add .ico{font-size:28px}
+.photo-add .lbl{font-size:11px;letter-spacing:1px;font-family:'Oswald',sans-serif}
+.photo-count{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;color:var(--rescue);text-align:center;margin-bottom:6px}
+</style>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+<audio id="eaglecry" preload="auto" src="eagle.mp3"></audio>
+<input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this)">
+<div class="app" id="app"></div>
+<div id="lock-screen" class="lock-overlay" style="display:none">
+  <div class="lock-icon">🔒</div>
+  <div class="lock-text">SESSION VERROUILLÉE</div>
+  <div class="lock-sub">Inactivité détectée — touche l'écran pour revenir</div>
+  <button class="btn btn-gold" onclick="unlockScreen()" style="max-width:280px;margin-top:12px">🦅 DÉVERROUILLER</button>
+</div>
+<script src="data.js"></script>
+<script>
+const LOGO='data:image/jpeg;base64,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';
+
+// ===== DATA loaded from data.js =====
+
+
+// ===== STATE =====
+let state = {step:1,pin:"",depot:null,remorques:[],dest:null,numProjet:"",personneRessource:"",personneRessourceTel:"",personneRessourceEmail:"",detailsJob:"",sauvs:[],scanned:[],sceaux:{},mode:"pickon",showModal:null,addType:null,camMode:true,searchQ:"",filterType:"all",itemQ:"",catFilter:"all",photoMode:false,setupPhotos:[],photoLieu:"",photoContrat:"",kmMode:false,kmFromGains:false,kmAllerRetour:true,kmDebut:"",kmDest:"",kmProjet:"",kmPerso:"",kmTab:"vehicule",kmVehicle:"",kmOdoStart:"",kmOdoEnd:"",gainsMode:false,loggedIn:false};
+
+// ── Helper: current user is SURVEILLANT? ──
+function isUserSurv(){
+  const r=localStorage.getItem('volo_last_role');
+  return r==='SURVEILLANT';
+}
+
+// ===== LOCK SCREEN (2 min inactivity) =====
+let lockTimeout=null;
+const LOCK_DELAY=300000; // 5 minutes
+function resetLockTimer(){
+  if(lockTimeout)clearTimeout(lockTimeout);
+  if(state.step>0){
+    lockTimeout=setTimeout(()=>{
+      if(state.loggedIn){
+        // Lock to accueil after inactivity (PIN stays saved)
+        state.step=0;
+        render();
+        lockScreen();
+      }
+    },LOCK_DELAY);
+  }
+}
+function lockScreen(){
+  document.getElementById('lock-screen').style.display='flex';
+  try{navigator.vibrate&&navigator.vibrate([100,50,100])}catch(e){}
+}
+function unlockScreen(){
+  document.getElementById('lock-screen').style.display='none';
+  // Go to PIN if session expired
+  if(!state.loggedIn){render();}
+  resetLockTimer();
+}
+['click','touchstart','keydown','scroll'].forEach(evt=>{
+  document.addEventListener(evt,resetLockTimer,{passive:true});
+});
+
+// ===== TRANSACTION HISTORY =====
+function getHistory(){
+  try{return JSON.parse(localStorage.getItem('volo_history')||'[]')}catch(e){return[]}
+}
+function saveToHistory(payload){
+  const h=getHistory();
+  h.unshift({...payload,id:'TX-'+Date.now()});
+  if(h.length>100)h.length=100;
+  localStorage.setItem('volo_history',JSON.stringify(h));
+}
+function getActiveItems(){
+  const h=getHistory();
+  const active=[];
+  // === V7.1 PICK-OFF FIX — use original_timestamp for cancel/return key matching ===
+  const closed=new Set();
+  h.forEach(tx=>{
+    if(tx.statut==='ANNULÉ'||tx.statut==='RETOURNÉ'){
+      const key=(tx.original_timestamp||tx.timestamp)+tx.sauveteur_id;
+      closed.add(key);
+    }
+  });
+  h.forEach(tx=>{
+    if(tx.statut==='ACTIF'&&tx.mode==='PICK-ON'&&!closed.has(tx.timestamp+tx.sauveteur_id)){
+      try{
+        const items=JSON.parse(tx.items||'[]');
+        items.forEach(item=>{
+          active.push({...item,sauveteur:tx.sauveteur_nom,destination:tx.destination,num_projet:tx.num_projet||'',personne_ressource:tx.personne_ressource||'',timestamp:tx.timestamp,txId:tx.id});
+        });
+      }catch(e){}
+    }
+  });
+  return active;
+}
+
+// ===== PICK-OFF INTELLIGENT =====
+// === V7.1 PICK-OFF FIX — getActiveDeployments uses original_timestamp for key matching ===
+function getActiveDeployments(){
+  const h=getHistory();
+  const closed=new Set();
+  h.forEach(tx=>{
+    if(tx.statut==='ANNULÉ'||tx.statut==='RETOURNÉ'){
+      // Use original_timestamp if present (cancel/return), else tx.timestamp
+      const key=(tx.original_timestamp||tx.timestamp)+tx.sauveteur_id;
+      closed.add(key);
+    }
+  });
+  return h.filter(tx=>tx.statut==='ACTIF'&&tx.mode==='PICK-ON'&&!closed.has(tx.timestamp+tx.sauveteur_id));
+}
+
+function renderPickoffSelect(){
+  const deployments=getActiveDeployments();
+  if(deployments.length===0){
+    return `<h2 style="color:var(--orange)">◀ PICK-OFF</h2>
+      <div style="text-align:center;padding:40px 20px">
+        <div style="font-size:48px;margin-bottom:16px">✅</div>
+        <div style="color:var(--muted);font-size:16px;font-weight:600">Aucun déploiement actif</div>
+        <div style="color:var(--muted);font-size:13px;margin-top:8px">Tous les items sont au dépôt.<br>Faites un PICK-ON d'abord.</div>
+      </div>
+      <div class="btn-nav"><button class="btn btn-outline btn-sm" onclick="setState({step:0,mode:'pickon'})">◀ ACCUEIL</button></div>`;
+  }
+  return `<h2 style="color:var(--orange)">◀ PICK-OFF</h2>
+    <p style="font-size:14px;color:var(--muted);text-align:center;margin-bottom:16px">Sélectionnez le déploiement qui revient</p>
+    <div style="max-height:70vh;overflow-y:auto;-webkit-overflow-scrolling:touch">
+    ${deployments.map((tx,idx)=>{
+      let items=[];try{items=JSON.parse(tx.items||'[]')}catch(e){}
+      const isOverdue=Date.now()-new Date(tx.timestamp).getTime()>86400000;
+      return `<div class="card" onclick="selectPickoffDeployment(${idx})" style="cursor:pointer;border-color:${isOverdue?'var(--red)':'var(--orange)'};margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div style="font-weight:700;font-size:15px;color:var(--txt)">${tx.sauveteur_nom||'Inconnu'}</div>
+          <span class="badge badge-orange">${items.length} item${items.length>1?'s':''}</span>
+        </div>
+        <div style="font-size:13px;color:var(--gold);font-weight:600;margin-bottom:4px">→ ${tx.destination||'N/A'}</div>
+        ${tx.num_projet?`<div style="font-size:11px;color:var(--rescue);margin-bottom:4px">📋 #${tx.num_projet}${tx.personne_ressource?' • 👤 '+tx.personne_ressource:''}</div>`:''}
+        ${tx.remorque&&tx.remorque!=='Aucun'?`<div style="font-size:11px;color:var(--muted);margin-bottom:4px">🚛 ${tx.remorque}</div>`:''}
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
+          <div style="font-size:11px;color:var(--muted)">Sorti: ${tx.timestamp||'—'}</div>
+          <span class="time-ago ${isOverdue?'overdue':''}" style="font-size:12px;${isOverdue?'color:var(--red);font-weight:700':'color:var(--muted)'}">${timeAgo(tx.timestamp)}${isOverdue?' ⚠️':''}</span>
+        </div>
+        <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">
+          ${items.slice(0,5).map(i=>`<span style="font-size:10px;background:var(--card2);color:var(--muted);padding:2px 6px;border-radius:4px">${i.name||i.id}</span>`).join('')}
+          ${items.length>5?`<span style="font-size:10px;color:var(--muted)">+${items.length-5}</span>`:''}
+        </div>
+      </div>`;
+    }).join('')}
+    </div>
+    <div class="btn-nav"><button class="btn btn-outline btn-sm" onclick="setState({step:0,mode:'pickon'})">◀ ACCUEIL</button></div>`;
+}
+
+function selectPickoffDeployment(idx){
+  const deployments=getActiveDeployments();
+  const tx=deployments[idx];
+  if(!tx)return;
+  let items=[];try{items=JSON.parse(tx.items||'[]')}catch(e){}
+  // Find matching depot
+  const depotMatch=DEPOTS.find(d=>d.name===tx.depot);
+  const destMatch=DESTINATIONS.find(d=>d.name===tx.destination);
+  const remIds=tx.remorque&&tx.remorque!=='Aucun'?tx.remorque.split(' + ').map(n=>{const r=REMORQUES.find(x=>x.name===n);return r?r.id:null}).filter(Boolean):[];
+  // Find sauveteur
+  const sauvMatch=SAUVETEURS.find(s=>s.name===tx.sauveteur_nom);
+  // === V7.1 PICK-OFF FIX — Store expected items AND original TX reference ===
+  window._pickoffExpected=items;
+  window._pickoffOriginalTx=tx;
+  setState({
+    depot:depotMatch?depotMatch.id:null,
+    dest:destMatch?destMatch.id:null,
+    remorques:remIds,
+    sauvs:sauvMatch?[sauvMatch.id]:(tx.sauveteur_id?[tx.sauveteur_id]:[]),
+    numProjet:tx.num_projet||'',
+    personneRessource:tx.personne_ressource||'',
+    detailsJob:tx.details_job||'',
+    scanned:[],
+    sceaux:{},
+    step:6
+  });
+  showToast('📦 Scannez les '+items.length+' items retournés','ok');
+}
+
+// ===== +24h NOTIFICATION CHECK =====
+function checkOverdueItems(){
+  const active=getActiveItems();
+  const now=Date.now();
+  let overdueCount=0;
+  active.forEach(item=>{
+    const ts=new Date(item.timestamp).getTime();
+    if(now-ts>86400000)overdueCount++;
+  });
+  if(overdueCount>0){
+    showToast('⚠️ '+overdueCount+' item(s) sorti(s) depuis +24h!','info');
+  }
+}
+
+function timeAgo(timestamp){
+  const diff=Date.now()-new Date(timestamp).getTime();
+  const mins=Math.floor(diff/60000);
+  if(mins<60)return mins+'min';
+  const hrs=Math.floor(mins/60);
+  if(hrs<24)return hrs+'h'+String(mins%60).padStart(2,'0');
+  const days=Math.floor(hrs/24);
+  return days+'j '+hrs%24+'h';
+}
+function timeClass(timestamp){
+  const diff=Date.now()-new Date(timestamp).getTime();
+  if(diff>86400000)return 'time-alert';
+  if(diff>28800000)return 'time-warn';
+  return 'time-ok';
+}
+
+function playEagleCry(){
+  try{
+    const a=document.getElementById('eaglecry');
+    a.currentTime=0;
+    a.volume=1;
+    a.play();
+  }catch(e){}
+}
+
+function setState(updates){
+  if(updates.step!==undefined&&updates.step!==6)stopQrScanner();
+  Object.assign(state,updates);
+  render();
+  resetLockTimer();
+  if(state.step===6&&state.camMode!==false)setTimeout(()=>startQrScanner(),400);
+}
+
+// ===== RENDER =====
+function render(){
+  const app=document.getElementById('app');
+  let html='<div class="gold-bar"></div>';
+  html+=`<div class="header"><img src="${LOGO}" alt="Logo"><span class="title">GOLDEN EAGLES</span><span class="step-label">${getStepLabel()}</span></div>`;
+  html+='<div class="screen">'+renderStep()+'</div>';
+  if(state.step<7||state.step===11||state.step===12) html+='<button class="urgence-btn" onclick="showUrgence()">🚨</button>';
+  // Modal
+  if(state.showModal) html+=renderModal();
+  app.innerHTML=html;
+}
+
+function getStepLabel(){
+  const labels=["ACCUEIL","IDENTIFIANT","VÉHICULE","DÉPÔT","DESTINATION","PERSONNEL","SCAN RAFALE","CONFIRMATION","VALIDATION","DASHBOARD","HISTORIQUE","PHOTOS SETUP","KILOMÉTRAGE","FORMATION","","MES GAINS"];
+  if(state.step===2&&state.mode==='pickoff')return "RETOUR MATÉRIEL";
+  return labels[state.step]||"";
+}
+
+function renderStep(){
+  switch(state.step){
+    case 0:return renderAccueil();
+    case 1:return renderPin();
+    case 2:return state.mode==='pickoff'?renderPickoffSelect():renderRemorque();
+    case 3:return renderDepot();
+    case 4:return renderDest();
+    case 5:return renderSauvs();
+    case 6:return renderScan();
+    case 7:return renderConfirm();
+    case 8:return renderValidation();
+    case 9:return renderDashboard();
+    case 10:return renderHistory();
+    case 11:return renderPhotoSetup();
+    case 12:return renderKmTracking();
+    case 13:return renderFormation();
+    case 15:return renderMesGains();
+    default:return '';
+  }
+}
+
+function renderAccueil(){
+  const activeItems=getActiveItems();
+  const overdueCount=activeItems.filter(i=>Date.now()-new Date(i.timestamp).getTime()>86400000).length;
+  const hLen=getHistory().length;
+  const lastRole=localStorage.getItem('volo_last_role')||'';
+  const lastUser=localStorage.getItem('volo_last_user')||'';
+  const isSurv=lastRole==='SURVEILLANT';
+  return `
+    <div style="text-align:center;padding-top:14px">
+      <img src="${LOGO}" class="splash-logo" style="animation:float 3s ease-in-out infinite">
+      <h2 style="margin-top:20px;font-size:26px">INVENTAIRE SST</h2>
+      <p style="font-size:14px;color:var(--muted);letter-spacing:2px;margin-bottom:${isSurv?'8px':'20px'}">SAUVETAGE TECHNIQUE — VOLO RESCUE</p>
+      ${isSurv?`<div style="font-size:11px;color:var(--blue);margin-bottom:16px">👁️ ${lastUser} — SURVEILLANT</div>
+      <!-- SURVEILLANT: PICK-ON / PICK-OFF (EPI seulement, pas de fonctionnalité pour l'instant) -->
+      <div style="display:flex;gap:12px;margin-top:8px">
+        <button class="btn" style="flex:1;font-size:18px;padding:16px;background:var(--card);border:1px solid var(--border);color:var(--muted);cursor:not-allowed;opacity:.6" onclick="showToast('🔒 Bientôt disponible — Demande EPI','info')">▶ PICK-ON</button>
+        <button class="btn" style="flex:1;font-size:18px;padding:16px;background:var(--card);border:1px solid var(--border);color:var(--muted);cursor:not-allowed;opacity:.6" onclick="showToast('🔒 Bientôt disponible — Retour EPI','info')">◀ PICK-OFF</button>
+      </div>
+      <div style="margin-top:6px;text-align:center;font-size:10px;color:var(--muted);letter-spacing:1px">🦺 EPI UNIQUEMENT — Casque, Gants, Lunettes</div>
+      `:`<div style="font-size:11px;color:var(--blue);margin-bottom:16px">&nbsp;</div>`}
+      ${isSurv?'':`<div class="stats-row">
+        <div class="stat" style="border:1px solid rgba(230,81,0,.2);background:linear-gradient(135deg,var(--card),rgba(230,81,0,.03))"><div class="num" style="color:var(--green)">${PERSONNEL.filter(p=>p.type==='SAUVETEUR').length}</div><div class="label">SAUVETEURS</div></div>
+        <div class="stat" style="border:1px solid rgba(59,130,246,.2);background:linear-gradient(135deg,var(--card),rgba(59,130,246,.03))"><div class="num" style="color:var(--blue)">${PERSONNEL.filter(p=>p.type==='SURVEILLANT').length}</div><div class="label">SURVEILLANTS</div></div>
+        <div class="stat" style="border:1px solid rgba(230,81,0,.2);background:linear-gradient(135deg,var(--card),rgba(230,81,0,.03))"><div class="num" style="color:var(--rescue)">24+</div><div class="label">ITEMS</div></div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:20px">
+        <button class="btn btn-green" onclick="startPickOn()" style="flex:1;font-size:20px;padding:18px">▶ PICK-ON</button>
+        <button class="btn btn-orange" onclick="startPickOff()" style="flex:1;font-size:20px;padding:18px">◀ PICK-OFF</button>
+      </div>`}
+      <div onclick="setState({step:15,gainsMode:true})" style="margin-top:14px;padding:18px 20px;background:linear-gradient(135deg,rgba(212,160,23,.15),rgba(230,81,0,.08));border:2px solid rgba(212,160,23,.5);border-radius:16px;cursor:pointer;display:flex;align-items:center;gap:16px;transition:all .3s;box-shadow:0 4px 20px rgba(212,160,23,.1)">
+        <span style="font-size:36px">💰</span>
+        <div style="text-align:left;flex:1">
+          <div style="font-weight:800;font-size:18px;color:var(--gold);letter-spacing:2px;font-family:Oswald,sans-serif">MES GAINS</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">${(()=>{try{const u=PERSONNEL.find(p=>p.volo==='V'+state.pin);if(!u)return 'KM • Per diem • Urgences';const g=getAutoGains(u);const periods=getPayPeriods();const wLogs=g.filter(e=>e.date>=periods.current.from&&e.date<=periods.current.to);const total=wLogs.reduce((s,e)=>s+e.total,0);return total>0?'<span style="color:var(--gold);font-weight:700">'+total.toFixed(2)+'$</span> cette semaine':'KM • Per diem • Urgences';}catch(e){return 'KM • Per diem • Urgences';}})()}</div>
+        </div>
+        <span style="font-size:22px;color:var(--gold)">→</span>
+      </div>
+      <div onclick="window.open('pointage.html?pin='+state.pin,'_self')" style="margin-top:10px;padding:16px 20px;background:linear-gradient(135deg,rgba(39,174,96,.15),rgba(39,174,96,.05));border:1px solid var(--green);border-radius:14px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:all .3s">
+        <span style="font-size:28px">⏱</span>
+        <div style="text-align:left;flex:1">
+          <div style="font-weight:700;font-size:15px;color:var(--green);letter-spacing:1px">POINTAGE D'HEURES</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">Arrivée • Départ • Suivi temps</div>
+        </div>
+        <span style="font-size:18px;color:var(--green)">→</span>
+      </div>
+      ${isSurv?`
+      <div onclick="formView='main';setState({step:13})" style="margin-top:12px;padding:14px 18px;background:linear-gradient(135deg,rgba(251,191,36,.12),rgba(251,191,36,.03));border:1px solid rgba(251,191,36,.3);border-radius:14px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:all .3s">
+        <span style="font-size:24px">📚</span>
+        <div style="text-align:left;flex:1">
+          <div style="font-weight:700;font-size:14px;color:var(--gold);letter-spacing:1px">FORMATION & DOCS</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">Mes certifications</div>
+        </div>
+        <span style="font-size:16px;color:var(--gold)">→</span>
+      </div>
+      <div style="margin-top:16px;padding:12px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:12px">
+        <div style="font-size:11px;color:var(--blue)">👁️ Mode Surveillant — Pointage • Gains • Certifications • EPI (bientôt)</div>
+      </div>
+      `:`
+      <div class="nav-grid" style="grid-template-columns:repeat(2,1fr)">
+        <div class="nav-card" onclick="setState({step:9})">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">DASHBOARD</span>
+          ${activeItems.length?`<div style="font-size:12px;color:var(--gold);margin-top:4px">${activeItems.length} actif${activeItems.length>1?'s':''}</div>`:''}
+          ${overdueCount?`<div style="font-size:11px;color:var(--red);margin-top:2px">⚠️ ${overdueCount} +24h</div>`:''}
+        </div>
+        <div class="nav-card" onclick="setState({photoMode:true,step:11})" style="border-color:rgba(230,81,0,.3)">
+          <span class="nav-icon">📷</span>
+          <span class="nav-label">PHOTOS</span>
+          ${getSetupPhotos().length?`<div style="font-size:12px;color:var(--rescue);margin-top:4px">${getSetupPhotos().length} photo${getSetupPhotos().length>1?'s':''}</div>`:'<div style="font-size:11px;color:var(--muted);margin-top:4px">Setup terrain</div>'}
+        </div>
+        <div class="nav-card" onclick="setState({kmMode:true,step:12})">
+          <span class="nav-icon">🚛</span>
+          <span class="nav-label">KILOMÉTRAGE</span>
+          ${(()=>{const logs=getKmLogs();const today=logs.filter(l=>l.timestamp&&l.timestamp.startsWith(new Date().toISOString().slice(0,10)));return today.length?'<div style="font-size:12px;color:var(--rescue);margin-top:4px">'+today.length+' trajet'+(today.length>1?'s':'')+'</div>':'<div style="font-size:11px;color:var(--muted);margin-top:4px">Log km</div>';})()}
+        </div>
+        <div class="nav-card" onclick="setState({step:10})">
+          <span class="nav-icon">📜</span>
+          <span class="nav-label">HISTORIQUE</span>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px">${hLen} transaction${hLen!==1?'s':''}</div>
+        </div>
+      </div>
+      <div onclick="formView='main';setState({step:13})" style="margin-top:12px;padding:16px 20px;background:linear-gradient(135deg,rgba(251,191,36,.12),rgba(251,191,36,.03));border:1px solid rgba(251,191,36,.3);border-radius:14px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:all .3s">
+        <span style="font-size:28px">📚</span>
+        <div style="text-align:left;flex:1">
+          <div style="font-weight:700;font-size:15px;color:var(--gold);letter-spacing:1px">FORMATION & DOCS</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">Certifications • Tracker équipe • PDF</div>
+        </div>
+        <span style="font-size:18px;color:var(--gold)">→</span>
+      </div>
+      <div onclick="window.open('dashboard-superviseur.html','_blank')" style="margin-top:12px;padding:16px 20px;background:linear-gradient(135deg,rgba(230,81,0,.12),rgba(230,81,0,.03));border:1px solid rgba(230,81,0,.3);border-radius:14px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:all .3s">
+        <span style="font-size:28px">🦅</span>
+        <div style="text-align:left;flex:1">
+          <div style="font-weight:700;font-size:15px;color:var(--rescue);letter-spacing:1px">DASHBOARD SAUVETAGE</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">Vue complète • Charts • Export CSV</div>
+        </div>
+        <span style="font-size:18px;color:var(--rescue)">↗</span>
+      </div>`}
+      <!-- V9.1: Déconnexion pour tout le monde -->
+      <button onclick="localStorage.removeItem('volo_last_role');localStorage.removeItem('volo_last_user');localStorage.removeItem('volo_pin');setState({step:1,pin:'',loggedIn:false})" style="margin-top:20px;padding:10px;background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:11px;cursor:pointer;width:100%;letter-spacing:1px">🔓 DÉCONNEXION</button>
+    </div>`;
+}
+
+function renderPin(){
+  const isInitialLogin=!state.loggedIn;
+  const dots=Array.from({length:4},(_,i)=>`<div class="pin-dot ${state.pin.length>i?'filled':''}">${state.pin[i]?'●':''}</div>`).join('');
+  let identified='';
+  if(state.pin.length===4){
+    const s=PERSONNEL.find(s=>s.volo==='V'+state.pin)||null;
+    const btnLabel=isInitialLogin?'🦅 ACCÉDER':state.gainsMode?'💰 MES GAINS':state.photoMode?'📷 PHOTOS SETUP':state.kmMode?'🚛 KILOMÉTRAGE':'CONTINUER';
+    identified=s?`<div class="card selected" style="margin-top:12px;text-align:center;border-color:var(--green)">
+      <div class="badge badge-green" style="margin-bottom:6px">✓ IDENTIFIÉ</div>
+      <div class="name">${s.name}</div>
+      <div class="sub">${s.id} • ${s.volo} • ${s.ville}</div>
+      <div style="margin-top:4px;font-size:12px;color:${s.type==='SURVEILLANT'?'var(--blue)':'var(--rescue)'};font-weight:600">${s.type}</div>
+      <div class="btn-nav" style="margin-top:10px"><button class="btn btn-green btn-sm" onclick="onPinContinue()">${btnLabel} ▶</button></div>
+    </div>`:`<div class="card" style="margin-top:12px;text-align:center;border-color:var(--red)">
+      <div class="badge badge-red" style="margin-bottom:6px">✗ INCONNU</div>
+      <div class="name" style="color:var(--red)">Code ${state.pin} non reconnu</div>
+    </div>`;
+  }
+  const nums=[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(d=>{
+    if(d==='')return '<button disabled style="visibility:hidden"></button>';
+    if(d==='⌫')return `<button onclick="setState({pin:state.pin.slice(0,-1)})">⌫</button>`;
+    return `<button onclick="handlePin('${d}')">${d}</button>`;
+  }).join('');
+  const title=isInitialLogin?'🛡️ CONNEXION':'IDENTIFIANT SAUVETEUR';
+  const sub=isInitialLogin?'Entrez votre code VOLO pour accéder':'Entrez votre code PIN 4 chiffres';
+  return `<h2>${title}</h2><p style="font-size:14px;color:var(--muted);margin-bottom:14px;text-align:center">${sub}</p>
+    <div class="pin-row">${dots}</div><div class="numpad">${nums}</div>${identified}
+    ${isInitialLogin?'':'<div class="btn-nav"><button class="btn btn-outline btn-sm" onclick="setState({step:0,photoMode:false,kmMode:false,gainsMode:false})">◀ RETOUR</button></div>'}`;
+}
+
+function toggleRemorque(id){
+  const cur=[...state.remorques];
+  const idx=cur.indexOf(id);
+  if(idx>=0)cur.splice(idx,1);else cur.push(id);
+  setState({remorques:cur});
+}
+function renderRemorque(){
+  const selNames=state.remorques.map(id=>{const r=REMORQUES.find(x=>x.id===id);return r?r.name:id;});
+  return `<h2>VÉHICULE(S)</h2>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:16px;text-align:center">Sélectionnez un ou plusieurs véhicules</p>
+    <div class="remorque-tabs">
+      ${REMORQUES.map(r=>`<div class="remorque-tab ${state.remorques.includes(r.id)?'active':''}" onclick="toggleRemorque('${r.id}')">${r.name}${state.remorques.includes(r.id)?' ✓':''}</div>`).join('')}
+    </div>
+    ${selNames.length?`<div class="card selected" style="border-color:var(--green);text-align:center">
+      <span class="check">✓</span> <span class="name">${selNames.join(' + ')}</span>
+    </div>`:''}
+    <button class="btn btn-outline btn-sm" style="margin-bottom:12px" onclick="showAddModal('remorque')">+ AJOUTER UN VÉHICULE</button>
+    <div class="btn-nav">
+      <button class="btn btn-outline btn-sm" onclick="setState({step:0})">◀ RETOUR</button>
+      <button class="btn btn-sm" style="background:var(--card);border:1px solid var(--border);color:var(--muted)" onclick="setState({remorques:[],step:3})">SANS VÉHICULE ▶</button>
+      ${state.remorques.length?`<button class="btn btn-green btn-sm" onclick="setState({step:3})">CONTINUER (${state.remorques.length}) ▶</button>`:''}
+    </div>`;
+}
+
+function renderDepot(){
+  return `<h2>DÉPÔT D'ORIGINE</h2>
+    ${DEPOTS.map(d=>`<div class="card ${state.depot===d.id?'selected':''}" onclick="setState({depot:'${d.id}'})">
+      <div class="name">${d.name}</div><div class="sub">${d.region}</div>
+      ${state.depot===d.id?'<span class="check" style="float:right;margin-top:-28px">✓</span>':''}
+    </div>`).join('')}
+    <button class="btn btn-outline btn-sm" style="margin-bottom:12px" onclick="showAddModal('depot')">+ AJOUTER UN DÉPÔT</button>
+    <div class="btn-nav">
+      <button class="btn btn-outline btn-sm" onclick="setState({step:2})">◀ RETOUR</button>
+      ${state.depot?`<button class="btn btn-green btn-sm" onclick="setState({step:4})">CONTINUER ▶</button>`:''}
+    </div>`;
+}
+
+function renderDest(){
+  return `<h2>DESTINATION</h2>
+    ${DESTINATIONS.map(d=>`<div class="card ${state.dest===d.id?'selected':''}" onclick="loadTerrainContact('${d.id}');setState({dest:'${d.id}'})">
+      <div class="name">${d.name}</div><div class="sub">${d.region}</div>
+      ${state.dest===d.id?'<span class="check" style="float:right;margin-top:-28px">✓</span>':''}
+    </div>`).join('')}
+    <button class="btn btn-outline btn-sm" style="margin-bottom:12px" onclick="showAddModal('destination')">+ AJOUTER UNE DESTINATION</button>
+    ${state.dest?`<div class="card" style="border-color:var(--rescue);padding:14px;margin-top:6px">
+      <div style="font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;color:var(--rescue);margin-bottom:10px">📋 DÉTAILS MISSION</div>
+      <input type="text" placeholder="📋 Numéro de projet / contrat" value="${state.numProjet}" oninput="state.numProjet=this.value" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:14px;font-family:'Inter',sans-serif;margin-bottom:8px;outline:none">
+      <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:2px;color:var(--gold);margin-bottom:8px;margin-top:6px">👤 CONTACT TERRAIN</div>
+      <input type="text" placeholder="👤 Nom et prénom" value="${state.personneRessource}" oninput="state.personneRessource=this.value" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:14px;font-family:'Inter',sans-serif;margin-bottom:8px;outline:none">
+      <input type="tel" placeholder="📞 Numéro de téléphone" value="${state.personneRessourceTel||''}" oninput="state.personneRessourceTel=this.value" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:14px;font-family:'Inter',sans-serif;margin-bottom:8px;outline:none">
+      <input type="email" placeholder="📧 Courriel" value="${state.personneRessourceEmail||''}" oninput="state.personneRessourceEmail=this.value" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:14px;font-family:'Inter',sans-serif;margin-bottom:8px;outline:none">
+      <textarea placeholder="📝 Détails du job (optionnel)" oninput="state.detailsJob=this.value" rows="3" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:14px;font-family:'Inter',sans-serif;outline:none;resize:vertical">${state.detailsJob}</textarea>
+    </div>`:''}
+    <div class="btn-nav">
+      <button class="btn btn-outline btn-sm" onclick="setState({step:3})">◀ RETOUR</button>
+      ${state.dest?`<button class="btn btn-green btn-sm" onclick="saveTerrainContact();setState({step:5})">CONTINUER ▶</button>`:''}
+    </div>`;
+}
+
+// V9: Terrain contacts auto-fill
+function getTerrainContacts(){try{return JSON.parse(localStorage.getItem('volo_terrain_contacts')||'{}')}catch(e){return{}}}
+function saveTerrainContact(){
+  if(!state.dest)return;
+  const contacts=getTerrainContacts();
+  const data={};
+  if(state.personneRessource)data.nom=state.personneRessource;
+  if(state.personneRessourceTel)data.tel=state.personneRessourceTel;
+  if(state.personneRessourceEmail)data.email=state.personneRessourceEmail;
+  if(Object.keys(data).length>0){contacts[state.dest]=data;localStorage.setItem('volo_terrain_contacts',JSON.stringify(contacts));}
+}
+function loadTerrainContact(destId){
+  const contacts=getTerrainContacts();
+  const c=contacts[destId];
+  if(c){
+    if(c.nom&&!state.personneRessource)state.personneRessource=c.nom;
+    if(c.tel&&!state.personneRessourceTel)state.personneRessourceTel=c.tel;
+    if(c.email&&!state.personneRessourceEmail)state.personneRessourceEmail=c.email;
+  }
+}
+
+function renderSauvs(){
+  const q=state.searchQ.toLowerCase();
+  const ft=state.filterType;
+  let list=PERSONNEL;
+  if(ft==='sauv') list=list.filter(s=>s.type==='SAUVETEUR');
+  else if(ft==='surv') list=list.filter(s=>s.type==='SURVEILLANT');
+  if(q) list=list.filter(s=>s.name.toLowerCase().includes(q)||s.id.toLowerCase().includes(q)||s.volo.toLowerCase().includes(q)||s.ville.toLowerCase().includes(q));
+  const shown=list.slice(0,30);
+  const more=list.length-shown.length;
+  const sCount=PERSONNEL.filter(p=>p.type==='SAUVETEUR').length;
+  const vCount=PERSONNEL.filter(p=>p.type==='SURVEILLANT').length;
+  return `<h2>PERSONNEL</h2>
+    <input type="text" placeholder="🔍 Rechercher nom, ID, ville..." value="${state.searchQ}" oninput="setState({searchQ:this.value})" style="width:100%;padding:12px 16px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:15px;font-family:'Inter',sans-serif;margin-bottom:10px;outline:none">
+    <div style="display:flex;gap:6px;margin-bottom:14px">
+      <button class="btn-filter ${ft==='all'?'active':''}" onclick="setState({filterType:'all'})">TOUS (${PERSONNEL.length})</button>
+      <button class="btn-filter ${ft==='sauv'?'active':''}" onclick="setState({filterType:'sauv'})">🟠 SAUV (${sCount})</button>
+      <button class="btn-filter ${ft==='surv'?'active':''}" onclick="setState({filterType:'surv'})">🔵 SURV (${vCount})</button>
+    </div>
+    ${state.sauvs.length?`<div style="font-size:13px;color:var(--green);letter-spacing:1px;margin-bottom:8px;text-align:center">✓ ${state.sauvs.length} SÉLECTIONNÉ(S)</div>`:''}
+    <div style="max-height:52vh;overflow-y:auto;-webkit-overflow-scrolling:touch">
+    ${shown.map(s=>`<div class="card ${state.sauvs.includes(s.id)?'selected':''}" onclick="toggleSauv('${s.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><div class="name">${s.name}</div><div class="sub">${s.id} • ${s.ville||s.region}</div></div>
+        <div style="text-align:right"><div class="role" style="color:${s.type==='SURVEILLANT'?'var(--blue)':'var(--orange)'}">${s.role}</div>${state.sauvs.includes(s.id)?'<span class="check">✓</span>':''}</div>
+      </div>
+    </div>`).join('')}
+    ${more>0?`<div style="text-align:center;padding:12px;color:var(--muted);font-size:13px">+${more} résultats — affinez votre recherche</div>`:''}
+    ${list.length===0?`<div style="text-align:center;padding:20px;color:var(--muted)">Aucun résultat</div>`:''}
+    </div>
+    <div class="btn-nav">
+      <button class="btn btn-outline btn-sm" onclick="setState({step:4})">◀ RETOUR</button>
+      ${state.sauvs.length?`<button class="btn btn-green btn-sm" onclick="setState({step:6})">CONTINUER (${state.sauvs.length}) ▶</button>`:''}
+    </div>`;
+}
+
+function renderScan(){
+  const scannedIds=state.scanned.map(s=>s.id);
+  const camMode=state.camMode!==false;
+  const q=state.itemQ.toLowerCase();
+  let available=ITEMS.filter(i=>!scannedIds.includes(i.id));
+  if(q) available=available.filter(i=>i.name.toLowerCase().includes(q)||i.id.toLowerCase().includes(q)||i.cat.toLowerCase().includes(q));
+  if(state.catFilter && state.catFilter!=='all') available=available.filter(i=>i.cat===state.catFilter);
+  const isPickoff=state.mode==='pickoff';
+  const expected=isPickoff&&window._pickoffExpected?window._pickoffExpected:[];
+  const expectedIds=expected.map(e=>e.id);
+  if(isPickoff&&expectedIds.length){
+    available.sort((a,b)=>{const aExp=expectedIds.includes(a.id)?0:1;const bExp=expectedIds.includes(b.id)?0:1;return aExp-bExp;});
+  }
+  const expectedScanned=expected.filter(e=>scannedIds.includes(e.id)).length;
+  return `<h2>${isPickoff?'◀ RETOUR ITEMS':'SCAN RAFALE UNIFIÉ'}</h2>
+    ${isPickoff&&expected.length?`<div style="background:rgba(230,126,34,.1);border:1px solid var(--orange);border-radius:12px;padding:12px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;color:var(--orange)">📦 ITEMS ATTENDUS</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:${expectedScanned===expected.length?'var(--green)':'var(--orange)'}">${expectedScanned}/${expected.length}</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px">
+        ${expected.map(e=>`<span style="font-size:11px;padding:3px 8px;border-radius:6px;${scannedIds.includes(e.id)?'background:rgba(39,174,96,.2);color:var(--green)':'background:var(--card2);color:var(--muted)'}">${scannedIds.includes(e.id)?'✓ ':''}${e.name||e.id}</span>`).join('')}
+      </div>
+      ${expectedScanned===expected.length?'<div style="text-align:center;margin-top:8px;color:var(--green);font-weight:700;font-size:14px">✅ TOUS LES ITEMS SCANNÉS</div>':''}
+    </div>`:''}
+    <div style="display:flex;gap:10px;margin-bottom:14px">
+      <button class="btn btn-sm ${camMode?'btn-green':''}" style="flex:1;${camMode?'':'background:var(--card);border:1px solid var(--border);color:var(--muted)'}" onclick="toggleCam(true)">📷 CAMÉRA</button>
+      <button class="btn btn-sm ${!camMode?'btn-gold':''}" style="flex:1;${!camMode?'':'background:var(--card);border:1px solid var(--border);color:var(--muted)'}" onclick="toggleCam(false)">✋ MANUEL</button>
+    </div>
+    ${camMode?`<div id="qr-reader" style="border-radius:12px;overflow:hidden;border:2px solid var(--gold);margin-bottom:14px"></div>
+      <p style="text-align:center;font-size:13px;color:var(--muted);margin-bottom:14px">Pointe la caméra vers le QR code de l'item</p>`
+    :`<div class="scan-area" style="padding:16px;text-align:center">
+      <div style="color:var(--gold);font-size:15px;margin-bottom:6px">✋ MODE MANUEL</div>
+      <div style="color:var(--muted);font-size:13px">Touche un item dans la liste ci-dessous</div>
+    </div>`}
+    ${state.scanned.length?`<div style="background:var(--card);border:1px solid var(--green);border-radius:12px;padding:12px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;color:var(--green)">📋 DERNIERS SCANS</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold);font-weight:700">${state.scanned.length} item${state.scanned.length>1?'s':''}</div>
+      </div>
+      <div style="max-height:140px;overflow-y:auto;-webkit-overflow-scrolling:touch">
+      ${[...state.scanned].reverse().map(item=>{
+        const t=item.scanTime?new Date(item.scanTime):new Date();
+        const ts=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0')+':'+String(t.getSeconds()).padStart(2,'0');
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:14px">${item.icon}</span>
+            <div><div style="font-size:13px;font-weight:600;color:var(--txt)">${item.name}</div><div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono'">${item.id}</div></div>
+          </div>
+          <div style="text-align:right"><div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--green)">${ts}</div>${item.sceau?`<div style="font-size:10px;color:var(--green);letter-spacing:1px">${state.sceaux[item.id]||'INTACT'}</div>`:''}</div>
+        </div>`}).join('')}
+      </div>
+    </div>`:''}
+    <h3 style="margin-top:14px">${isPickoff&&expectedIds.length?'📦 ITEMS À SCANNER':'ITEMS DISPONIBLES'} (${available.length})</h3>
+    <input type="text" placeholder="🔍 Rechercher item, ID, catégorie..." value="${state.itemQ}" oninput="setState({itemQ:this.value})" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:14px;font-family:'Inter',sans-serif;margin-bottom:10px;outline:none">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+      <button class="btn-filter ${state.catFilter==='all'?'active':''}" onclick="setState({catFilter:'all'})">TOUT</button>
+      ${ITEM_CATEGORIES.map(cat=>`<button class="btn-filter ${state.catFilter===cat?'active':''}" onclick="setState({catFilter:'${cat}'})">${cat.toUpperCase()}</button>`).join('')}
+    </div>
+    <div style="max-height:40vh;overflow-y:auto;-webkit-overflow-scrolling:touch">
+    ${available.map(item=>{const isExp=isPickoff&&expectedIds.includes(item.id);return `<div class="item-btn" onclick="scanItem('${item.id}')" ${isExp?'style="border:1px solid var(--orange);background:rgba(230,126,34,.06)"':''}>
+      <div><span class="cat">${item.icon}</span><span style="font-size:15px;font-weight:600">${item.name}</span><div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono'">${item.id} • ${item.cat}</div></div>
+      ${isExp?'<span class="badge badge-orange">ATTENDU</span>':'<span class="badge badge-gold">SCAN</span>'}
+    </div>`}).join('')}
+    ${available.length===0?`<div style="text-align:center;padding:16px;color:var(--muted)">${q?'Aucun résultat':'Tous les items sont scannés ✓'}</div>`:''}
+    </div>
+    <button class="btn btn-outline btn-sm" style="margin-bottom:12px" onclick="showAddModal('item')">+ AJOUTER UN ITEM MANUELLEMENT</button>
+    <div class="btn-nav">
+      <button class="btn btn-outline btn-sm" onclick="leaveScan(${state.mode==='pickoff'?2:5})">◀ RETOUR</button>
+      ${state.scanned.length>=1?`<button class="btn btn-green btn-sm" onclick="stopQrScanner();setState({step:7})">TERMINER (${state.scanned.length}) ▶</button>`:''}
+    </div>`;
+}
+
+function renderConfirm(){
+  const depot=DEPOTS.find(d=>d.id===state.depot);
+  const dest=DESTINATIONS.find(d=>d.id===state.dest);
+  const remNames=state.remorques&&state.remorques.length?state.remorques.map(id=>{const r=REMORQUES.find(x=>x.id===id);return r?r.name:id}).join(' + '):'Aucun';
+  const sauvNames=state.sauvs.map(id=>{const s=SAUVETEURS.find(x=>x.id===id);return s?s.name:id}).join(', ');
+  const isPickoff=state.mode==='pickoff';
+  const expected=isPickoff&&window._pickoffExpected?window._pickoffExpected:[];
+  const expectedIds=expected.map(e=>e.id);
+  const scannedIds=state.scanned.map(s=>s.id);
+  const expectedScanned=expected.filter(e=>scannedIds.includes(e.id)).length;
+  return `<h2>${isPickoff?'◀ CONFIRMATION RETOUR':'CONFIRMATION'}</h2>
+    ${isPickoff?`<div style="background:rgba(230,126,34,.1);border:1px solid var(--orange);border-radius:12px;padding:12px;margin-bottom:14px;text-align:center">
+      <div style="font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:2px;color:var(--orange);margin-bottom:4px">📦 RETOUR MATÉRIEL (PICK-OFF)</div>
+      <div style="font-size:13px;color:var(--muted)">${expectedScanned}/${expected.length} items attendus scannés${expectedScanned<expected.length?' — <span style="color:var(--red)">⚠️ incomplet</span>':' — <span style="color:var(--green)">✅ complet</span>'}</div>
+    </div>`:''}
+    <div class="confirm-block">
+      <div class="confirm-label">VÉHICULE</div><div style="font-weight:600;font-size:16px">${remNames||'Aucun véhicule'}</div>
+      <div class="confirm-label">DÉPÔT</div><div style="font-weight:600;font-size:16px">${depot?depot.name:'—'}</div>
+      <div class="confirm-label">DESTINATION</div><div style="font-weight:600;font-size:16px">${dest?dest.name:'—'}</div>
+      ${state.numProjet?`<div class="confirm-label">N° PROJET</div><div style="font-weight:600;font-size:15px;color:var(--rescue)">${state.numProjet}</div>`:''}
+      ${state.personneRessource?`<div class="confirm-label">CONTACT TERRAIN</div><div style="font-size:15px">${state.personneRessource}${state.personneRessourceTel?' • 📞 '+state.personneRessourceTel:''}</div>`:''}
+      ${state.detailsJob?`<div class="confirm-label">DÉTAILS JOB</div><div style="font-size:14px;color:var(--muted);white-space:pre-wrap">${state.detailsJob}</div>`:''}
+      <div class="confirm-label">SAUVETEUR(S)</div><div style="font-size:15px">${sauvNames}</div>
+      <div class="confirm-label">ITEMS (${state.scanned.length})</div>
+      ${state.scanned.map((i,idx)=>{
+        const wasExpected=isPickoff&&expectedIds.includes(i.id);
+        return `<div class="confirm-row" style="display:flex;justify-content:space-between;align-items:center"><span>${i.icon} ${i.name}${wasExpected?' <span style="font-size:10px;color:var(--green)">✓ ATTENDU</span>':''}</span><span style="display:flex;align-items:center;gap:8px"><span style="font-family:'JetBrains Mono';color:var(--muted);font-size:12px">${i.id}</span><button onclick="removeScannedItem(${idx})" style="width:26px;height:26px;border-radius:50%;border:1px solid var(--red);background:rgba(192,57,43,.1);color:var(--red);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1">✕</button></span></div>`;
+      }).join('')}
+    </div>
+    <button class="btn ${isPickoff?'btn-orange':'btn-green'}" onclick="doValidation()" style="font-size:20px;padding:18px">🦅 ${isPickoff?'CONFIRMER LE RETOUR':'ENREGISTRER'}</button>
+    <div class="btn-nav"><button class="btn btn-outline btn-sm" onclick="setState({step:6})">◀ MODIFIER</button></div>`;
+}
+
+// V9: Remove scanned item from confirmation
+function removeScannedItem(idx){
+  state.scanned.splice(idx,1);
+  if(state.scanned.length===0){setState({step:6});showToast('⚠️ Aucun item — retour au scan','err');}
+  else{render();}
+}
+
+function renderValidation(){
+  const depot=DEPOTS.find(d=>d.id===state.depot);
+  const dest=DESTINATIONS.find(d=>d.id===state.dest);
+  const remNames=state.remorques&&state.remorques.length?state.remorques.map(id=>{const r=REMORQUES.find(x=>x.id===id);return r?r.name:id}).join(' + '):'Aucun';
+  const sauvNames=state.sauvs.map(id=>{const s=SAUVETEURS.find(x=>x.id===id);return s?s.name:id});
+  const canCancel=cancelSeconds>0&&lastPayload;
+  const m=Math.floor(cancelSeconds/60);const s=cancelSeconds%60;
+  return `<div style="padding-top:10px">
+    <div style="text-align:center">
+      <div style="margin-bottom:8px"><img src="data:image/jpeg;base64,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" style="width:100px;height:100px;border-radius:50%;border:2px solid var(--gold);box-shadow:0 0 30px rgba(212,160,23,.3),0 0 60px rgba(212,160,23,.1);animation:float 3s ease-in-out infinite;margin-bottom:8px"></div>
+      <h2 style="font-size:24px;margin-bottom:4px">${state.mode==='pickon'?'PICK-ON':'PICK-OFF'} COMPLÉTÉ!</h2>
+      <p style="color:var(--green);font-size:15px;margin-bottom:16px">Transaction enregistrée avec succès</p>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--green);border-radius:14px;overflow:hidden;margin-bottom:14px">
+      <div style="background:rgba(39,174,96,.12);padding:12px 16px;border-bottom:1px solid rgba(39,174,96,.2);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:2px;color:var(--green)">📋 RÉCAP TRANSACTION</span>
+        <span style="font-family:'JetBrains Mono';font-size:11px;color:var(--muted)">${tsNow()}</span>
+      </div>
+      <div style="padding:14px 16px">
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--muted);font-size:13px">Mode</span>
+          <span class="badge ${state.mode==='pickon'?'badge-green':'badge-orange'}">${state.mode==='pickon'?'PICK-ON':'PICK-OFF'}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--muted);font-size:13px">Sauveteur</span>
+          <span style="font-weight:600;font-size:14px">${sauvNames.join(', ')}</span>
+        </div>
+        ${remNames!=='Aucun'?`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--muted);font-size:13px">Véhicule</span>
+          <span style="font-size:14px">${remNames}</span>
+        </div>`:''}
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--muted);font-size:13px">Dépôt</span>
+          <span style="font-size:14px">${depot?depot.name:'—'}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--muted);font-size:13px">Destination</span>
+          <span style="font-size:14px;font-weight:600;color:var(--gold)">${dest?dest.name:'—'}</span>
+        </div>
+        ${state.numProjet?`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--muted);font-size:13px">N° Projet</span>
+          <span style="font-size:14px;font-weight:600;color:var(--rescue)">${state.numProjet}</span>
+        </div>`:''}
+        ${state.personneRessource?`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--muted);font-size:13px">Contact terrain</span>
+          <span style="font-size:14px">${state.personneRessource}${state.personneRessourceTel?' • '+state.personneRessourceTel:''}</span>
+        </div>`:''}
+        ${state.detailsJob?`<div style="padding:6px 0;border-bottom:1px solid var(--border)">
+          <div style="color:var(--muted);font-size:13px;margin-bottom:4px">Détails job</div>
+          <div style="font-size:13px;color:var(--txt);white-space:pre-wrap;opacity:.85">${state.detailsJob}</div>
+        </div>`:''}
+        <div style="margin-top:12px;margin-bottom:6px;font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;color:var(--goldL)">ITEMS (${state.scanned.length})</div>
+        ${state.scanned.map((item,idx)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;${idx<state.scanned.length-1?'border-bottom:1px solid rgba(58,36,40,.3)':''}">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:16px">${item.icon}</span>
+            <div>
+              <div style="font-size:14px;font-weight:600">${item.name}</div>
+              <div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono'">${item.id}</div>
+            </div>
+          </div>
+          <span style="color:var(--green);font-size:14px;font-weight:700">✓</span>
+        </div>`).join('')}
+      </div>
+    </div>
+    ${canCancel?`<button id="cancel-btn" class="btn btn-outline" style="border-color:var(--red);color:var(--red);font-size:15px" onclick="cancelTransaction()">ANNULER (${m}:${String(s).padStart(2,'0')} restant)</button>`
+    :`<div style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:8px">⏱ Délai d'annulation expiré</div>`}
+    <button class="btn btn-gold" style="margin-top:10px;font-size:18px;padding:18px" onclick="resetAll()">NOUVELLE TRANSACTION</button>
+  </div>`;
+}
+
+function renderModal(){
+  let content='';
+  if(state.showModal==='urgence'){
+    content=`<h3>🚨 SIGNALER UNE URGENCE</h3>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:12px;text-align:center">Signaler un équipement critique manquant</p>
+      <select><option>Détecteur de gaz manquant</option><option>Sac paramédic manquant</option><option>Harnais défectueux</option><option>Autre</option></select>
+      <textarea rows="3" placeholder="Détails supplémentaires..."></textarea>
+      <button class="btn btn-red btn-sm" onclick="sendUrgence()">ENVOYER L'ALERTE</button>`;
+  } else if(state.showModal==='add'){
+    const titles={depot:"NOUVEAU DÉPÔT",destination:"NOUVELLE DESTINATION",sauveteur:"NOUVEAU SAUVETEUR",item:"NOUVEL ITEM",remorque:"NOUVEAU VÉHICULE"};
+    const needsRegion=state.addType==='depot'||state.addType==='destination'||state.addType==='sauveteur';
+    content=`<h3 style="color:var(--gold)">+ ${titles[state.addType]||'AJOUTER'}</h3>
+      <input placeholder="Nom" id="add-name" style="margin-bottom:8px">
+      ${state.addType==='sauveteur'?'<input placeholder="ID VOLO (ex: V0400)" id="add-volo" style="margin-bottom:8px">':''}
+      ${state.addType==='item'?`<select id="add-cat" style="margin-bottom:8px"><option>Paramédic</option><option>Corde</option><option>Détection</option><option>Évacuation</option><option>EPI</option></select>`:''}
+      ${needsRegion?`<select id="add-region" style="margin-bottom:8px"><option>ESTRIE</option><option>CAPITALE-NATIONALE</option><option>MAURICIE</option><option>LANAUDIÈRE</option><option>MONTRÉAL</option><option>BAS-ST-LAURENT</option></select>`:''}
+      <button class="btn btn-gold btn-sm" onclick="doAddItem()">AJOUTER</button>`;
+  }
+  return `<div class="modal-overlay" onclick="if(event.target===this)setState({showModal:null})"><div class="modal">${content}
+    <button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="setState({showModal:null})">FERMER</button></div></div>`;
+}
+
+// ===== DASHBOARD =====
+function renderDashboard(){
+  const active=getActiveItems();
+  const overdueCount=active.filter(i=>Date.now()-new Date(i.timestamp).getTime()>86400000).length;
+  // V9: Group by mission (destination + num_projet) instead of individual sauveteurs
+  const missions={};
+  active.forEach(item=>{
+    const missionKey=(item.destination||'Inconnu')+'|'+(item.num_projet||'sans-projet');
+    if(!missions[missionKey])missions[missionKey]={destination:item.destination||'Inconnu',num_projet:item.num_projet||'',personne_ressource:item.personne_ressource||'',sauveteurs:new Set(),items:[],chefEquipe:null};
+    missions[missionKey].sauveteurs.add(item.sauveteur||'Inconnu');
+    missions[missionKey].items.push(item);
+    if(item.personne_ressource&&!missions[missionKey].personne_ressource)missions[missionKey].personne_ressource=item.personne_ressource;
+  });
+  // Identify chef d'équipe (first sauveteur listed or marked as CHEF)
+  const CHEFS=PERSONNEL.filter(p=>p.role&&p.role.includes('CHEF')).map(p=>p.name);
+  Object.values(missions).forEach(m=>{
+    const sauvArr=[...m.sauveteurs];
+    m.chefEquipe=sauvArr.find(s=>CHEFS.some(c=>s.includes(c)))||sauvArr[0]||'Inconnu';
+  });
+  const mKeys=Object.keys(missions);
+  return `<h2>📊 DASHBOARD SAUVETEUR</h2>
+    <div class="stats-row">
+      <div class="stat" style="border:1px solid var(--border)"><div class="num" style="color:var(--gold)">${active.length}</div><div class="label">ITEMS SORTIS</div></div>
+      <div class="stat" style="border:1px solid var(--border)"><div class="num" style="color:${overdueCount?'var(--red)':'var(--green)'}">${overdueCount}</div><div class="label">ALERTE +24H</div></div>
+      <div class="stat" style="border:1px solid var(--border)"><div class="num" style="color:var(--blue)">${mKeys.length}</div><div class="label">MISSIONS</div></div>
+    </div>
+    ${overdueCount?`<div style="background:rgba(192,57,43,.1);border:1px solid var(--red);border-radius:12px;padding:12px;margin-bottom:14px;text-align:center">
+      <div style="font-size:15px;color:var(--red);font-weight:700">⚠️ ${overdueCount} item(s) sorti(s) depuis plus de 24h</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px">Vérifiez les retours manquants</div>
+    </div>`:''}
+    ${mKeys.length===0?`<div style="text-align:center;padding:40px 20px">
+      <div style="font-size:48px;margin-bottom:16px">✅</div>
+      <div style="color:var(--muted);font-size:15px">Aucun item actuellement sorti</div>
+      <div style="color:var(--muted);font-size:13px;margin-top:4px">Tout le matériel est au dépôt</div>
+    </div>`:''}
+    ${mKeys.map(key=>{const m=missions[key];const sauvArr=[...m.sauveteurs];return `<div class="dash-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-weight:700;font-size:15px;color:var(--gold)">📍 ${m.destination}</div>
+        <span class="badge badge-gold">${m.items.length} item${m.items.length>1?'s':''}</span>
+      </div>
+      ${m.num_projet?`<div style="font-size:12px;color:var(--rescue);margin-bottom:6px">📋 #${m.num_projet}${m.personne_ressource?' • 👤 '+m.personne_ressource:''}</div>`:''}
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--card2);border-radius:8px">
+        <div style="font-size:10px;letter-spacing:1px;color:var(--gold);margin-bottom:4px;font-family:'Oswald',sans-serif">ÉQUIPE (${sauvArr.length})</div>
+        ${sauvArr.map(s=>`<span style="display:inline-block;padding:2px 8px;margin:2px;border-radius:6px;font-size:12px;${s===m.chefEquipe?'background:rgba(230,81,0,.15);border:1px solid var(--rescue);color:var(--rescue);font-weight:700':'background:var(--card);border:1px solid var(--border);color:var(--txt)'}">${s===m.chefEquipe?'⭐ ':''} ${s}</span>`).join('')}
+      </div>
+      ${m.items.map(item=>`<div class="dash-item-row">
+        <div><div style="font-size:14px;font-weight:600">${item.name}</div><div style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono'">${item.id}</div></div>
+        <span class="time-ago ${timeClass(item.timestamp)}">${timeAgo(item.timestamp)}</span>
+      </div>`).join('')}
+    </div>`}).join('')}
+    ${renderDashboardPhotos()}
+    <div class="btn-nav"><button class="btn btn-outline btn-sm" onclick="setState({step:0})">◀ ACCUEIL</button></div>`;
+}
+
+// ===== DASHBOARD PHOTOS =====
+function renderDashboardPhotos(){
+  const saved=getSetupPhotos();
+  if(saved.length===0) return '';
+  const grouped={};
+  saved.forEach((p,idx) => {const k=p.contrat+'|'+p.lieu+'|'+p.timestamp;if(!grouped[k])grouped[k]={photos:[],lieu:p.lieu,contrat:p.contrat,sauveteur:p.sauveteur,timestamp:p.timestamp,indices:[]};grouped[k].photos.push(p);grouped[k].indices.push(idx);});
+  const groups=Object.values(grouped);
+  return `<div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
+    <h3 style="margin-bottom:12px">📷 PHOTOS SETUP TERRAIN (${saved.length})</h3>
+    ${groups.map(g=>`<div class="card" style="padding:12px;margin-bottom:10px;border-color:rgba(230,81,0,.25)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <span style="font-weight:700;font-size:15px;color:var(--rescue)">📍 ${g.lieu}</span>
+          <span class="badge badge-gold" style="margin-left:8px;font-size:11px">#${g.contrat}</span>
+        </div>
+        <span style="font-size:12px;color:var(--muted)">${g.photos.length} 📷</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">👷 ${g.sauveteur} • ${g.timestamp}</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+        ${g.photos.map(p=>`<div style="aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid var(--border)"><img src="${p.data}" style="width:100%;height:100%;object-fit:cover"></div>`).join('')}
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+// ===== HISTORIQUE =====
+function renderHistory(){
+  const h=getHistory();
+  return `<h2>📜 HISTORIQUE</h2>
+    <p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:14px">${h.length} transaction${h.length!==1?'s':''} enregistrée${h.length!==1?'s':''}</p>
+    ${h.length===0?`<div style="text-align:center;padding:40px 20px">
+      <div style="font-size:48px;margin-bottom:16px">📋</div>
+      <div style="color:var(--muted);font-size:15px">Aucune transaction enregistrée</div>
+    </div>`:''}
+    <div style="max-height:70vh;overflow-y:auto;-webkit-overflow-scrolling:touch">
+    ${h.slice(0,50).map((tx,i)=>{
+      const modeClass=tx.statut==='ANNULÉ'?'h-cancelled':tx.statut==='RETOURNÉ'?'h-pickoff':tx.mode==='PICK-ON'?'h-pickon':'h-pickoff';
+      const modeLabel=tx.statut==='ANNULÉ'?'ANNULÉ':tx.statut==='RETOURNÉ'?'RETOURNÉ':tx.mode;
+      let itemCount=0;
+      try{itemCount=JSON.parse(tx.items||'[]').length}catch(e){itemCount=tx.nb_items||0}
+      return `<div class="history-item" style="animation-delay:${i*50}ms">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span class="h-mode ${modeClass}">${modeLabel}</span>
+          <span style="font-family:'JetBrains Mono';font-size:12px;color:var(--muted)">${tx.timestamp}</span>
+        </div>
+        <div style="font-weight:600;font-size:15px;margin-bottom:4px">${tx.sauveteur_nom||'—'}</div>
+        <div style="font-size:13px;color:var(--muted)">${itemCount} item${itemCount>1?'s':''} → ${tx.destination||'—'}</div>
+        ${tx.num_projet?`<div style="font-size:12px;color:var(--rescue);margin-top:2px">📋 #${tx.num_projet}${tx.personne_ressource?' • 👤 '+tx.personne_ressource:''}</div>`:''}
+        ${tx.remorque&&tx.remorque!=='Aucune'?`<div style="font-size:12px;color:var(--blue);margin-top:2px">${tx.remorque}</div>`:''}
+      </div>`;
+    }).join('')}
+    </div>
+    ${h.length>0?`<button class="btn btn-outline btn-sm" style="margin-top:10px;border-color:var(--red);color:var(--red)" onclick="if(confirm('Effacer tout l\\'historique?')){localStorage.removeItem('volo_history');setState({step:10})}">🗑 EFFACER L'HISTORIQUE</button>`:''}
+    <div class="btn-nav"><button class="btn btn-outline btn-sm" onclick="setState({step:0})">◀ ACCUEIL</button></div>`;
+}
+
+// ===== QR SCANNER =====
+let qrScanner=null;
+let qrCooldown=false;
+
+function startQrScanner(){
+  if(qrScanner)return;
+  const el=document.getElementById('qr-reader');
+  if(!el)return;
+  if(typeof Html5Qrcode==='undefined'){
+    el.innerHTML='<div style="padding:40px;text-align:center;color:var(--red)">Librairie QR non chargée.<br>Vérifie ta connexion internet.</div>';
+    return;
+  }
+  el.innerHTML='<div style="padding:40px;text-align:center;color:var(--gold)">Activation caméra...</div>';
+  qrScanner=new Html5Qrcode('qr-reader');
+  qrScanner.start(
+    {facingMode:'environment'},
+    {fps:10,qrbox:{width:220,height:220},aspectRatio:1.0},
+    onQrSuccess,
+    ()=>{}
+  ).catch(e=>{
+    qrScanner=null;
+    el.innerHTML='<div style="padding:30px;text-align:center"><div style="color:var(--red);font-size:15px;margin-bottom:10px">⚠️ Caméra non disponible</div><div style="color:var(--muted);font-size:13px">Autorise la caméra dans ton navigateur<br>ou utilise le mode manuel</div></div>';
+  });
+}
+
+function stopQrScanner(){
+  if(qrScanner){
+    try{qrScanner.stop().then(()=>{qrScanner.clear();qrScanner=null}).catch(()=>{qrScanner=null})}catch(e){qrScanner=null}
+  }
+}
+
+function onQrSuccess(decoded){
+  if(qrCooldown)return;
+  qrCooldown=true;
+  setTimeout(()=>{qrCooldown=false},1500);
+  let itemId=decoded.trim();
+  if(itemId.startsWith('VOLO|ITEM|'))itemId=itemId.split('|')[2];
+  const item=ITEMS.find(i=>i.id===itemId);
+  if(item&&!state.scanned.find(s=>s.id===itemId)){
+    const sceaux={...state.sceaux};
+    if(item.sceau)sceaux[itemId]='INTACT';
+    const stamped={...item,scanTime:new Date()};
+    try{navigator.vibrate&&navigator.vibrate(100)}catch(e){}
+    showToast('✓ '+item.name,'ok');
+    stopQrScanner();
+    setState({scanned:[...state.scanned,stamped],sceaux});
+  }
+}
+
+function toggleCam(on){
+  stopQrScanner();
+  state.camMode=on;
+  render();
+  if(on)setTimeout(()=>startQrScanner(),500);
+}
+
+// ===== ACTIONS =====
+function handlePin(d){const next=state.pin+d;setState({pin:next})}
+function toggleSauv(id){const s=[...state.sauvs];const i=s.indexOf(id);i>=0?s.splice(i,1):s.push(id);setState({sauvs:s})}
+function scanItem(id){const item=ITEMS.find(i=>i.id===id);if(!item||state.scanned.find(s=>s.id===id))return;
+  const sceaux={...state.sceaux};if(item.sceau)sceaux[id]='INTACT';
+  const stamped={...item,scanTime:new Date()};
+  // Flow V8 — Warn if scanning non-expected item during PICK-OFF
+  const isPickoff=state.mode==='pickoff';
+  const expected=isPickoff&&window._pickoffExpected?window._pickoffExpected:[];
+  const isExpected=expected.some(e=>e.id===id);
+  if(isPickoff&&expected.length>0&&!isExpected){
+    if(!confirm('⚠️ '+item.name+' n\'était PAS dans le déploiement original.\n\nScanner quand même?'))return;
+  }
+  try{navigator.vibrate&&navigator.vibrate([50,30,50])}catch(e){}
+  try{const ac=new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator();const g=ac.createGain();o.connect(g);g.connect(ac.destination);o.frequency.value=880;g.gain.value=0.15;o.start();o.stop(ac.currentTime+0.1)}catch(e){}
+  showToast('✓ '+item.name,'ok');
+  setState({scanned:[...state.scanned,stamped],sceaux})}
+function showUrgence(){setState({showModal:'urgence'})}
+// Flow V8 — Confirm before losing scanned items
+function leaveScan(targetStep){
+  if(state.scanned.length>0){
+    if(!confirm('Tu as '+state.scanned.length+' item'+(state.scanned.length>1?'s':'')+' scanné'+(state.scanned.length>1?'s':'')+'.\n\nQuitter sans sauvegarder?'))return;
+  }
+  stopQrScanner();
+  setState({step:targetStep});
+}
+function sendUrgence(){
+  const sel=document.querySelector('.modal select');
+  const txt=document.querySelector('.modal textarea');
+  const type=sel?sel.value:'Autre';
+  const details=txt?txt.value:'';
+  const sauv=SAUVETEURS.find(s=>state.sauvs.includes(s.id))||SAUVETEURS.find(s=>s.id==='SAUV-JM-205')||{name:'Inconnu',id:'N/A'};
+  const payload={
+    type:type,
+    details:details,
+    sauveteur:sauv.name,
+    sauveteur_id:sauv.id,
+    timestamp:tsNow()
+  };
+  fetch('https://hook.us2.make.com/eha54bbek46jrg1yp88939167v7ngveh',{
+    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
+  }).then(r=>{if(r.ok)showToast('🚨 Urgence envoyée','ok');else showToast('⚠️ Erreur envoi','err')})
+  .catch(()=>showToast('📴 Hors-ligne — réessayez','err'));
+  setState({showModal:null});
+}
+function tsNow(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0')}
+function showToast(msg,type){
+  const t=document.createElement('div');t.className='toast toast-'+type;t.textContent=msg;
+  document.body.appendChild(t);setTimeout(()=>t.remove(),3000);
+}
+let lastPayload=null;
+let cancelTimer=null;
+let cancelSeconds=300;
+function showAddModal(type){setState({showModal:'add',addType:type})}
+function doAddItem(){
+  const nameEl=document.getElementById('add-name');
+  const name=nameEl?nameEl.value.trim():'';
+  if(!name){showToast('⚠️ Nom requis','err');return;}
+  const regionEl=document.getElementById('add-region');
+  const region=regionEl?regionEl.value:'ESTRIE';
+  const id='CUSTOM-'+Date.now();
+  if(state.addType==='remorque'){
+    REMORQUES.push({id:id,name:name});
+    showToast('✅ '+name+' ajouté','ok');
+  } else if(state.addType==='depot'){
+    DEPOTS.push({id:id,name:name,region:region});
+    showToast('✅ Dépôt ajouté','ok');
+  } else if(state.addType==='destination'){
+    DESTINATIONS.push({id:id,name:name,region:region});
+    showToast('✅ Destination ajoutée','ok');
+  } else if(state.addType==='item'){
+    const catEl=document.getElementById('add-cat');
+    const cat=catEl?catEl.value:'EPI';
+    ITEMS.push({id:id,name:name,cat:cat,icon:'📦'});
+    showToast('✅ Item ajouté','ok');
+  }
+  setState({showModal:null});
+}
+// PHOTO DROP — Compression + Preview
+function triggerPhoto(){document.getElementById('photoInput').click();}
+function handlePhoto(input){
+  if(!input.files||!input.files[0])return;
+  if(state.setupPhotos.length>=10){showToast('⚠️ Maximum 10 photos','err');return;}
+  const file=input.files[0];
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const img=new Image();
+    img.onload=function(){
+      const canvas=document.createElement('canvas');
+      const MAX=600;
+      let w=img.width,h=img.height;
+      if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}
+      else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}
+      canvas.width=w;canvas.height=h;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,w,h);
+      const compressed=canvas.toDataURL('image/jpeg',0.35);
+      state.setupPhotos.push({data:compressed,ts:Date.now()});
+      render();
+      showToast('📷 Photo ajoutée ('+state.setupPhotos.length+'/10)','ok');
+      if(navigator.vibrate)navigator.vibrate(50);
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+  input.value='';
+}
+function removeSetupPhoto(idx){state.setupPhotos.splice(idx,1);render();}
+
+// ===== SETUP PHOTOS STORAGE =====
+function getSetupPhotos(){try{return JSON.parse(localStorage.getItem('volo_setup_photos')||'[]')}catch(e){return[]}}
+function saveSetupPhoto(photoObj){const all=getSetupPhotos();all.unshift(photoObj);if(all.length>20)all.length=20;localStorage.setItem('volo_setup_photos',JSON.stringify(all));}
+function deleteSetupPhotoFromStorage(idx){const all=getSetupPhotos();all.splice(idx,1);localStorage.setItem('volo_setup_photos',JSON.stringify(all));}
+
+function submitSetupPhotos(){
+  if(state.setupPhotos.length===0){showToast('⚠️ Ajoutez au moins 1 photo','err');return;}
+  if(!state.photoLieu.trim()){showToast('⚠️ Lieu requis','err');return;}
+  const s=PERSONNEL.find(p=>p.volo==='V'+state.pin);
+  const ts=tsNow();
+  // Save each photo with small thumbnail to localStorage for dashboard display
+  state.setupPhotos.forEach((p,i)=>{
+    saveSetupPhoto({
+      lieu:state.photoLieu.trim(),
+      contrat:state.photoContrat.trim(),
+      sauveteur:s?s.name:'Inconnu',
+      sauveteur_id:s?s.volo:'',
+      timestamp:ts,
+      index:i+1,
+      data:p.data
+    });
+  });
+  // Send metadata to webhook (small payload)
+  const metaPayload={
+    type:'PHOTO_SETUP',
+    lieu:state.photoLieu.trim(),
+    contrat:state.photoContrat.trim(),
+    sauveteur_nom:s?s.name:'',
+    sauveteur_id:s?s.volo:'',
+    photos_count:state.setupPhotos.length,
+    timestamp:ts
+  };
+  fetch('https://hook.us2.make.com/wm4fvbqy87nfcuf111azq02l3w2a87sh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(metaPayload)})
+  .then(r=>{if(!r.ok){try{const q=JSON.parse(localStorage.getItem('volo_queue')||'[]');q.push(metaPayload);localStorage.setItem('volo_queue',JSON.stringify(q))}catch(e){}showToast('⚠️ Erreur serveur — métadonnées sauvées local','off')}})
+  .catch(()=>{try{const q=JSON.parse(localStorage.getItem('volo_queue')||'[]');q.push(metaPayload);localStorage.setItem('volo_queue',JSON.stringify(q))}catch(e){}showToast('📴 Hors-ligne — sauvé local','off')});
+  // Send each photo individually (avoids payload size limit)
+  state.setupPhotos.forEach((p,i)=>{
+    const photoPayload={type:'PHOTO_SINGLE',lieu:state.photoLieu.trim(),contrat:state.photoContrat.trim(),sauveteur_id:s?s.volo:'',photo_index:i+1,photo_total:state.setupPhotos.length,photo_b64:p.data,timestamp:ts};
+    fetch('https://hook.us2.make.com/wm4fvbqy87nfcuf111azq02l3w2a87sh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(photoPayload)}).catch(()=>{});
+  });
+  playEagleCry();
+  if(navigator.vibrate)navigator.vibrate([100,50,100]);
+  showToast('✅ '+state.setupPhotos.length+' photo(s) envoyée(s)!','ok');
+  setState({step:0,photoMode:false,setupPhotos:[],photoLieu:'',photoContrat:''});
+}
+
+function renderPhotoSetup(){
+  const s=PERSONNEL.find(p=>p.volo==='V'+state.pin);
+  const saved=getSetupPhotos();
+  return `<h2>📷 PHOTOS SETUP TERRAIN</h2>
+    <p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:6px">Documenter l'installation du Terradaptor / Trépied</p>
+    ${s?`<div style="text-align:center;margin-bottom:14px"><span class="badge badge-green">✓ ${s.name}</span></div>`:''}
+    <div class="card" style="border-color:var(--rescue);padding:16px">
+      <div style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;color:var(--rescue);margin-bottom:12px">INFORMATIONS MISSION</div>
+      <input type="text" placeholder="📍 Lieu / Chantier *" value="${state.photoLieu}" oninput="state.photoLieu=this.value" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:15px;font-family:'Inter',sans-serif;margin-bottom:10px;outline:none">
+      <input type="text" placeholder="📋 Numéro de contrat (optionnel)" value="${state.photoContrat}" oninput="state.photoContrat=this.value" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:15px;font-family:'Inter',sans-serif;outline:none">
+    </div>
+    <div style="margin-top:14px">
+      <div style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;color:var(--rescue);margin-bottom:10px;text-align:center">📷 PHOTOS (${state.setupPhotos.length}/10)</div>
+      <div class="photo-grid">
+        ${state.setupPhotos.map((p,i)=>`<div class="photo-thumb"><img src="${p.data}"><button class="del" onclick="removeSetupPhoto(${i})">✕</button></div>`).join('')}
+        ${state.setupPhotos.length<10?`<div class="photo-add" onclick="triggerPhoto()"><span class="ico">📷</span><span class="lbl">AJOUTER</span></div>`:''}
+      </div>
+      ${state.setupPhotos.length===0?`<p style="text-align:center;font-size:12px;color:var(--muted);margin-top:6px">Prendre des photos du montage sur le terrain</p>`:''}
+    </div>
+    ${state.setupPhotos.length>0?`
+      <button class="btn btn-green" onclick="submitSetupPhotos()" style="font-size:18px;padding:16px;margin-top:16px;position:sticky;bottom:70px;z-index:10">🦅 ENVOYER ${state.setupPhotos.length} PHOTO${state.setupPhotos.length>1?'S':''}</button>
+      ${!state.photoLieu?'<div style="text-align:center;font-size:11px;color:var(--orange);margin-top:4px">⚠️ Remplir le lieu avant envoi</div>':''}
+    `:`<button class="btn btn-outline" style="font-size:16px;padding:14px;margin-top:16px;opacity:.5" disabled>📷 Ajouter des photos pour valider</button>`}
+    <div class="btn-nav" style="margin-top:10px"><button class="btn btn-outline btn-sm" onclick="setState({step:0,photoMode:false,setupPhotos:[],photoLieu:'',photoContrat:''})">◀ ACCUEIL</button></div>
+    ${saved.length>0?`
+      <details style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+        <summary style="font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;color:var(--gold);cursor:pointer;padding:6px 0">📁 PHOTOS ENVOYÉES (${saved.length}) ▼</summary>
+        <div style="max-height:180px;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-top:8px">
+        ${(() => {
+          const grouped={};
+          saved.forEach(p => {const k=p.contrat+'|'+p.lieu+'|'+p.timestamp;if(!grouped[k])grouped[k]={photos:[],lieu:p.lieu,contrat:p.contrat,sauveteur:p.sauveteur,timestamp:p.timestamp};grouped[k].photos.push(p);});
+          return Object.values(grouped).map(g=>`<div class="card" style="padding:10px;margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <div><span style="font-weight:700;font-size:14px;color:var(--rescue)">${g.lieu}</span><span style="color:var(--muted);font-size:12px;margin-left:8px">#${g.contrat}</span></div>
+              <span style="font-size:11px;color:var(--muted)">${g.photos.length}📷</span>
+            </div>
+            <div style="font-size:11px;color:var(--muted)">${g.sauveteur} • ${g.timestamp}</div>
+          </div>`).join('');
+        })()}
+        </div>
+        <button class="btn btn-outline btn-sm" style="margin-top:8px;border-color:var(--red);color:var(--red);font-size:12px" onclick="if(confirm('Effacer toutes les photos?')){localStorage.removeItem('volo_setup_photos');render()}">🗑 EFFACER TOUT</button>
+      </details>
+    `:''}`;
+}
+
+// ===== KILOMÉTRAGE TRACKING =====
+function getKmLogs(){try{return JSON.parse(localStorage.getItem('volo_km_logs')||'[]')}catch(e){return[]}}
+function saveKmLog(log){const all=getKmLogs();all.unshift(log);if(all.length>200)all.length=200;localStorage.setItem('volo_km_logs',JSON.stringify(all));}
+
+function updateKmDisplay(){
+  const v=parseFloat(state.kmDebut)||0;
+  const isAR=state.kmAllerRetour!==false;
+  const total=isAR?Math.round(v*2):Math.round(v);
+  const box=document.getElementById('km-total-box');
+  const btn=document.getElementById('km-submit-btn');
+  if(box){
+    if(v>0){
+      box.style.display='block';
+      box.innerHTML=`<div style="font-size:12px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">${isAR?'ALLER '+Math.round(v)+' km × 2':'ALLER SIMPLE'}</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:36px;font-weight:800;color:var(--gold)">${total} <span style="font-size:18px">km</span></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Total facturable</div>`;
+    } else { box.style.display='none'; }
+  }
+  if(btn){
+    if(v>0){btn.disabled=false;btn.style.opacity='1';btn.className='btn btn-green';btn.textContent='🦅 ENREGISTRER '+total+' KM';}
+    else{btn.disabled=true;btn.style.opacity='.5';btn.className='btn btn-outline';btn.textContent='Entrer le kilométrage aller';}
+  }
+}
+
+function hasPointageToday(){
+  const ptg=JSON.parse(localStorage.getItem('volo-ptg-history')||'[]');
+  const today=new Date().toISOString().slice(0,10);
+  const user=PERSONNEL.find(p=>p.volo==='V'+state.pin);
+  if(!user)return false;
+  return ptg.some(e=>(e.sauveteur_id===user.id||e.sauveteur_id===user.volo) && e.timestamp && e.timestamp.startsWith(today));
+}
+
+function hasKmToday(){
+  const logs=getKmLogs();
+  const today=new Date().toISOString().slice(0,10);
+  const user=PERSONNEL.find(p=>p.volo==='V'+state.pin);
+  if(!user)return false;
+  return logs.some(l=>(l.sauveteur_id===user.id||l.sauveteur_id===user.volo||l.sauveteur_volo===user.volo) && l.timestamp && l.timestamp.startsWith(today));
+}
+
+function getOpenDeployment(){
+  const logs=getKmLogs();
+  const user=PERSONNEL.find(p=>p.volo==='V'+state.pin);
+  if(!user)return null;
+  const myLogs=logs.filter(l=>l.sauveteur_id===user.id||l.sauveteur_volo===user.volo||l.sauveteur===user.name);
+  for(const l of myLogs){
+    if(l.type_trajet==='RETOUR')return null;
+    if(l.type_trajet==='ALLER SIMPLE')return l;
+  }
+  return null;
+}
+
+function submitKmRetour(){
+  const dep=getOpenDeployment();
+  if(!dep){showToast('⚠️ Aucun déploiement ouvert','err');return;}
+  if(!hasPointageToday()){showToast('🚫 Pointage requis avant de soumettre vos km','err');return;}
+  const s=PERSONNEL.find(p=>p.volo==='V'+state.pin);
+  const log={
+    type_trajet:'RETOUR',
+    sauveteur:s?s.name:'Inconnu',
+    sauveteur_id:s?s.id:'',
+    sauveteur_volo:s?s.volo:'',
+    destination:dep.destination||'',
+    projet:dep.projet||'',
+    km_aller:dep.km_aller||0,
+    km_total:dep.km_aller||0,
+    timestamp:tsNow()
+  };
+  saveKmLog(log);
+  const kmPayload={type:'KM_LOG',...log};
+  fetch('https://hook.us2.make.com/wm4fvbqy87nfcuf111azq02l3w2a87sh',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(kmPayload)
+  }).catch(()=>{try{const q=JSON.parse(localStorage.getItem('volo_queue')||'[]');q.push(kmPayload);localStorage.setItem('volo_queue',JSON.stringify(q))}catch(e){}});
+  playEagleCry();
+  if(navigator.vibrate)navigator.vibrate([100,50,100]);
+  showToast('✅ Retour enregistré — '+(dep.km_aller||0)+' km','ok');
+  const backToGains=state.kmFromGains;
+  setState({step:backToGains?15:0,kmMode:false,kmFromGains:false,gainsMode:backToGains,kmDebut:'',kmDest:'',kmProjet:'',kmAllerRetour:true});
+}
+
+function submitKm(){
+  const kmAller=parseFloat(state.kmDebut);
+  if(isNaN(kmAller)||kmAller<=0){showToast('⚠️ Entrez le nombre de km aller','err');return;}
+  if(!hasPointageToday()){showToast('🚫 Pointage requis avant de soumettre vos km','err');return;}
+  if(hasKmToday()){showToast('⚠️ KM déjà soumis aujourd\'hui','err');return;}
+  if(getOpenDeployment()){showToast('⚠️ Déploiement en cours — soumettez le retour d\'abord','err');return;}
+  if(kmAller>500){if(!confirm('⚠️ '+kmAller+' km aller dépasse le plafond habituel (500 km). Un superviseur sera notifié.\n\nConfirmer?'))return;}
+  const isAR=state.kmAllerRetour!==false;
+  const kmTotal=isAR?Math.round(kmAller*2):Math.round(kmAller);
+  const s=PERSONNEL.find(p=>p.volo==='V'+state.pin);
+  const log={
+    type_trajet:isAR?'ALLER-RETOUR':'ALLER SIMPLE',
+    sauveteur:s?s.name:'Inconnu',
+    sauveteur_id:s?s.id:'',
+    sauveteur_volo:s?s.volo:'',
+    destination:state.kmDest||'',
+    projet:state.kmProjet||'',
+    km_aller:Math.round(kmAller),
+    km_total:kmTotal,
+    plafond_depasse:kmAller>500,
+    timestamp:tsNow()
+  };
+  saveKmLog(log);
+  const kmPayload={type:'KM_LOG',...log};
+  fetch('https://hook.us2.make.com/wm4fvbqy87nfcuf111azq02l3w2a87sh',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(kmPayload)
+  }).then(r=>{if(!r.ok){try{const q=JSON.parse(localStorage.getItem('volo_queue')||'[]');q.push(kmPayload);localStorage.setItem('volo_queue',JSON.stringify(q))}catch(e){}showToast('⚠️ Erreur serveur — sauvé local','off')}})
+  .catch(()=>{try{const q=JSON.parse(localStorage.getItem('volo_queue')||'[]');q.push(kmPayload);localStorage.setItem('volo_queue',JSON.stringify(q))}catch(e){}showToast('📴 Hors-ligne — sauvé local','off')});
+  playEagleCry();
+  if(navigator.vibrate)navigator.vibrate([100,50,100]);
+  showToast('✅ '+kmTotal+' km perso enregistrés!','ok');
+  const backToGains=state.kmFromGains;
+  setState({step:backToGains?15:0,kmMode:false,kmFromGains:false,gainsMode:backToGains,kmDebut:'',kmDest:'',kmProjet:'',kmAllerRetour:true});
+}
+
+// V9: Odometer logs for work vehicle tracking
+function getOdoLogs(){try{return JSON.parse(localStorage.getItem('volo_odo_logs')||'[]')}catch(e){return[]}}
+function saveOdoLog(log){const all=getOdoLogs();all.unshift(log);if(all.length>200)all.length=200;localStorage.setItem('volo_odo_logs',JSON.stringify(all));}
+function getOpenOdo(){
+  const logs=getOdoLogs();
+  const s=PERSONNEL.find(p=>p.volo==='V'+state.pin);
+  if(!s)return null;
+  for(const l of logs){
+    if((l.sauveteur_id===s.id||l.sauveteur_volo===s.volo)&&l.statut==='OUVERT') return l;
+  }
+  return null;
+}
+
+function submitOdoDepart(){
+  const odoVal=parseInt(state.kmOdoStart);
+  if(isNaN(odoVal)||odoVal<=0){showToast('⚠️ Entrez le kilométrage au compteur','err');return;}
+  if(!state.kmVehicle){showToast('⚠️ Sélectionnez un véhicule','err');return;}
+  const s=PERSONNEL.find(p=>p.volo==='V'+state.pin);
+  const openOdo=getOpenOdo();
+  if(openOdo){showToast('⚠️ Trajet déjà ouvert — entrez le retour d\'abord','err');return;}
+  const log={
+    type:'ODO_DEPART',
+    statut:'OUVERT',
+    vehicule:state.kmVehicle,
+    odo_depart:odoVal,
+    odo_fin:null,
+    km_parcouru:null,
+    destination:state.kmDest||'',
+    projet:state.kmProjet||'',
+    sauveteur:s?s.name:'Inconnu',
+    sauveteur_id:s?s.id:'',
+    sauveteur_volo:s?s.volo:'',
+    timestamp:tsNow()
+  };
+  saveOdoLog(log);
+  const payload={type:'ODO_LOG',...log};
+  fetch('https://hook.us2.make.com/wm4fvbqy87nfcuf111azq02l3w2a87sh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{try{const q=JSON.parse(localStorage.getItem('volo_queue')||'[]');q.push(payload);localStorage.setItem('volo_queue',JSON.stringify(q))}catch(e){}});
+  playEagleCry();
+  if(navigator.vibrate)navigator.vibrate([100,50,100]);
+  showToast('✅ Départ enregistré — '+state.kmVehicle+' à '+odoVal+' km','ok');
+  state.kmOdoStart='';state.kmVehicle='';state.kmDest='';state.kmProjet='';
+  render();
+}
+
+function submitOdoRetour(){
+  const odoEnd=parseInt(state.kmOdoEnd);
+  if(isNaN(odoEnd)||odoEnd<=0){showToast('⚠️ Entrez le kilométrage au compteur','err');return;}
+  const openOdo=getOpenOdo();
+  if(!openOdo){showToast('⚠️ Aucun trajet ouvert','err');return;}
+  if(odoEnd<=openOdo.odo_depart){showToast('⚠️ Le KM final doit être supérieur au départ ('+openOdo.odo_depart+')','err');return;}
+  const kmParcouru=odoEnd-openOdo.odo_depart;
+  if(kmParcouru>1500){if(!confirm('⚠️ '+kmParcouru+' km parcouru — c\'est beaucoup! Confirmer?'))return;}
+  // Update the open log
+  const logs=getOdoLogs();
+  const s=PERSONNEL.find(p=>p.volo==='V'+state.pin);
+  const idx=logs.findIndex(l=>(l.sauveteur_id===(s?s.id:''))&&l.statut==='OUVERT');
+  if(idx>=0){
+    logs[idx].odo_fin=odoEnd;
+    logs[idx].km_parcouru=kmParcouru;
+    logs[idx].statut='FERMÉ';
+    logs[idx].timestamp_retour=tsNow();
+    localStorage.setItem('volo_odo_logs',JSON.stringify(logs));
+  }
+  const payload={type:'ODO_LOG',statut:'FERMÉ',vehicule:openOdo.vehicule,odo_depart:openOdo.odo_depart,odo_fin:odoEnd,km_parcouru:kmParcouru,destination:openOdo.destination,projet:openOdo.projet,sauveteur:s?s.name:'',sauveteur_id:s?s.id:'',sauveteur_volo:s?s.volo:'',timestamp:tsNow()};
+  fetch('https://hook.us2.make.com/wm4fvbqy87nfcuf111azq02l3w2a87sh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{try{const q=JSON.parse(localStorage.getItem('volo_queue')||'[]');q.push(payload);localStorage.setItem('volo_queue',JSON.stringify(q))}catch(e){}});
+  playEagleCry();
+  if(navigator.vibrate)navigator.vibrate([100,50,100]);
+  showToast('✅ Retour — '+openOdo.vehicule+' : '+kmParcouru+' km parcourus','ok');
+  state.kmOdoEnd='';
+  render();
+}
+
+function renderKmTracking(){
+  const s=PERSONNEL.find(p=>p.volo==='V'+state.pin);
+  const logs=getKmLogs();
+  const odoLogs=getOdoLogs();
+  const todayLogs=logs.filter(l=>l.timestamp&&l.timestamp.startsWith(new Date().toISOString().slice(0,10)));
+  const todayKm=todayLogs.reduce((sum,l)=>sum+(l.km_total||0),0);
+  const hasKm=hasKmToday();
+  const hasPtg=hasPointageToday();
+  const openDep=getOpenDeployment();
+  const openOdo=getOpenOdo();
+  const isAR=state.kmAllerRetour!==false;
+  const kmVal=parseFloat(state.kmDebut)||0;
+  const kmTotal=isAR?Math.round(kmVal*2):Math.round(kmVal);
+  const tab=state.kmTab||'vehicule';
+  const myOdoLogs=odoLogs.filter(l=>l.sauveteur_id===(s?s.id:''));
+
+  return `<h2>🚛 KILOMÉTRAGE</h2>
+    ${s?`<div style="text-align:center;margin-bottom:10px"><span class="badge badge-green">✓ ${s.name}</span></div>`:''}
+
+    <!-- TABS -->
+    <div style="display:flex;gap:0;margin-bottom:16px;border-radius:12px;overflow:hidden;border:1px solid var(--border)">
+      <button onclick="state.kmTab='vehicule';render()" style="flex:1;padding:12px;font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1px;border:none;cursor:pointer;transition:all .2s;${tab==='vehicule'?'background:var(--rescue);color:white':'background:var(--card);color:var(--muted)'}">🚛 VÉHICULE</button>
+      <button onclick="state.kmTab='perso';render()" style="flex:1;padding:12px;font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1px;border:none;border-left:1px solid var(--border);cursor:pointer;transition:all .2s;${tab==='perso'?'background:var(--blue);color:white':'background:var(--card);color:var(--muted)'}">🚗 KM PERSO</button>
+    </div>
+
+    ${tab==='vehicule'?`
+    <!-- ═══════ ONGLET VÉHICULE D'ENTREPRISE ═══════ -->
+    <div style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:14px">Suivi odométrique • Véhicule d'entreprise</div>
+
+    ${openOdo?`
+    <!-- TRAJET OUVERT — RETOUR -->
+    <div style="background:rgba(230,126,34,.1);border:2px solid var(--orange);border-radius:14px;padding:20px;margin-bottom:14px;text-align:center">
+      <div style="font-size:36px;margin-bottom:10px">🚛</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;color:var(--orange);letter-spacing:2px">TRAJET EN COURS</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:6px">${openOdo.vehicule} • Depuis ${openOdo.timestamp?openOdo.timestamp.slice(11,16):''}</div>
+      ${openOdo.destination?`<div style="font-size:13px;color:var(--gold);margin-top:4px">📍 ${openOdo.destination}</div>`:''}
+      <div style="margin-top:10px;padding:10px;background:var(--card);border-radius:10px;border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--muted);letter-spacing:1px">COMPTEUR AU DÉPART</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:28px;font-weight:800;color:var(--rescue)">${openOdo.odo_depart.toLocaleString()} <span style="font-size:14px">km</span></div>
+      </div>
+      <div style="margin-top:14px">
+        <div style="font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;color:var(--green);margin-bottom:8px">📏 COMPTEUR AU RETOUR</div>
+        <input type="number" inputmode="numeric" placeholder="ex: ${openOdo.odo_depart+50}" value="${state.kmOdoEnd}" oninput="state.kmOdoEnd=this.value" style="width:100%;padding:14px;border-radius:12px;border:2px solid var(--green);background:var(--card);color:var(--txt);font-size:24px;font-family:'JetBrains Mono';text-align:center;outline:none">
+        ${state.kmOdoEnd&&parseInt(state.kmOdoEnd)>openOdo.odo_depart?`<div style="margin-top:8px;padding:8px;background:rgba(39,174,96,.1);border:1px solid var(--green);border-radius:8px;font-family:'Oswald',sans-serif;font-size:20px;color:var(--green)">${parseInt(state.kmOdoEnd)-openOdo.odo_depart} km parcourus</div>`:''}
+      </div>
+      <button class="btn btn-green" onclick="submitOdoRetour()" style="margin-top:14px;font-size:18px;padding:16px;width:100%">🏠 ENREGISTRER LE RETOUR</button>
+    </div>
+    `:`
+    <!-- NOUVEAU TRAJET — DÉPART -->
+    <div class="card" style="border-color:var(--rescue);padding:14px">
+      <div style="font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;color:var(--rescue);margin-bottom:12px">🚛 SÉLECTION VÉHICULE</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+        ${REMORQUES.map(r=>`<div onclick="state.kmVehicle='${r.name}';render()" style="flex:1;min-width:45%;padding:12px;border-radius:10px;border:2px solid ${state.kmVehicle===r.name?'var(--rescue)':'var(--border)'};background:${state.kmVehicle===r.name?'rgba(230,81,0,.1)':'var(--card)'};cursor:pointer;text-align:center;font-size:14px;font-weight:${state.kmVehicle===r.name?'700':'400'};color:${state.kmVehicle===r.name?'var(--rescue)':'var(--muted)'};transition:all .2s">${r.name}${state.kmVehicle===r.name?' ✓':''}</div>`).join('')}
+      </div>
+
+      <div style="font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;color:var(--rescue);margin-bottom:8px">📏 COMPTEUR AU DÉPART</div>
+      <input type="number" inputmode="numeric" placeholder="Kilométrage au compteur" value="${state.kmOdoStart}" oninput="state.kmOdoStart=this.value" style="width:100%;padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:24px;font-family:'JetBrains Mono';text-align:center;outline:none">
+      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:4px">Notez le kilométrage exact affiché au compteur</div>
+
+      <div style="font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;color:var(--rescue);margin-bottom:8px;margin-top:14px">📍 TRAJET (optionnel)</div>
+      <input type="text" placeholder="📍 Destination / chantier" value="${state.kmDest}" oninput="state.kmDest=this.value" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:14px;font-family:'Inter',sans-serif;margin-bottom:8px;outline:none">
+      <input type="text" placeholder="📋 N° projet / contrat" value="${state.kmProjet}" oninput="state.kmProjet=this.value" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:14px;font-family:'Inter',sans-serif;outline:none">
+    </div>
+    <button class="btn ${state.kmVehicle&&state.kmOdoStart?'btn-green':'btn-outline'}" onclick="submitOdoDepart()" style="font-size:${state.kmVehicle&&state.kmOdoStart?'18':'16'}px;padding:${state.kmVehicle&&state.kmOdoStart?'16':'14'}px;margin-top:14px;${state.kmVehicle&&state.kmOdoStart?'':'opacity:.5'}" ${state.kmVehicle&&state.kmOdoStart?'':'disabled'}>🦅 ENREGISTRER LE DÉPART</button>
+    `}
+
+    <!-- HISTORIQUE ODO -->
+    ${myOdoLogs.length>0?`
+    <details style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+      <summary style="font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;color:var(--gold);cursor:pointer;padding:6px 0">📁 HISTORIQUE VÉHICULES (${myOdoLogs.length}) ▼</summary>
+      <div style="max-height:200px;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-top:8px">
+        ${myOdoLogs.slice(0,15).map(l=>`<div class="card" style="padding:8px 10px;margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <span style="font-weight:700;font-size:13px;color:${l.statut==='OUVERT'?'var(--orange)':'var(--green)'}">${l.statut==='OUVERT'?'🔓 EN COURS':'✅ FERMÉ'}</span>
+              <span style="color:var(--muted);font-size:11px;margin-left:6px">${l.vehicule}</span>
+            </div>
+            <span style="font-family:'JetBrains Mono';font-size:13px;color:var(--rescue);font-weight:700">${l.km_parcouru!==null?l.km_parcouru+' km':'—'}</span>
+          </div>
+          <div style="font-size:10px;color:var(--muted)">${l.odo_depart||'?'}→${l.odo_fin||'?'} • ${l.timestamp}${l.destination?' • 📍'+l.destination:''}</div>
+        </div>`).join('')}
+      </div>
+      <button class="btn btn-outline btn-sm" style="margin-top:8px;border-color:var(--red);color:var(--red);font-size:12px" onclick="if(confirm('Effacer l\\'historique véhicules?')){localStorage.removeItem('volo_odo_logs');render()}">🗑 EFFACER</button>
+    </details>`:''}
+
+    `:tab==='perso'?`
+    <!-- ═══════ ONGLET KM PERSONNEL ═══════ -->
+    <div style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:14px">Frais kilométriques • Véhicule personnel</div>
+
+    ${!hasPtg?`<div style="background:rgba(192,57,43,.1);border:1px solid var(--red);border-radius:12px;padding:16px;margin-bottom:14px;text-align:center">
+      <div style="font-size:32px;margin-bottom:8px">🚫</div>
+      <div style="font-size:15px;font-weight:700;color:var(--red)">POINTAGE REQUIS</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">Vous devez pointer aujourd'hui avant de soumettre vos km personnels.</div>
+      <a href="pointage.html" class="btn btn-outline btn-sm" style="margin-top:12px;display:inline-block">Aller au pointage →</a>
+    </div>`
+
+    :openDep?`<div style="background:rgba(230,126,34,.1);border:2px solid var(--orange);border-radius:14px;padding:20px;margin-bottom:14px;text-align:center">
+      <div style="font-size:36px;margin-bottom:10px">🏗️</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;color:var(--orange);letter-spacing:2px">DÉPLOIEMENT EN COURS</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:8px">Aller simple enregistré le <span style="color:var(--txt);font-weight:600">${openDep.timestamp?openDep.timestamp.slice(0,10):''}</span></div>
+      ${openDep.destination?`<div style="font-size:13px;color:var(--gold);margin-top:4px">📍 ${openDep.destination}</div>`:''}
+      <div style="margin-top:10px;padding:10px;background:var(--card);border-radius:10px;border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--muted);letter-spacing:1px">ALLER ENREGISTRÉ</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:28px;font-weight:800;color:var(--rescue)">${openDep.km_aller||0} km</div>
+      </div>
+      <button class="btn btn-gold" onclick="submitKmRetour()" style="margin-top:16px;font-size:16px;padding:14px;width:100%">🏠 SOUMETTRE LE RETOUR (${openDep.km_aller||0} km)</button>
+    </div>`
+
+    :hasKm?`<div style="background:rgba(39,174,96,.1);border:1px solid var(--green);border-radius:12px;padding:16px;margin-bottom:14px;text-align:center">
+      <div style="font-size:32px;margin-bottom:8px">✅</div>
+      <div style="font-size:15px;font-weight:700;color:var(--green)">KM DÉJÀ SOUMIS AUJOURD'HUI</div>
+      <div style="font-size:14px;color:var(--muted);margin-top:6px">${todayKm} km enregistrés</div>
+    </div>`
+
+    :`<div class="card" style="border-color:var(--blue);padding:14px">
+      <div style="font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;color:var(--blue);margin-bottom:12px">🚗 KILOMÉTRAGE ALLER</div>
+      <input id="km-input" type="number" inputmode="numeric" placeholder="ex: 150" value="${state.kmDebut}" oninput="state.kmDebut=this.value;updateKmDisplay()" style="width:100%;padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:24px;font-family:'JetBrains Mono';text-align:center;outline:none">
+      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:4px">Nombre de km entre chez vous et le chantier</div>
+
+      <!-- TOGGLE A/R -->
+      <div onclick="state.kmAllerRetour=state.kmAllerRetour===false?true:false;render();setTimeout(()=>{const i=document.getElementById('km-input');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},50)" style="margin-top:14px;padding:14px;border-radius:12px;border:2px solid ${isAR?'var(--green)':'var(--border)'};background:${isAR?'rgba(39,174,96,.08)':'var(--card)'};cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .2s">
+        <div style="width:44px;height:24px;border-radius:12px;background:${isAR?'var(--green)':'var(--border)'};position:relative;transition:all .3s">
+          <div style="width:20px;height:20px;border-radius:50%;background:white;position:absolute;top:2px;${isAR?'right:2px':'left:2px'};transition:all .3s;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>
+        </div>
+        <div>
+          <div style="font-weight:700;font-size:14px;color:${isAR?'var(--green)':'var(--muted)'}">${isAR?'↔️ ALLER-RETOUR (×2)':'→ ALLER SIMPLE'}</div>
+          <div style="font-size:11px;color:var(--muted)">${isAR?'Trajet quotidien — km doublé automatiquement':'Déploiement longue durée — aller seulement'}</div>
+        </div>
+      </div>
+
+      <div id="km-total-box" style="text-align:center;padding:14px;background:linear-gradient(135deg,rgba(212,160,23,.12),rgba(230,81,0,.06));border:2px solid rgba(212,160,23,.3);border-radius:14px;margin-top:14px;${kmVal>0?'':'display:none'}">
+        ${kmVal>0?`<div style="font-size:12px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">${isAR?'ALLER '+Math.round(kmVal)+' km × 2':'ALLER SIMPLE'}</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:36px;font-weight:800;color:var(--gold)">${kmTotal} <span style="font-size:18px">km</span></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Total facturable</div>`:''}
+      </div>
+
+      <div style="font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;color:var(--blue);margin-bottom:8px;margin-top:14px">📍 TRAJET (optionnel)</div>
+      <input type="text" placeholder="📍 Destination / chantier" value="${state.kmDest}" oninput="state.kmDest=this.value" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:14px;font-family:'Inter',sans-serif;margin-bottom:8px;outline:none">
+      <input type="text" placeholder="📋 N° projet / contrat" value="${state.kmProjet}" oninput="state.kmProjet=this.value" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:14px;font-family:'Inter',sans-serif;outline:none">
+    </div>
+    ${kmVal>500?`<div style="background:rgba(192,57,43,.1);border:1px solid var(--red);border-radius:10px;padding:10px;margin-top:8px;text-align:center;font-size:12px;color:var(--red)">⚠️ Attention : ${kmVal} km dépasse le plafond habituel (500 km). Un superviseur sera notifié.</div>`:''}
+    <button id="km-submit-btn" class="btn ${kmVal>0?'btn-blue':'btn-outline'}" onclick="submitKm()" style="font-size:${kmVal>0?'18':'16'}px;padding:${kmVal>0?'16':'14'}px;margin-top:14px;${kmVal>0?'':'opacity:.5'}" ${kmVal>0?'':'disabled'}>${kmVal>0?'🚗 ENREGISTRER '+kmTotal+' KM PERSO':'Entrer le kilométrage aller'}</button>
+    `}
+
+    <!-- HISTORIQUE KM PERSO -->
+    ${logs.length>0?`
+    <details style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+      <summary style="font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;color:var(--gold);cursor:pointer;padding:6px 0">📁 DERNIERS TRAJETS PERSO (${logs.length}) ▼</summary>
+      <div style="max-height:180px;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-top:8px">
+        ${logs.slice(0,10).map(l=>`<div class="card" style="padding:8px 10px;margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <span style="font-weight:700;font-size:13px;color:${{RETOUR:'var(--green)','ALLER SIMPLE':'var(--orange)','ALLER-RETOUR':'var(--blue)'}[l.type_trajet]||'var(--muted)'}">${{'RETOUR':'🏠','ALLER SIMPLE':'→','ALLER-RETOUR':'↔️'}[l.type_trajet]||'📍'} ${l.type_trajet||'TRAJET'}</span>
+              <span style="color:var(--muted);font-size:11px;margin-left:6px">${l.destination||''}</span>
+            </div>
+            <span style="font-family:'JetBrains Mono';font-size:14px;color:var(--blue);font-weight:700">${l.km_total||0} km</span>
+          </div>
+          <div style="font-size:10px;color:var(--muted)">${l.sauveteur} • ${l.timestamp}${l.projet?' • #'+l.projet:''}</div>
+        </div>`).join('')}
+      </div>
+      <button class="btn btn-outline btn-sm" style="margin-top:8px;border-color:var(--red);color:var(--red);font-size:12px" onclick="if(confirm('Effacer tous les trajets perso?')){localStorage.removeItem('volo_km_logs');render()}">🗑 EFFACER</button>
+    </details>`:''}
+    `:''}
+
+    <div class="btn-nav" style="margin-top:10px"><button class="btn btn-outline btn-sm" onclick="setState({step:state.kmFromGains?15:0,kmMode:false,kmFromGains:false,gainsMode:state.kmFromGains||false,kmDebut:'',kmDest:'',kmProjet:'',kmAllerRetour:true,kmTab:'vehicule',kmVehicle:'',kmOdoStart:'',kmOdoEnd:''})">${state.kmFromGains?'◀ MES GAINS':'◀ ACCUEIL'}</button></div>`;
+}
+
+// ── FORMATIONS MODULE ──
+let formView='main'; // main|certs|team
+let formTeamTab='SAUVETEUR'; // SAUVETEUR|SURVEILLANT
+let formTeamSearch='';
+
+function getCertData(userId){return JSON.parse(localStorage.getItem('volo_certs_'+userId)||'{}')}
+function setCertData(userId,data){localStorage.setItem('volo_certs_'+userId,JSON.stringify(data))}
+
+function certStatus(certId,userId){
+  const data=getCertData(userId);
+  const cert=CERTS_LIST.find(c=>c.id===certId);
+  if(!cert)return{status:'missing',label:'—',color:'var(--muted)'};
+  const d=data[certId];
+  if(!d)return{status:'missing',label:'NON ENREGISTRÉ',color:'var(--muted)'};
+  const obtained=new Date(d);
+  const exp=new Date(d);exp.setMonth(exp.getMonth()+cert.dur);
+  const now=new Date();
+  const days=Math.ceil((exp-now)/(86400000));
+  if(days<0)return{status:'expired',label:'EXPIRÉ ('+Math.abs(days)+'j)',color:'var(--red)',exp:exp.toISOString().slice(0,10)};
+  if(days<60)return{status:'warning',label:days+'j restants',color:'var(--gold)',exp:exp.toISOString().slice(0,10)};
+  return{status:'valid',label:'OK → '+exp.toISOString().slice(0,10),color:'var(--green)',exp:exp.toISOString().slice(0,10)};
+}
+
+function renderFormation(){
+  const user=PERSONNEL.find(p=>p.volo==='V'+state.pin);
+  const surv=isUserSurv();
+  if(formView==='certs') return renderMyCerts(user);
+  if(formView==='team'&&!surv) return renderTeamCerts();
+
+  // ── MAIN VIEW ──
+  const DOCS=surv?[]:[
+    {title:'Formation Sauvetage Technique',desc:'Ancrages, nœuds, CIAIAI, empaquetages, Terradaptor, Skate Block, Twin Tension',icon:'🎓',type:'PDF',url:'https://drive.google.com/file/d/1GqMlfK6K_uFAJZHcaPNerI9i3D9KzWUt/view'}
+  ];
+
+  // Quick cert summary
+  const userId=user?user.id:'unknown';
+  const myData=getCertData(userId);
+  const stats=CERTS_LIST.map(c=>certStatus(c.id,userId));
+  const expired=stats.filter(s=>s.status==='expired').length;
+  const warning=stats.filter(s=>s.status==='warning').length;
+  const valid=stats.filter(s=>s.status==='valid').length;
+  const missing=stats.filter(s=>s.status==='missing').length;
+  const badgeColor=expired>0?'var(--red)':warning>0?'var(--gold)':valid>0?'var(--green)':'var(--muted)';
+  const badgeIcon=expired>0?'🚨':warning>0?'⚠️':valid>0?'✅':'📋';
+  const badgeText=expired>0?expired+' expirée'+(expired>1?'s':''):warning>0?warning+' bientôt':missing===CERTS_LIST.length?'Aucune enregistrée':valid+'/'+CERTS_LIST.length+' à jour';
+
+  return `<div style="padding-top:10px">
+    <h2 style="text-align:center;margin:0;font-size:22px;letter-spacing:2px">📚 FORMATION & DOCS</h2>
+    <div style="text-align:center;font-size:12px;color:var(--muted);margin-top:4px">${user?user.name:'—'}</div>
+
+    <!-- MES CERTIFICATIONS -->
+    <div onclick="formView='certs';render()" style="margin-top:16px;padding:14px 16px;background:var(--card);border:2px solid ${badgeColor};border-radius:14px;cursor:pointer;display:flex;align-items:center;gap:14px">
+      <span style="font-size:28px">${badgeIcon}</span>
+      <div style="flex:1;text-align:left">
+        <div style="font-weight:700;font-size:15px;color:${badgeColor}">MES CERTIFICATIONS</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${badgeText}</div>
+      </div>
+      <span style="font-size:18px;color:var(--muted)">→</span>
+    </div>
+
+    <!-- TRACKER EQUIPE (sauveteurs only) -->
+    ${surv?'':`<div onclick="formView='team';render()" style="margin-top:10px;padding:14px 16px;background:var(--card);border:1px solid rgba(59,130,246,.3);border-radius:14px;cursor:pointer;display:flex;align-items:center;gap:14px">
+      <span style="font-size:28px">👥</span>
+      <div style="flex:1;text-align:left">
+        <div style="font-weight:700;font-size:15px;color:var(--blue)">TRACKER ÉQUIPE</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Sauveteurs • Surveillants • Vue complète</div>
+      </div>
+      <span style="font-size:18px;color:var(--muted)">→</span>
+    </div>`}
+
+    <!-- DOCUMENTS -->
+    ${DOCS.length?`<div style="margin-top:20px;font-size:11px;color:var(--gold);letter-spacing:2px;font-family:Oswald,sans-serif;margin-bottom:8px">DOCUMENTS DE FORMATION</div>
+    ${DOCS.map(d=>`
+      <div onclick="window.open('${d.url}','_blank')" style="padding:14px;margin-bottom:10px;background:linear-gradient(135deg,var(--card),rgba(251,191,36,.04));border:1px solid rgba(251,191,36,.2);border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:14px">
+        <div style="font-size:30px">${d.icon}</div>
+        <div style="flex:1;text-align:left">
+          <div style="font-weight:700;font-size:13px">${d.title}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px">${d.desc}</div>
+          <span style="font-size:9px;padding:2px 8px;background:rgba(251,191,36,.15);color:var(--gold);border-radius:6px;font-weight:600;margin-top:4px;display:inline-block">${d.type}</span>
+        </div>
+        <span style="font-size:18px;color:var(--gold)">↗</span>
+      </div>`).join('')}
+    ${surv?'':`<div onclick="window.open('https://drive.google.com/drive/folders/1ZGuUrkwQcVODWQiWsg9NLz_MBiTU15iQ','_blank')" style="padding:12px;background:linear-gradient(135deg,rgba(251,191,36,.08),rgba(251,191,36,.02));border:1px dashed rgba(251,191,36,.3);border-radius:12px;cursor:pointer;text-align:center">
+      <div style="font-size:20px">📁</div>
+      <div style="font-weight:600;font-size:12px;color:var(--gold)">DOSSIER COMPLET GOOGLE DRIVE</div>
+    </div>`}`:`
+    <div style="margin-top:20px;font-size:11px;color:var(--muted);letter-spacing:2px;font-family:Oswald,sans-serif;margin-bottom:8px">DOCUMENTS DE FORMATION</div>
+    <div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;background:var(--card);border-radius:12px;border:1px solid var(--border)">Aucun document disponible</div>`}
+    <div class="btn-nav" style="margin-top:20px"><button class="btn btn-outline btn-sm" onclick="setState({step:0})">◀ ACCUEIL</button></div>
+  </div>`;
+}
+
+// ── MES CERTIFICATIONS (self-service) ──
+function renderMyCerts(user){
+  const userId=user?user.id:'unknown';
+  const data=getCertData(userId);
+  return `<div style="padding-top:10px">
+    <h2 style="text-align:center;margin:0;font-size:20px">📋 MES CERTIFICATIONS</h2>
+    <div style="text-align:center;font-size:12px;color:var(--muted);margin-top:4px;margin-bottom:16px">${user?user.name:'—'} • Entre ta date d'obtention</div>
+    ${CERTS_LIST.map(c=>{
+      const s=certStatus(c.id,userId);
+      const bg=s.status==='expired'?'rgba(192,57,43,.08)':s.status==='warning'?'rgba(212,160,23,.08)':s.status==='valid'?'rgba(39,174,96,.06)':'var(--card)';
+      const border=s.status==='expired'?'rgba(192,57,43,.4)':s.status==='warning'?'rgba(212,160,23,.4)':s.status==='valid'?'rgba(39,174,96,.3)':'var(--border)';
+      return `<div style="display:flex;align-items:center;gap:10px;padding:12px;background:${bg};border:1px solid ${border};border-radius:12px;margin-bottom:6px">
+        <div style="font-size:20px;min-width:28px;text-align:center">${c.icon}</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600">${c.name}</div>
+          <div style="font-size:10px;color:${s.color};font-weight:600;margin-top:1px">${s.label}</div>
+          <div style="font-size:9px;color:var(--muted)">Durée: ${c.dur} mois</div>
+        </div>
+        <input type="date" value="${data[c.id]||''}" onchange="saveMyCert('${userId}','${c.id}',this.value)" style="padding:6px;border-radius:8px;border:1px solid ${border};background:var(--card);color:var(--txt);font-size:11px;width:125px">
+      </div>`;
+    }).join('')}
+    <div class="btn-nav" style="margin-top:16px"><button class="btn btn-outline btn-sm" onclick="formView='main';render()">◀ RETOUR</button></div>
+  </div>`;
+}
+
+function saveMyCert(userId,certId,val){
+  const data=getCertData(userId);
+  if(val) data[certId]=val; else delete data[certId];
+  setCertData(userId,data);
+  // Also send to webhook for Google Sheet sync
+  const user=PERSONNEL.find(p=>p.id===userId);
+  const payload={type:'CERT_UPDATE',sauveteur_id:userId,sauveteur_nom:user?user.name:'',cert_id:certId,cert_name:CERTS_LIST.find(c=>c.id===certId)?.name||'',date_obtention:val,timestamp:tsNow()};
+  fetch('https://hook.us2.make.com/wm4fvbqy87nfcuf111azq02l3w2a87sh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{
+    try{const q=JSON.parse(localStorage.getItem('volo_queue')||'[]');q.push(payload);localStorage.setItem('volo_queue',JSON.stringify(q))}catch(e){}
+  });
+  render();
+}
+
+// ── TRACKER ÉQUIPE (vue d'ensemble) ──
+function renderTeamCerts(){
+  const people=PERSONNEL.filter(p=>(p.type||'SAUVETEUR')===formTeamTab);
+  const filtered=formTeamSearch?people.filter(p=>p.name.toLowerCase().includes(formTeamSearch.toLowerCase())):people;
+  const sCount=PERSONNEL.filter(p=>(p.type||'SAUVETEUR')==='SAUVETEUR').length;
+  const vCount=PERSONNEL.filter(p=>p.type==='SURVEILLANT').length;
+
+  return `<div style="padding-top:10px">
+    <h2 style="text-align:center;margin:0;font-size:20px">👥 TRACKER ÉQUIPE</h2>
+    <div style="text-align:center;font-size:12px;color:var(--muted);margin-top:4px;margin-bottom:14px">Statut certifications de l'équipe</div>
+
+    <!-- TABS -->
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn ${formTeamTab==='SAUVETEUR'?'btn-green':'btn-outline'}" onclick="formTeamTab='SAUVETEUR';render()" style="flex:1;font-size:12px;padding:10px">🦅 Sauveteurs (${sCount})</button>
+      <button class="btn ${formTeamTab==='SURVEILLANT'?'btn-gold':'btn-outline'}" onclick="formTeamTab='SURVEILLANT';render()" style="flex:1;font-size:12px;padding:10px">👷 Surveillants (${vCount})</button>
+    </div>
+
+    <!-- SEARCH -->
+    <input placeholder="🔍 Rechercher..." value="${formTeamSearch}" oninput="formTeamSearch=this.value;render()" style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:13px;margin-bottom:12px">
+
+    <!-- LEGEND -->
+    <div style="display:flex;gap:12px;margin-bottom:12px;font-size:10px;color:var(--muted);justify-content:center">
+      <span>🟢 OK</span><span>🟡 &lt;60j</span><span>🔴 Expiré</span><span>⚪ Vide</span>
+    </div>
+
+    <!-- PEOPLE LIST -->
+    ${filtered.length>0?filtered.map(p=>{
+      const data=getCertData(p.id);
+      const statuses=CERTS_LIST.map(c=>certStatus(c.id,p.id));
+      const dots=statuses.map(s=>s.status==='valid'?'🟢':s.status==='warning'?'🟡':s.status==='expired'?'🔴':'⚪').join('');
+      const expCount=statuses.filter(s=>s.status==='expired').length;
+      const warnCount=statuses.filter(s=>s.status==='warning').length;
+      const okCount=statuses.filter(s=>s.status==='valid').length;
+      const bg=expCount>0?'rgba(192,57,43,.06)':warnCount>0?'rgba(212,160,23,.06)':'var(--card)';
+      return `<div style="padding:10px 12px;background:${bg};border:1px solid var(--border);border-radius:10px;margin-bottom:5px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:13px;font-weight:600">${p.name}</div>
+            <div style="font-size:10px;color:var(--muted)">${p.volo} • ${p.region||'—'}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:12px;letter-spacing:1px">${dots}</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:2px">${okCount}✓ ${warnCount}⚠ ${expCount}✗</div>
+          </div>
+        </div>
+      </div>`;
+    }).join(''):'<div style="text-align:center;color:var(--muted);padding:20px">Aucun résultat</div>'}
+
+    <!-- CERT HEADERS LEGEND -->
+    <div style="margin-top:12px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:10px">
+      <div style="font-size:10px;color:var(--gold);letter-spacing:1px;font-family:Oswald,sans-serif;margin-bottom:6px">FORMATIONS SUIVIES</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${CERTS_LIST.map(c=>`<span style="font-size:10px;padding:3px 8px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.2);border-radius:6px">${c.icon} ${c.name} (${c.dur}m)</span>`).join('')}
+      </div>
+    </div>
+
+    <div class="btn-nav" style="margin-top:16px"><button class="btn btn-outline btn-sm" onclick="formView='main';formTeamSearch='';render()">◀ RETOUR</button></div>
+  </div>`;
+}
+
+// Flow V8 — Smart PICK-ON/PICK-OFF entry points
+function startPickOn(){
+  const active=getActiveDeployments();
+  const user=PERSONNEL.find(p=>p.volo==='V'+state.pin);
+  const myActive=user?active.filter(tx=>tx.sauveteur_nom===user.name||tx.sauveteur_id===user.id):[];
+  if(myActive.length>0){
+    const items=myActive.reduce((n,tx)=>{try{return n+JSON.parse(tx.items||'[]').length}catch(e){return n}},0);
+    if(!confirm('⚠️ Tu as déjà '+myActive.length+' déploiement'+(myActive.length>1?'s':'')+' actif'+(myActive.length>1?'s':'')+' ('+items+' items dehors).\n\nVeux-tu quand même lancer un nouveau PICK-ON?'))return;
+  }
+  setState({step:2,mode:'pickon'});
+}
+function startPickOff(){
+  // Flow V8 — Clean any residual pickoff state before entering
+  window._pickoffExpected=null;
+  window._pickoffOriginalTx=null;
+  setState({step:2,mode:'pickoff',scanned:[],sceaux:{},depot:null,dest:null,remorques:[],sauvs:[],numProjet:'',personneRessource:'',detailsJob:''});
+}
+
+function doValidation(){
+  const depot=DEPOTS.find(d=>d.id===state.depot);
+  const dest=DESTINATIONS.find(d=>d.id===state.dest);
+  const remNames=state.remorques&&state.remorques.length?state.remorques.map(id=>{const r=REMORQUES.find(x=>x.id===id);return r?r.name:id}).join(' + '):'Aucun';
+  const sauvNames=state.sauvs.map(id=>{const s=SAUVETEURS.find(x=>x.id===id);return s?s.name:id});
+  const payload={
+    mode:state.mode==='pickon'?'PICK-ON':'PICK-OFF',
+    sauveteur_id:state.sauvs[0]||'',
+    sauveteur_nom:sauvNames[0]||'',
+    remorque:remNames,
+    depot:depot?depot.name:'',
+    destination:dest?dest.name:'',
+    num_projet:state.numProjet||'',
+    personne_ressource:state.personneRessource||'',
+    personne_ressource_tel:state.personneRessourceTel||'',
+    personne_ressource_email:state.personneRessourceEmail||'',
+    details_job:state.detailsJob||'',
+    items:JSON.stringify(state.scanned.map(i=>({id:i.id,name:i.name,sceau:state.sceaux[i.id]||'N/A'}))),
+    nb_items:state.scanned.length,
+    statut:'ACTIF',
+    timestamp:tsNow()
+  };
+  lastPayload=payload;
+  cancelSeconds=300;
+  saveToHistory(payload);
+  // === V7.1 PICK-OFF FIX — Mark original PICK-ON as RETOURNÉ when PICK-OFF completes ===
+  if(state.mode==='pickoff'&&window._pickoffOriginalTx){
+    const origTx=window._pickoffOriginalTx;
+    const closurePayload={
+      mode:'PICK-ON',
+      sauveteur_id:origTx.sauveteur_id||'',
+      sauveteur_nom:origTx.sauveteur_nom||'',
+      remorque:origTx.remorque||'Aucun',
+      depot:origTx.depot||'',
+      destination:origTx.destination||'',
+      num_projet:origTx.num_projet||'',
+      personne_ressource:origTx.personne_ressource||'',
+      items:origTx.items||'[]',
+      nb_items:origTx.nb_items||0,
+      statut:'RETOURNÉ',
+      original_timestamp:origTx.timestamp,
+      timestamp:tsNow()
+    };
+    saveToHistory(closurePayload);
+    // Clean up global reference
+    window._pickoffOriginalTx=null;
+    window._pickoffExpected=null;
+  }
+  fetch('https://hook.us2.make.com/wm4fvbqy87nfcuf111azq02l3w2a87sh',{
+    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
+  }).then(r=>{if(r.ok)showToast('✅ Transaction envoyée','ok');else showToast('⚠️ Erreur serveur','err')})
+  .catch(()=>{
+    try{const q=JSON.parse(localStorage.getItem('volo_queue')||'[]');q.push(payload);localStorage.setItem('volo_queue',JSON.stringify(q))}catch(e){}
+    showToast('📴 Hors-ligne — sauvegardé localement','off');
+  });
+  // V9.1: Envoie 1 seul webhook ITEM_LOG avec items_array JSON (au lieu de 1 par item)
+  const itemsArray = state.scanned.map(item => {
+    const itemDef = ITEMS.find(x => x.id === item.id);
+    return {
+      item_id: item.id || '',
+      item_name: item.name || '',
+      item_cat: itemDef ? itemDef.cat : '',
+      item_icon: itemDef ? itemDef.icon : '📦',
+      sceau: state.sceaux[item.id] || 'N/A'
+    };
+  });
+  const itemBatchPayload = {
+    type: 'ITEM_LOG',
+    items_array: JSON.stringify(itemsArray),
+    nb_items: itemsArray.length,
+    mode: payload.mode,
+    sauveteur_nom: payload.sauveteur_nom,
+    sauveteur_id: payload.sauveteur_id,
+    destination: payload.destination,
+    depot: payload.depot,
+    num_projet: payload.num_projet,
+    remorque: payload.remorque,
+    timestamp: payload.timestamp
+  };
+  fetch('https://hook.us2.make.com/wm4fvbqy87nfcuf111azq02l3w2a87sh', {
+    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(itemBatchPayload)
+  }).catch(() => { try { const q = JSON.parse(localStorage.getItem('volo_queue') || '[]'); q.push(itemBatchPayload); localStorage.setItem('volo_queue', JSON.stringify(q)) } catch(e) {} });
+  setState({step:8});setTimeout(()=>playEagleCry(),300);
+  startCancelTimer();
+}
+function startCancelTimer(){
+  if(cancelTimer)clearInterval(cancelTimer);
+  cancelTimer=setInterval(()=>{
+    cancelSeconds--;
+    const el=document.getElementById('cancel-btn');
+    if(el){
+      if(cancelSeconds<=0){clearInterval(cancelTimer);cancelTimer=null;el.style.display='none';return}
+      const m=Math.floor(cancelSeconds/60);const s=cancelSeconds%60;
+      el.textContent=`ANNULER (${m}:${String(s).padStart(2,'0')} restant)`;
+    }
+  },1000);
+}
+function cancelTransaction(){
+  if(!lastPayload||cancelSeconds<=0)return;
+  if(cancelTimer){clearInterval(cancelTimer);cancelTimer=null;}
+  // === V7.1 PICK-OFF FIX — Preserve original_timestamp for key matching ===
+  const cancelPayload={...lastPayload,statut:'ANNULÉ',original_timestamp:lastPayload.timestamp,timestamp:tsNow()};
+  saveToHistory(cancelPayload);
+  fetch('https://hook.us2.make.com/wm4fvbqy87nfcuf111azq02l3w2a87sh',{
+    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cancelPayload)
+  }).then(r=>{if(r.ok)showToast('✅ Transaction annulée','ok');else showToast('⚠️ Erreur annulation','err')})
+  .catch(()=>showToast('📴 Annulation hors-ligne','off'));
+  lastPayload=null;cancelSeconds=0;
+  render();
+}
+// ===== MODULE 💰 MES GAINS (Step 15) =====
+function onPinContinue(){
+  const u=PERSONNEL.find(p=>p.volo==='V'+state.pin);
+  if(u){
+    localStorage.setItem('volo_last_role',u.type||'SAUVETEUR');
+    localStorage.setItem('volo_last_user',u.name);
+    localStorage.setItem('volo_pin',state.pin);
+  }
+  // Si login initial (pas encore loggé) → accueil conditionnel
+  if(!state.loggedIn){
+    setState({step:0,loggedIn:true});
+    return;
+  }
+  // Sinon, routing action spécifique
+  const nextStep=state.gainsMode?15:state.photoMode?11:state.kmMode?12:2;
+  if(state.gainsMode) gainsView='overview';
+  setState({step:nextStep});
+}
+
+// ── GAINS AUTO-CALC (read-only from pointage + KM) ──
+
+let gainsView='overview'; // overview|history
+let gainsHistPeriod='current'; // current|prev|all
+
+function getGainsUser(){
+  return PERSONNEL.find(p=>p.volo==='V'+state.pin)||null;
+}
+
+function getPayPeriods(){
+  // Weekly: Monday to Sunday, payday Thursday
+  const now=new Date();
+  const day=now.getDay(); // 0=Sun,1=Mon,...6=Sat
+  const diffToMon=day===0?-6:1-day; // days to subtract to get Monday
+  const mon=new Date(now);mon.setDate(now.getDate()+diffToMon);mon.setHours(0,0,0,0);
+  const sun=new Date(mon);sun.setDate(mon.getDate()+6);
+  const prevMon=new Date(mon);prevMon.setDate(mon.getDate()-7);
+  const prevSun=new Date(mon);prevSun.setDate(mon.getDate()-1);
+  const fmt=d=>d.toISOString().slice(0,10);
+  const label=d=>{const j=d.getDate();const m=d.toLocaleString('fr-CA',{month:'short'});return j+' '+m;};
+  return {
+    current:{label:label(mon)+' → '+label(sun),from:fmt(mon),to:fmt(sun)},
+    prev:{label:label(prevMon)+' → '+label(prevSun),from:fmt(prevMon),to:fmt(prevSun)},
+    payday:'Jeudi'
+  };
+}
+
+function renderMesGains(){
+  const user=getGainsUser();
+  if(!user) return '<div style="text-align:center;padding:40px"><h2>Erreur</h2><p style="color:var(--muted)">Utilisateur non identifié</p></div>';
+  const role=user.type||'SAUVETEUR';
+  const b=BAREMES[role]||BAREMES.SAUVETEUR;
+
+  if(gainsView==='history') return renderGainsHistory(user,role);
+
+  // AUTO-CALCULATE from pointage history + KM logs
+  const entries=getAutoGains(user);
+  const periods=getPayPeriods();
+  const currentEntries=entries.filter(e=>e.date>=periods.current.from&&e.date<=periods.current.to);
+
+  const totalMonth=currentEntries.reduce((s,e)=>s+e.total,0);
+  const totalKm=currentEntries.reduce((s,e)=>s+e.kmMontant,0);
+  const totalPerdiem=currentEntries.reduce((s,e)=>s+e.perdiem,0);
+  const totalUrg=currentEntries.reduce((s,e)=>s+e.urgMontant,0);
+  const nbJours=currentEntries.length;
+
+  return `
+    <div style="text-align:center;padding-top:10px">
+      <h2 style="margin:0;font-size:22px;letter-spacing:2px">💰 MES GAINS</h2>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">${user.name} • ${role}</div>
+      <div style="margin-top:6px;padding:4px 12px;display:inline-block;background:rgba(39,174,96,.1);border:1px solid rgba(39,174,96,.3);border-radius:20px;font-size:10px;color:var(--green);letter-spacing:1px">⚡ AUTO-CALCULÉ DEPUIS POINTAGE</div>
+      <div style="margin-top:8px;font-size:10px;color:var(--muted)">💵 Paye: <span style="color:var(--gold)">Jeudi</span> • Semaine: Lun→Dim</div>
+      <div style="margin-top:12px;font-size:11px;color:var(--gold);letter-spacing:2px;font-family:Oswald,sans-serif">${periods.current.label.toUpperCase()}</div>
+
+      ${(()=>{
+        // Flow V8 — Gentle notice if no pointage today
+        const today=new Date().toISOString().slice(0,10);
+        const hasToday=currentEntries.some(e=>e.date===today);
+        const isWorkday=new Date().getDay()>=1&&new Date().getDay()<=5;
+        if(!hasToday&&isWorkday){
+          return '<div style="margin-top:10px;padding:8px 14px;background:rgba(230,126,34,.08);border:1px solid rgba(230,126,34,.25);border-radius:10px;font-size:11px;color:var(--orange)">⏱ Pas encore de pointage aujourd\'hui — ton per diem n\'apparaîtra qu\'après ton pointage</div>';
+        }
+        return '';
+      })()}
+
+      <!-- TOTAL EN GROS -->
+      <div style="margin-top:14px;padding:28px 20px;background:linear-gradient(135deg,rgba(212,160,23,.12),rgba(230,81,0,.06));border:2px solid rgba(212,160,23,.4);border-radius:20px;box-shadow:0 8px 32px rgba(212,160,23,.08)">
+        <div style="font-family:Oswald,sans-serif;font-size:52px;font-weight:800;color:var(--gold);letter-spacing:2px;line-height:1">${totalMonth.toFixed(2)}<span style="font-size:22px;color:var(--muted)">$</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;letter-spacing:1px">${nbJours} jour${nbJours!==1?'s':''} travaillé${nbJours!==1?'s':''} cette semaine</div>
+      </div>
+
+      <!-- BREAKDOWN -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 8px;text-align:center">
+          <div style="font-size:20px;margin-bottom:4px">🚗</div>
+          <div style="font-family:Oswald,sans-serif;font-size:20px;font-weight:700;color:${totalKm>0?'var(--blue)':'var(--muted)'}">${totalKm.toFixed(0)}$</div>
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px">KM PERSO</div>
+          <div style="font-size:10px;color:var(--gold);margin-top:2px">${b.km_rate}$/km</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 8px;text-align:center">
+          <div style="font-size:20px;margin-bottom:4px">🍽️</div>
+          <div style="font-family:Oswald,sans-serif;font-size:20px;font-weight:700;color:var(--green)">${totalPerdiem.toFixed(0)}$</div>
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px">PER DIEM</div>
+          <div style="font-size:10px;color:var(--gold);margin-top:2px">${b.perdiem_standard}$/jour</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 8px;text-align:center">
+          <div style="font-size:20px;margin-bottom:4px">🚨</div>
+          <div style="font-family:Oswald,sans-serif;font-size:20px;font-weight:700;color:${totalUrg>0?'var(--red)':'var(--muted)'}">${totalUrg.toFixed(0)}$</div>
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px">URGENCES</div>
+          <div style="font-size:10px;color:var(--gold);margin-top:2px">${b.urgence_perdiem>0?(b.perdiem_standard+b.urgence_perdiem)+'$/jour':'—'}</div>
+        </div>
+      </div>
+
+      <!-- AJOUTER KM -->
+      <div onclick="setState({step:12,kmMode:true,kmFromGains:true,gainsMode:false,kmTab:'perso'})" style="margin-top:14px;padding:14px 18px;background:linear-gradient(135deg,rgba(52,152,219,.12),rgba(52,152,219,.05));border:2px dashed var(--blue);border-radius:14px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:all .3s">
+        <span style="font-size:28px">🚗</span>
+        <div style="text-align:left;flex:1">
+          <div style="font-weight:700;font-size:15px;color:var(--blue);letter-spacing:1px">➕ AJOUTER KM PERSO</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">Frais kilométriques véhicule personnel</div>
+        </div>
+        <span style="font-size:18px;color:var(--blue)">→</span>
+      </div>
+
+      <!-- BARÈME RAPIDE -->
+      <div style="margin-top:14px;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;text-align:left">
+        <div style="font-size:10px;color:var(--gold);letter-spacing:2px;font-family:Oswald,sans-serif;margin-bottom:6px">BARÈMES ${role}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px;color:var(--muted)">
+          <div>Standard: <span style="color:var(--txt)">${b.perdiem_standard}$/j</span></div>
+          <div>KM: <span style="color:var(--txt)">${b.km_rate}$/km</span></div>
+          ${role==='SAUVETEUR'?`<div>Urgence: <span style="color:var(--txt)">${b.perdiem_standard+b.urgence_perdiem}$/j</span></div>
+          <div>Route: <span style="color:var(--txt)">${b.urgence_rate}$/h</span></div>`:`<div>Local: <span style="color:var(--txt)">0$/j</span></div><div></div>`}
+        </div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div style="display:flex;gap:10px;margin-top:18px">
+        <button class="btn btn-gold" onclick="gainsView='history';render()" style="flex:1;font-size:15px;padding:16px">📜 DÉTAILS PAR JOUR</button>
+        <button class="btn btn-outline" onclick="exportAutoGainsCSV('${user.id}','${user.name}')" style="flex:1;font-size:13px;padding:16px">📁 CSV</button>
+      </div>
+
+      <!-- DERNIÈRES ENTRÉES -->
+      ${currentEntries.length>0?`
+      <div style="margin-top:18px;text-align:left">
+        <div style="font-size:11px;color:var(--gold);letter-spacing:2px;font-family:Oswald,sans-serif;margin-bottom:8px">DERNIERS JOURS</div>
+        ${currentEntries.slice(0,7).map(e=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:6px">
+          <div>
+            <div style="font-size:13px;font-weight:600">${{STANDARD:'📋',LOCAL:'🏢',URGENCE:'🚨',NEGOCIATION:'🤝'}[e.type]||'📋'} ${e.type}</div>
+            <div style="font-size:10px;color:var(--muted)">${e.date} • ${e.lieu}${e.km>0?' • '+e.km+'km':''}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-family:Oswald,sans-serif;font-size:18px;font-weight:700;color:var(--gold)">${e.total.toFixed(2)}$</div>
+            <div style="font-size:9px;color:var(--muted)">${e.perdiem>0?e.perdiem+'$ pd':''}${e.kmMontant>0?' + '+e.kmMontant.toFixed(0)+'$ km':''}${e.kmPersoMontant>0?' + '+e.kmPersoMontant.toFixed(0)+'$ perso':''}</div>
+          </div>
+        </div>`).join('')}
+      </div>`:'<div style="margin-top:20px;color:var(--muted);font-size:13px">Aucun pointage cette semaine.<br>Les gains apparaîtront automatiquement quand tu pointes.</div>'}
+
+      <div class="btn-nav" style="margin-top:16px"><button class="btn btn-outline btn-sm" onclick="gainsView='overview';setState({step:0,gainsMode:false})">◀ ACCUEIL</button></div>
+    </div>`;
+}
+
+// ── AUTO-CALCULATE GAINS FROM POINTAGE + KM ──
+function getAutoGains(user){
+  const ptgHist=JSON.parse(localStorage.getItem('volo-ptg-history')||'[]');
+  const kmLogs=getKmLogs();
+  const role=user.type||'SAUVETEUR';
+  const b=BAREMES[role]||BAREMES.SAUVETEUR;
+  const myArrivals=ptgHist.filter(e=>e.sauveteur_id===user.id&&e.mode==='ARRIVÉE');
+  const myDeparts=ptgHist.filter(e=>e.sauveteur_id===user.id&&e.mode==='DÉPART');
+  const dateMap={};
+  myArrivals.forEach(a=>{
+    const date=a.timestamp?a.timestamp.slice(0,10):'';
+    if(!date)return;
+    if(!dateMap[date]) dateMap[date]={type:a.mission_type||'STANDARD',lieu:a.lieu||'',region:a.region||''};
+  });
+  myDeparts.forEach(d=>{
+    const date=d.timestamp?d.timestamp.slice(0,10):'';
+    if(date&&dateMap[date]) dateMap[date].heures=d.heures||'';
+  });
+  // km_logs = véhicule personnel (remboursé) — 1 entrée max par jour (anti-fraude)
+  const myKm={};
+  kmLogs.filter(l=>l.sauveteur_id===user.id||l.sauveteur_volo===user.volo||l.sauveteur===user.name).forEach(l=>{
+    const date=l.timestamp?l.timestamp.slice(0,10):'';
+    if(!date)return;
+    // Prend le MAX au lieu d'additionner — empêche accumulation frauduleuse
+    myKm[date]=Math.max(myKm[date]||0, l.km_total||0);
+  });
+  const entries=[];
+  Object.keys(dateMap).sort().reverse().forEach(date=>{
+    const d=dateMap[date];
+    const type=d.type||'STANDARD';
+    const km=(myKm[date]||0);
+    const kmMontant=km*b.km_rate;
+    let perdiemJour=0,urgMontant=0;
+    if(type==='STANDARD') perdiemJour=b.perdiem_standard;
+    else if(type==='LOCAL') perdiemJour=0;
+    else if(type==='URGENCE'){perdiemJour=b.perdiem_standard+b.urgence_perdiem;}
+    const perdiem=perdiemJour;
+    const total=kmMontant+perdiem+urgMontant;
+    entries.push({date,type,lieu:d.lieu,region:d.region,heures:d.heures||'',km,kmMontant,perdiem,perdiemJour,urgMontant,total});
+  });
+  return entries;
+}
+
+function renderGainsHistory(user,role){
+  const entries=getAutoGains(user);
+  const periods=getPayPeriods();
+  const b=BAREMES[role]||BAREMES.SAUVETEUR;
+  let filtered=entries;
+  if(gainsHistPeriod==='current') filtered=entries.filter(e=>e.date>=periods.current.from&&e.date<=periods.current.to);
+  else if(gainsHistPeriod==='prev') filtered=entries.filter(e=>e.date>=periods.prev.from&&e.date<=periods.prev.to);
+  const total=filtered.reduce((s,e)=>s+e.total,0);
+  return `
+    <div style="padding-top:10px">
+      <h2 style="text-align:center;margin:0;font-size:20px">📜 DÉTAILS PAR JOUR</h2>
+      <div style="text-align:center;font-size:12px;color:var(--muted);margin-top:4px;margin-bottom:14px">${user.name} • ${role}</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        ${['current','prev','all'].map(p=>`<button class="btn ${gainsHistPeriod===p?'btn-gold':'btn-outline'}" onclick="gainsHistPeriod='${p}';render()" style="flex:1;font-size:11px;padding:10px">${p==='current'?'Cette sem.':p==='prev'?'Sem. dernière':'Historique'}</button>`).join('')}
+      </div>
+      <div style="padding:14px;background:linear-gradient(135deg,rgba(212,160,23,.12),rgba(230,81,0,.06));border:2px solid rgba(212,160,23,.3);border-radius:16px;text-align:center;margin-bottom:14px">
+        <div style="font-size:11px;color:var(--muted);letter-spacing:1px">${filtered.length} JOUR${filtered.length!==1?'S':''}</div>
+        <div style="font-family:Oswald,sans-serif;font-size:36px;font-weight:800;color:var(--gold)">${total.toFixed(2)}$</div>
+      </div>
+      ${filtered.length>0?filtered.map(e=>`
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:6px">
+          <div>
+            <div style="font-size:13px;font-weight:600">${{STANDARD:'📋',LOCAL:'🏢',URGENCE:'🚨',NEGOCIATION:'🤝'}[e.type]||'📋'} ${e.type}</div>
+            <div style="font-size:10px;color:var(--muted)">${e.date} • ${e.lieu}</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:2px">${e.heures?'⏱ '+e.heures+' travaillées':''}${e.km>0?' • 🚗 '+e.km+'km perso':''}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-family:Oswald,sans-serif;font-size:18px;font-weight:700;color:var(--gold)">${e.total.toFixed(2)}$</div>
+            <div style="font-size:9px;color:var(--muted)">${e.perdiem>0?e.perdiem+'$ pd':''}${e.kmMontant>0?' + '+e.kmMontant.toFixed(0)+'$ km':''}</div>
+          </div>
+        </div>`).join(''):'<div style="text-align:center;color:var(--muted);padding:30px;font-size:13px">Aucun pointage pour cette période.</div>'}
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-outline" onclick="exportAutoGainsCSV()" style="flex:1;font-size:12px;padding:12px">📁 EXPORT CSV</button>
+        <button class="btn btn-gold" onclick="gainsView='overview';render()" style="flex:1;font-size:12px;padding:12px">◀ RÉSUMÉ</button>
+      </div>
+    </div>`;
+}
+
+function exportAutoGainsCSV(){
+  const user=getGainsUser();
+  if(!user)return;
+  const entries=getAutoGains(user);
+  const periods=getPayPeriods();
+  let filtered=entries;
+  if(gainsHistPeriod==='current') filtered=entries.filter(e=>e.date>=periods.current.from&&e.date<=periods.current.to);
+  else if(gainsHistPeriod==='prev') filtered=entries.filter(e=>e.date>=periods.prev.from&&e.date<=periods.prev.to);
+  let csv='GAINS AUTO — '+user.name+'\nPériode:,'+gainsHistPeriod+'\n\n';
+  csv+='Date,Type,Lieu,Heures,KM_AR,KM$,Per_Diem$,Urgence$,Total$\n';
+  let grand=0;
+  filtered.forEach(e=>{
+    grand+=e.total;
+    csv+='"'+[e.date,e.type,e.lieu,e.heures,e.km,e.kmMontant.toFixed(2),e.perdiem.toFixed(2),e.urgMontant.toFixed(2),e.total.toFixed(2)].join('","')+'"\n';
+  });
+  csv+='\nTOTAL:,,,,,,,,'+grand.toFixed(2)+'\n';
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='VOLO-Gains-'+user.name.replace(/\s/g,'_')+'-'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  URL.revokeObjectURL(url);
+  showToast('📁 CSV exporté','ok');
+}
+
+function resetAll(){stopQrScanner();if(cancelTimer){clearInterval(cancelTimer);cancelTimer=null;}lastPayload=null;cancelSeconds=0;formView='main';window._pickoffExpected=null;window._pickoffOriginalTx=null;const keepPin=state.pin;setState({step:0,pin:keepPin,depot:null,remorques:[],dest:null,numProjet:'',personneRessource:'',personneRessourceTel:'',personneRessourceEmail:'',detailsJob:'',sauvs:[],scanned:[],sceaux:{},mode:'pickon',showModal:null,camMode:true,searchQ:'',filterType:'all',itemQ:'',catFilter:'all',photoMode:false,setupPhotos:[],photoLieu:'',photoContrat:'',kmMode:false,kmFromGains:false,kmAllerRetour:true,kmDebut:'',kmDest:'',kmProjet:'',kmPerso:'',kmTab:'vehicule',kmVehicle:'',kmOdoStart:'',kmOdoEnd:'',gainsMode:false,loggedIn:true})}
+// ===== INIT =====
+// Network indicator
+function updateNetBadge(){
+  let el=document.getElementById('net-badge');
+  if(!el){el=document.createElement('div');el.id='net-badge';document.body.appendChild(el)}
+  if(navigator.onLine){el.className='net-badge net-on';el.textContent='● EN LIGNE'}
+  else{el.className='net-badge net-off';el.textContent='● HORS-LIGNE'}
+}
+window.addEventListener('online',()=>{updateNetBadge();showToast('✅ Connexion rétablie','ok');flushQueue()});
+window.addEventListener('offline',()=>{updateNetBadge();showToast('📴 Connexion perdue','off')});
+
+// Offline queue auto-retry
+function flushQueue(){
+  let q;try{q=JSON.parse(localStorage.getItem('volo_queue')||'[]')}catch(e){return}
+  if(!q.length)return;
+  showToast('🔄 Envoi de '+q.length+' transaction(s) en attente...','ok');
+  const send=async()=>{
+    const remaining=[];
+    for(const p of q){
+      try{
+        const r=await fetch('https://hook.us2.make.com/wm4fvbqy87nfcuf111azq02l3w2a87sh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});
+        if(!r.ok)remaining.push(p);
+      }catch(e){remaining.push(p)}
+    }
+    localStorage.setItem('volo_queue',JSON.stringify(remaining));
+    if(remaining.length===0)showToast('✅ Toutes les transactions envoyées','ok');
+    else showToast('⚠️ '+remaining.length+' transaction(s) en échec','err');
+  };
+  send();
+}
+
+updateNetBadge();
+if(navigator.onLine)flushQueue();
+// Auto-login from saved PIN
+const savedPin=localStorage.getItem('volo_pin');
+if(savedPin&&savedPin.length===4){
+  const u=PERSONNEL.find(p=>p.volo==='V'+savedPin);
+  if(u){
+    state.pin=savedPin;state.loggedIn=true;state.step=0;
+    // V9.1: Always sync role on auto-login (fixes stale role after pointage redirect)
+    localStorage.setItem('volo_last_role',u.type||'SAUVETEUR');
+    localStorage.setItem('volo_last_user',u.name);
+  }
+}
+render();
+// Check for overdue items on load
+setTimeout(()=>checkOverdueItems(),2000);
+// Re-check every 30 minutes
+setInterval(()=>checkOverdueItems(),1800000);
+</script>
+</body>
+</html>
