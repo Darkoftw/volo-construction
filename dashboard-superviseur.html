@@ -1,13 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr" class="dark">
+<html lang="fr" id="appRoot">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VOLO SST — Tableau de Bord Superviseurs</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config={darkMode:'class',theme:{extend:{colors:{volo:{bg:'#12090B',card:'#1C1012',card2:'#231518',card3:'#2A1A1E',gold:'#D4A017',goldL:'#E8C547',goldD:'#A67C10',rescue:'#E65100',rescueL:'#FF6D00',rescueD:'#BF360C',red:'#C0392B',green:'#27AE60',orange:'#E67E22',blue:'#3B82F6',txt:'#F5F0EB',muted:'#B8A99A',border:'#3A2428'}},fontFamily:{title:['Oswald'],body:['Inter'],mono:['JetBrains Mono']},animation:{'shimmer':'shimmer 3s ease infinite','float':'float 3s ease-in-out infinite','slide-up':'slideUp .5s cubic-bezier(.4,0,.2,1) forwards','toast-in':'toastIn .4s ease forwards','toast-out':'toastOut .4s ease forwards','modal-in':'modalIn .3s ease forwards'},keyframes:{shimmer:{'0%':{backgroundPosition:'200% 0'},'100%':{backgroundPosition:'-200% 0'}},float:{'0%,100%':{transform:'translateY(0)'},'50%':{transform:'translateY(-8px)'}},slideUp:{from:{opacity:'0',transform:'translateY(20px)'},to:{opacity:'1',transform:'translateY(0)'}},toastIn:{from:{opacity:'0',transform:'translateY(20px)'},to:{opacity:'1',transform:'translateY(0)'}},toastOut:{from:{opacity:'1'},to:{opacity:'0',transform:'translateY(20px)'}},modalIn:{from:{opacity:'0',transform:'scale(.95)'},to:{opacity:'1',transform:'scale(1)'}}}}}}
-</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -18,6 +14,70 @@ tailwind.config={darkMode:'class',theme:{extend:{colors:{volo:{bg:'#12090B',card
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 body{background:#0C0608}
+
+html.light{
+  --bg:#F8FAFC;--card:rgba(255,255,255,.96);--card2:rgba(241,245,249,.98);--cardSolid:#fff;
+  --gold:#C2410C;--goldL:#EA580C;
+  --rescue:#E65100;--rescueL:#EA580C;--rescueD:#BF360C;--rescueGlow:rgba(230,81,0,.09);
+  --txt:#0F172A;--muted:#64748B;--border:rgba(203,213,225,.9);
+}
+
+/* ---- AURA GLOW LAYERS ---- */
+/* Layer 1 — grain texture */
+body::before{
+  content:'';position:fixed;inset:0;
+  background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.028'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:.6;
+}
+/* Layer 2 — orange aura bloom (top-center like the main app hero) */
+body::after{
+  content:'';
+  position:fixed;
+  top:-120px;
+  left:50%;
+  transform:translateX(-50%);
+  width:900px;
+  height:600px;
+  background:
+    radial-gradient(ellipse 55% 40% at 50% 20%, rgba(230,81,0,.22) 0%, transparent 70%),
+    radial-gradient(ellipse 35% 25% at 50% 10%, rgba(255,109,0,.12) 0%, transparent 65%),
+    radial-gradient(ellipse 70% 30% at 50% 0%, rgba(180,60,0,.08) 0%, transparent 80%);
+  pointer-events:none;
+  z-index:0;
+  animation:aura-breathe 6s ease-in-out infinite;
+}
+html.light body::after{opacity:.12}
+@keyframes aura-breathe{
+  0%,100%{opacity:.85;transform:translateX(-50%) scaleX(1)}
+  50%{opacity:1;transform:translateX(-50%) scaleX(1.06)}
+}
+/* Additional deep glow — bottom corners */
+.aura-corners::before{
+  content:'';position:fixed;
+  bottom:0;left:-10%;width:45%;height:35%;
+  background:radial-gradient(ellipse at bottom left, rgba(230,81,0,.06) 0%, transparent 70%);
+  pointer-events:none;z-index:0;
+}
+.aura-corners::after{
+  content:'';position:fixed;
+  bottom:0;right:-10%;width:45%;height:35%;
+  background:radial-gradient(ellipse at bottom right, rgba(212,160,23,.05) 0%, transparent 70%);
+  pointer-events:none;z-index:0;
+}
+.theme-pill{
+  position:fixed;bottom:24px;right:20px;z-index:100;
+  display:flex;border-radius:20px;background:#1C1012;
+  border:1px solid rgba(68,40,46,.55);overflow:hidden;
+  box-shadow:0 4px 20px rgba(0,0,0,.4);
+}
+html.light .theme-pill{background:#fff;border-color:rgba(203,213,225,.9)}
+.theme-btn{
+  padding:8px 14px;font-size:.9rem;cursor:pointer;
+  background:transparent;border:none;transition:background .2s;
+}
+.theme-btn:hover{background:rgba(212,160,23,.1)}
+.theme-btn.active{background:rgba(230,81,0,.15)}
+
 .gold-shimmer{background:linear-gradient(90deg,#BF360C,#E65100,#FF6D00,#E65100,#BF360C);background-size:300% 100%;animation:shimmer 4s ease infinite}
 ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:#12090B}::-webkit-scrollbar-thumb{background:#3A2428;border-radius:3px}::-webkit-scrollbar-thumb:hover{background:#D4A017}
 .glass-card{background:rgba(28,16,18,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(58,36,40,.6);transition:all .3s cubic-bezier(.4,0,.2,1)}
@@ -59,15 +119,454 @@ body{background:#0C0608}
 .region-select{background:#12090B;border:1px solid #3A2428;color:#F5F0EB;font-family:'Inter',sans-serif;font-size:11px;padding:6px 10px;border-radius:8px;outline:none;width:100%;transition:all .2s;cursor:pointer;-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23D4A017' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:28px}
 .region-select:focus{border-color:rgba(212,160,23,.5);box-shadow:0 0 0 2px rgba(212,160,23,.15)}
 .region-select option{background:#1C1012;color:#F5F0EB}
+
+/* COLLAPSIBLE SECTIONS */
+.sec-toggle{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:opacity .2s}
+.sec-toggle:hover{opacity:.85}
+.sec-arrow{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;background:rgba(58,36,40,.5);border:1px solid rgba(68,40,46,.5);color:#D4A017;font-size:11px;transition:all .3s;flex-shrink:0}
+.sec-arrow.collapsed{transform:rotate(-90deg)}
+.sec-body{overflow:hidden;transition:max-height .4s cubic-bezier(.4,0,.2,1),opacity .3s;max-height:5000px;opacity:1}
+.sec-body.collapsed{max-height:0!important;opacity:0;margin-top:0!important;padding-top:0!important}
+
+/* ============================================================
+   TACTICAL EAGLE — CSS VARS & UTILITY SYSTEM (Tailwind-free)
+   Matches identité VOLO SST main app
+   ============================================================ */
+:root {
+  --bg: #12090B;
+  --card: #1C1012;
+  --card2: #231518;
+  --card3: #2A1A1E;
+  --gold: #D4A017;
+  --goldL: #E8C547;
+  --goldD: #A67C10;
+  --rescue: #E65100;
+  --rescueL: #FF6D00;
+  --rescueD: #BF360C;
+  --red: #C0392B;
+  --green: #27AE60;
+  --orange: #E67E22;
+  --blue: #3B82F6;
+  --txt: #F5F0EB;
+  --muted: #B8A99A;
+  --border: #3A2428;
+}
+html.light {
+  --bg: #F4F0EC;
+  --card: rgba(255,255,255,.97);
+  --card2: rgba(241,237,233,.99);
+  --card3: #fff;
+  --gold: #C2410C;
+  --goldL: #EA580C;
+  --goldD: #9A3412;
+  --rescue: #D94A00;
+  --rescueL: #EA580C;
+  --rescueD: #B84200;
+  --txt: #1A0E10;
+  --muted: #7B6B5E;
+  --border: rgba(180,150,130,.4);
+}
+
+/* ---- BODY / RESET ---- */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--txt);
+  font-family:'Inter',system-ui,sans-serif;
+  min-height:100vh;line-height:1.5;
+}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit}
+
+/* ---- DISPLAY ---- */
+.flex{display:flex!important}
+.inline-flex{display:inline-flex!important}
+.grid{display:grid!important}
+.block{display:block!important}
+.hidden{display:none!important}
+.table{display:table!important}
+
+/* ---- FLEX ---- */
+.flex-1{flex:1 1 0%}
+.flex-col{flex-direction:column}
+.flex-row{flex-direction:row}
+.flex-shrink-0{flex-shrink:0}
+.flex-wrap{flex-wrap:wrap}
+.items-center{align-items:center}
+.items-start{align-items:flex-start}
+.items-end{align-items:flex-end}
+.justify-between{justify-content:space-between}
+.justify-center{justify-content:center}
+.justify-end{justify-content:flex-end}
+.self-center{align-self:center}
+
+/* ---- GRID ---- */
+.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}
+.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+
+/* ---- GAP ---- */
+.gap-1{gap:4px}.gap-1\.5{gap:6px}.gap-2{gap:8px}.gap-3{gap:12px}
+.gap-4{gap:16px}.gap-5{gap:20px}
+
+/* ---- SPACING ---- */
+.p-2{padding:8px}.p-2\.5{padding:10px}.p-3{padding:12px}
+.p-4{padding:16px}.p-5{padding:20px}.p-6{padding:24px}
+.px-1\.5{padding-left:6px;padding-right:6px}
+.px-2{padding-left:8px;padding-right:8px}
+.px-3{padding-left:12px;padding-right:12px}
+.px-4{padding-left:16px;padding-right:16px}
+.py-0\.5{padding-top:2px;padding-bottom:2px}
+.py-1{padding-top:4px;padding-bottom:4px}
+.py-1\.5{padding-top:6px;padding-bottom:6px}
+.py-2{padding-top:8px;padding-bottom:8px}
+.py-2\.5{padding-top:10px;padding-bottom:10px}
+.py-3{padding-top:12px;padding-bottom:12px}
+.py-4{padding-top:16px;padding-bottom:16px}
+.py-8{padding-top:32px;padding-bottom:32px}
+.pl-11{padding-left:44px}
+.pr-1{padding-right:4px}.pr-3{padding-right:12px}.pr-4{padding-right:16px}
+.pb-2{padding-bottom:8px}.pb-4{padding-bottom:16px}.pb-8{padding-bottom:32px}
+.pt-3{padding-top:12px}
+.pt-\[76px\]{padding-top:76px}
+.mt-0\.5{margin-top:2px}.mt-1{margin-top:4px}.mt-1\.5{margin-top:6px}
+.mt-2{margin-top:8px}.mt-3{margin-top:12px}.mt-4{margin-top:16px}
+.mt-6{margin-top:24px}
+.mb-1{margin-bottom:4px}.mb-2{margin-bottom:8px}.mb-3{margin-bottom:12px}
+.mb-4{margin-bottom:16px}.mb-5{margin-bottom:20px}
+.ml-1{margin-left:4px}.ml-2{margin-left:8px}.ml-3{margin-left:12px}
+.ml-auto{margin-left:auto}
+.mr-1{margin-right:4px}
+.mx-1{margin-left:4px;margin-right:4px}
+.mx-auto{margin-left:auto;margin-right:auto}
+
+/* ---- SIZING ---- */
+.w-full{width:100%}
+.w-2{width:8px}.w-4{width:16px}.w-5{width:20px}.w-8{width:32px}
+.w-10{width:40px}.w-16{width:64px}
+.h-1{height:4px}.h-2{height:8px}.h-4{height:16px}.h-5{height:20px}
+.h-8{height:32px}.h-10{height:40px}.h-16{height:64px}
+.h-full{height:100%}
+.h-56{height:224px}.h-64{height:256px}
+.h-56{height:224px}
+.min-h-screen{min-height:100vh}
+.min-w-0{min-width:0}
+.max-w-\[1600px\]{max-width:1600px}
+.max-w-\[400px\]{max-width:400px}
+.max-w-\[480px\]{max-width:480px}
+.max-w-\[520px\]{max-width:520px}
+.max-w-\[120px\]{max-width:120px}
+.max-w-\[140px\]{max-width:140px}
+.max-w-\[160px\]{max-width:160px}
+.max-h-40{max-height:160px}
+.max-h-48{max-height:192px}
+.max-h-56{max-height:224px}
+.max-h-\[80vh\]{max-height:80vh}
+.aspect-square{aspect-ratio:1/1}
+
+/* ---- POSITION ---- */
+.relative{position:relative}
+.absolute{position:absolute}
+.fixed{position:fixed}
+.inset-0{inset:0}
+.top-0{top:0}.top-1{top:4px}.top-1\/2{top:50%}
+.left-0{left:0}.left-4{left:16px}
+.right-0{right:0}
+.z-40{z-index:40}.z-50{z-index:50}
+.-translate-y-1\/2{transform:translateY(-50%)}
+
+/* ---- OVERFLOW ---- */
+.overflow-hidden{overflow:hidden}
+.overflow-x-auto{overflow-x:auto}
+.overflow-y-auto{overflow-y:auto}
+
+/* ---- BORDERS ---- */
+.border{border:1px solid var(--border)}
+.border-2{border-width:2px}
+.border-b{border-bottom:1px solid var(--border)}
+.border-t{border-top:1px solid var(--border)}
+.rounded{border-radius:4px}
+.rounded-md{border-radius:6px}
+.rounded-lg{border-radius:8px}
+.rounded-xl{border-radius:12px}
+.rounded-2xl{border-radius:16px}
+.rounded-full{border-radius:9999px}
+
+/* ---- BG COLORS ---- */
+.bg-volo-bg{background:var(--bg)}
+.bg-volo-card{background:var(--card)}
+.bg-volo-card2{background:var(--card2)}
+.bg-volo-blue{background:var(--blue)}
+.bg-volo-green{background:var(--green)}
+.bg-volo-orange{background:var(--orange)}
+.bg-volo-red{background:var(--red)}
+.bg-volo-rescue{background:var(--rescue)}
+.bg-volo-gold{background:var(--gold)}
+.bg-gradient-to-r.from-\[\#E65100\].to-\[\#FF6D00\]{
+  background:linear-gradient(to right,#E65100,#FF6D00)}
+
+/* opacity bg variants */
+.bg-volo-bg\/30{background:color-mix(in srgb,var(--bg) 30%,transparent)}
+.bg-volo-bg\/40{background:color-mix(in srgb,var(--bg) 40%,transparent)}
+.bg-volo-bg\/60{background:color-mix(in srgb,var(--bg) 60%,transparent)}
+.bg-volo-bg\/95{background:color-mix(in srgb,var(--bg) 95%,transparent)}
+.bg-volo-card\/80{background:color-mix(in srgb,var(--card) 80%,transparent)}
+.bg-volo-card\/95{background:color-mix(in srgb,var(--card) 95%,transparent)}
+.bg-volo-card2\/60{background:color-mix(in srgb,var(--card2) 60%,transparent)}
+.bg-volo-card2\/80{background:color-mix(in srgb,var(--card2) 80%,transparent)}
+.bg-volo-blue\/8{background:rgba(59,130,246,.08)}
+.bg-volo-blue\/10{background:rgba(59,130,246,.1)}
+.bg-volo-green\/15{background:rgba(39,174,96,.15)}
+.bg-volo-gold\/15{background:rgba(212,160,23,.15)}
+.bg-volo-muted\/15{background:rgba(184,169,154,.15)}
+.bg-volo-orange\/15{background:rgba(230,126,34,.15)}
+.bg-volo-red\/5{background:rgba(192,57,43,.05)}
+.bg-volo-red\/15{background:rgba(192,57,43,.15)}
+.bg-volo-red\/20{background:rgba(192,57,43,.2)}
+.bg-volo-rescue\/10{background:rgba(230,81,0,.1)}
+.bg-volo-rescue\/20{background:rgba(230,81,0,.2)}
+
+/* ---- TEXT COLORS ---- */
+.text-volo-txt{color:var(--txt)}
+.text-volo-muted{color:var(--muted)}
+.text-volo-gold{color:var(--gold)}
+.text-volo-goldL{color:var(--goldL)}
+.text-volo-green{color:var(--green)}
+.text-volo-blue{color:var(--blue)}
+.text-volo-orange{color:var(--orange)}
+.text-volo-red{color:var(--red)}
+.text-volo-rescue{color:var(--rescue)}
+.text-volo-border{color:var(--border)}
+.text-white{color:#fff}
+.text-\[\#E65100\]{color:#E65100}
+.text-blue-400{color:#60a5fa}
+
+/* opacity text variants */
+.text-volo-muted\/60{color:color-mix(in srgb,var(--muted) 60%,transparent)}
+.text-volo-red\/70{color:color-mix(in srgb,var(--red) 70%,transparent)}
+.text-volo-rescue\/80{color:color-mix(in srgb,var(--rescue) 80%,transparent)}
+
+/* ---- BORDER COLORS ---- */
+.border-volo-border{border-color:var(--border)}
+.border-volo-border\/20{border-color:color-mix(in srgb,var(--border) 20%,transparent)}
+.border-volo-border\/30{border-color:color-mix(in srgb,var(--border) 30%,transparent)}
+.border-volo-blue\/20{border-color:rgba(59,130,246,.2)}
+.border-volo-blue\/30{border-color:rgba(59,130,246,.3)}
+.border-volo-gold\/30{border-color:rgba(212,160,23,.3)}
+.border-volo-red\/20{border-color:rgba(192,57,43,.2)}
+.border-volo-red\/40{border-color:rgba(192,57,43,.4)}
+.border-volo-rescue{border-color:var(--rescue)}
+.border-volo-rescue\/20{border-color:rgba(230,81,0,.2)}
+.border-volo-rescue\/30{border-color:rgba(230,81,0,.3)}
+.border-volo-rescue\/40{border-color:rgba(230,81,0,.4)}
+.border-volo-orange\/30{border-color:rgba(230,126,34,.3)}
+.border-volo-orange\/40{border-color:rgba(230,126,34,.4)}
+.border-blue-400\/40{border-color:rgba(96,165,250,.4)}
+.border-\[\#E65100\]{border-color:#E65100}
+
+/* ---- PLACEHOLDER ---- */
+.placeholder-volo-muted\/60::placeholder{color:color-mix(in srgb,var(--muted) 60%,transparent)}
+
+/* ---- FONT ---- */
+.font-title{font-family:'Oswald',sans-serif}
+.font-body{font-family:'Inter',sans-serif}
+.font-mono{font-family:'JetBrains Mono','Courier New',monospace}
+.font-bold{font-weight:700}
+.font-semibold{font-weight:600}
+.text-xs{font-size:.75rem}
+.text-sm{font-size:.875rem}
+.text-lg{font-size:1.125rem}
+.text-xl{font-size:1.25rem}
+.text-2xl{font-size:1.5rem}
+.text-3xl{font-size:1.875rem}
+.text-\[8px\]{font-size:8px}
+.text-\[9px\]{font-size:9px}
+.text-\[10px\]{font-size:10px}
+.text-\[11px\]{font-size:11px}
+.text-\[12px\]{font-size:12px}
+.text-\[13px\]{font-size:13px}
+.tracking-wide{letter-spacing:.025em}
+.tracking-\[1px\]{letter-spacing:1px}
+.tracking-\[2px\]{letter-spacing:2px}
+.tracking-\[3px\]{letter-spacing:3px}
+.leading-tight{line-height:1.25}
+
+/* ---- TEXT ALIGN ---- */
+.text-left{text-align:left}
+.text-center{text-align:center}
+.text-right{text-align:right}
+
+/* ---- MISC ---- */
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.whitespace-nowrap{white-space:nowrap}
+.opacity-0{opacity:0}
+.opacity-50{opacity:.5}
+.pointer-events-none{pointer-events:none}
+.cursor-pointer{cursor:pointer}
+.cursor-default{cursor:default}
+.select-none{user-select:none;-webkit-user-select:none}
+.object-cover{object-fit:cover}
+
+/* ---- TRANSITIONS ---- */
+.transition-all{transition:all .3s cubic-bezier(.4,0,.2,1)}
+.transition-colors{transition:color .2s,background-color .2s,border-color .2s}
+.transition-transform{transition:transform .3s}
+.duration-500{transition-duration:500ms}
+
+/* ---- HOVER / ACTIVE / FOCUS ---- */
+.hover\:scale-\[1\.02\]:hover{transform:scale(1.02)}
+.hover\:scale-\[1\.03\]:hover{transform:scale(1.03)}
+.hover\:text-volo-gold:hover{color:var(--gold)}
+.hover\:text-volo-goldL:hover{color:var(--goldL)}
+.hover\:text-volo-blue:hover{color:var(--blue)}
+.hover\:text-volo-blue\/80:hover{color:color-mix(in srgb,var(--blue) 80%,transparent)}
+.hover\:text-volo-rescue:hover{color:var(--rescue)}
+.hover\:text-volo-red:hover{color:var(--red)}
+.hover\:border-volo-gold:hover{border-color:var(--gold)}
+.hover\:border-volo-gold\/40:hover{border-color:rgba(212,160,23,.4)}
+.hover\:border-volo-blue:hover{border-color:var(--blue)}
+.hover\:border-volo-blue\/40:hover{border-color:rgba(59,130,246,.4)}
+.hover\:border-volo-rescue:hover{border-color:var(--rescue)}
+.hover\:border-volo-rescue\/40:hover{border-color:rgba(230,81,0,.4)}
+.hover\:border-volo-rescue\/50:hover{border-color:rgba(230,81,0,.5)}
+.hover\:bg-volo-card2\/50:hover{background:color-mix(in srgb,var(--card2) 50%,transparent)}
+.hover\:bg-volo-rescue\/20:hover{background:rgba(230,81,0,.2)}
+.hover\:bg-volo-rescue\/30:hover{background:rgba(230,81,0,.3)}
+.hover\:bg-volo-red\/30:hover{background:rgba(192,57,43,.3)}
+.hover\:shadow-lg:hover{box-shadow:0 10px 25px -3px rgba(0,0,0,.4)}
+.hover\:shadow-\[\#E65100\]\/20:hover{box-shadow:0 0 20px rgba(230,81,0,.2)}
+.hover\:underline:hover{text-decoration:underline}
+.active\:scale-95:active{transform:scale(.95)}
+.focus\:outline-none:focus{outline:none}
+.focus\:border-volo-gold\/50:focus{border-color:rgba(212,160,23,.5)}
+.focus\:border-volo-blue\/50:focus{border-color:rgba(59,130,246,.5)}
+.focus\:border-volo-rescue\/50:focus{border-color:rgba(230,81,0,.5)}
+
+/* ---- RESPONSIVE BREAKPOINTS (all !important to win cascade) ---- */
+@media(min-width:640px){
+  [class~="sm:block"]{display:block!important}
+  [class~="sm:grid-cols-2"]{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(min-width:768px){
+  [class~="md:flex"]{display:flex!important}
+  [class~="md:grid-cols-4"]{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  [class~="md:table-cell"]{display:table-cell!important}
+  [class~="hidden"][class~="md:flex"]{display:flex!important}
+}
+@media(min-width:1024px){
+  [class~="lg:flex"]{display:flex!important}
+  [class~="lg:grid-cols-2"]{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  [class~="lg:grid-cols-3"]{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  [class~="lg:grid-cols-8"]{grid-template-columns:repeat(8,minmax(0,1fr))!important}
+  [class~="lg:px-6"]{padding-left:24px!important;padding-right:24px!important}
+  [class~="lg:table-cell"]{display:table-cell!important}
+}
+@media(min-width:1280px){
+  [class~="xl:flex"]{display:flex!important}
+  [class~="xl:flex-row"]{flex-direction:row!important}
+  [class~="xl:grid-cols-4"]{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  [class~="xl:w-80"]{width:320px!important}
+}
+/* hide elements that are hidden on mobile, shown only on specific breakpoints */
+@media(max-width:767px){
+  [class~="md:flex"]:not([class~="flex"]){display:none}
+  [class~="md:table-cell"]{display:none!important}
+}
+@media(max-width:1023px){
+  [class~="lg:flex"]:not([class~="flex"]){display:none}
+  [class~="lg:table-cell"]{display:none!important}
+}
+@media(max-width:1279px){
+  [class~="xl:flex"]:not([class~="flex"]){display:none}
+}
+
+/* ---- TABLE ---- */
+table.w-full{width:100%}
+th,td{text-align:left}
+.last\:border-0:last-child{border-bottom:none}
+
+/* ---- SPACE-Y ---- */
+.space-y-1>*+*{margin-top:4px}
+.space-y-1\.5>*+*{margin-top:6px}
+.space-y-2>*+*{margin-top:8px}
+.space-y-3>*+*{margin-top:12px}
+.space-y-4>*+*{margin-top:16px}
+.space-y-5>*+*{margin-top:20px}
+
+/* ---- ANIMATIONS ---- */
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateY(20px)}}
+@keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+@keyframes ap{0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,.4)}50%{box-shadow:0 0 16px 6px rgba(192,57,43,.15)}}
+@keyframes lspin{to{transform:rotate(360deg)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+.animate-shimmer{animation:shimmer 4s ease infinite}
+.animate-float{animation:float 3s ease-in-out infinite}
+.animate-slide-up{animation:slideUp .5s cubic-bezier(.4,0,.2,1) forwards}
+.animate-toast-in{animation:toastIn .4s ease forwards}
+.animate-toast-out{animation:toastOut .4s ease forwards}
+.animate-modal-in{animation:modalIn .3s ease forwards}
+.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.2,1) infinite}
+.animate-spin{animation:spin 1s linear infinite}
+.group-hover\:rotate-180:is(.group:hover *),.group:hover .group-hover\:rotate-180{transform:rotate(180deg)}
+
+/* stagger delays */
+.stagger-1{animation-delay:.05s}
+.stagger-2{animation-delay:.1s}
+.stagger-3{animation-delay:.15s}
+.stagger-4{animation-delay:.2s}
+.stagger-5{animation-delay:.25s}
+.stagger-6{animation-delay:.3s}
+.stagger-7{animation-delay:.35s}
+
+/* ---- BACKDROP ---- */
+.backdrop-blur-lg{backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.backdrop-blur-xl{backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+
+/* ============================================================
+   HORAIRES MOBILE — full width forced below sm breakpoint
+   ============================================================ */
+@media(max-width:599px){
+  .horaire-grid{
+    grid-template-columns:1fr!important;
+    gap:8px!important;
+  }
+  /* Horaires section stays visible on mobile — no hidden class */
+  #sec-horaires{
+    display:block!important;
+    max-height:none!important;
+  }
+  /* Filter pills wrap properly */
+  .h-filter{
+    font-size:.6rem!important;
+    padding:4px 10px!important;
+  }
+  /* Stats bar wraps */
+  #horaireStats{
+    gap:4px!important;
+  }
+  #horaireStats span{
+    font-size:.68rem!important;
+    margin-left:0!important;
+  }
+}
+
 </style>
 </head>
-<body class="font-body text-volo-txt min-h-screen noise">
+<body class="font-body text-volo-txt min-h-screen noise aura-corners">
 <div class="gold-shimmer h-1 w-full fixed top-0 z-50"></div>
 
 <!-- PIN AUTH OVERLAY -->
 <div id="pinOverlay" style="position:fixed;inset:0;z-index:999;background:#12090B;display:flex;align-items:center;justify-content:center">
 <div style="max-width:380px;width:100%;padding:20px;text-align:center">
-  <img id="pinLogo" src="data:image/jpeg;base64,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" style="width:120px;height:120px;border-radius:50%;border:3px solid #E65100;box-shadow:0 0 30px rgba(230,81,0,.25),0 0 60px rgba(230,81,0,.1);margin:0 auto 16px;display:block">
+  <img id="pinLogo" src="eagle_tactic.png" onerror="this.style.display='none';document.getElementById('pinEmoji').style.display='block'" style="width:120px;height:120px;border-radius:50%;border:3px solid #E65100;box-shadow:0 0 30px rgba(230,81,0,.25),0 0 60px rgba(230,81,0,.1);margin:0 auto 16px;display:block;object-fit:cover"><div id="pinEmoji" style="display:none;font-size:4rem;margin-bottom:12px">🦅</div>
   <div style="font-family:Oswald;font-size:1.4em;color:#E65100;letter-spacing:3px;text-shadow:0 0 20px rgba(230,81,0,.15);margin-bottom:4px">🛡️ DASHBOARD</div>
   <div style="font-size:.75em;color:#8B7355;letter-spacing:2px;margin-bottom:20px">ACCÈS SUPERVISEURS</div>
   <div id="pinDots" style="display:flex;gap:10px;justify-content:center;margin-bottom:16px"></div>
@@ -77,6 +576,90 @@ body{background:#0C0608}
 </div>
 </div>
 <script>
+
+// === THEME ===
+function setTheme(t){
+  const r=document.getElementById('appRoot');
+  const btnL=document.getElementById('btnLight');
+  const btnD=document.getElementById('btnDark');
+  if(!r)return;
+  if(t==='light'){
+    r.classList.add('light');
+    if(btnL)btnL.classList.add('active');
+    if(btnD)btnD.classList.remove('active');
+  }else{
+    r.classList.remove('light');
+    if(btnD)btnD.classList.add('active');
+    if(btnL)btnL.classList.remove('active');
+  }
+  localStorage.setItem('volo_theme_main',t);
+}
+// Defer until DOM ready to avoid null crash on btnLight/btnDark
+document.addEventListener('DOMContentLoaded',function(){
+  const t=localStorage.getItem('volo_theme_main');
+  if(t)setTheme(t);
+});
+
+
+// === HORAIRES ===
+let horaireFilter='ALL';
+function setHoraireFilter(btn,type){
+  horaireFilter=type;
+  document.querySelectorAll('.h-filter[data-h]').forEach(b=>b.classList.remove('hf-active'));
+  btn.classList.add('hf-active');
+  rHoraires();
+}
+function initHoraireRegions(){
+  const regs=[...new Set(DEP.map(d=>d.reg))].sort();
+  const sel=document.getElementById('horaireRegion');
+  if(!sel)return;
+  regs.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;sel.appendChild(o);});
+}
+function rHoraires(){
+  const regFilter=document.getElementById('horaireRegion')?.value||'';
+  let list=DEP;
+  if(regFilter)list=list.filter(p=>p.reg===regFilter);
+  if(horaireFilter!=='ALL')list=list.filter(p=>p.type===horaireFilter);
+  list=[...list].sort((a,b)=>a.since.localeCompare(b.since));
+  const sauv=DEP.filter(p=>p.type==='SAUVETEUR').length;
+  const surv=DEP.filter(p=>p.type==='SURVEILLANT').length;
+  const earliest=list.reduce((m,p)=>p.since<m?p.since:m,list[0]?.since||'--:--');
+  const latest=list.reduce((m,p)=>p.since>m?p.since:m,list[0]?.since||'--:--');
+  const cnt=document.getElementById('horaireCount');if(cnt)cnt.textContent=`(${list.length})`;
+  const stats=document.getElementById('horaireStats');
+  if(stats)stats.innerHTML=`
+    <span style="font-size:.72rem;color:#B8A99A">👷 <strong style="color:#F5F0EB">${DEP.length}</strong> terrain</span>
+    <span style="font-size:.72rem;color:#B8A99A;margin-left:12px">🔶 <strong style="color:#E67E22">${sauv}</strong> sauveteurs</span>
+    <span style="font-size:.72rem;color:#B8A99A;margin-left:12px">🔷 <strong style="color:#3B82F6">${surv}</strong> surveillants</span>
+    <span style="font-size:.72rem;color:#B8A99A;margin-left:12px">🌅 <strong style="color:#27AE60">${earliest}</strong> premier</span>
+    <span style="font-size:.72rem;color:#B8A99A;margin-left:12px">🕗 <strong style="color:#D4A017">${latest}</strong> dernier</span>
+  `;
+  // Group by site
+  const siteMap={};
+  list.forEach(p=>{const site=p.loc||'Inconnu';if(!siteMap[site])siteMap[site]=[];siteMap[site].push(p);});
+  const sortedSites=Object.entries(siteMap).sort(([,a],[,b])=>a[0].since.localeCompare(b[0].since));
+  let html='';
+  sortedSites.forEach(([site,persons])=>{
+    html+=`<div style="grid-column:1/-1;font-family:Oswald,sans-serif;font-size:.7rem;letter-spacing:2px;color:#D4A017;padding:10px 4px 4px;border-bottom:1px solid rgba(68,40,46,.55);margin-bottom:4px">🏗️ ${site}</div>`;
+    persons.forEach(p=>{
+      const isSauv=p.type==='SAUVETEUR';
+      const isChef=p.role&&p.role.includes('CHEF');
+      html+=`<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(38,22,26,.94);border:1px solid rgba(68,40,46,.55);border-radius:10px;transition:border .2s" onmouseover="this.style.borderColor='rgba(212,160,23,.25)'" onmouseout="this.style.borderColor='rgba(68,40,46,.55)'">
+        <span style="width:10px;height:10px;border-radius:50%;flex-shrink:0;background:${isSauv?'#E67E22':'#3B82F6'}"></span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${isChef?'⭐ ':''}${p.name}</div>
+          <div style="font-size:.68rem;color:#B8A99A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px">${p.reg}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.85rem;color:#27AE60;font-weight:600">${p.since||'—'}</div>
+          <div style="font-family:Oswald,sans-serif;font-size:.6rem;letter-spacing:1px;margin-top:2px;${isSauv?'color:#E67E22':'color:#3B82F6'}">${p.role}</div>
+        </div>
+      </div>`;
+    });
+  });
+  const grid=document.getElementById('horaireGrid');if(grid)grid.innerHTML=html;
+}
+
 // PIN AUTH — Only CHEF D'EQUIPE + COORDONNATEUR
 const AUTH_ROLES=["CHEF D'EQUIPE","COORDONNATEUR"];
 const PERSONNEL_AUTH=[
@@ -137,12 +720,12 @@ renderPin();
 <div id="loadingOverlay" class="loading-overlay"><div class="loading-spinner"></div></div>
 
 <!-- HEADER -->
-<header class="fixed top-1 left-0 right-0 z-40 bg-volo-bg/95 backdrop-blur-xl border-b border-volo-border">
+<header class="fixed top-1 left-0 right-0 z-40 bg-volo-bg/95 backdrop-blur-xl border-b border-volo-border" style="box-shadow:0 1px 40px rgba(230,81,0,.08),0 0 0 0 transparent">
 <div class="max-w-[1600px] mx-auto px-4 lg:px-6 h-16 flex items-center justify-between">
 <div class="flex items-center gap-3">
   <a href="index.html" class="w-10 h-10 rounded-xl bg-volo-card border border-volo-border hover:border-volo-gold transition-all flex items-center justify-center text-volo-muted hover:text-volo-gold" title="Retour">←</a>
   <div class="w-10 h-10 rounded-full border-2 border-[#E65100] overflow-hidden animate-float shadow-[0_0_16px_rgba(230,81,0,.2)]">
-    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCABQAFADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD4yoor0P4O/DaXxpcT6pqtxLpvhmwcLeXiKDJK5GRbwA8NKw5yeEHzN2BipUjTi5zdkjSjRnWmqdNXk9Ekcz4L8IeI/GOpnT/DmlT38yLvlZcLHCn96R2wqL7sQK9j8NfAPR4k3+JPEl1qU4Kq9roFvvRGY4UNcyDbknj5UYE9Ca9v0fQ9N0rQY9OksItC8PoXit7KFzsScIGV7l/vSSkBhl+QQONpArU0j/hIrqwmv4EsLKwNssM+pX4ENvJHEzkPHHgHowztHBAPBNfN185rVZ+zw8bfK7+7p8/wPtsJw1hsPS9tjJJ2t9rlivLm6vfRW12utTzZPg74BsbC6mbwT9pjtAvmSXmvyyM2d2MeQEUn5WHYAinXHwb+H91phuk8HpFD9mW4eSw1+ZHjRiwGRMHGcq3HP3T7V6PqkujW2mxz6t47urq0uDLCTpmmoYQY8M/JI7zjkDkyemcUdNn8L3NnfQaf41v7SO20+O8uF1HTVZI4Bt2NlScYMwGFyQWIrPkza/Mua1u8L39NjVVOHrcj5L37VLW66733PDPFf7P+mjH9g+ILzS7lkDx2fiC32K49riMY9vmRRnqRXjPjLwl4i8H6mNP8RaVPYzOu+Jmw0cy/3o3XKuvupIr7svLPULKC7vbzS7DU9MuD5895pwaby2ZSyu0bnch/eM+CMElewFYuvaBpWsaZNp8Fpa6x4eu5R/xLZ5wFV2B5gkYho5AfkVh8zsr8FRg60M3r0Z8mJjf5WfrbqvT8TDFcOYXE0/aYKVvmnF+V94vyd/Ox8I0V6D8YPhxP4LuodR02eXUPDl87LZ3bqBJE45aCYDhZVHPHDD5l7gefV9HTqRqRU4O6Z8XWozo1HTqK0lo0zb8CeGtQ8YeLtN8N6YFFzfziIO/3Y16vI3oqqGY+ymvtPw1o+laXp9nBa293Z+GdJtmGlzKqNvYN800yMCGeZg3XAyVXIAFeFfsu6StpoXijxfIuJmWPRrJvQzAvOw9xGgX6Smvb/h3ZXWva7baJNcSnTATPdRbuPLQ7io9AzbRgdSQT0FfLZ5jXPEwwcFe/5va/l1+59D7zhbLY08FVzGo7JXV+0Uvea83svmuprZs7WG213VNJ+23k1qzaJoa7j50UWcSy7iSwG75UyW2g7QwXFdBpfg7VPEsNlqXjyaR7+1dxHHayhd0JYsqPsGEKk9I25AGScLjC8efGqz8PXslld+EbiWeGbMO+8g8rcvCsu3cy4+gIrxfxj8QvEPi3Uv7TOu32irtKJZ2VxKIlXI5GGyc4GT0yOB1r2KEKGX0+Vavq7bv+tux8vjsXiM0re0lpFbK+iXb17vqfVtj4Y8OaSpng0WwgaP52nlhDPkDG9nfJzjOWJycnJoS08M6/p89pBBpWo2hwkyW4RlHIYA7OnKgj3UHtXxLe6vrMttDZSa7rF3YPubyZ5n8tiCM4VmKkgnof61Jb63q0krMNd1azUIsSeTO4BUD7uFIwoGAFGQK1eN1Xu6HGsJ/ePrDUfAt7ouptrfgu+urS4eczz2cszus0jAI0gLNgttAOx8hiiqCgJrGivrO+uLvVdD06TSrwM095ospQT3NojlTcxqBmGTG4FRgjJIrwfw18RvFvhO8a6sNfudVaVADDfu8sRA9mOd2OBgjg17L8OPH154j8QR6hbaFpFlq98sazzqkvmyovQfNkAY74PAGegxNWFHHU+V6Po+q81/Wp0YTE18tq88dU910a7P8AR9Hqir4s0vw/qGhyWup3EUmla3CqXduiBXVTzHcxqvyo8RwQozwGBYkuB8XeNvDt/wCE/FepeHdSC/abGcxMyfdkXqrr6qylWB9GFfZ/xQ0VNE8VyxW6bLO5UXFsvZFYncg9gwYflXhf7T2krc6T4a8WRp+92yaReN6mEB4WPuY3K/SIV4mSYydPF1MFUVrbeq3+/c+s4oy6nWwFHMqLveyfo9r/AOHb7l0Ot+Dlutp8CdD2DH23VtQuX9yogiH6Kfzr234C26+ZrV4R8yxwwg+gZmY/+gCvEfgvcLefAnSNhybDWb61f23pDKv55b8q9f8AhDf6jbwaxbaVaQXd3J9mkWKaQopQOUdiwBxtDg9D06VyNf8AGRLm/r3dDvh/yRz5Pn/4M1/A7vxN4J0HXtz3VqscrnLuij5jnO5geGPpuyB6Vyn/AApv4caZFFPqUMjoigO93ebBMe7N0ySc8Z9h0FdlBp3iG4n8zU9fSGLJ/wBG023EYI9DK+X/AC20j21lbX5tdJsoJtTwDJczgym3U9Gd2JYk9kBBPsOa+1cFJ6o/M1LlW581ftGanJqni37Bp+nR2mjaZahLBzG0QuJndDI6AD5sjABPUIcZzXU/s267GlvqnhHVdDuri0eU3VkhtQ7IAqiUEHqeFf5eeScV6947i0nS/AmrNqKR3rTxMCbra0lzOylUxnq+T8oGMYwMVhaP4q8NabokfhbxHdRafqOleVbgQuXLlUUJPHIoI3Yxuz905ByOuPslCo6jf+XQ2VRzgoRjfy6kMnwr+GOsWs1pptotndcFGgmZZ4GByCEfnj0I6D8a7Twn4X0rw1Zm3sIiWJy8rgbmPPYAKDz1AGe+TzVbS9R0rxBbQx3hs9SR2K210I/lmI6rzzHKO6ceq8cC3eaVqUVu/wDYetzW0gGY47xPtUOR25IcA9OG+lbKKWqMnq7N29f6/Q5D48W6nT9Hu8fOs00OfYqrD9QfzrwX4z263XwS1guMmz1awuE9iyzxn9GH5V7P8Wb7V30nTbLW7ezgulup5FFqzFJIwqKJBu5AYluD0xjnrXi3xsuRZ/BHUw3W+1iyt099iTyN+Xy/nXxjs+Ifd+f/AICfpEbrg98/y/8ABhzX7K+rrdW3iXwVI2ZbuBNU09SfvTWwbzEHu0Luf+2Yr2bwHra+H/FFpqMmTbZMVwB3icYb8uG/CvjjwnrupeGPEuneINIn8m/0+4S4gfqNynOCO4PQjuCRX1kt7pfiDRLPxd4dULpOpE5hBybG4AzJbP7qTlT/ABIVPrWnEmEqUqkMdS3ja/y2f6GPBWPo16NTK8RtO9vO6s1+q+Z7prOrXuo38ug+GpQl0m03moPFmO0jcZR0DYEjsOVAyuOT6Vl/EC/1LwR4GE3h2xuL+RJD5sjL50pZgSZGzjczHjJ4BI7Vz/ww8b21gi6NrjrHBwtveEZMQ5xG56lOTg/w5PY8eq3MrQ2j3MUUlziIyRpAVJmGMgISQpz0HOOetfQYLMKWY4e9J2dte6f9bHyeaZRXyfF8taPNG+j6SX9br9D5nm8P/F/4i6jBql1Zto6rIPKkvJc+TGFH3FGFBZsk4z6c11Xhr9nbSI40bxXrd5rDiNUaFDsiwAeMEe57V13jf4g6joHiafS4dPsJUGnfaIvPmYSNJ5cj4fB/doNmNxG08/OpwDL4R8Z63reo2YNjp7WUumXF4/kJL57PDOYdiBm2Hc2CDuII6MRhq6oUErOTu1/Xr+JwVMXJpqKST/r0072Oq0rw9o2l6GuiWNhHFYL/AMsskkn+8WJzu4HzZyMDFVRql1pet2+kalHNPb3fy2N+qbi8gyWilA6MFG7fjaQGJwRzuwkyRq+xkygdlfAKDGTu7DHfnFeX/E7xzbT28miaFKkytlbm9XkEdCkZ9D0LdxwOMk8+Ox9HL6PNP5Lv6HVlWU4nN8T7Omv8UuiXd/1qcr8SNdj17xVcXNu+6zgUW9sfVFz83/AiWb8RXhn7UerrAnh3wbG37y0gfUr5QfuzXIXy0I9VhSM/9tDXqc99pfh7Q7zxZ4gUNpWnEAQk4N7cEZjtl92IyxH3UDH0z8neKNb1HxJ4i1DXtWn8++v7h5536AsxzgDsB0A7AAV89w5hqlarPH1t5Xt+r/Q+w4yxtHDYellWH2ha/wAlon59X8jNrt/hJ8RdR8BarNi3XUdFvgqalpsrlUuFB4ZT/BIuSVccjkHIJB4iivrpwjOLjJXTPz2nUlTkpwdmtmfbXgnU/D+r6Vda94Zk/t7SpY0S4R1H2rTR5is32iAcnG3hh8jY69Vrq9K1C90y3jl8K6rGLQyus9uxa4tY1VXkLkONwOwL90DLbgOmK+CvD2t6x4e1aHVdC1O702+hOY7i2lMbr7ZHY9x0NexeG/2hr1Xjbxb4XsdVuEI/4mOnSnTrwn+8SgMbH32A+9fN1silSfNhXby2a9Gvyf3n2mG4qhXhyY+N+7smnpZXi9PmvuPrTT/G+tS3V3bSeHbO4ls0VpJLe8aEFXXcuA6kjI5wcY71Zl8W6qxeC20TTobhYElSOa9eUsGBIwqqueB2JHSvnPTfjj8Og8ky3njjTJpmDzbrW3ut7DPV/MQt949RzmnX/wAdfh8ijbfeONQZYvKCx2ttZhkAACs/mMSMADkHpUxjm6XK7/fH89y5z4ecuePL06VL30vp8O9z2jxFrNzPPLHr2qbbeEu8VpLGsNvOFDbXEaEmRd6rw5O5XJH3c1xPj7U/DmlK3inxDNcaJpU674YZNrXl83923i7joPMY7B1JHC14rrvx/uYkaPwZ4V0/RXxhb29f7fdL6Fd4ESH6Rkj1ryLxBrWr+INVm1XXNSu9SvpjmS4uZTI7fie3t0FXTyOdd82Ld1va7b+bf6feZ1+KaeFjyZdGzta7SSXpFaX8236HS/Ff4haj481WFmgXTtHsQyabpsTlkt1J5Yn+ORsAs55Jx0AAHFUUV9HCEYRUYqyR8ZUqSqSc5u7e7P/Z" style="width:100%;height:100%;object-fit:cover">
+    <img src="eagle_tactic.png" alt="Golden Eagles" onerror="this.parentElement.innerHTML='🦅'" style="width:100%;height:100%;object-fit:cover">
   </div>
   <div><div class="font-title text-[#E65100] text-sm tracking-[3px]">GOLDEN EAGLES</div><div class="text-[11px] text-volo-muted tracking-[1px]">TABLEAU DE BORD SUPERVISEURS</div></div>
 </div>
@@ -181,33 +764,120 @@ renderPin();
   </div>
   <!-- KPI -->
   <section id="kpis" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3"></section>
+  
+<!-- ⏰ HORAIRES — MOBILE FIRST -->
+<style>
+.horaire-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+@media(max-width:600px){.horaire-grid{grid-template-columns:1fr}}
+.h-filter{padding:5px 12px;border-radius:20px;font-family:Oswald,sans-serif;font-size:.65rem;letter-spacing:1px;border:1px solid rgba(68,40,46,.55);background:transparent;color:#B8A99A;cursor:pointer;transition:all .2s}
+.h-filter:hover{background:rgba(212,160,23,.1);border-color:rgba(212,160,23,.3)}
+.h-filter.hf-active{background:#E65100;border-color:#E65100;color:#fff}
+</style>
+<section class="opacity-0 animate-slide-up stagger-2" style="margin-bottom:4px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div class="sec-toggle" onclick="toggleSec('horaires')">
+      <span class="sec-arrow" id="arr-horaires">▼</span>
+      <h3 class="font-title text-volo-goldL text-sm tracking-[2px] flex items-center gap-2">
+        ⏰ HORAIRES — PERSONNEL DÉPLOYÉ
+        <span id="horaireCount" class="text-xs font-mono text-volo-muted">(0)</span>
+      </h3>
+    </div>
+    <select id="horaireRegion" class="region-select" onchange="rHoraires()" style="width:auto;min-width:140px">
+      <option value="">🌐 Toutes régions</option>
+    </select>
+  </div>
+  <div id="sec-horaires" class="sec-body">
+    <div id="horaireStats" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px 14px;border-radius:10px;background:rgba(230,81,0,.06);border:1px solid rgba(230,81,0,.15);margin-bottom:10px"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <button class="h-filter hf-active" data-h="ALL" onclick="setHoraireFilter(this,'ALL')">TOUS</button>
+      <button class="h-filter" data-h="SAUVETEUR" onclick="setHoraireFilter(this,'SAUVETEUR')">🔶 SAUVETEURS</button>
+      <button class="h-filter" data-h="SURVEILLANT" onclick="setHoraireFilter(this,'SURVEILLANT')">🔷 SURVEILLANTS</button>
+    </div>
+    <div id="horaireGrid" class="horaire-grid"></div>
+  </div>
+</section>
+
   <!-- CHARTS ROW -->
-  <section class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+  <section>
+    <div class="sec-toggle mb-3" onclick="toggleSec('charts')">
+      <span class="sec-arrow" id="arr-charts">▼</span>
+      <span class="font-title text-volo-goldL text-sm tracking-[2px]">📊 GRAPHIQUES & ITEMS CRITIQUES</span>
+    </div>
+    <div id="sec-charts" class="sec-body">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
     <div class="glass-card rounded-2xl p-5 opacity-0 animate-slide-up stagger-2"><h3 class="font-title text-volo-goldL text-sm tracking-[2px] mb-4">📊 INVENTAIRE</h3><div class="h-56 flex items-center justify-center"><canvas id="cI"></canvas></div></div>
     <div class="glass-card rounded-2xl p-5 opacity-0 animate-slide-up stagger-3"><h3 class="font-title text-volo-goldL text-sm tracking-[2px] mb-4">📈 TRANSACTIONS 7J</h3><div class="h-56"><canvas id="c7"></canvas></div></div>
     <div class="glass-card rounded-2xl p-5 opacity-0 animate-slide-up stagger-4"><h3 class="font-title text-volo-goldL text-sm tracking-[2px] mb-4">⚠️ ITEMS CRITIQUES</h3><div id="ci" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div></div>
+    </div>
+    </div>
   </section>
   <!-- MISSIONS ACTIVES V2 -->
   <section class="opacity-0 animate-slide-up stagger-5">
     <div class="flex items-center justify-between mb-3">
-      <h3 class="font-title text-volo-rescue text-sm tracking-[3px] flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-volo-rescue animate-pulse"></span>🎯 MISSIONS EN COURS
-        <span id="missionCount" class="text-xs font-mono text-volo-muted">(0)</span>
-      </h3>
+      <div class="sec-toggle" onclick="toggleSec('missions')">
+        <span class="sec-arrow" id="arr-missions">▼</span>
+        <h3 class="font-title text-volo-rescue text-sm tracking-[3px] flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-volo-rescue animate-pulse"></span>🎯 MISSIONS EN COURS
+          <span id="missionCount" class="text-xs font-mono text-volo-muted">(0)</span>
+        </h3>
+      </div>
       <div class="flex items-center gap-2">
         <button onclick="toggleMissionView()" id="missionViewBtn" class="text-[10px] px-3 py-1.5 rounded-lg bg-volo-card border border-volo-border hover:border-volo-gold text-volo-muted hover:text-volo-gold transition-all">📋 Liste</button>
       </div>
     </div>
+    <div id="sec-missions" class="sec-body">
     <div id="missionsGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-3"></div>
     <div id="missionsEmpty" class="hidden text-center py-8 glass-card rounded-2xl">
       <div class="text-3xl mb-2">🎯</div>
       <div class="text-volo-muted text-sm">Aucune mission active</div>
     </div>
+    </div>
+  </section>
+  <!-- PLANS DE TRAVAIL -->
+  <section class="opacity-0 animate-slide-up stagger-5" id="plans-section">
+    <div class="flex items-center justify-between mb-3">
+      <div class="sec-toggle" onclick="toggleSec('plans')">
+        <span class="sec-arrow" id="arr-plans">▼</span>
+        <h3 class="font-title text-volo-rescue text-sm tracking-[3px] flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-volo-rescue"></span>📋 PLANS DE TRAVAIL
+          <span id="planCount" class="text-xs font-mono text-volo-muted">(0)</span>
+        </h3>
+      </div>
+      <div class="flex items-center gap-2">
+        <select id="planFilter" class="region-select" onchange="rPlans(this.value)" style="width:auto;min-width:120px">
+          <option value="">Tous</option>
+          <option value="today">Aujourd'hui</option>
+          <option value="actif">Actifs</option>
+          <option value="complété">Complétés</option>
+        </select>
+      </div>
+    </div>
+    <div id="sec-plans" class="sec-body">
+    <div id="plansGrid" class="space-y-3"></div>
+    <div id="plansEmpty" class="hidden text-center py-8 glass-card rounded-2xl">
+      <div class="text-3xl mb-2">📋</div>
+      <div class="text-volo-muted text-sm">Aucun plan de travail</div>
+    </div>
+    </div>
   </section>
   <!-- SITES -->
-  <section class="opacity-0 animate-slide-up stagger-5"><h3 class="font-title text-volo-gold text-sm tracking-[3px] mb-3">🏗️ LIEUX ACTIFS</h3><div id="as" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"></div></section>
+  <section class="opacity-0 animate-slide-up stagger-5">
+    <div class="sec-toggle mb-3" onclick="toggleSec('sites')">
+      <span class="sec-arrow" id="arr-sites">▼</span>
+      <h3 class="font-title text-volo-gold text-sm tracking-[3px]">🏗️ LIEUX ACTIFS</h3>
+    </div>
+    <div id="sec-sites" class="sec-body">
+      <div id="as" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"></div>
+    </div>
+  </section>
   <!-- PERSONNEL -->
-  <section class="grid grid-cols-1 lg:grid-cols-2 gap-5 opacity-0 animate-slide-up stagger-6">
+  <section class="opacity-0 animate-slide-up stagger-6">
+    <div class="sec-toggle mb-3" onclick="toggleSec('personnel')">
+      <span class="sec-arrow" id="arr-personnel">▼</span>
+      <span class="font-title text-volo-goldL text-sm tracking-[2px]">👷 PERSONNEL & RÉGIONS</span>
+    </div>
+    <div id="sec-personnel" class="sec-body">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
     <div class="glass-card rounded-2xl p-5"><h3 class="font-title text-volo-goldL text-sm tracking-[2px] mb-4">📍 RÉGIONS</h3><div class="h-64"><canvas id="cR"></canvas></div></div>
     <div class="glass-card rounded-2xl p-5">
       <div class="flex items-center justify-between mb-3">
@@ -221,44 +891,70 @@ renderPin();
       </div>
       <div id="dp" class="space-y-1.5 max-h-56 overflow-y-auto pr-1"></div>
     </div>
+    </div>
+    </div>
   </section>
   <!-- ACTIVITY -->
-  <section class="glass-card rounded-2xl p-5 opacity-0 animate-slide-up stagger-7"><h3 class="font-title text-volo-goldL text-sm tracking-[2px] mb-4">🕐 ACTIVITÉ RÉCENTE</h3><div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-left text-volo-muted text-xs tracking-[1px] border-b border-volo-border"><th class="pb-2 pr-3">HEURE</th><th class="pb-2 pr-3">MODE</th><th class="pb-2 pr-3">SAUVETEUR</th><th class="pb-2 pr-3 hidden md:table-cell">ITEMS</th><th class="pb-2 pr-3">DESTINATION</th><th class="pb-2 pr-3 hidden lg:table-cell">PROJET</th><th class="pb-2">STATUT</th></tr></thead><tbody id="at"></tbody></table></div></section>
+  <section class="opacity-0 animate-slide-up stagger-7">
+    <div class="sec-toggle mb-3" onclick="toggleSec('activity')">
+      <span class="sec-arrow" id="arr-activity">▼</span>
+      <span class="font-title text-volo-goldL text-sm tracking-[2px]">🕐 ACTIVITÉ RÉCENTE</span>
+    </div>
+    <div id="sec-activity" class="sec-body">
+      <div class="glass-card rounded-2xl p-5"><div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-left text-volo-muted text-xs tracking-[1px] border-b border-volo-border"><th class="pb-2 pr-3">HEURE</th><th class="pb-2 pr-3">MODE</th><th class="pb-2 pr-3">SAUVETEUR</th><th class="pb-2 pr-3 hidden md:table-cell">ITEMS</th><th class="pb-2 pr-3">DESTINATION</th><th class="pb-2 pr-3 hidden lg:table-cell">PROJET</th><th class="pb-2">STATUT</th></tr></thead><tbody id="at"></tbody></table></div></div>
+    </div>
+  </section>
   <!-- PHOTOS SETUP TERRAIN -->
-  <section id="photos-section" class="glass-card rounded-2xl p-5 opacity-0 animate-slide-up stagger-7" style="animation-delay:.4s">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="font-title text-volo-rescue text-sm tracking-[2px] flex items-center gap-2">📷 PHOTOS SETUP TERRAIN</h3>
+  <section id="photos-section" class="opacity-0 animate-slide-up stagger-7" style="animation-delay:.4s">
+    <div class="flex items-center justify-between mb-3">
+      <div class="sec-toggle" onclick="toggleSec('photos')">
+        <span class="sec-arrow" id="arr-photos">▼</span>
+        <h3 class="font-title text-volo-rescue text-sm tracking-[2px] flex items-center gap-2">📷 PHOTOS SETUP TERRAIN</h3>
+      </div>
       <span id="photo-count" class="text-[11px] font-mono text-volo-muted"></span>
     </div>
+    <div id="sec-photos" class="sec-body">
+    <div class="glass-card rounded-2xl p-5">
     <div id="photos-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     <div id="photos-empty" class="text-center py-8 hidden">
       <div class="text-3xl mb-3">📷</div>
       <div class="text-volo-muted text-sm">Aucune photo de setup terrain</div>
       <div class="text-volo-muted/60 text-xs mt-1">Les sauveteurs enverront des photos depuis l'app Inventaire</div>
     </div>
+    </div>
+    </div>
   </section>
 </main>
 
 <!-- SIDEBAR -->
 <aside class="w-full xl:w-80 space-y-4 flex-shrink-0 sb">
-  <div class="glass-card rounded-2xl p-5 opacity-0 animate-slide-up stagger-2"><h3 class="font-title text-volo-red text-sm tracking-[2px] mb-3 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-volo-red animate-pulse"></span>🚨 ALERTES</h3><div id="al" class="space-y-2"></div><button onclick="sendUrgence()" class="mt-4 w-full py-3 rounded-xl bg-volo-red/20 border border-volo-red/40 text-volo-red font-title text-sm tracking-[2px] hover:bg-volo-red/30 transition-all active:scale-95">🚨 URGENCE</button></div>
-  <div class="glass-card rounded-2xl p-5 opacity-0 animate-slide-up stagger-3"><h3 class="font-title text-volo-goldL text-sm tracking-[2px] mb-3">⚡ STATS</h3><div id="qs" class="space-y-3"></div></div>
-  <div class="glass-card rounded-2xl p-4 opacity-0 animate-slide-up stagger-4"><h3 class="font-title text-volo-goldL text-sm tracking-[2px] mb-3">🗺️ CARTE OPÉRATIONS</h3><div id="map" style="height:260px;border-radius:12px;overflow:hidden;border:1px solid rgba(58,36,40,.6)"></div></div>
+  <div class="glass-card rounded-2xl p-5 opacity-0 animate-slide-up stagger-2">
+    <div class="sec-toggle mb-3" onclick="toggleSec('alertes')"><span class="sec-arrow" id="arr-alertes">▼</span><h3 class="font-title text-volo-red text-sm tracking-[2px] flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-volo-red animate-pulse"></span>🚨 ALERTES</h3></div>
+    <div id="sec-alertes" class="sec-body"><div id="al" class="space-y-2"></div><button onclick="sendUrgence()" class="mt-4 w-full py-3 rounded-xl bg-volo-red/20 border border-volo-red/40 text-volo-red font-title text-sm tracking-[2px] hover:bg-volo-red/30 transition-all active:scale-95">🚨 URGENCE</button></div>
+  </div>
+  <div class="glass-card rounded-2xl p-5 opacity-0 animate-slide-up stagger-3">
+    <div class="sec-toggle mb-3" onclick="toggleSec('stats')"><span class="sec-arrow" id="arr-stats">▼</span><h3 class="font-title text-volo-goldL text-sm tracking-[2px]">⚡ STATS</h3></div>
+    <div id="sec-stats" class="sec-body"><div id="qs" class="space-y-3"></div></div>
+  </div>
+  <div class="glass-card rounded-2xl p-4 opacity-0 animate-slide-up stagger-4">
+    <div class="sec-toggle mb-3" onclick="toggleSec('carte')"><span class="sec-arrow" id="arr-carte">▼</span><h3 class="font-title text-volo-goldL text-sm tracking-[2px]">🗺️ CARTE OPÉRATIONS</h3></div>
+    <div id="sec-carte" class="sec-body"><div id="map" style="height:260px;border-radius:12px;overflow:hidden;border:1px solid rgba(58,36,40,.6)"></div></div>
+  </div>
   <!-- PERSONNES RESSOURCES PAR SITE -->
   <div class="glass-card rounded-2xl p-4 opacity-0 animate-slide-up stagger-5">
-    <h3 class="font-title text-volo-goldL text-sm tracking-[2px] mb-3">👤 CONTACTS TERRAIN</h3>
-    <div id="contacts-grid" class="space-y-2"></div>
-    <div id="contacts-empty" class="text-center text-volo-muted text-xs py-3">Aucun contact — données des pick-on</div>
+    <div class="sec-toggle mb-3" onclick="toggleSec('contacts')"><span class="sec-arrow" id="arr-contacts">▼</span><h3 class="font-title text-volo-goldL text-sm tracking-[2px]">👤 CONTACTS TERRAIN</h3></div>
+    <div id="sec-contacts" class="sec-body"><div id="contacts-grid" class="space-y-2"></div><div id="contacts-empty" class="text-center text-volo-muted text-xs py-3">Aucun contact — données des pick-on</div></div>
   </div>
   <!-- MÉTÉO CHANTIERS V2 — INTELLIGENTE -->
   <div class="glass-card rounded-2xl p-4 opacity-0 animate-slide-up stagger-5">
     <div class="flex items-center justify-between mb-3">
-      <h3 class="font-title text-volo-blue text-sm tracking-[2px]">🌤️ MÉTÉO</h3>
+      <div class="sec-toggle" onclick="toggleSec('meteo')"><span class="sec-arrow" id="arr-meteo">▼</span><h3 class="font-title text-volo-blue text-sm tracking-[2px]">🌤️ MÉTÉO</h3></div>
       <div class="flex items-center gap-1">
         <button onclick="toggleMeteoInactifs()" id="meteoToggleBtn" class="text-[9px] px-2 py-1 rounded-md bg-volo-card2 border border-volo-border hover:border-volo-blue text-volo-muted hover:text-volo-blue transition-all" title="Afficher/masquer sites inactifs">👁️</button>
         <button onclick="openAddMeteoModal()" class="text-[9px] px-2 py-1 rounded-md bg-volo-card2 border border-volo-border hover:border-volo-blue text-volo-muted hover:text-volo-blue transition-all" title="Ajouter lieu météo">➕</button>
       </div>
     </div>
+    <div id="sec-meteo" class="sec-body">
     <!-- Météo locale superviseur — toujours visible -->
     <div id="meteo-local" class="mb-3 p-3 rounded-xl bg-volo-blue/8 border border-volo-blue/20">
       <div class="text-[10px] text-volo-blue font-title tracking-[1px] mb-1">📍 MA POSITION</div>
@@ -273,9 +969,13 @@ renderPin();
     <div id="meteo-custom" class="mt-3">
       <div id="meteo-custom-grid" class="space-y-2"></div>
     </div>
+    </div>
   </div>
   <!-- KM TRACKING -->
-  <div class="glass-card rounded-2xl p-4 opacity-0 animate-slide-up stagger-6"><h3 class="font-title text-volo-rescue text-sm tracking-[2px] mb-3">🚛 KILOMÉTRAGE</h3><div id="km-grid" class="space-y-2"></div><div id="km-empty" class="text-center text-volo-muted text-xs py-3">Aucun trajet enregistré</div></div>
+  <div class="glass-card rounded-2xl p-4 opacity-0 animate-slide-up stagger-6">
+    <div class="sec-toggle mb-3" onclick="toggleSec('km')"><span class="sec-arrow" id="arr-km">▼</span><h3 class="font-title text-volo-rescue text-sm tracking-[2px]">🚛 KILOMÉTRAGE</h3></div>
+    <div id="sec-km" class="sec-body"><div id="km-grid" class="space-y-2"></div><div id="km-empty" class="text-center text-volo-muted text-xs py-3">Aucun trajet enregistré</div></div>
+  </div>
   <!-- DATA SOURCE -->
   <div class="glass-card rounded-2xl p-4 opacity-0 animate-slide-up stagger-7"><div class="text-[10px] text-volo-muted tracking-[1px] font-title mb-1">DONNÉES</div><div id="data-src" class="flex items-center gap-2 text-xs text-volo-muted"><span class="w-2 h-2 rounded-full bg-volo-green"></span>Démo — Auto-refresh 60s</div></div>
 </aside>
@@ -293,6 +993,7 @@ const CONFIG = {
     transactions: 'Transactions',   // Colonnes attendues: timestamp, mode, sauveteur_nom, sauveteur_id, remorque, depot, destination, num_projet, personne_ressource, items, nb_items, statut
     items: 'Items',                 // Colonnes: id, name, cat, icon, status, assignee, location, since
     personnel: 'Personnel',         // Colonnes: name, role, type, loc, since, reg
+    plans: 'Plans',                   // Colonnes: date, cie, installation_type, responsable, responsable_id, equipe, epi, permis, dangers, mesures, meteo, temps_estime, signe_par, timestamp, revisions
   },
   REFRESH_INTERVAL: 60000,  // 60 secondes
   METEO_ENABLED: true,
@@ -312,6 +1013,14 @@ let ACT=[{d:"2026-02-25 07:30",m:"PICK-ON",s:"Danny Alie",i:2,dest:"Drummondvill
 
 let ALERTS=[{t:"critical",x:"Harnais #6 — MANQUANT 48h+",w:"Il y a 2j"},{t:"warning",x:"Sac Paramédic C — +24h (Valero)",w:"18h"},{t:"warning",x:"Corde #1 — +24h (Montréal)",w:"20h"},{t:"info",x:"Sac Paramédic D — Inspection",w:"Ce matin"}];
 
+// PLANS DE TRAVAIL — Demo data
+let PLANS=[
+  {date:"2026-02-25",cie:"Sherbrooke — Usine Kruger",type:"VERTICALE",resp:"Alexandre Gendreau",respId:"SAUV-AG-075",equipe:[{poste:"Éclaireur #1",nom:"Jonathan Milone"},{poste:"Support #2",nom:"Maxime Boisvert"},{poste:"Manoeuvre #1",nom:"Carl St-Pierre"},{poste:"Manoeuvre #2",nom:"Olivier Lessard"},{poste:"Chef/P.C.",nom:"Alexandre Gendreau"}],epi:["Casque CSA","Lunette CSA","Gant de protection","Bottes d'acier CSA","Protection respiratoire"],permis:["A.S.T","Entrée en espace-clos"],dangers:"Risque de gaz H2S, manque d'oxygène, résidus au sol",mesures:"Ventilation forcée, détecteur 4 gaz en continu",meteo:"Vent(s) fort, -8°C",temps:"4h00",signe:"Alexandre Gendreau",ts:"2026-02-25 06:15:00",rev:0,status:"actif"},
+  {date:"2026-02-25",cie:"Magog — Chantier Hydro",type:"HORIZONTALE",resp:"Maxime Boisvert",respId:"SAUV-MB-180",equipe:[{poste:"Éclaireur #1",nom:"Frédéric Massicotte"},{poste:"Support #2",nom:"Denis Bélanger"},{poste:"Chef/P.C.",nom:"Maxime Boisvert"}],epi:["Casque CSA","Lunette CSA","Gant de protection","Bottes d'acier CSA"],permis:["Travail en hauteur"],dangers:"Risque de chute, surfaces glissantes",mesures:"Lignes de vie, périmètre sécurisé",meteo:"Neige, -12°C",temps:"6h00",signe:"Maxime Boisvert",ts:"2026-02-25 06:45:00",rev:1,status:"actif"},
+  {date:"2026-02-24",cie:"Québec — Raffinerie Valero",type:"VERTICALE",resp:"Phillippe Monnier",respId:"",equipe:[{poste:"Éclaireur #1",nom:"Yani Goulet"},{poste:"Support #2",nom:""},{poste:"Chef/P.C.",nom:"Phillippe Monnier"}],epi:["Casque CSA","Lunette CSA","Protection respiratoire","Bottes d'acier CSA"],permis:["A.S.T","Entrée en espace-clos","Travail à chaud"],dangers:"Gaz inflammables, chaleur résiduelle, espace confiné",mesures:"Détecteur 5 gaz, ventilation mécanique, buddy system",meteo:"Pluie, 2°C",temps:"8h00",signe:"Phillippe Monnier",ts:"2026-02-24 07:30:00",rev:0,status:"complété"},
+  {date:"2026-02-24",cie:"Trois-Rivières — Hydro-QC",type:"VERTICALE",resp:"Tommy Raymond",respId:"",equipe:[{poste:"Éclaireur #1",nom:"Tommy Raymond"},{poste:"Chef/P.C.",nom:"Tommy Raymond"}],epi:["Casque CSA","Harnais","Bottes d'acier CSA"],permis:["Travail en hauteur"],dangers:"Chute de hauteur, électrisation",mesures:"LOTO complet, lignes de vie certifiées",meteo:"N/A, -5°C",temps:"3h30",signe:"Tommy Raymond",ts:"2026-02-24 05:50:00",rev:0,status:"complété"}
+];
+
 let sq='',lr=0,chI=null,ch7=null,chR=null,lMap=null,pres=false;
 // NOUVELLE FEATURE : Variables loading et filtre région
 let isLoading=false;
@@ -330,6 +1039,7 @@ function rKPI(){
     {l:"TERRAIN",v:DEP.length,c:"text-volo-txt",ic:"👷",tr:""},
     {l:"LIEUX",v:SITES.length,c:"text-volo-goldL",ic:"🏗️",tr:""},
     {l:"TX JOUR",v:tx,c:"text-volo-green",ic:"📋",tr:'<span class="text-[10px] text-volo-green">▲+18%</span>'},
+    {l:"PLANS",v:PLANS.length,c:"text-volo-rescue",ic:"📋",tr:PLANS.filter(p=>p.date===new Date().toISOString().slice(0,10)).length?'<span class="text-[10px] text-volo-rescue">'+PLANS.filter(p=>p.date===new Date().toISOString().slice(0,10)).length+' auj.</span>':''},
   ];
   document.getElementById('kpis').innerHTML=k.map((x,i)=>`<div class="glass-card rounded-2xl p-4 opacity-0 animate-slide-up stagger-${Math.min(i+1,7)} hover:scale-[1.03] transition-transform cursor-default"><div class="flex items-center justify-between mb-2"><span class="text-lg">${x.ic}</span>${x.tr}</div><div class="font-title text-3xl font-bold ${x.c} tracking-wide">${x.v}</div><div class="text-[10px] text-volo-muted tracking-[2px] font-title mt-1">${x.l}</div></div>`).join('')+(ac>0?`<div class="glass-card rounded-2xl p-4 border border-volo-red/40 alert-pulse opacity-0 animate-slide-up stagger-7 cursor-pointer" onclick="document.getElementById('al').scrollIntoView({behavior:'smooth'})"><div class="flex items-center gap-2 mb-2"><span class="text-lg">🚨</span><span class="text-[10px] bg-volo-red text-white px-2 py-0.5 rounded-full font-bold">URGENT</span></div><div class="font-title text-3xl font-bold text-volo-red">${ac}</div><div class="text-[10px] text-volo-muted tracking-[2px] font-title mt-1">ALERTE${ac>1?'S':''}</div></div>`:'');
 }
@@ -416,6 +1126,92 @@ function rAct(f=''){const q=f.toLowerCase();const ls=q?ACT.filter(t=>t.s.toLower
 
 function rAlerts(){const ic={critical:'🔴',warning:'🟡',info:'🔵'};const st={critical:'border-volo-red/40 bg-volo-red/5',warning:'border-volo-orange/30 bg-volo-orange/5',info:'border-volo-blue/30 bg-volo-blue/5'};document.getElementById('al').innerHTML=ALERTS.map(a=>`<div class="p-3 rounded-xl border ${st[a.t]} ${a.t==='critical'?'alert-pulse':''}"><div class="flex items-start gap-2"><span class="text-sm flex-shrink-0 mt-0.5">${ic[a.t]}</span><div><div class="text-[13px] font-semibold leading-tight">${a.x}</div><div class="text-[10px] text-volo-muted mt-1">${a.w}</div></div></div></div>`).join('');}
 
+// PLANS DE TRAVAIL RENDER
+let expandedPlan = null;
+function rPlans(filter=''){
+  const today = new Date().toISOString().slice(0,10);
+  let filtered = PLANS;
+  if(filter==='today') filtered = PLANS.filter(p=>p.date===today);
+  else if(filter==='actif') filtered = PLANS.filter(p=>p.status==='actif');
+  else if(filter==='complété') filtered = PLANS.filter(p=>p.status==='complété');
+  
+  document.getElementById('planCount').textContent = `(${filtered.length})`;
+  const grid = document.getElementById('plansGrid');
+  const empty = document.getElementById('plansEmpty');
+  
+  if(!filtered.length){
+    grid.innerHTML='';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  
+  grid.innerHTML = filtered.map((p,i)=>{
+    const isToday = p.date===today;
+    const isExpanded = expandedPlan===i;
+    const statusBadge = p.status==='actif'
+      ? '<span class="text-[10px] font-bold tracking-[1px] px-2 py-0.5 rounded-md bg-volo-green/15 text-volo-green">ACTIF</span>'
+      : '<span class="text-[10px] font-bold tracking-[1px] px-2 py-0.5 rounded-md bg-volo-muted/15 text-volo-muted">COMPLÉTÉ</span>';
+    
+    return `
+    <div class="glass-card rounded-2xl overflow-hidden transition-all ${isToday?'border-volo-rescue/30':''}">
+      <div class="p-4 cursor-pointer hover:bg-volo-card2/50 transition-all" onclick="expandedPlan=${isExpanded?'null':i};rPlans(document.getElementById('planFilter').value)">
+        <div class="flex items-start justify-between">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-lg">${p.type==='VERTICALE'?'🔺':'🔷'}</span>
+              <span class="font-title text-sm font-semibold text-volo-txt tracking-wide truncate">${p.cie}</span>
+            </div>
+            <div class="flex items-center gap-3 text-[11px] text-volo-muted">
+              <span class="font-mono">${p.date}</span>
+              <span>👤 ${p.resp}</span>
+              <span>👥 ${p.equipe.filter(e=>e.nom).length} membres</span>
+            </div>
+          </div>
+          <div class="flex flex-col items-end gap-1 ml-3 flex-shrink-0">
+            ${statusBadge}
+            <span class="text-[10px] font-mono text-volo-muted">${p.ts.split(' ')[1]||''}</span>
+            ${p.rev>0?`<span class="text-[10px] text-volo-orange">🔄 ×${p.rev}</span>`:''}
+          </div>
+        </div>
+        <div class="flex items-center gap-2 mt-2 flex-wrap">
+          <span class="text-[10px] px-2 py-0.5 rounded-md bg-volo-rescue/10 text-volo-rescue font-title tracking-[1px]">${p.type}</span>
+          ${p.permis?(Array.isArray(p.permis)?p.permis:String(p.permis).split(',')).slice(0,3).map(x=>`<span class="text-[10px] px-2 py-0.5 rounded-md bg-volo-blue/10 text-volo-blue">${x.trim()}</span>`).join(''):''}
+          <span class="text-[10px] text-volo-muted ml-auto">${isExpanded?'▲ Réduire':'▼ Détails'}</span>
+        </div>
+      </div>
+      ${isExpanded?`
+      <div class="border-t border-volo-border px-4 pb-4 pt-3 space-y-3 bg-volo-bg/30">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-volo-card rounded-xl p-3">
+            <div class="text-[10px] text-volo-gold tracking-[2px] font-title mb-2">👥 ÉQUIPE</div>
+            <div class="space-y-1">${p.equipe.filter(e=>e.nom).map(e=>`<div class="flex justify-between text-[12px]"><span class="text-volo-muted">${e.poste}</span><span class="font-semibold">${e.nom}</span></div>`).join('')}</div>
+          </div>
+          <div class="bg-volo-card rounded-xl p-3">
+            <div class="text-[10px] text-volo-gold tracking-[2px] font-title mb-2">🦺 EPI & PERMIS</div>
+            <div class="text-[12px] text-volo-txt mb-1">${(p.epi||[]).join(' • ')}</div>
+            <div class="text-[11px] text-volo-muted">Permis: ${p.permis||'—'}</div>
+          </div>
+        </div>
+        <div class="bg-volo-card rounded-xl p-3">
+          <div class="text-[10px] text-volo-gold tracking-[2px] font-title mb-2">⚡ ANALYSE DE RISQUE</div>
+          <div class="grid grid-cols-2 gap-2 text-[12px]">
+            <div><span class="text-volo-muted">Météo:</span> <span class="text-volo-blue">${p.meteo||'—'}</span></div>
+            <div><span class="text-volo-muted">Temps:</span> <span class="text-volo-txt">${p.temps||'—'}</span></div>
+          </div>
+          <div class="mt-2 text-[12px]"><span class="text-volo-muted">Dangers:</span> <span class="text-volo-txt">${p.dangers||'—'}</span></div>
+          <div class="mt-1 text-[12px]"><span class="text-volo-muted">Mesures:</span> <span class="text-volo-txt">${p.mesures||'—'}</span></div>
+        </div>
+        <div class="flex items-center justify-between bg-volo-card rounded-xl p-3">
+          <div class="text-[12px]"><span class="text-volo-muted">Signé par:</span> <span class="text-volo-green font-semibold">${p.signe}</span></div>
+          <div class="text-[10px] font-mono text-volo-muted">${p.ts}</div>
+        </div>
+      </div>
+      `:''}
+    </div>`;
+  }).join('');
+}
+
 function rQS(){const s=ITEMS.filter(i=>i.status==='sorti').length;const p=Math.round((ITEMS.length-s)/ITEMS.length*100);const st=[{l:"Disponibilité",v:`${p}%`,c:p>60?'text-volo-green':'text-volo-orange'},{l:"TX aujourd'hui",v:ACT.filter(a=>a.d.startsWith('2026-02-25')).length,c:'text-volo-gold'},{l:"Régions actives",v:new Set(DEP.map(d=>d.reg)).size,c:'text-volo-blue'},{l:"Sauv/Surv",v:`${DEP.filter(d=>d.type==='SAUVETEUR').length}/${DEP.filter(d=>d.type==='SURVEILLANT').length}`,c:'text-volo-goldL'}];document.getElementById('qs').innerHTML=st.map(s=>`<div class="flex items-center justify-between py-2 border-b border-volo-border/30 last:border-0"><span class="text-[12px] text-volo-muted">${s.l}</span><span class="font-title text-lg font-bold ${s.c}">${s.v}</span></div>`).join('');}
 
 function initMap(){if(lMap)return;lMap=L.map('map',{zoomControl:false,attributionControl:false}).setView([46.8,-71.3],6);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(lMap);L.control.zoom({position:'bottomright'}).addTo(lMap);
@@ -434,6 +1230,29 @@ function doSearch(v){sq=v;rDep(v);rAct(v);}
 
 // TOAST
 function toast(msg,type='gold'){const c={gold:'border-volo-gold/40 text-volo-gold',green:'border-volo-green/40 text-volo-green',red:'border-volo-red/40 text-volo-red'};const el=document.createElement('div');el.className=`px-4 py-3 rounded-xl bg-volo-card/95 backdrop-blur-xl border ${c[type]||c.gold} text-sm font-semibold animate-toast-in shadow-lg shadow-black/30 mb-2`;el.textContent=msg;document.getElementById('toast-box').appendChild(el);setTimeout(()=>{el.style.animation='toastOut .4s ease forwards';setTimeout(()=>el.remove(),400)},3000);}
+
+// COLLAPSIBLE SECTIONS
+const secState=JSON.parse(localStorage.getItem('volo_dash_sections')||'{}');
+function toggleSec(id){
+  const body=document.getElementById('sec-'+id);
+  const arrow=document.getElementById('arr-'+id);
+  if(!body)return;
+  const collapsed=!body.classList.contains('collapsed');
+  body.classList.toggle('collapsed',collapsed);
+  if(arrow)arrow.classList.toggle('collapsed',collapsed);
+  secState[id]=collapsed;
+  localStorage.setItem('volo_dash_sections',JSON.stringify(secState));
+}
+function initSections(){
+  Object.keys(secState).forEach(id=>{
+    if(secState[id]){
+      const body=document.getElementById('sec-'+id);
+      const arrow=document.getElementById('arr-'+id);
+      if(body)body.classList.add('collapsed');
+      if(arrow)arrow.classList.add('collapsed');
+    }
+  });
+}
 
 // PRESENTATION
 function togglePres(){pres=!pres;document.getElementById('ml').classList.toggle('pres-mode',pres);if(pres){document.documentElement.requestFullscreen?.();toast('Mode Présentation','gold');}else{document.exitFullscreen?.();}}
@@ -474,7 +1293,7 @@ function doRefresh(silent){
   setTimeout(async()=>{
     // Fetch live data if configured
     await fetchLiveData();
-    rKPI();rCharts();rCI();rSites();rDep(sq);rAct(sq);rAlerts();rQS();rPhotos();rKm();rMissions();rContacts();
+    rKPI();rCharts();rCI();rSites();rDep(sq);rAct(sq);rAlerts();rQS();rPhotos();rKm();rMissions();rContacts();rPlans();rHoraires();
     ic.classList.remove('animate-spin');
     isLoading=false;
     showLoading(false);
@@ -594,7 +1413,8 @@ async function fetchLiveData(){
     const results = await Promise.allSettled([
       fetchSheet('transactions'),
       fetchSheet('items'),
-      fetchSheet('personnel')
+      fetchSheet('personnel'),
+      fetchSheet('plans')
     ]);
     let liveCount=0;
     // Parse Transactions
@@ -638,6 +1458,34 @@ async function fetchLiveData(){
         since: row.since||row.depuis||'',
         reg: row.reg||row.region||'ESTRIE'
       }));
+      liveCount++;
+    }
+    // Parse Plans de Travail
+    if(results[3].status==='fulfilled' && results[3].value.length>0){
+      PLANS = results[3].value.filter(row=>row.date||row.cie).map(row=>{
+        let equipeArr = [];
+        try { equipeArr = JSON.parse(row.equipe||'[]'); } catch{ equipeArr = [{poste:'',nom:row.responsable||''}]; }
+        let epiArr = [];
+        try { epiArr = JSON.parse(row.epi||'[]'); } catch{ epiArr = (row.epi||'').split(',').map(x=>x.trim()); }
+        return {
+          date: row.date||'',
+          cie: row.cie||row.site||'',
+          type: (row.installation_type||row.type||'').toUpperCase(),
+          resp: row.responsable||'',
+          respId: row.responsable_id||'',
+          equipe: equipeArr,
+          epi: epiArr,
+          permis: row.permis||'',
+          dangers: row.dangers||'',
+          mesures: row.mesures_risques||row.mesures||'',
+          meteo: row.meteo||'',
+          temps: row.temps_estime||row.temps||'',
+          signe: row.signe_par||row.signe||'',
+          ts: row.timestamp||row.ts||'',
+          rev: parseInt(row.revisions||row.rev||0),
+          status: (row.status||row.statut||'actif').toLowerCase()
+        };
+      }).sort((a,b)=>b.ts.localeCompare(a.ts));
       liveCount++;
     }
     // Auto-generate alerts from items
@@ -1312,7 +2160,10 @@ async function sendComptableFilteredWebhook(){
 // ===== INIT =====
 tick();setInterval(tick,1000);updateNet();
 initRegionFilter();
-rPhotos();rKm();
+initSections();
+rPhotos();rKm();rPlans();
+initHoraireRegions();
+rHoraires();
 updateDataIndicator(CONFIG.SHEET_ID?'loading':'demo');
 doRefresh(true);
 // Météo on first load
@@ -1322,5 +2173,13 @@ setInterval(()=>doRefresh(false),60000);
 // Timer sinceLast toutes les 15s
 setInterval(updateSinceLast,15000);
 </script>
+
+<!-- THEME PILL -->
+<div class="theme-pill">
+  <button class="theme-btn active" id="btnDark" onclick="setTheme('dark')" title="Mode sombre">🌙</button>
+  <button class="theme-btn" id="btnLight" onclick="setTheme('light')" title="Mode clair">☀️</button>
+</div>
+
+
 </body>
 </html>

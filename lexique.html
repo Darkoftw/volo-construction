@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VOLO SST — Lexique Inventaire</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap');
+  :root{
+    --bg:#0C0608;--card:#1a0f12;--border:#2a1a1f;
+    --rescue:#E65100;--gold:#D4A017;--teal:#00BCD4;--green:#27AE60;
+    --text:#f0e6e8;--muted:#8a7070;
+  }
+  body.light{
+    --bg:#F5F0EB;--card:#FFFFFF;--border:#ddd0c8;
+    --text:#1a0f12;--muted:#8a7070;
+  }
+  #btn-lex-theme{position:fixed;bottom:20px;right:16px;z-index:9999;
+    width:46px;height:46px;border-radius:50%;background:var(--card);
+    border:1px solid var(--border);font-size:20px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 20px rgba(0,0,0,.4);transition:all .2s;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;padding:16px;}
+  
+  header{display:flex;align-items:center;gap:14px;padding:16px 20px;
+    background:var(--card);border:1px solid var(--border);border-radius:12px;
+    margin-bottom:20px;}
+  header h1{font-family:'Oswald',sans-serif;font-size:22px;letter-spacing:3px;color:var(--rescue);}
+  header p{font-size:12px;color:var(--muted);margin-top:2px;}
+
+  .search-wrap{margin-bottom:16px;}
+  .search-wrap input{width:100%;padding:10px 14px;background:var(--card);border:1px solid var(--border);
+    border-radius:8px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;}
+  .search-wrap input:focus{border-color:var(--rescue);}
+  .search-wrap input::placeholder{color:var(--muted);}
+
+  .cat-filter{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+  .cat-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--card);
+    color:var(--muted);font-size:11px;font-family:'Oswald',sans-serif;letter-spacing:1px;cursor:pointer;transition:.2s;}
+  .cat-btn.active{border-color:var(--rescue);color:var(--rescue);}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;}
+  
+  .entry{background:var(--card);border:1px solid var(--border);border-radius:10px;
+    padding:12px 14px;display:flex;gap:12px;align-items:flex-start;transition:.2s;}
+  .entry:hover{border-color:var(--rescue);}
+  .entry.hidden{display:none;}
+
+  .prefix-badge{background:rgba(230,81,0,.15);border:1px solid rgba(230,81,0,.3);
+    border-radius:6px;padding:4px 8px;font-family:'JetBrains Mono',monospace;
+    font-size:14px;font-weight:700;color:var(--rescue);white-space:nowrap;min-width:62px;text-align:center;}
+  
+  .icon{font-size:22px;width:30px;text-align:center;flex-shrink:0;}
+  
+  .info{flex:1;}
+  .info .nom{font-weight:600;font-size:14px;color:var(--text);line-height:1.3;}
+  .info .cat{font-size:11px;color:var(--teal);margin-top:2px;font-family:'Oswald',sans-serif;letter-spacing:1px;}
+  .info .desc{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4;}
+  
+  .count-badge{font-size:11px;font-family:'JetBrains Mono',monospace;
+    color:var(--gold);background:rgba(212,160,23,.1);
+    border:1px solid rgba(212,160,23,.2);border-radius:4px;
+    padding:2px 6px;white-space:nowrap;flex-shrink:0;}
+
+  .section-title{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;
+    color:var(--muted);margin:16px 0 8px;padding-left:4px;}
+
+  .no-result{text-align:center;padding:40px;color:var(--muted);font-size:14px;}
+
+  @media print{
+    body{background:white;color:#111;padding:8px;}
+    header{background:#f5f5f5;border-color:#ddd;}
+    header h1{color:#c0392b;}
+    .search-wrap,.cat-filter{display:none;}
+    .entry{border-color:#ddd;background:white;break-inside:avoid;}
+    .prefix-badge{background:#fce4d6;border-color:#c0392b;color:#c0392b;}
+    .info .cat{color:#0077aa;}
+    .count-badge{background:#fff8e1;border-color:#f0c040;color:#7a6000;}
+    .info .muted{color:#666;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div style="font-size:28px">📋</div>
+  <div>
+    <h1>LEXIQUE INVENTAIRE — VOLO SST</h1>
+    <p>Référence des codes d'identification · The Golden Eagles</p>
+  </div>
+  <div style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);text-align:right">
+    <div id="total-badge" style="font-size:18px;font-weight:700;color:var(--gold)"></div>
+    <div>préfixes actifs</div>
+  </div>
+</header>
+
+<div class="search-wrap">
+  <input type="text" id="search" placeholder="🔍  Rechercher un préfixe, nom, catégorie...">
+</div>
+
+<div class="cat-filter" id="cat-filter">
+  <button class="cat-btn active" data-cat="">TOUT</button>
+</div>
+
+<div class="grid" id="grid"></div>
+<div class="no-result hidden" id="no-result">Aucun résultat trouvé.</div>
+
+<script>
+const LEXIQUE = [
+  {prefix:"ANC", icon:"🔗", nom:"Ancrage quincaillerie", cat:"Surplus quincaillerie sauvetage", desc:"Paw L / Paw M — points d'ancrage fixes (Petzl)", count:16},
+  {prefix:"ASC", icon:"⬇️", nom:"Ascendeur", cat:"Surplus Descendeur/Ascendeur", desc:"CLUTCH, Poignée d'ascension — remontée sur corde (Petzl, CMC)", count:12},
+  {prefix:"ASP", icon:"🛡️", nom:"ASAP / Antichute", cat:"Surplus ASAP", desc:"Asap, Asap Lock, Asap'Sorber Axess — dispositif antichute mobile (Petzl, Falltech)", count:44},
+  {prefix:"BAT", icon:"🔋", nom:"Batteries", cat:"Caisse 23", desc:"AA et C4 — piles de rechange équipements", count:2},
+  {prefix:"BEA", icon:"🔧", nom:"Beam Anchor", cat:"Autre", desc:"Ancrage poutre horizontale (Hiigard)", count:2},
+  {prefix:"BNK", icon:"🧥", nom:"Bunker pompier", cat:"Bunker pompier", desc:"Manteau et pantalon ignifuges — bottes incluses (tailles 10–12)", count:28},
+  {prefix:"BSK", icon:"🛷", nom:"Basket Stretcher", cat:"Autre", desc:"Civière corbeille rigide (Ferno)", count:1},
+  {prefix:"BTL", icon:"🫁", nom:"Bouteille APRIA (SCBA)", cat:"Bouteilles APRIA", desc:"Bouteille MSA SCBA — air comprimé respirable, contrôle annuel obligatoire", count:11},
+  {prefix:"CCL", icon:"🔧", nom:"Pitagore / Podium", cat:"Autre", desc:"Équipements de confinement / support (Petzl)", count:3},
+  {prefix:"CDN", icon:"🔒", nom:"Cadenas", cat:"Caisse 23", desc:"Cadenas numérotés avec clés assignées — cadenassage LOTO", count:7},
+  {prefix:"COL", icon:"🏥", nom:"Collet cervical", cat:"Caisse 8", desc:"Immobilisation rachis cervical", count:1},
+  {prefix:"COR", icon:"🔧", nom:"Protecteur de corde", cat:"Surplus sauvetage", desc:"Manchons/protecteurs — bleu, noir, 30' à 600'", count:22},
+  {prefix:"CRD", icon:"🪢", nom:"Cordage SL Tech", cat:"Cordages", desc:"Corde kernmantle 11mm — 150' à 600', rouge/bleu/orange (SL Tech)", count:12},
+  {prefix:"CRL", icon:"🔧", nom:"Croll (poignée ventrale)", cat:"À déterminer", desc:"Bloqueur ventral pour remontée sur corde", count:1},
+  {prefix:"CRO", icon:"🔗", nom:"Courroie de suspension", cat:"Caisse 12", desc:"Rondelle et courroie d'ancrage", count:1},
+  {prefix:"CRV", icon:"🔧", nom:"Cervolet", cat:"Mobilisation", desc:"Équipement de mobilisation terrain", count:2},
+  {prefix:"CSQ", icon:"⛑️", nom:"Casque", cat:"Caisse 15", desc:"Vertex orange/rouge (sauveteur), casque surveillant — EPI tête", count:7},
+  {prefix:"CTR", icon:"😷", nom:"Cartouche filtre", cat:"Caisse 16", desc:"Cartouche 7093 P100/OV — masque demi-facial", count:1},
+  {prefix:"DES", icon:"⬇️", nom:"Descendeur", cat:"Sac Premonter #1", desc:"I'D L, I'D S, Rescue Sender — contrôle de descente (Petzl)", count:19},
+  {prefix:"DOS", icon:"🦺", nom:"Dossard surveillant", cat:"Caisse 5", desc:"S/M à 2XL, neuf et usagé — identification terrain", count:5},
+  {prefix:"FHK", icon:"🦺", nom:"Harnais FireHawk M7", cat:"Harnais FireHawk", desc:"Harnais SCBA MSA pour bouteille APRIA — Kit APRIA, inspection annuelle", count:10},
+  {prefix:"FLX", icon:"🎒", nom:"Flex", cat:"Sac Premonter #1", desc:"Équipement sac Flex (SMC)", count:2},
+  {prefix:"GAZ", icon:"☢️", nom:"Détecteur gaz", cat:"Caisse 16", desc:"Chlore 7902 — détection atmosphérique", count:1},
+  {prefix:"GNT", icon:"🧤", nom:"Gants anti-coupure", cat:"Caisse 18", desc:"Niveau A-5 — protection mains", count:1},
+  {prefix:"GRL", icon:"🪢", nom:"Grillion (longe)", cat:"Surplus Longe", desc:"Grillion simple et 2m — longe d'ancrage (Petzl)", count:4},
+  {prefix:"HAR", icon:"🦺", nom:"Harnais sauveteur", cat:"Harnais sauveteur", desc:"AVAO BOD FAST, Astro — harnais corps complet (Petzl), inspection annuelle", count:10},
+  {prefix:"JAG", icon:"🔧", nom:"Jag Systeme", cat:"Autre", desc:"Système de démultiplication pour sauvetage (Petzl)", count:1},
+  {prefix:"JAN", icon:"🪢", nom:"Jane / longe ajustable", cat:"Surplus Longe", desc:"Jane, Jane I, Jane Ajustable — longe réglable (Petzl)", count:12},
+  {prefix:"LGT", icon:"🧻", nom:"Lingette APRIA", cat:"Caisse 19", desc:"Lingettes nettoyantes pour pièces faciales APRIA", count:1},
+  {prefix:"LMP", icon:"🔦", nom:"Lampe frontale", cat:"Caisse 23", desc:"Lampe frontale Petzl sauveteur", count:1},
+  {prefix:"LNG", icon:"🔧", nom:"Longe d'ancrage", cat:"Sac Premonter #1", desc:"10', 25', 30' — connexion point d'ancrage fixe (SL Tech)", count:8},
+  {prefix:"LUN", icon:"🥽", nom:"Lunettes de protection", cat:"Caisse 18", desc:"Monocoque, nasale réserve — EPI yeux", count:3},
+  {prefix:"MAS", icon:"😷", nom:"Masque / pièce faciale", cat:"Caisse 16", desc:"N95, P100 demi-masque/full face, ballon réserve — protection respiratoire", count:12},
+  {prefix:"MED", icon:"🏥", nom:"Médical / pansements", cat:"Caisse 8", desc:"Pansements variés, réserve médicale de base", count:2},
+  {prefix:"MSQ", icon:"🔗", nom:"Mousqueton", cat:"Caisse mousqueton", desc:"Bm'D, DNA TWIST, Vulcan, William, Hook Up — connecteurs certifiés (Petzl, CMC)", count:271},
+  {prefix:"OXY", icon:"💨", nom:"Kit Oxygénothérapie", cat:"Autre", desc:"Kit oxygénothérapie 1 & 2 — administration oxygène terrain", count:2},
+  {prefix:"PAL", icon:"⚙️", nom:"Palan / Maestro", cat:"Surplus Descendeur/Ascendeur", desc:"Palan Harken Wingman, Maestro L — système de levage (CMC, Petzl)", count:10},
+  {prefix:"PLN", icon:"🩹", nom:"Planche dorsale", cat:"Autre", desc:"Planche dorsale, Ferno, kit strap — immobilisation (SL Tech)", count:3},
+  {prefix:"PRC", icon:"🔧", nom:"Perche", cat:"Autre", desc:"Perche de récupération (Yates)", count:1},
+  {prefix:"PRG", icon:"🔧", nom:"Progress", cat:"Surplus Longe", desc:"Bloqueur à came pour remontée sur corde (Petzl)", count:6},
+  {prefix:"PRU", icon:"🔵", nom:"Prussik", cat:"Surplus Prussik", desc:"6mm/8mm, rouge/vert — nœud autobloquant de sécurité (CMC, SL Tech)", count:34},
+  {prefix:"PSC", icon:"🔧", nom:"Passe-corniche", cat:"Autre", desc:"Passage d'arête pour corde (MSA)", count:2},
+  {prefix:"PUL", icon:"⚙️", nom:"Poulie", cat:"Surplus quincaillerie sauvetage", desc:"Spin L1, Spin L2 — renvoi de charge (Petzl)", count:28},
+  {prefix:"RLC", icon:"🔗", nom:"Rollclip", cat:"Caisse mousqueton", desc:"Connecteur à roulette — travaux en hauteur (Petzl)", count:8},
+  {prefix:"RSL", icon:"🔧", nom:"Rescue Sling", cat:"Surplus sauvetage", desc:"Sling 311 — sangle de sauvetage (Yates)", count:1},
+  {prefix:"RSP", icon:"🫁", nom:"Pièce faciale APRIA", cat:"Caisse 19", desc:"Partie faciale masque SCBA Médium/Large — Kit APRIA (MSA)", count:20},
+  {prefix:"SAC", icon:"🎒", nom:"Sac opérationnel", cat:"Sac Premonter #1", desc:"Prémonter #1/#2, Sauveteur, Médical, Premier de cordé — contenants de déploiement", count:9},
+  {prefix:"SKD", icon:"🛷", nom:"Sked (civière souple)", cat:"Autre", desc:"Civière d'évacuation flexible — espace confiné (Ferno)", count:2},
+  {prefix:"SNG", icon:"🔧", nom:"Sangle", cat:"Surplus sangle d'ancrage", desc:"Texora, cousues, anneau C40 — sangles d'ancrage multitâches", count:60},
+  {prefix:"SPK", icon:"🔧", nom:"Spec Pak", cat:"Autre", desc:"Système d'emballage évacuation (Yates)", count:1},
+  {prefix:"STP", icon:"🔧", nom:"Pick-off Strap", cat:"Surplus sauvetage", desc:"Sangle de récupération en suspension (CMC)", count:2},
+  {prefix:"SURV", icon:"📦", nom:"Équipement surveillant", cat:"EPI", desc:"Visières, casques, dossards, masques, gants, vêtements — EPI surveillant complet", count:84},
+  {prefix:"TRD", icon:"🔧", nom:"Terradaptor", cat:"Autre", desc:"Adaptateur d'ancrage terrain (SMC)", count:1},
+  {prefix:"TRI", icon:"🔺", nom:"Triangle d'évacuation", cat:"Surplus sauvetage", desc:"Harnais d'évacuation triangulaire d'urgence (3M DBI Sala)", count:1},
+  {prefix:"VET", icon:"👕", nom:"Vêtements VOLO", cat:"Vêtement", desc:"Imperméables, tyvex, chandails, T-shirts — uniforme terrain", count:22},
+  {prefix:"VIS", icon:"🛡️", nom:"Visière surveillant", cat:"Caisse 4", desc:"Support visière + visière — EPI visage", count:2},
+  {prefix:"VNT", icon:"🌀", nom:"Ventilateur", cat:"Autre", desc:"Ventilation espace confiné (Allegro)", count:1},
+];
+
+const cats = [...new Set(LEXIQUE.map(e=>e.cat))].sort();
+const filterEl = document.getElementById('cat-filter');
+const grid = document.getElementById('grid');
+const noResult = document.getElementById('no-result');
+let activeCat = '', searchTerm = '';
+
+document.getElementById('total-badge').textContent = LEXIQUE.length;
+
+// Build category filters
+cats.forEach(cat=>{
+  const b = document.createElement('button');
+  b.className='cat-btn'; b.dataset.cat=cat; b.textContent=cat;
+  b.addEventListener('click',()=>{
+    activeCat = activeCat===cat ? '' : cat;
+    document.querySelectorAll('.cat-btn').forEach(x=>x.classList.remove('active'));
+    document.querySelector(`.cat-btn[data-cat="${activeCat}"]`)?.classList.add('active') ||
+    document.querySelector('.cat-btn[data-cat=""]').classList.add('active');
+    render();
+  });
+  filterEl.appendChild(b);
+});
+document.querySelector('.cat-btn[data-cat=""]').addEventListener('click',()=>{
+  activeCat=''; document.querySelectorAll('.cat-btn').forEach(x=>x.classList.remove('active'));
+  document.querySelector('.cat-btn[data-cat=""]').classList.add('active'); render();
+});
+
+document.getElementById('search').addEventListener('input',e=>{
+  searchTerm=e.target.value.toLowerCase().trim(); render();
+});
+
+function render(){
+  let list = LEXIQUE;
+  if(activeCat) list = list.filter(e=>e.cat===activeCat);
+  if(searchTerm) list = list.filter(e=>
+    e.prefix.toLowerCase().includes(searchTerm)||
+    e.nom.toLowerCase().includes(searchTerm)||
+    e.cat.toLowerCase().includes(searchTerm)||
+    e.desc.toLowerCase().includes(searchTerm)
+  );
+  grid.innerHTML='';
+  noResult.classList.toggle('hidden', list.length>0);
+  list.forEach(e=>{
+    const div=document.createElement('div');
+    div.className='entry';
+    div.innerHTML=`
+      <div class="prefix-badge">${e.prefix}</div>
+      <div class="icon">${e.icon}</div>
+      <div class="info">
+        <div class="nom">${e.nom}</div>
+        <div class="cat">${e.cat}</div>
+        <div class="desc">${e.desc}</div>
+      </div>
+      <div class="count-badge">${e.count}×</div>
+    `;
+    grid.appendChild(div);
+  });
+}
+render();
+
+// ── DARK / LIGHT MODE ──
+const LEX_THEME_KEY = 'volo_theme';
+const btnLexTheme = document.getElementById('btn-lex-theme');
+function applyLexTheme(t){
+  document.body.classList.toggle('light', t==='light');
+  btnLexTheme.textContent = t==='light' ? '☀️' : '🌙';
+  localStorage.setItem(LEX_THEME_KEY, t);
+}
+btnLexTheme.addEventListener('click', ()=>{
+  applyLexTheme(document.body.classList.contains('light') ? 'dark' : 'light');
+});
+applyLexTheme(localStorage.getItem(LEX_THEME_KEY) || 'dark');
+</script>
+
+<button id="btn-lex-theme">🌙</button>
+</body>
+</html>

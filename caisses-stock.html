@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="fr" id="appRoot">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOLO SST — Caisses & Stock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TACTICAL EAGLE — CAISSES & STOCK
+   Full CSS vars, no Tailwind, same tokens as main app
+   ============================================================ */
+:root{
+  --bg:#0C0608;--card:#1C1012;--card2:#231518;--card3:#2A1A1E;
+  --gold:#D4A017;--goldL:#E8C547;--goldD:#A67C10;
+  --rescue:#E65100;--rescueL:#FF6D00;--rescueD:#BF360C;
+  --red:#C0392B;--green:#27AE60;--orange:#E67E22;--blue:#3B82F6;
+  --txt:#F5F0EB;--muted:#B8A99A;--border:#3A2428;
+  --card-hover:#2A1A1E;
+  --dispo:#27AE60;--sorti:#D4A017;--manquant:#C0392B;--inspect:#3B82F6;
+}
+html.light{
+  --bg:#F0EBE3;--card:rgba(255,255,255,.97);--card2:rgba(244,238,230,.99);
+  --card3:#fff;--gold:#C2410C;--goldL:#EA580C;
+  --rescue:#D94A00;--rescueL:#EA580C;
+  --txt:#1A0E10;--muted:#7B6B5E;--border:rgba(180,150,130,.35);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--txt);
+  font-family:'Inter',sans-serif;min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ---- AURA GLOW ---- */
+body::before{
+  content:'';position:fixed;inset:0;
+  background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.028'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:.55;
+}
+body::after{
+  content:'';position:fixed;
+  top:-140px;left:50%;transform:translateX(-50%);
+  width:1000px;height:700px;
+  background:
+    radial-gradient(ellipse 55% 40% at 50% 20%,rgba(230,81,0,.18) 0%,transparent 70%),
+    radial-gradient(ellipse 35% 22% at 50% 8%,rgba(255,109,0,.1) 0%,transparent 65%),
+    radial-gradient(ellipse 70% 28% at 50% 0%,rgba(180,60,0,.06) 0%,transparent 80%);
+  pointer-events:none;z-index:0;
+  animation:aura-breathe 7s ease-in-out infinite;
+}
+@keyframes aura-breathe{
+  0%,100%{opacity:.8;transform:translateX(-50%) scaleX(1)}
+  50%{opacity:1;transform:translateX(-50%) scaleX(1.05)}
+}
+
+/* ---- SCROLLBAR ---- */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--gold)}
+
+/* ---- SHIMMER TOP BAR ---- */
+.top-shimmer{
+  position:fixed;top:0;left:0;right:0;height:2px;z-index:100;
+  background:linear-gradient(90deg,var(--rescueD),var(--rescue),var(--rescueL),var(--gold),var(--rescueL),var(--rescue),var(--rescueD));
+  background-size:300% 100%;
+  animation:shimmer 4s ease infinite;
+}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ---- HEADER ---- */
+.app-header{
+  position:fixed;top:2px;left:0;right:0;z-index:90;
+  background:rgba(12,6,8,.92);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(58,36,40,.7);
+  box-shadow:0 1px 40px rgba(230,81,0,.07);
+}
+.header-inner{
+  max-width:900px;margin:0 auto;
+  padding:0 16px;height:56px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.header-left{display:flex;align-items:center;gap:10px}
+.back-btn{
+  width:36px;height:36px;border-radius:10px;
+  background:var(--card);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);font-size:1rem;cursor:pointer;
+  transition:all .2s;text-decoration:none;
+}
+.back-btn:hover{border-color:var(--gold);color:var(--gold)}
+.logo-ring{
+  width:34px;height:34px;border-radius:50%;
+  border:2px solid var(--rescue);overflow:hidden;
+  box-shadow:0 0 12px rgba(230,81,0,.25);
+  animation:float 3s ease-in-out infinite;
+  flex-shrink:0;
+}
+.logo-ring img{width:100%;height:100%;object-fit:cover}
+.header-title{
+  font-family:'Oswald',sans-serif;
+  font-size:.8rem;color:var(--rescue);
+  letter-spacing:3px;
+}
+.header-sub{font-size:.65rem;color:var(--muted);letter-spacing:1.5px;margin-top:1px}
+.header-right{display:flex;align-items:center;gap:8px}
+.hdr-stat{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 10px;border-radius:8px;
+  background:var(--card);border:1px solid var(--border);
+  font-size:.68rem;color:var(--muted);
+}
+.hdr-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* ---- THEME PILL ---- */
+.theme-pill{
+  position:fixed;bottom:20px;right:16px;z-index:200;
+  display:flex;border-radius:20px;background:var(--card);
+  border:1px solid rgba(68,40,46,.55);overflow:hidden;
+  box-shadow:0 4px 20px rgba(0,0,0,.4);
+}
+.theme-btn{
+  padding:7px 12px;font-size:.85rem;cursor:pointer;
+  background:transparent;border:none;transition:background .2s;
+}
+.theme-btn:hover{background:rgba(212,160,23,.1)}
+.theme-btn.active{background:rgba(230,81,0,.15)}
+
+/* ---- MAIN LAYOUT ---- */
+.main-wrap{
+  padding-top:72px;padding-bottom:80px;
+  max-width:900px;margin:0 auto;
+  padding-left:14px;padding-right:14px;
+}
+
+/* ---- SECTION HEADER ---- */
+.sec-title{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:14px;
+}
+.sec-title-line{
+  height:1px;flex:1;
+  background:linear-gradient(to right,rgba(58,36,40,.8),transparent);
+}
+.sec-label{
+  font-family:'Oswald',sans-serif;
+  font-size:.62rem;letter-spacing:3px;color:var(--muted);
+  white-space:nowrap;
+}
+
+/* ---- KPI STRIP ---- */
+.kpi-strip{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;margin-bottom:18px;
+}
+.kpi-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:12px 10px;
+  text-align:center;
+  transition:all .25s;
+  position:relative;overflow:hidden;
+}
+.kpi-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.03) 0%,transparent 60%);
+}
+.kpi-card:hover{border-color:rgba(212,160,23,.3);transform:translateY(-2px)}
+.kpi-num{
+  font-family:'Oswald',sans-serif;
+  font-size:1.5rem;font-weight:700;line-height:1;
+  margin-bottom:3px;
+}
+.kpi-label{
+  font-size:.58rem;letter-spacing:1.5px;
+  color:var(--muted);font-family:'Oswald',sans-serif;
+}
+
+/* ---- SEARCH / FILTER BAR ---- */
+.filter-bar{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:16px;flex-wrap:wrap;
+}
+.search-wrap{
+  position:relative;flex:1;min-width:180px;
+}
+.search-ico{
+  position:absolute;left:11px;top:50%;transform:translateY(-50%);
+  color:var(--muted);pointer-events:none;
+  width:14px;height:14px;
+}
+.search-input{
+  width:100%;padding:9px 12px 9px 34px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;color:var(--txt);
+  font-family:'Inter',sans-serif;font-size:.82rem;
+  outline:none;transition:border .2s;
+}
+.search-input::placeholder{color:rgba(184,169,154,.5)}
+.search-input:focus{border-color:rgba(212,160,23,.45)}
+
+.filter-pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{
+  padding:6px 12px;border-radius:20px;
+  font-family:'Oswald',sans-serif;font-size:.62rem;letter-spacing:1px;
+  border:1px solid rgba(58,36,40,.6);background:transparent;
+  color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.pill:hover{background:rgba(212,160,23,.08);border-color:rgba(212,160,23,.3)}
+.pill.active{background:var(--rescue);border-color:var(--rescue);color:#fff}
+
+.sort-select{
+  padding:7px 28px 7px 10px;border-radius:10px;
+  background:var(--card);border:1px solid var(--border);
+  color:var(--txt);font-family:'Inter',sans-serif;font-size:.78rem;
+  outline:none;cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23D4A017' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center;
+}
+.sort-select option{background:var(--card2)}
+.sort-select:focus{border-color:rgba(212,160,23,.45);outline:none}
+
+/* ---- CATEGORY HEADER ---- */
+.cat-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 12px;border-radius:10px;
+  background:rgba(28,16,18,.7);border:1px solid rgba(58,36,40,.5);
+  margin-bottom:8px;cursor:pointer;
+  transition:all .2s;user-select:none;
+}
+.cat-header:hover{border-color:rgba(212,160,23,.25)}
+.cat-header-left{display:flex;align-items:center;gap:10px}
+.cat-icon{font-size:1.1rem}
+.cat-name{
+  font-family:'Oswald',sans-serif;
+  font-size:.72rem;letter-spacing:2px;color:var(--goldL);
+}
+.cat-count{
+  font-size:.65rem;font-family:'JetBrains Mono',monospace;
+  color:var(--muted);
+}
+.cat-arrow{
+  font-size:.7rem;color:var(--gold);
+  transition:transform .3s;
+}
+.cat-arrow.collapsed{transform:rotate(-90deg)}
+
+/* ---- ITEM GRID ---- */
+.items-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:8px;
+  margin-bottom:18px;
+  overflow:hidden;
+  transition:max-height .4s cubic-bezier(.4,0,.2,1),opacity .3s;
+  max-height:9999px;opacity:1;
+}
+.items-grid.collapsed{max-height:0;opacity:0;margin-bottom:0}
+
+/* ---- ITEM CARD ---- */
+.item-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;padding:12px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;
+  cursor:pointer;transition:all .25s;
+  position:relative;overflow:hidden;
+}
+.item-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  border-radius:3px 0 0 3px;
+  transition:background .2s;
+}
+.item-card.s-disponible::before{background:var(--dispo)}
+.item-card.s-sorti::before{background:var(--sorti)}
+.item-card.s-manquant::before{background:var(--manquant)}
+.item-card.s-inspection::before{background:var(--inspect)}
+.item-card:hover{
+  border-color:rgba(212,160,23,.3);
+  background:var(--card2);
+  transform:translateX(2px);
+}
+.item-card.s-manquant{
+  border-color:rgba(192,57,43,.3);
+  animation:card-pulse 2s ease infinite;
+}
+@keyframes card-pulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,.0)}
+  50%{box-shadow:0 0 12px 2px rgba(192,57,43,.1)}
+}
+
+.item-left{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.item-icon{
+  font-size:1.3rem;width:38px;height:38px;
+  background:rgba(58,36,40,.5);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;border:1px solid rgba(68,40,46,.4);
+}
+.item-info{min-width:0}
+.item-name{
+  font-size:.84rem;font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  line-height:1.2;
+}
+.item-id{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.62rem;color:var(--gold);margin-top:2px;
+}
+.item-sub{
+  font-size:.68rem;color:var(--muted);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  margin-top:1px;
+}
+
+.item-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
+.status-badge{
+  font-family:'Oswald',sans-serif;
+  font-size:.58rem;letter-spacing:1px;
+  padding:3px 8px;border-radius:6px;font-weight:600;
+  white-space:nowrap;
+}
+.status-badge.s-disponible{background:rgba(39,174,96,.15);color:var(--dispo)}
+.status-badge.s-sorti{background:rgba(212,160,23,.15);color:var(--sorti)}
+.status-badge.s-manquant{background:rgba(192,57,43,.18);color:var(--manquant)}
+.status-badge.s-inspection{background:rgba(59,130,246,.15);color:var(--inspect)}
+
+.item-duration{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.6rem;color:var(--muted);
+}
+.item-since-over{color:var(--manquant);font-weight:600}
+
+/* ---- MODAL ---- */
+.modal-bg{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;padding:16px;
+}
+.modal-box{
+  background:rgba(28,16,18,.97);
+  border:1px solid rgba(212,160,23,.3);border-radius:18px;
+  padding:24px;max-width:420px;width:100%;
+  animation:modal-in .25s ease forwards;
+  max-height:90vh;overflow-y:auto;
+  position:relative;
+}
+@keyframes modal-in{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+
+.modal-header{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:20px;
+}
+.modal-close{
+  width:32px;height:32px;border-radius:8px;
+  background:rgba(58,36,40,.5);border:none;
+  color:var(--muted);font-size:1.1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;flex-shrink:0;
+}
+.modal-close:hover{color:var(--gold);background:rgba(212,160,23,.12)}
+
+.modal-status-bar{
+  display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;
+}
+.modal-action-btn{
+  flex:1;min-width:80px;
+  padding:10px 8px;border-radius:12px;
+  font-family:'Oswald',sans-serif;font-size:.68rem;letter-spacing:1.5px;
+  border:1px solid transparent;cursor:pointer;
+  transition:all .2s;text-align:center;
+}
+.modal-action-btn:active{transform:scale(.97)}
+
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.detail-cell{
+  background:rgba(12,6,8,.5);border-radius:10px;
+  padding:10px 12px;
+}
+.detail-cell-label{
+  font-size:.6rem;letter-spacing:1.5px;
+  color:var(--muted);font-family:'Oswald',sans-serif;
+  margin-bottom:4px;
+}
+.detail-cell-val{
+  font-size:.82rem;font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+/* ---- TIMELINE (historique) ---- */
+.history-item{
+  display:flex;gap:12px;padding:10px 0;
+  border-bottom:1px solid rgba(58,36,40,.4);
+}
+.history-item:last-child{border:none}
+.history-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;
+}
+.history-content{flex:1;min-width:0}
+.history-action{font-size:.8rem;font-weight:600}
+.history-meta{font-size:.68rem;color:var(--muted);margin-top:2px}
+
+/* ---- FAB ADD BUTTON ---- */
+.fab{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  z-index:200;
+  display:flex;align-items:center;gap:8px;
+  padding:12px 24px;border-radius:28px;
+  background:linear-gradient(135deg,var(--rescue),var(--rescueL));
+  border:none;color:#fff;cursor:pointer;
+  font-family:'Oswald',sans-serif;font-size:.75rem;letter-spacing:2px;
+  box-shadow:0 6px 24px rgba(230,81,0,.35);
+  transition:all .25s;
+}
+.fab:hover{
+  box-shadow:0 8px 32px rgba(230,81,0,.5);
+  transform:translateX(-50%) translateY(-2px);
+}
+.fab:active{transform:translateX(-50%) scale(.97)}
+
+/* ---- TOAST ---- */
+.toast-wrap{position:fixed;bottom:70px;right:14px;z-index:400;display:flex;flex-direction:column;gap:8px}
+.toast{
+  padding:10px 16px;border-radius:12px;
+  background:rgba(28,16,18,.97);backdrop-filter:blur(16px);
+  font-size:.82rem;font-weight:600;
+  border:1px solid;
+  box-shadow:0 4px 16px rgba(0,0,0,.4);
+  animation:toast-in .35s ease forwards;
+}
+@keyframes toast-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toast-out{from{opacity:1}to{opacity:0;transform:translateY(10px)}}
+.toast.gold{border-color:rgba(212,160,23,.4);color:var(--gold)}
+.toast.green{border-color:rgba(39,174,96,.4);color:var(--green)}
+.toast.red{border-color:rgba(192,57,43,.4);color:var(--manquant)}
+
+/* ---- EMPTY STATE ---- */
+.empty-state{
+  text-align:center;padding:40px 20px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;margin:12px 0;
+}
+
+/* ---- ANIMATIONS ---- */
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes slide-up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.slide-up{animation:slide-up .4s ease forwards;opacity:0}
+.d1{animation-delay:.05s}.d2{animation-delay:.1s}.d3{animation-delay:.15s}
+.d4{animation-delay:.2s}.d5{animation-delay:.25s}
+
+/* ---- MOBILE ---- */
+@media(max-width:480px){
+  .kpi-strip{grid-template-columns:repeat(2,1fr)}
+  .items-grid{grid-template-columns:1fr}
+  .detail-grid{grid-template-columns:1fr}
+  .modal-status-bar{flex-direction:column}
+  .modal-action-btn{min-width:unset}
+  .hdr-stat{display:none}
+}
+</style>
+</head>
+<body>
+<script src="data.js"></script>
+<div class="top-shimmer"></div>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="header-inner">
+    <div class="header-left">
+      <a href="index.html" class="back-btn" title="Retour">←</a>
+      <div class="logo-ring">
+        <img src="eagle_tactic.png" alt="Golden Eagles" onerror="this.parentElement.innerHTML='🦅'">
+      </div>
+      <div>
+        <div class="header-title">CAISSES &amp; STOCK</div>
+        <div class="header-sub">INVENTAIRE EN TEMPS RÉEL</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="hdr-stat">
+        <span class="hdr-dot" id="hdr-dot" style="background:var(--green);animation:float 1.5s ease infinite"></span>
+        <span id="hdr-status" style="font-size:.68rem;font-weight:600;color:var(--green)">EN LIGNE</span>
+      </div>
+      <div class="hdr-stat">
+        <span id="hdr-clock" style="font-family:'JetBrains Mono',monospace;font-size:.68rem">--:--:--</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- MODAL -->
+<div id="modalRoot"></div>
+
+<!-- MAIN -->
+<div class="main-wrap">
+
+  <!-- KPI STRIP -->
+  <div class="kpi-strip slide-up d1" id="kpiStrip">
+    <div class="kpi-card">
+      <div class="kpi-num" id="kpi-total" style="color:var(--goldL)">—</div>
+      <div class="kpi-label">TOTAL</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-num" id="kpi-dispo" style="color:var(--dispo)">—</div>
+      <div class="kpi-label">DISPO</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-num" id="kpi-sorti" style="color:var(--sorti)">—</div>
+      <div class="kpi-label">SORTIS</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-num" id="kpi-alert" style="color:var(--manquant)">—</div>
+      <div class="kpi-label">ALERTES</div>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar slide-up d2">
+    <div class="search-wrap">
+      <svg class="search-ico" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input id="searchInput" class="search-input" type="text"
+        placeholder="Rechercher item, ID, assigné..."
+        oninput="applyFilters()">
+    </div>
+    <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+      <option value="cat">Par catégorie</option>
+      <option value="status">Par statut</option>
+      <option value="name">Par nom</option>
+      <option value="alert">Alertes d'abord</option>
+    </select>
+  </div>
+  <div class="filter-pills slide-up d2" id="filterPills">
+    <button class="pill active" data-f="tous" onclick="setFilter('tous',this)">TOUS</button>
+    <button class="pill" data-f="disponible" onclick="setFilter('disponible',this)">✅ DISPO</button>
+    <button class="pill" data-f="sorti" onclick="setFilter('sorti',this)">📤 SORTIS</button>
+    <button class="pill" data-f="inspection" onclick="setFilter('inspection',this)">🔍 INSPECTION</button>
+    <button class="pill" data-f="manquant" onclick="setFilter('manquant',this)">🚨 MANQUANT</button>
+  </div>
+
+  <!-- ITEMS LIST -->
+  <div id="itemsContainer" class="slide-up d3"></div>
+
+  <!-- EMPTY STATE -->
+  <div id="emptyState" class="empty-state slide-up d4" style="display:none">
+    <div style="font-size:2.5rem;margin-bottom:10px">📦</div>
+    <div style="font-family:'Oswald',sans-serif;color:var(--gold);letter-spacing:2px;font-size:.85rem;margin-bottom:6px">AUCUN RÉSULTAT</div>
+    <div style="font-size:.78rem;color:var(--muted)">Aucun item ne correspond à votre recherche</div>
+  </div>
+
+</div>
+
+<!-- FAB -->
+<button class="fab" onclick="openAddModal()">
+  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+  AJOUTER ITEM
+</button>
+
+<!-- THEME PILL -->
+<div class="theme-pill">
+  <button class="theme-btn active" id="btnDark" onclick="setTheme('dark')">🌙</button>
+  <button class="theme-btn" id="btnLight" onclick="setTheme('light')">☀️</button>
+</div>
+
+<script>
+// ================================================================
+//  VOLO SST — Caisses & Stock
+//  Vanilla JS, no frameworks
+// ================================================================
+
+// ---- USER CONTEXT (passé depuis index.html) ----
+let CURRENT_USER = null;
+try{
+  const raw = localStorage.getItem('volo_caisse_user');
+  if(raw) CURRENT_USER = JSON.parse(raw);
+}catch(e){}
+
+function getUserName(){
+  if(!CURRENT_USER) return 'Superviseur';
+  return CURRENT_USER.name || CURRENT_USER.nom || 'Superviseur';
+}
+
+// ---- THEME ----
+function setTheme(t){
+  const r=document.getElementById('appRoot');
+  const btnL=document.getElementById('btnLight');
+  const btnD=document.getElementById('btnDark');
+  if(!r)return;
+  if(t==='light'){
+    r.classList.add('light');
+    if(btnL)btnL.classList.add('active');
+    if(btnD)btnD.classList.remove('active');
+  }else{
+    r.classList.remove('light');
+    if(btnD)btnD.classList.add('active');
+    if(btnL)btnL.classList.remove('active');
+  }
+  localStorage.setItem('volo_theme_main',t);
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const t=localStorage.getItem('volo_theme_main');
+  if(t)setTheme(t);
+});
+
+// ---- CLOCK ----
+function tick(){
+  const el=document.getElementById('hdr-clock');
+  if(el)el.textContent=new Date().toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+tick();setInterval(tick,1000);
+
+// ---- TOAST ----
+function toast(msg,type='gold'){
+  const w=document.getElementById('toastWrap');
+  const el=document.createElement('div');
+  el.className='toast '+type;
+  el.textContent=msg;
+  w.appendChild(el);
+  setTimeout(()=>{
+    el.style.animation='toast-out .35s ease forwards';
+    setTimeout(()=>el.remove(),400);
+  },3000);
+}
+
+// ---- DATA : chargé depuis data.js (836 items + CAISSES) ----
+// Mapping etat → status pour l'UI
+// ITEMS, CAISSES, GROUPS sont définis dans data.js (chargé via <script src>)
+
+function etatToStatus(etat){
+  if(!etat) return 'disponible';
+  const e = etat.toLowerCase();
+  if(e.includes('hors') || e.includes('manquant')) return 'manquant';
+  if(e.includes('surveiller')) return 'inspection';
+  if(e.includes('sorti') || e.includes('mission')) return 'sorti';
+  return 'disponible';
+}
+
+// Trouver la caisse d'un item
+function findCaisseForItem(itemId){
+  if(typeof CAISSES === 'undefined') return null;
+  return CAISSES.find(c => (c.items_contenus||c.items||[]).includes(itemId)) || null;
+}
+
+// Enrichir les ITEMS de data.js avec les champs UI + statuts caisses
+function buildUIItems(){
+  if(typeof ITEMS === 'undefined') return [];
+  // Récupérer les statuts de caisses depuis localStorage (partagé avec index.html)
+  let caisseStatuts = {};
+  try { caisseStatuts = JSON.parse(localStorage.getItem('volo_caisse_statuts')||'{}'); } catch(e){}
+  // Récupérer les incidents
+  let incidents = [];
+  try { incidents = JSON.parse(localStorage.getItem('volo_incidents')||'[]'); } catch(e){}
+
+  return ITEMS.map(i => {
+    // Déterminer le statut : d'abord vérifier si la caisse est en mission
+    let status = etatToStatus(i.etat);
+    let assignee = '';
+    let location = '';
+    let since = '';
+    const caisse = findCaisseForItem(i.id);
+    const caisseName = caisse ? (caisse.nom||caisse.name||caisse.id) : '';
+
+    if(caisse && caisseStatuts[caisse.id]){
+      const cs = caisseStatuts[caisse.id];
+      if(cs.statut === 'en_mission'){
+        status = 'sorti';
+        since = cs.since || '';
+        assignee = cs.user || '';
+      }
+    }
+
+    // Vérifier si item est signalé manquant dans les incidents récents
+    const recentIncident = incidents.find(inc =>
+      (inc.type === 'MANQUANT_PICK_OFF' || inc.type === 'MANQUANT_PICK_ON') &&
+      (inc.items||inc.items_manquants||[]).includes(i.id)
+    );
+    if(recentIncident){
+      status = 'manquant';
+    }
+
+    return {
+      id: i.id,
+      name: i.name,
+      cat: i.cat,
+      icon: i.icon || '📦',
+      status,
+      etat: i.etat || 'Bon',
+      desc: i.desc || '',
+      fab: i.fab || '',
+      serial: i.serial || '',
+      volo_id: i.volo_id || '',
+      expiry: i.expiry || '',
+      inspBy: i.inspBy || '',
+      inspDate: i.inspDate || '',
+      notes: i.notes || '',
+      qty: i.qty || 1,
+      group: i.group || '',
+      caisse_id: caisse ? caisse.id : '',
+      caisse_nom: caisseName,
+      assignee,
+      location,
+      since,
+      history: []
+    };
+  });
+}
+let currentFilter = 'tous';
+let collapsedCats = new Set(JSON.parse(localStorage.getItem('volo_cat_collapsed')||'[]'));
+let UI_ITEMS = []; // chargé depuis data.js via buildUIItems()
+
+// ---- HELPERS ----
+function timeSince(since){
+  if(!since) return '—';
+  const ms = Date.now() - new Date(since).getTime();
+  const h = Math.floor(ms/3600000);
+  const m = Math.floor((ms%3600000)/60000);
+  if(h>24) return Math.floor(h/24)+'j '+h%24+'h';
+  if(h>0) return h+'h'+(m>0?m+'m':'');
+  return m+'m';
+}
+function isOverdue(since){
+  if(!since) return false;
+  return Date.now()-new Date(since).getTime() > 86400000;
+}
+function getStatusLabel(s){
+  return{disponible:'DISPO',sorti:'SORTI',manquant:'MANQUANT',inspection:'INSPECTER'}[s]||s.toUpperCase();
+}
+
+// ---- KPI ----
+function updateKPIs(items){
+  document.getElementById('kpi-total').textContent = items.length;
+  document.getElementById('kpi-dispo').textContent = items.filter(i=>i.status==='disponible').length;
+  document.getElementById('kpi-sorti').textContent = items.filter(i=>i.status==='sorti').length;
+  document.getElementById('kpi-alert').textContent = items.filter(i=>i.status==='manquant'||i.status==='inspection').length;
+}
+
+// ---- FILTER / SORT ----
+function setFilter(f, btn){
+  currentFilter = f;
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function applyFilters(){
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const sort = document.getElementById('sortSelect').value;
+
+  let list = UI_ITEMS.slice();
+
+  // status filter
+  if(currentFilter !== 'tous') list = list.filter(i=>i.status===currentFilter);
+
+  // search — nom, id, serial, fabricant, caisse, assigné, localisation
+  if(q) list = list.filter(i=>
+    i.name.toLowerCase().includes(q) ||
+    i.id.toLowerCase().includes(q) ||
+    (i.serial||'').toLowerCase().includes(q) ||
+    (i.fab||'').toLowerCase().includes(q) ||
+    (i.caisse_nom||'').toLowerCase().includes(q) ||
+    (i.assignee||'').toLowerCase().includes(q) ||
+    (i.location||'').toLowerCase().includes(q) ||
+    (i.notes||'').toLowerCase().includes(q)
+  );
+
+  // sort
+  if(sort==='status') list.sort((a,b)=>{
+    const order={manquant:0,inspection:1,sorti:2,disponible:3};
+    return (order[a.status]||9)-(order[b.status]||9);
+  });
+  else if(sort==='name') list.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(sort==='alert') list.sort((a,b)=>{
+    const score = i => (i.status==='manquant'?0:i.status==='inspection'?1:isOverdue(i.since)?2:3);
+    return score(a)-score(b);
+  });
+
+  updateKPIs(list);
+  renderItems(list, sort);
+}
+
+// ---- RENDER ----
+function renderItems(list, sort='cat'){
+  const container = document.getElementById('itemsContainer');
+  const empty = document.getElementById('emptyState');
+
+  if(!list.length){
+    container.innerHTML='';
+    empty.style.display='block';
+    return;
+  }
+  empty.style.display='none';
+
+  if(sort === 'cat' && currentFilter === 'tous'){
+    // Group by category
+    const cats = {};
+    list.forEach(i=>{
+      if(!cats[i.cat]) cats[i.cat]={items:[],icon:i.icon};
+      cats[i.cat].items.push(i);
+    });
+
+    container.innerHTML = Object.entries(cats).map(([cat, data])=>{
+      const collapsed = collapsedCats.has(cat);
+      const alertCount = data.items.filter(i=>i.status==='manquant'||i.status==='inspection').length;
+      return `
+      <div class="cat-block" data-cat="${cat}">
+        <div class="cat-header" onclick="toggleCat('${cat}')">
+          <div class="cat-header-left">
+            <span class="cat-icon">${data.icon}</span>
+            <span class="cat-name">${cat.toUpperCase()}</span>
+            <span class="cat-count">(${data.items.length})</span>
+            ${alertCount?`<span style="font-size:.6rem;padding:2px 7px;border-radius:10px;background:rgba(192,57,43,.2);color:var(--manquant);font-family:'Oswald',sans-serif;letter-spacing:1px">⚠ ${alertCount}</span>`:''}
+          </div>
+          <span class="cat-arrow ${collapsed?'collapsed':''}">▼</span>
+        </div>
+        <div class="items-grid ${collapsed?'collapsed':''}">
+          ${data.items.map(i=>renderItemCard(i)).join('')}
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    // Flat list
+    container.innerHTML = `<div class="items-grid">${list.map(i=>renderItemCard(i)).join('')}</div>`;
+  }
+}
+
+function renderItemCard(i){
+  const over = i.status==='sorti' && isOverdue(i.since);
+  const dur = timeSince(i.since);
+  return `
+  <div class="item-card s-${i.status}" onclick="openItemModal('${i.id}')">
+    <div class="item-left">
+      <div class="item-icon">${i.icon}</div>
+      <div class="item-info">
+        <div class="item-name">${i.name}</div>
+        <div class="item-id">${i.id}${i.serial?' • '+i.serial.substring(0,15):''}</div>
+        <div class="item-sub">${i.assignee||i.location||(i.caisse_nom?i.caisse_nom:'— Dépôt')}</div>
+      </div>
+    </div>
+    <div class="item-right">
+      <span class="status-badge s-${i.status}">${getStatusLabel(i.status)}</span>
+      ${i.since?`<span class="item-duration ${over?'item-since-over':''}">${over?'⚠ ':''}${dur}</span>`:''}
+    </div>
+  </div>`;
+}
+
+// ---- CATEGORY TOGGLE ----
+function toggleCat(cat){
+  if(collapsedCats.has(cat)) collapsedCats.delete(cat);
+  else collapsedCats.add(cat);
+  localStorage.setItem('volo_cat_collapsed', JSON.stringify([...collapsedCats]));
+
+  const block = document.querySelector(`.cat-block[data-cat="${cat}"]`);
+  if(!block) return;
+  const grid = block.querySelector('.items-grid');
+  const arrow = block.querySelector('.cat-arrow');
+  grid.classList.toggle('collapsed', collapsedCats.has(cat));
+  arrow.classList.toggle('collapsed', collapsedCats.has(cat));
+}
+
+// ---- ITEM MODAL ----
+function openItemModal(id){
+  const item = UI_ITEMS.find(i=>i.id===id);
+  if(!item) return;
+  const over = item.status==='sorti' && isOverdue(item.since);
+
+  const statusActions = [
+    {s:'disponible', label:'✅ DISPO', bg:'rgba(39,174,96,.18)', border:'rgba(39,174,96,.4)', color:'var(--dispo)'},
+    {s:'sorti',      label:'📤 SORTI', bg:'rgba(212,160,23,.18)', border:'rgba(212,160,23,.4)', color:'var(--sorti)'},
+    {s:'inspection', label:'🔍 INSPECTER', bg:'rgba(59,130,246,.18)', border:'rgba(59,130,246,.4)', color:'var(--inspect)'},
+    {s:'manquant',   label:'🚨 MANQUANT', bg:'rgba(192,57,43,.18)', border:'rgba(192,57,43,.4)', color:'var(--manquant)'},
+  ];
+
+  document.getElementById('modalRoot').innerHTML = `
+  <div class="modal-bg" onclick="if(event.target.classList.contains('modal-bg'))closeModal()">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+            <span style="font-size:1.6rem">${item.icon}</span>
+            <div>
+              <div style="font-family:'Oswald',sans-serif;font-size:1rem;letter-spacing:1px;color:var(--goldL)">${item.name}</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--gold);margin-top:1px">${item.id}</div>
+            </div>
+          </div>
+          ${over?'<div style="font-size:.7rem;color:var(--manquant);font-weight:600;margin-top:4px">⚠️ DÉPASSEMENT +24H — Retour requis</div>':''}
+        </div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+
+      <!-- STATUS ACTIONS -->
+      <div style="font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:2px;color:var(--muted);margin-bottom:8px">CHANGER STATUT</div>
+      <div class="modal-status-bar">
+        ${statusActions.map(a=>`
+          <button class="modal-action-btn" onclick="changeStatus('${id}','${a.s}')"
+            style="background:${a.bg};border-color:${a.border};color:${a.color};${item.status===a.s?'outline:2px solid '+a.border+';font-weight:700':''}"
+          >${a.label}</button>
+        `).join('')}
+      </div>
+
+      <!-- DETAILS GRID -->
+      <div class="detail-grid">
+        <div class="detail-cell">
+          <div class="detail-cell-label">CATÉGORIE</div>
+          <div class="detail-cell-val">${item.cat}</div>
+        </div>
+        <div class="detail-cell">
+          <div class="detail-cell-label">STATUT ACTUEL</div>
+          <div class="detail-cell-val" style="color:${{disponible:'var(--dispo)',sorti:'var(--sorti)',manquant:'var(--manquant)',inspection:'var(--inspect)'}[item.status]}">${getStatusLabel(item.status)}</div>
+        </div>
+        ${item.caisse_nom?`<div class="detail-cell">
+          <div class="detail-cell-label">CAISSE</div>
+          <div class="detail-cell-val" style="color:var(--gold)">${item.caisse_nom}</div>
+        </div>`:''}
+        <div class="detail-cell">
+          <div class="detail-cell-label">ASSIGNÉ À</div>
+          <div class="detail-cell-val">${item.assignee||'—'}</div>
+        </div>
+        <div class="detail-cell">
+          <div class="detail-cell-label">LOCALISATION</div>
+          <div class="detail-cell-val">${item.location||'Dépôt'}</div>
+        </div>
+        <div class="detail-cell">
+          <div class="detail-cell-label">DEPUIS</div>
+          <div class="detail-cell-val ${over?'item-since-over':''}">${item.since||'—'}</div>
+        </div>
+        ${item.serial?`<div class="detail-cell">
+          <div class="detail-cell-label">N° SÉRIE</div>
+          <div class="detail-cell-val" style="font-family:'JetBrains Mono',monospace;font-size:.7rem">${item.serial}</div>
+        </div>`:''}
+        ${item.fab?`<div class="detail-cell">
+          <div class="detail-cell-label">FABRICANT</div>
+          <div class="detail-cell-val">${item.fab}</div>
+        </div>`:''}
+        ${item.expiry?`<div class="detail-cell">
+          <div class="detail-cell-label">EXPIRATION</div>
+          <div class="detail-cell-val">${item.expiry}</div>
+        </div>`:''}
+        ${item.inspBy?`<div class="detail-cell">
+          <div class="detail-cell-label">INSPECTÉ PAR</div>
+          <div class="detail-cell-val">${item.inspBy}${item.inspDate?' • '+item.inspDate:''}</div>
+        </div>`:''}
+        ${item.notes?`<div class="detail-cell" style="grid-column:1/-1">
+          <div class="detail-cell-label">NOTES</div>
+          <div class="detail-cell-val" style="font-size:.72rem;line-height:1.4;max-height:80px;overflow-y:auto">${item.notes}</div>
+        </div>`:''}
+      </div>
+
+      <!-- ASSIGN QUICK FORM -->
+      <div style="margin-bottom:16px">
+        <div style="font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:2px;color:var(--muted);margin-bottom:6px">ASSIGNATION RAPIDE</div>
+        <div style="display:flex;gap:8px">
+          <input id="assignInput" type="text" placeholder="Nom du sauveteur..."
+            value="${item.assignee||''}"
+            style="flex:1;padding:8px 12px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.8rem;outline:none"
+            onfocus="this.style.borderColor='rgba(212,160,23,.45)'"
+            onblur="this.style.borderColor='var(--border)'">
+          <input id="destInput" type="text" placeholder="Destination..."
+            value="${item.location||''}"
+            style="flex:1;padding:8px 12px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.8rem;outline:none"
+            onfocus="this.style.borderColor='rgba(230,81,0,.45)'"
+            onblur="this.style.borderColor='var(--border)'">
+          <button onclick="assignItem('${id}')"
+            style="padding:8px 14px;border-radius:9px;background:linear-gradient(135deg,var(--rescue),var(--rescueL));border:none;color:#fff;font-family:'Oswald',sans-serif;font-size:.65rem;letter-spacing:1px;cursor:pointer;white-space:nowrap">
+            ✓ ASSIGNER
+          </button>
+        </div>
+      </div>
+
+      <!-- HISTORIQUE -->
+      ${item.history.length?`
+      <div>
+        <div style="font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:2px;color:var(--muted);margin-bottom:8px">HISTORIQUE</div>
+        <div style="max-height:160px;overflow-y:auto;padding-right:4px">
+          ${item.history.map(h=>`
+          <div class="history-item">
+            <div class="history-dot" style="background:${({'PICK-ON':'var(--green)','RETOUR':'var(--gold)','PICK-OFF':'var(--gold)','MANQUANT':'var(--manquant)','INSPECTION':'var(--inspect)'}[h.a]||'var(--muted)')}"></div>
+            <div class="history-content">
+              <div class="history-action">${h.a} — ${h.dest}</div>
+              <div class="history-meta">${h.by} • ${h.at}</div>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>
+      `:''}
+    </div>
+  </div>`;
+}
+
+function closeModal(){
+  document.getElementById('modalRoot').innerHTML='';
+}
+
+function changeStatus(id, newStatus){
+  const item = UI_ITEMS.find(i=>i.id===id);
+  if(!item) return;
+  item.history.unshift({a:newStatus.toUpperCase(),by:getUserName(),at:new Date().toLocaleString('fr-CA'),dest:item.location||'?'});
+  item.status = newStatus;
+  if(newStatus==='disponible'){item.assignee='';item.location='';item.since='';}
+  else if(!item.since) item.since = new Date().toISOString().slice(0,16).replace('T',' ');
+  closeModal();
+  applyFilters();
+  toast(`${item.name} → ${getStatusLabel(newStatus)}`, newStatus==='manquant'?'red':newStatus==='disponible'?'green':'gold');
+}
+
+function assignItem(id){
+  const item = UI_ITEMS.find(i=>i.id===id);
+  if(!item) return;
+  const newAssignee = document.getElementById('assignInput').value.trim();
+  const newDest = document.getElementById('destInput').value.trim();
+  item.assignee = newAssignee;
+  item.location = newDest;
+  if(newAssignee && item.status==='disponible') item.status='sorti';
+  if(!item.since && newAssignee) item.since=new Date().toISOString().slice(0,16).replace('T',' ');
+  item.history.unshift({a:'ASSIGNÉ',by:newAssignee||'—',at:new Date().toLocaleString('fr-CA'),dest:newDest||'?'});
+  closeModal();
+  applyFilters();
+  toast(`${item.name} assigné à ${newAssignee||'—'}`, 'green');
+}
+
+// ---- ADD ITEM MODAL ----
+function openAddModal(){
+  const cats = [...new Set(UI_ITEMS.map(i=>i.cat))];
+  document.getElementById('modalRoot').innerHTML = `
+  <div class="modal-bg" onclick="if(event.target.classList.contains('modal-bg'))closeModal()">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div style="font-family:'Oswald',sans-serif;font-size:.95rem;letter-spacing:2px;color:var(--rescue)">➕ NOUVEL ITEM</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:3px">Ajouter un équipement au stock</div>
+        </div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label style="font-size:.6rem;letter-spacing:1.5px;color:var(--muted);font-family:'Oswald',sans-serif;display:block;margin-bottom:4px">NOM *</label>
+            <input id="add-name" type="text" placeholder="Nom de l'item"
+              style="width:100%;padding:9px 12px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.82rem;outline:none">
+          </div>
+          <div>
+            <label style="font-size:.6rem;letter-spacing:1.5px;color:var(--muted);font-family:'Oswald',sans-serif;display:block;margin-bottom:4px">ID *</label>
+            <input id="add-id" type="text" placeholder="ITEM-XXX-000"
+              style="width:100%;padding:9px 12px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:.78rem;outline:none">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label style="font-size:.6rem;letter-spacing:1.5px;color:var(--muted);font-family:'Oswald',sans-serif;display:block;margin-bottom:4px">CATÉGORIE</label>
+            <select id="add-cat"
+              style="width:100%;padding:9px 12px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.82rem;outline:none;-webkit-appearance:none">
+              ${cats.map(c=>`<option value="${c}">${c}</option>`).join('')}
+              <option value="__new__">➕ Nouvelle catégorie...</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:.6rem;letter-spacing:1.5px;color:var(--muted);font-family:'Oswald',sans-serif;display:block;margin-bottom:4px">ICÔNE</label>
+            <input id="add-icon" type="text" value="📦" maxlength="2"
+              style="width:100%;padding:9px 12px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:1.1rem;outline:none;text-align:center">
+          </div>
+        </div>
+        <button onclick="submitAddItem()"
+          style="width:100%;padding:13px;border-radius:12px;
+            background:linear-gradient(135deg,var(--rescue),var(--rescueL));
+            border:none;color:#fff;font-family:'Oswald',sans-serif;
+            font-size:.78rem;letter-spacing:2px;cursor:pointer;margin-top:4px">
+          ✓ AJOUTER AU STOCK
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function submitAddItem(){
+  const name = document.getElementById('add-name').value.trim();
+  const id = document.getElementById('add-id').value.trim();
+  const catSel = document.getElementById('add-cat').value;
+  const icon = document.getElementById('add-icon').value.trim()||'📦';
+
+  if(!name||!id){toast('Nom et ID requis','red');return;}
+  if(UI_ITEMS.find(i=>i.id===id)){toast('ID déjà existant','red');return;}
+
+  const cat = catSel==='__new__' ? prompt('Nom de la nouvelle catégorie:')||'Autre' : catSel;
+  UI_ITEMS.push({id,name,cat,icon,status:'disponible',assignee:'',location:'',since:'',history:[{a:'CRÉÉ',by:getUserName(),at:new Date().toLocaleString('fr-CA'),dest:'Dépôt'}]});
+  closeModal();
+  applyFilters();
+  toast(`${name} ajouté au stock`,'green');
+}
+
+// ---- INIT ----
+UI_ITEMS = buildUIItems();
+if(!UI_ITEMS.length){
+  document.getElementById('emptyState').style.display='block';
+  document.getElementById('emptyState').innerHTML='<div style="font-size:2rem;margin-bottom:10px">⚠️</div><div style="font-family:\'Oswald\',sans-serif;color:var(--manquant);letter-spacing:2px;font-size:.85rem;margin-bottom:6px">DATA.JS NON CHARGÉ</div><div style="font-size:.78rem;color:var(--muted)">Vérifier que data.js est dans le même dossier</div>';
+}
+applyFilters();
+</script>
+</body>
+</html>
