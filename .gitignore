@@ -1,0 +1,27 @@
+# Données privées — NE PAS déployer
+emails_prives.js
+service-account-key.json
+serviceAccountKey.json
+*.pem
+*.p12
+.env
+.env.local
+.env.production
+
+# Firebase / Node
+node_modules/
+.firebase/
+firebase-debug.log
+
+# Scripts admin (pas dans le deploy Netlify)
+set-claims.js
+test-rules.html
+seed-firestore.html
+
+# IDE / Tools
+.claude/
+.netlify/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,653 @@
+// ══════════════════════════════════════════
+//  VOLO SST — Firebase Service Layer
+//  Abstraction Firestore avec fallback data.js
+//  Requiert : firebase-config.js chargé avant
+// ══════════════════════════════════════════
+
+var VoloData = (function() {
+  'use strict';
+
+  // --- Helpers ---
+  var ORG = window.VOLO_ORG || 'ORG_VOLO_PROD';
+  var CACHE_PREFIX = 'volo_fb_';
+  var QUEUE_KEY = 'volo_fb_queue';
+
+  function _fs() { return window.firebaseFS; }
+  function _enabled() { return !!(window.VOLO_FIREBASE && window.VOLO_FIREBASE.enabled && _fs()); }
+  function _primary() { return window.VOLO_FIREBASE && window.VOLO_FIREBASE.firestorePrimary; }
+
+  // --- Circuit Breaker (quota Spark 20k writes/jour) ---
+  var WRITE_LIMIT = 20000;
+  var WRITE_WARN_PCT = 0.80;  // 80% = bandeau rouge
+  var WRITE_COUNT_KEY = 'volo_write_count';
+  var WRITE_DATE_KEY = 'volo_write_date';
+  var _circuitOpen = false;
+  var _bannerShown = false;
+
+  function _todayStr() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function _getWriteCount() {
+    try {
+      var storedDate = localStorage.getItem(WRITE_DATE_KEY);
+      if (storedDate !== _todayStr()) {
+        // Nouveau jour — reset
+        localStorage.setItem(WRITE_DATE_KEY, _todayStr());
+        localStorage.setItem(WRITE_COUNT_KEY, '0');
+        _circuitOpen = false;
+        _bannerShown = false;
+        return 0;
+      }
+      return parseInt(localStorage.getItem(WRITE_COUNT_KEY) || '0', 10);
+    } catch(e) { return 0; }
+  }
+
+  function _incrementWrite() {
+    try {
+      var count = _getWriteCount() + 1;
+      localStorage.setItem(WRITE_COUNT_KEY, String(count));
+      localStorage.setItem(WRITE_DATE_KEY, _todayStr());
+      var pct = count / WRITE_LIMIT;
+      if (pct >= 1) {
+        _circuitOpen = true;
+        _showQuotaBanner('CIRCUIT OUVERT — Quota Firestore atteint (' + count + '/' + WRITE_LIMIT + '). Mode webhook-only.', true);
+      } else if (pct >= WRITE_WARN_PCT && !_bannerShown) {
+        _showQuotaBanner('⚠ Quota Firestore à ' + Math.round(pct * 100) + '% (' + count + '/' + WRITE_LIMIT + ' writes)', false);
+        _bannerShown = true;
+      }
+      return count;
+    } catch(e) { return 0; }
+  }
+
+  function _isCircuitOpen() {
+    if (_circuitOpen) return true;
+    var count = _getWriteCount();
+    if (count >= WRITE_LIMIT) {
+      _circuitOpen = true;
+      return true;
+    }
+    return false;
+  }
+
+  function _showQuotaBanner(msg, critical) {
+    // Retire l'ancien bandeau s'il existe
+    var old = document.getElementById('voloQuotaBanner');
+    if (old) old.remove();
+    var banner = document.createElement('div');
+    banner.id = 'voloQuotaBanner';
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;padding:10px 16px;font-family:Inter,sans-serif;font-size:13px;font-weight:600;text-align:center;color:#fff;background:' + (critical ? '#B71C1C' : '#E65100') + ';box-shadow:0 2px 8px rgba(0,0,0,.5);';
+    banner.textContent = msg;
+    if (!critical) {
+      var btn = document.createElement('span');
+      btn.textContent = ' ✕';
+      btn.style.cssText = 'cursor:pointer;margin-left:12px;opacity:.8;';
+      btn.onclick = function() { banner.remove(); };
+      banner.appendChild(btn);
+    }
+    document.body.appendChild(banner);
+  }
+
+  function _canWrite() {
+    if (_isCircuitOpen()) {
+      console.warn('[VoloData] Circuit OPEN — write skipped, queuing for webhook');
+      return false;
+    }
+    return true;
+  }
+
+  function _cacheSet(key, data) {
+    try { localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({ ts: Date.now(), data: data })); }
+    catch(e) { /* quota exceeded — ignore */ }
+  }
+
+  function _cacheGet(key, maxAgeMs) {
+    try {
+      var raw = localStorage.getItem(CACHE_PREFIX + key);
+      if (!raw) return null;
+      var parsed = JSON.parse(raw);
+      if (maxAgeMs && (Date.now() - parsed.ts) > maxAgeMs) return null;
+      return parsed.data;
+    } catch(e) { return null; }
+  }
+
+  function _tsNow() { return new Date().toISOString(); }
+
+  // --- Offline Queue ---
+  function _queuePush(operation) {
+    try {
+      var queue = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
+      queue.push({ op: operation, ts: _tsNow() });
+      localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+    } catch(e) { /* ignore */ }
+  }
+
+  function _queueFlush() {
+    if (!_enabled()) return;
+    _ensureAuth().then(function() {
+      try {
+        var queue = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
+        if (!queue.length) return;
+        console.log('[VoloData] Flushing', queue.length, 'queued operations');
+        var remaining = [];
+        queue.forEach(function(entry) {
+          try {
+            var op = entry.op;
+            if (op.collection && op.data) {
+              if (op.docId) {
+                _fs().collection(op.collection).doc(op.docId).set(op.data, { merge: true });
+              } else {
+                _fs().collection(op.collection).add(op.data);
+              }
+            }
+          } catch(e) {
+            remaining.push(entry);
+          }
+        });
+        localStorage.setItem(QUEUE_KEY, JSON.stringify(remaining));
+      } catch(e) { /* ignore */ }
+    });
+  }
+
+  // Flush queue quand on revient en ligne
+  window.addEventListener('online', function() {
+    setTimeout(_queueFlush, 2000);
+  });
+
+  // ══════════════════════════════════════════
+  //  PERSONNEL
+  // ══════════════════════════════════════════
+
+  function getPersonnel() {
+    // Retourne PERSONNEL global (peut être stub ou déjà enrichi par Firestore)
+    if (typeof PERSONNEL !== 'undefined') return Promise.resolve(PERSONNEL);
+    return Promise.resolve([]);
+  }
+
+  function _ensureAuth() {
+    // Sign-in anonyme si pas encore authentifié (nécessaire pour Security Rules isAuth())
+    if (!window.firebaseAuth) return Promise.resolve(false);
+    if (window.firebaseAuth.currentUser) return Promise.resolve(true);
+    return window.firebaseAuth.signInAnonymously()
+      .then(function(cred) {
+        console.log('[VoloData] Auth anonyme OK — uid:', cred.user.uid);
+        return true;
+      })
+      .catch(function(e) {
+        console.warn('[VoloData] Auth anonyme échoué:', e.code, e.message);
+        return false;
+      });
+  }
+
+  function getPersonnelFromFirestore() {
+    if (!_enabled()) {
+      console.log('[VoloData] getPersonnelFromFirestore — Firebase désactivé (_enabled=false)');
+      return Promise.resolve(null);
+    }
+    return _ensureAuth().then(function(authed) {
+      console.log('[VoloData] getPersonnelFromFirestore — auth:', authed, '| currentUser:', !!(window.firebaseAuth && window.firebaseAuth.currentUser));
+      return _fs().collection('users').get()
+        .then(function(snap) {
+          console.log('[VoloData] getPersonnelFromFirestore — Firestore répondu: empty=' + snap.empty + ', size=' + snap.size);
+          if (snap.empty) return null;
+          var result = [];
+          var firstLogged = false;
+          snap.forEach(function(doc) {
+            var d = doc.data();
+            if (!firstLogged) {
+              console.log('[VoloData] SAMPLE DOC id=' + doc.id + ' raw keys:', Object.keys(d).join(', '));
+              console.log('[VoloData] SAMPLE DOC values:', JSON.stringify({ name: d.name, nom: d.nom, displayName: d.displayName, volo: d.volo, voloId: d.voloId, role: d.role, type: d.type, region: d.region, ville: d.ville, active: d.active }));
+              firstLogged = true;
+            }
+            // Mapping exhaustif : name > nom > displayName
+            var resolvedName = d.name || d.nom || d.displayName || '';
+            result.push({
+              id: d.id || doc.id,
+              volo: d.volo || d.voloId || doc.id,
+              name: resolvedName,
+              role: (d.role || 'SAUVETEUR').toUpperCase(),
+              type: (d.type || d.role || 'SAUVETEUR').toUpperCase(),
+              region: d.region || '',
+              ville: d.ville || '',
+              email: '' // PII protégé côté client
+            });
+          });
+          console.log('[VoloData] getPersonnelFromFirestore — ' + result.length + ' membres chargés (sample name: "' + (result[0] && result[0].name) + '")');
+          return result;
+        })
+        .catch(function(e) {
+          console.warn('[VoloData] getPersonnelFromFirestore ERREUR:', e.code || '', e.message);
+          return null;
+        });
+    });
+  }
+
+  // Charge PERSONNEL depuis Firestore /users si >= 20 membres, sinon garde le stub local
+  // Seuil abaissé de 100 à 20 : le stub a 30 entrées, Firestore en a 161
+  function initPersonnel() {
+    var localCount = (typeof PERSONNEL !== 'undefined') ? PERSONNEL.length : 0;
+    console.log('[VoloData] initPersonnel — _enabled=' + _enabled() + ', PERSONNEL local=' + localCount);
+    if (!_enabled()) {
+      console.log('[VoloData] → branche FALLBACK (Firebase désactivé)');
+      return Promise.resolve(false);
+    }
+    return getPersonnelFromFirestore().then(function(list) {
+      var fsCount = list ? list.length : 0;
+      console.log('[VoloData] initPersonnel — Firestore retourné ' + fsCount + ' membres (seuil: 20, local: ' + localCount + ')');
+      if (list && fsCount >= 20) {
+        window.PERSONNEL = list;
+        if (typeof window.SAUVETEURS !== 'undefined') {
+          window.SAUVETEURS = list;
+        }
+        console.log('[VoloData] → branche FIRESTORE (' + fsCount + ' membres remplacent le local)');
+        return true;
+      }
+      console.log('[VoloData] → branche FALLBACK (Firestore ' + fsCount + ' < 20, stub conservé)');
+      return false;
+    }).catch(function(e) {
+      console.warn('[VoloData] initPersonnel ERREUR → branche FALLBACK:', e.code || '', e.message);
+      return false;
+    });
+  }
+
+  function findByVolo(pin) {
+    // pin = "0205" → cherche V0205
+    var voloId = 'V' + pin;
+    if (typeof PERSONNEL !== 'undefined') {
+      var local = PERSONNEL.find(function(p) { return p.volo === voloId; });
+      if (local) return Promise.resolve(local);
+    }
+    // Essayer Firestore /users si disponible
+    if (_enabled()) {
+      return _ensureAuth().then(function() {
+        return _fs().collection('users').doc(voloId).get()
+          .then(function(doc) {
+            if (doc.exists) {
+              var d = doc.data();
+              console.log('[VoloData] findByVolo doc=' + doc.id + ' raw keys:', Object.keys(d).join(', '));
+              return {
+                id: d.id || doc.id,
+                volo: d.volo || d.voloId || doc.id,
+                name: d.name || d.nom || d.displayName || '',
+                role: (d.role || 'SAUVETEUR').toUpperCase(),
+                type: (d.type || d.role || 'SAUVETEUR').toUpperCase(),
+                region: d.region || '',
+                ville: d.ville || '',
+                email: ''
+              };
+            }
+            return null;
+          })
+          .catch(function(e) {
+            console.warn('[VoloData] findByVolo Firestore error:', e.code || '', e.message);
+            return null;
+          });
+      });
+    }
+    return Promise.resolve(null);
+  }
+
+  // ══════════════════════════════════════════
+  //  ITEMS / INVENTAIRE
+  // ══════════════════════════════════════════
+
+  function getItems() {
+    if (typeof ITEMS !== 'undefined') return Promise.resolve(ITEMS);
+    return Promise.resolve([]);
+  }
+
+  function getItemById(id) {
+    if (typeof ITEMS_MAP !== 'undefined' && ITEMS_MAP.has) {
+      return ITEMS_MAP.get(id) || null;
+    }
+    if (typeof ITEMS !== 'undefined') {
+      return ITEMS.find(function(it) { return it.id === id; }) || null;
+    }
+    return null;
+  }
+
+  function getCaisses() {
+    if (typeof CAISSES !== 'undefined') return Promise.resolve(CAISSES);
+    return Promise.resolve([]);
+  }
+
+  // ══════════════════════════════════════════
+  //  TRANSACTIONS (dual-write: Webhook + Firestore)
+  // ══════════════════════════════════════════
+
+  function saveTransaction(payload) {
+    // 1. Enrichir le payload
+    var enriched = Object.assign({}, payload, {
+      org: ORG,
+      savedAt: _tsNow(),
+      source: 'web'
+    });
+
+    // 2. Écrire dans Firestore (avec circuit breaker + auth)
+    if (_enabled() && _canWrite()) {
+      _ensureAuth().then(function() {
+        try {
+          var docRef = _fs().collection('transactions').doc();
+          enriched._firestoreId = docRef.id;
+          _incrementWrite();
+          docRef.set(enriched).catch(function(e) {
+            console.warn('[VoloData] Firestore write failed, queuing:', e.message);
+            _queuePush({ collection: 'transactions', data: enriched });
+          });
+        } catch(e) {
+          _queuePush({ collection: 'transactions', data: enriched });
+        }
+      });
+    } else {
+      _queuePush({ collection: 'transactions', data: enriched });
+    }
+
+    // 3. Le webhook est envoyé par le code existant (pas dupliqué ici)
+    return enriched;
+  }
+
+  function getTransactions(filters) {
+    if (!_enabled()) {
+      // Fallback localStorage
+      var cached = _cacheGet('transactions', 3600000); // 1h
+      return Promise.resolve(cached || []);
+    }
+
+    var query = _fs().collection('transactions').where('org', '==', ORG);
+    if (filters) {
+      if (filters.voloId) query = query.where('voloId', '==', filters.voloId);
+      if (filters.type) query = query.where('type', '==', filters.type);
+      if (filters.chantier) query = query.where('chantier', '==', filters.chantier);
+    }
+    query = query.orderBy('savedAt', 'desc').limit(filters && filters.limit || 50);
+
+    return query.get().then(function(snap) {
+      var results = snap.docs.map(function(d) {
+        var data = d.data();
+        data._id = d.id;
+        return data;
+      });
+      _cacheSet('transactions', results);
+      return results;
+    }).catch(function(e) {
+      console.warn('[VoloData] Firestore read failed:', e.message);
+      return _cacheGet('transactions') || [];
+    });
+  }
+
+  function cancelTransaction(transactionId) {
+    if (!_enabled() || !_canWrite()) return Promise.resolve(false);
+    return _ensureAuth().then(function() {
+      _incrementWrite();
+      return _fs().collection('transactions').doc(transactionId).update({
+        status: 'ANNULÉ',
+        cancelledAt: _tsNow()
+      }).then(function() { return true; })
+        .catch(function() { return false; });
+    });
+  }
+
+  // ══════════════════════════════════════════
+  //  CERTIFICATIONS
+  // ══════════════════════════════════════════
+
+  function getCerts(voloId) {
+    // Fallback localStorage
+    var lsKey = 'volo_certs_' + voloId;
+    var local = null;
+    try { local = JSON.parse(localStorage.getItem(lsKey)); } catch(e) {}
+
+    if (!_enabled()) return Promise.resolve(local || {});
+
+    return _fs().collection('certifications').doc(voloId).get()
+      .then(function(doc) {
+        if (doc.exists) {
+          var data = doc.data();
+          _cacheSet('certs_' + voloId, data);
+          return data.certs || data;
+        }
+        return local || {};
+      })
+      .catch(function() { return local || {}; });
+  }
+
+  function setCert(voloId, certId, dateStr, userName) {
+    // localStorage (existant)
+    var lsKey = 'volo_certs_' + voloId;
+    var certs = {};
+    try { certs = JSON.parse(localStorage.getItem(lsKey)) || {}; } catch(e) {}
+    certs[certId] = { date: dateStr, updatedAt: _tsNow() };
+    try { localStorage.setItem(lsKey, JSON.stringify(certs)); } catch(e) {}
+
+    // Firestore (avec circuit breaker + auth)
+    if (_enabled() && _canWrite()) {
+      _ensureAuth().then(function() {
+        _incrementWrite();
+        _fs().collection('certifications').doc(voloId).set(
+          { voloId: voloId, name: userName || '', certs: certs, org: ORG, updatedAt: _tsNow() },
+          { merge: true }
+        ).catch(function(e) {
+          _queuePush({ collection: 'certifications', docId: voloId, data: { certs: certs, org: ORG, updatedAt: _tsNow() } });
+        });
+      });
+    }
+
+    return certs;
+  }
+
+  // ══════════════════════════════════════════
+  //  POINTAGE
+  // ══════════════════════════════════════════
+
+  function savePointage(payload) {
+    var enriched = Object.assign({}, payload, {
+      org: ORG,
+      savedAt: _tsNow(),
+      source: 'web'
+    });
+
+    if (_enabled() && _canWrite()) {
+      _ensureAuth().then(function() {
+        _incrementWrite();
+        _fs().collection('pointages').add(enriched).catch(function(e) {
+          _queuePush({ collection: 'pointages', data: enriched });
+        });
+      });
+    } else {
+      _queuePush({ collection: 'pointages', data: enriched });
+    }
+
+    return enriched;
+  }
+
+  function getPointages(voloId) {
+    if (!_enabled()) return Promise.resolve([]);
+
+    return _fs().collection('pointages')
+      .where('voloId', '==', voloId)
+      .where('org', '==', ORG)
+      .orderBy('savedAt', 'desc')
+      .limit(30)
+      .get()
+      .then(function(snap) {
+        return snap.docs.map(function(d) { var data = d.data(); data._id = d.id; return data; });
+      })
+      .catch(function() { return []; });
+  }
+
+  // ══════════════════════════════════════════
+  //  AUDIT LOG
+  // ══════════════════════════════════════════
+
+  function logAudit(action, details) {
+    var entry = {
+      action: action,
+      details: details || '',
+      userId: (typeof state !== 'undefined' && state.pin) ? 'V' + state.pin : 'unknown',
+      userName: (typeof state !== 'undefined' && state.user) ? state.user : '',
+      timestamp: _tsNow(),
+      org: ORG,
+      userAgent: navigator.userAgent.substring(0, 120),
+      url: location.pathname
+    };
+
+    if (_enabled() && _canWrite()) {
+      _ensureAuth().then(function() {
+        _incrementWrite();
+        _fs().collection('audit_logs').add(entry).catch(function() {
+          // Fire and forget — pas de queue pour les logs
+        });
+      });
+    }
+
+    return entry;
+  }
+
+  // ══════════════════════════════════════════
+  //  CONFIG APP
+  // ══════════════════════════════════════════
+
+  function getConfig() {
+    if (!_enabled()) {
+      return Promise.resolve(_cacheGet('config') || {
+        version: 'V10.5',
+        announcement: null,
+        emergencyAlert: null,
+        maintenanceMode: false
+      });
+    }
+
+    return _fs().collection('config').doc('app').get()
+      .then(function(doc) {
+        if (doc.exists) {
+          var data = doc.data();
+          _cacheSet('config', data);
+          return data;
+        }
+        return _cacheGet('config') || {};
+      })
+      .catch(function() { return _cacheGet('config') || {}; });
+  }
+
+  function getBaremes() {
+    if (typeof BAREMES !== 'undefined') return BAREMES;
+    var cached = _cacheGet('config');
+    return (cached && cached.baremes) || {
+      SAUVETEUR: { km: 0.68, perdiem: 200, urgence: 64, urgence_perdiem: 0 },
+      SURVEILLANT: { km: 0.63, perdiem: 150, urgence: 0 }
+    };
+  }
+
+  // ══════════════════════════════════════════
+  //  PHOTOS (Storage — Phase 3)
+  // ══════════════════════════════════════════
+
+  function uploadPhoto(file, path) {
+    if (!window.firebaseStorage) {
+      console.warn('[VoloData] Firebase Storage non activé');
+      return Promise.resolve(null);
+    }
+    var ref = window.firebaseStorage.ref(path + '/' + Date.now() + '_' + file.name);
+    return ref.put(file).then(function(snap) {
+      return snap.ref.getDownloadURL();
+    });
+  }
+
+  // ══════════════════════════════════════════
+  //  REAL-TIME LISTENERS
+  // ══════════════════════════════════════════
+
+  function onConfigChange(callback) {
+    if (!_enabled()) return function() {}; // noop unsubscribe
+    return _fs().collection('config').doc('app').onSnapshot(function(doc) {
+      if (doc.exists) callback(doc.data());
+    }, function(e) { console.warn('[VoloData] Config listener error:', e); });
+  }
+
+  function onTransactionsChange(callback, filters) {
+    if (!_enabled()) return function() {};
+    var query = _fs().collection('transactions').where('org', '==', ORG);
+    if (filters && filters.type) query = query.where('type', '==', filters.type);
+    query = query.orderBy('savedAt', 'desc').limit(20);
+    return query.onSnapshot(function(snap) {
+      var results = snap.docs.map(function(d) { var data = d.data(); data._id = d.id; return data; });
+      callback(results);
+    }, function(e) { console.warn('[VoloData] Transactions listener error:', e); });
+  }
+
+  // ══════════════════════════════════════════
+  //  STATUS
+  // ══════════════════════════════════════════
+
+  function getStatus() {
+    return {
+      firebaseEnabled: !!(_enabled()),
+      firestoreReady: !!_fs(),
+      rtdbReady: !!window.firebaseDB,
+      queueLength: (JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]')).length,
+      online: navigator.onLine
+    };
+  }
+
+  function getQuotaStatus() {
+    var count = _getWriteCount();
+    var pct = WRITE_LIMIT > 0 ? (count / WRITE_LIMIT) * 100 : 0;
+    return {
+      writesToday: count,
+      writeLimit: WRITE_LIMIT,
+      circuitOpen: _isCircuitOpen(),
+      percentUsed: Math.round(pct * 100) / 100
+    };
+  }
+
+  // ══════════════════════════════════════════
+  //  PUBLIC API
+  // ══════════════════════════════════════════
+
+  return {
+    // Personnel
+    getPersonnel: getPersonnel,
+    getPersonnelFromFirestore: getPersonnelFromFirestore,
+    initPersonnel: initPersonnel,
+    findByVolo: findByVolo,
+
+    // Inventory
+    getItems: getItems,
+    getItemById: getItemById,
+    getCaisses: getCaisses,
+
+    // Transactions
+    saveTransaction: saveTransaction,
+    getTransactions: getTransactions,
+    cancelTransaction: cancelTransaction,
+
+    // Certifications
+    getCerts: getCerts,
+    setCert: setCert,
+
+    // Pointage
+    savePointage: savePointage,
+    getPointages: getPointages,
+
+    // Audit
+    logAudit: logAudit,
+
+    // Config
+    getConfig: getConfig,
+    getBaremes: getBaremes,
+
+    // Photos
+    uploadPhoto: uploadPhoto,
+
+    // Listeners
+    onConfigChange: onConfigChange,
+    onTransactionsChange: onTransactionsChange,
+
+    // Status
+    getStatus: getStatus,
+    getQuotaStatus: getQuotaStatus,
+
+    // Queue
+    flushQueue: _queueFlush
+  };
+})();

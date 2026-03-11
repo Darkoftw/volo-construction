@@ -1,0 +1,8 @@
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Permissions-Policy: camera=(self), microphone=(self), geolocation=(self)
+  X-XSS-Protection: 1; mode=block
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' cdn.jsdelivr.net unpkg.com cdnjs.cloudflare.com www.gstatic.com *.firebaseapp.com *.googleapis.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com unpkg.com cdn.jsdelivr.net cdnjs.cloudflare.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: blob: https: unpkg.com; connect-src 'self' api.open-meteo.com *.firebaseio.com wss://*.firebaseio.com *.googleapis.com *.firebaseapp.com *.cloudfunctions.net *.firebasestorage.app *.firebasestorage.googleapis.com *.firebaseinstallations.googleapis.com identitytoolkit.googleapis.com securetoken.googleapis.com; media-src 'self'; frame-ancestors 'none'

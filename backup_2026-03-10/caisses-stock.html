@@ -1,0 +1,3455 @@
+<!DOCTYPE html>
+<html lang="fr" id="appRoot">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOLO SST — Inventaire / Stockage Temps Réel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TACTICAL EAGLE — CAISSES & STOCK
+   Full CSS vars, no Tailwind, same tokens as main app
+   ============================================================ */
+:root{
+  --bg:#0C0608;--card:#1C1012;--card2:#231518;--card3:#2A1A1E;
+  --gold:#D4A017;--goldL:#E8C547;--goldD:#A67C10;
+  --rescue:#E65100;--rescueL:#FF6D00;--rescueD:#BF360C;
+  --red:#C0392B;--green:#27AE60;--orange:#E67E22;--blue:#3B82F6;
+  --txt:#F5F0EB;--muted:#C9BAA9;--border:#3A2428;
+  --card-hover:#2A1A1E;
+  --dispo:#27AE60;--sorti:#D4A017;--manquant:#C0392B;--inspect:#3B82F6;--destruct:#6B21A8;
+}
+html.light{
+  --bg:#F0EBE3;--card:rgba(255,255,255,.97);--card2:rgba(244,238,230,.99);
+  --card3:#fff;--gold:#C2410C;--goldL:#EA580C;
+  --rescue:#D94A00;--rescueL:#EA580C;
+  --txt:#1A0E10;--muted:#7B6B5E;--border:rgba(180,150,130,.35);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--txt);
+  font-family:'Inter',sans-serif;min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ---- AURA GLOW ---- */
+body::before{
+  content:'';position:fixed;inset:0;
+  background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.028'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:.55;
+}
+body::after{
+  content:'';position:fixed;
+  top:-140px;left:50%;transform:translateX(-50%);
+  width:1000px;height:700px;
+  background:
+    radial-gradient(ellipse 55% 40% at 50% 20%,rgba(230,81,0,.18) 0%,transparent 70%),
+    radial-gradient(ellipse 35% 22% at 50% 8%,rgba(255,109,0,.1) 0%,transparent 65%),
+    radial-gradient(ellipse 70% 28% at 50% 0%,rgba(180,60,0,.06) 0%,transparent 80%);
+  pointer-events:none;z-index:0;
+  animation:aura-breathe 7s ease-in-out infinite;
+}
+@keyframes aura-breathe{
+  0%,100%{opacity:.8;transform:translateX(-50%) scaleX(1)}
+  50%{opacity:1;transform:translateX(-50%) scaleX(1.05)}
+}
+
+/* ---- SCROLLBAR ---- */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--gold)}
+
+/* ---- SHIMMER TOP BAR ---- */
+.top-shimmer{
+  position:fixed;top:0;left:0;right:0;height:2px;z-index:100;
+  background:linear-gradient(90deg,var(--rescueD),var(--rescue),var(--rescueL),var(--gold),var(--rescueL),var(--rescue),var(--rescueD));
+  background-size:300% 100%;
+  animation:shimmer 4s ease infinite;
+}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes pulse-badge{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* ---- HEADER ---- */
+.app-header{
+  position:fixed;top:2px;left:0;right:0;z-index:90;
+  background:rgba(12,6,8,.92);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(58,36,40,.7);
+  box-shadow:0 1px 40px rgba(230,81,0,.07);
+}
+.header-inner{
+  max-width:900px;margin:0 auto;
+  padding:0 16px;height:56px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.header-left{display:flex;align-items:center;gap:10px}
+.back-btn{
+  width:36px;height:36px;border-radius:10px;
+  background:var(--card);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);font-size:1rem;cursor:pointer;
+  transition:all .2s;text-decoration:none;
+}
+.back-btn:hover{border-color:var(--gold);color:var(--gold)}
+.logo-ring{
+  width:34px;height:34px;border-radius:50%;
+  border:2px solid var(--rescue);overflow:hidden;
+  box-shadow:0 0 12px rgba(230,81,0,.25);
+  animation:float 3s ease-in-out infinite;
+  flex-shrink:0;
+}
+.logo-ring img{width:100%;height:100%;object-fit:cover}
+.header-title{
+  font-family:'Oswald',sans-serif;
+  font-size:.8rem;color:var(--rescue);
+  letter-spacing:3px;
+}
+.header-sub{font-size:.65rem;color:var(--muted);letter-spacing:1.5px;margin-top:1px}
+.header-right{display:flex;align-items:center;gap:8px}
+.hdr-stat{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 10px;border-radius:8px;
+  background:var(--card);border:1px solid var(--border);
+  font-size:.68rem;color:var(--muted);
+}
+.hdr-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* ---- THEME PILL ---- */
+.theme-pill{
+  position:fixed;bottom:20px;right:16px;z-index:200;
+  display:flex;border-radius:20px;background:var(--card);
+  border:1px solid rgba(68,40,46,.55);overflow:hidden;
+  box-shadow:0 4px 20px rgba(0,0,0,.4);
+}
+.theme-btn{
+  padding:7px 12px;font-size:.85rem;cursor:pointer;
+  background:transparent;border:none;transition:background .2s;
+}
+.theme-btn:hover{background:rgba(212,160,23,.1)}
+.theme-btn.active{background:rgba(230,81,0,.15)}
+
+/* ---- MAIN LAYOUT ---- */
+.main-wrap{
+  padding-top:72px;padding-bottom:80px;
+  max-width:900px;margin:0 auto;
+  padding-left:14px;padding-right:14px;
+}
+
+/* ---- SECTION HEADER ---- */
+.sec-title{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:14px;
+}
+.sec-title-line{
+  height:1px;flex:1;
+  background:linear-gradient(to right,rgba(58,36,40,.8),transparent);
+}
+.sec-label{
+  font-family:'Oswald',sans-serif;
+  font-size:.62rem;letter-spacing:3px;color:var(--muted);
+  white-space:nowrap;
+}
+
+/* ---- KPI STRIP ---- */
+.kpi-strip{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:6px;margin-bottom:18px;
+}
+.kpi-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:12px 10px;
+  text-align:center;
+  transition:all .25s;
+  position:relative;overflow:hidden;
+}
+.kpi-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.03) 0%,transparent 60%);
+}
+.kpi-card:hover{border-color:rgba(212,160,23,.3);transform:translateY(-2px)}
+.kpi-num{
+  font-family:'Oswald',sans-serif;
+  font-size:1.5rem;font-weight:700;line-height:1;
+  margin-bottom:3px;
+}
+.kpi-label{
+  font-size:.58rem;letter-spacing:1.5px;
+  color:var(--muted);font-family:'Oswald',sans-serif;
+}
+
+/* ---- ALERT PANEL ---- */
+.alert-panel{
+  background:var(--card);border:1px solid rgba(192,57,43,.3);
+  border-radius:14px;padding:16px;
+}
+.alert-section{margin-bottom:14px}
+.alert-section:last-child{margin-bottom:0}
+.alert-section-title{
+  font-family:'Oswald',sans-serif;font-size:.65rem;letter-spacing:2px;
+  color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px;
+}
+.alert-item{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;border-radius:10px;cursor:pointer;
+  border:1px solid var(--border);margin-bottom:4px;
+  background:rgba(12,6,8,.3);transition:all .2s;
+}
+.alert-item:hover{border-color:var(--gold);background:rgba(212,160,23,.04)}
+.alert-item-icon{font-size:1rem;flex-shrink:0}
+.alert-item-info{flex:1;min-width:0}
+.alert-item-name{font-size:.78rem;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.alert-item-detail{font-size:.6rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:1px}
+.alert-item-reason{
+  font-size:.58rem;padding:2px 8px;border-radius:6px;
+  font-family:'Oswald',sans-serif;letter-spacing:1px;
+  flex-shrink:0;white-space:nowrap;
+}
+
+/* ---- CATEGORY TABS ---- */
+.cat-tabs{
+  display:flex;gap:4px;margin-bottom:12px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  padding-bottom:4px;scrollbar-width:none;
+}
+.cat-tabs::-webkit-scrollbar{display:none}
+.cat-tab{
+  flex-shrink:0;padding:8px 14px;border-radius:10px;
+  border:1px solid var(--border);background:var(--card);
+  color:var(--muted);font-family:'Oswald',sans-serif;
+  font-size:.65rem;letter-spacing:1.5px;cursor:pointer;
+  transition:all .2s;white-space:nowrap;
+  display:flex;align-items:center;gap:4px;
+}
+.cat-tab:hover{border-color:var(--gold);color:var(--txt)}
+.cat-tab.active{
+  background:linear-gradient(135deg,rgba(230,81,0,.15),rgba(212,160,23,.1));
+  border-color:var(--rescue);color:var(--goldL);font-weight:600;
+}
+.cat-tab-count{
+  font-size:.55rem;padding:1px 5px;border-radius:6px;
+  background:rgba(255,255,255,.06);font-weight:400;
+}
+.cat-tab.active .cat-tab-count{
+  background:rgba(230,81,0,.2);color:var(--rescue);
+}
+
+/* ---- SEARCH / FILTER BAR ---- */
+.filter-bar{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:16px;flex-wrap:wrap;
+}
+.search-wrap{
+  position:relative;flex:1;min-width:180px;
+}
+.search-ico{
+  position:absolute;left:11px;top:50%;transform:translateY(-50%);
+  color:var(--muted);pointer-events:none;
+  width:14px;height:14px;
+}
+.search-input{
+  width:100%;padding:9px 12px 9px 34px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;color:var(--txt);
+  font-family:'Inter',sans-serif;font-size:.82rem;
+  outline:none;transition:border .2s;
+}
+.search-input::placeholder{color:rgba(184,169,154,.5)}
+.search-input:focus{border-color:rgba(212,160,23,.45)}
+
+.filter-pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{
+  padding:6px 12px;border-radius:20px;
+  font-family:'Oswald',sans-serif;font-size:.62rem;letter-spacing:1px;
+  border:1px solid rgba(58,36,40,.6);background:transparent;
+  color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.pill:hover{background:rgba(212,160,23,.08);border-color:rgba(212,160,23,.3)}
+.pill.active{background:var(--rescue);border-color:var(--rescue);color:#fff}
+
+.sort-select{
+  padding:7px 28px 7px 10px;border-radius:10px;
+  background:var(--card);border:1px solid var(--border);
+  color:var(--txt);font-family:'Inter',sans-serif;font-size:.78rem;
+  outline:none;cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23D4A017' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center;
+}
+.sort-select option{background:var(--card2)}
+.sort-select:focus{border-color:rgba(212,160,23,.45);outline:none}
+
+/* ---- CATEGORY HEADER ---- */
+.cat-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 12px;border-radius:10px;
+  background:rgba(28,16,18,.7);border:1px solid rgba(58,36,40,.5);
+  margin-bottom:8px;cursor:pointer;
+  transition:all .2s;user-select:none;
+}
+.cat-header:hover{border-color:rgba(212,160,23,.25)}
+.cat-header-left{display:flex;align-items:center;gap:10px}
+.cat-icon{font-size:1.1rem}
+.cat-name{
+  font-family:'Oswald',sans-serif;
+  font-size:.72rem;letter-spacing:2px;color:var(--goldL);
+}
+.cat-count{
+  font-size:.65rem;font-family:'JetBrains Mono',monospace;
+  color:var(--muted);
+}
+.caisse-items-summary{
+  display:block;width:100%;
+  font-size:.62rem;color:var(--muted);
+  font-family:'Inter',sans-serif;
+  margin-top:3px;line-height:1.4;
+  opacity:.75;letter-spacing:.3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  max-width:calc(100vw - 120px);
+}
+.caisse-items-summary span{
+  color:var(--rescue);font-weight:600;
+  font-family:'JetBrains Mono',monospace;font-size:.58rem;
+}
+.cat-arrow{
+  font-size:.7rem;color:var(--gold);
+  transition:transform .3s;
+}
+.cat-arrow.collapsed{transform:rotate(-90deg)}
+
+/* ---- ITEM GRID ---- */
+.items-grid{
+  display:block;
+  margin-bottom:18px;
+  padding:8px 12px;
+  background:rgba(28,16,18,.4);
+  border:1px solid var(--border);
+  border-radius:0 0 10px 10px;
+  margin-top:-4px;
+}
+.items-grid.collapsed{display:none}
+
+/* ---- ITEM CARD ---- */
+.item-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;padding:12px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;
+  cursor:pointer;transition:all .25s;
+  position:relative;overflow:hidden;
+}
+.item-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  border-radius:3px 0 0 3px;
+  transition:background .2s;
+}
+.item-card.s-disponible::before{background:var(--dispo)}
+.item-card.s-sorti::before{background:var(--sorti)}
+.item-card.s-manquant::before{background:var(--manquant)}
+.item-card.s-inspection::before{background:var(--inspect)}
+.item-card.s-destruction::before{background:var(--destruct)}
+.item-card:hover{
+  border-color:rgba(212,160,23,.3);
+  background:var(--card2);
+  transform:translateX(2px);
+}
+.item-card.s-manquant{
+  border-color:rgba(192,57,43,.3);
+  animation:card-pulse 2s ease infinite;
+}
+.item-card.s-destruction{
+  border-color:rgba(107,33,168,.4);
+  background:rgba(107,33,168,.04);
+  opacity:.7;
+}
+@keyframes card-pulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,.0)}
+  50%{box-shadow:0 0 12px 2px rgba(192,57,43,.1)}
+}
+
+/* ---- EN SORTIE visual indicator ---- */
+.item-card.en-sortie{
+  border-color:rgba(230,81,0,.4);
+  background:rgba(230,81,0,.06);
+}
+.item-card.en-sortie::after{
+  content:'EN SORTIE';
+  position:absolute;top:6px;right:8px;
+  font-family:'Oswald',sans-serif;font-size:.5rem;letter-spacing:1.2px;
+  padding:2px 7px;border-radius:6px;
+  background:rgba(230,81,0,.2);color:var(--rescue);
+  animation:pulse-badge 2s infinite;
+}
+/* ---- SAC CONTAINER CARDS (V10.2) ---- */
+.sac-container-card{position:relative}
+.sac-container-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(230,81,0,.04) 0%,transparent 60%);
+  pointer-events:none;border-radius:12px;
+}
+.sac-container-card:hover{
+  border-color:rgba(212,160,23,.4) !important;
+  background:var(--card2) !important;
+  transform:translateX(2px);
+}
+
+/* ---- GROUPED ITEMS (x6, x12) ---- */
+.item-group-card{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:12px 14px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;
+}
+.item-group-card:hover{border-color:rgba(212,160,23,.3);background:var(--card2);transform:translateX(2px)}
+.item-group-card .group-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:32px;height:24px;padding:0 8px;border-radius:8px;
+  background:rgba(212,160,23,.2);color:var(--gold);
+  font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:800;
+  letter-spacing:1px;
+}
+.item-group-expand{
+  max-height:0;overflow:hidden;transition:max-height .3s ease;
+  margin-top:0;
+}
+.item-group-expand.open{max-height:5000px;margin-top:10px}
+.item-group-expand .item-card{margin-bottom:6px}
+
+.cat-header.en-sortie-group{
+  border-color:var(--rescue) !important;
+  background:rgba(230,81,0,.1) !important;
+  box-shadow:0 0 12px rgba(230,81,0,.15);
+}
+
+.item-left{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.item-icon{
+  font-size:1.3rem;width:38px;height:38px;
+  background:rgba(58,36,40,.5);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;border:1px solid rgba(68,40,46,.4);
+}
+.item-info{min-width:0}
+.item-name{
+  font-size:.84rem;font-weight:600;color:var(--txt);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  line-height:1.2;
+}
+.item-id{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.62rem;color:var(--gold);margin-top:2px;
+}
+.item-fab{
+  font-size:.62rem;color:var(--rescue);opacity:.8;
+  font-style:italic;margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.item-sub{
+  font-size:.68rem;color:var(--muted);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  margin-top:1px;
+}
+.item-dates{
+  display:flex;gap:8px;margin-top:3px;flex-wrap:wrap;
+}
+.item-date{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.56rem;letter-spacing:.3px;
+  padding:1px 6px;border-radius:4px;
+  white-space:nowrap;
+}
+.item-date.exp{background:rgba(39,174,96,.1);color:var(--green)}
+.item-date.exp-warn{background:rgba(230,126,34,.15);color:var(--orange)}
+.item-date.exp-danger{background:rgba(192,57,43,.15);color:var(--red);font-weight:600}
+.item-date.insp{background:rgba(59,130,246,.1);color:var(--blue)}
+
+.item-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.status-badge{
+  font-family:'Oswald',sans-serif;
+  font-size:.58rem;letter-spacing:1px;
+  padding:3px 8px;border-radius:6px;font-weight:600;
+  white-space:nowrap;
+}
+.status-badge.s-disponible{background:rgba(39,174,96,.15);color:var(--dispo)}
+.status-badge.s-sorti{background:rgba(212,160,23,.15);color:var(--sorti)}
+.status-badge.s-manquant{background:rgba(192,57,43,.18);color:var(--manquant)}
+.status-badge.s-inspection{background:rgba(59,130,246,.15);color:var(--inspect)}
+.status-badge.s-destruction{background:rgba(107,33,168,.18);color:var(--destruct)}
+.item-etat{
+  font-size:.55rem;letter-spacing:.5px;color:var(--muted);
+  font-family:'Inter',sans-serif;
+}
+.item-etat.warn{color:var(--orange);font-weight:600}
+.item-etat.bad{color:var(--red);font-weight:600}
+
+.item-duration{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.6rem;color:var(--muted);
+}
+.item-since-over{color:var(--manquant);font-weight:600}
+
+/* ---- MODAL ---- */
+.modal-bg{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;padding:16px;
+}
+.modal-box{
+  background:rgba(28,16,18,.97);
+  border:1px solid rgba(212,160,23,.3);border-radius:18px;
+  padding:24px;max-width:420px;width:100%;
+  animation:modal-in .25s ease forwards;
+  max-height:90vh;overflow-y:auto;
+  position:relative;
+}
+@keyframes modal-in{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+
+.modal-header{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:20px;
+}
+.modal-close{
+  width:32px;height:32px;border-radius:8px;
+  background:rgba(58,36,40,.5);border:none;
+  color:var(--muted);font-size:1.1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;flex-shrink:0;
+}
+.modal-close:hover{color:var(--gold);background:rgba(212,160,23,.12)}
+
+.modal-status-bar{
+  display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;
+}
+.modal-action-btn{
+  flex:1;min-width:80px;
+  padding:10px 8px;border-radius:12px;
+  font-family:'Oswald',sans-serif;font-size:.68rem;letter-spacing:1.5px;
+  border:1px solid transparent;cursor:pointer;
+  transition:all .2s;text-align:center;
+}
+.modal-action-btn:active{transform:scale(.97)}
+
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.detail-cell{
+  background:rgba(12,6,8,.5);border-radius:10px;
+  padding:10px 12px;
+}
+.detail-cell-label{
+  font-size:.6rem;letter-spacing:1.5px;
+  color:var(--muted);font-family:'Oswald',sans-serif;
+  margin-bottom:4px;
+}
+.detail-cell-val{
+  font-size:.82rem;font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+/* ---- TIMELINE (historique) ---- */
+.history-item{
+  display:flex;gap:12px;padding:10px 0;
+  border-bottom:1px solid rgba(58,36,40,.4);
+}
+.history-item:last-child{border:none}
+.history-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;
+}
+.history-content{flex:1;min-width:0}
+.history-action{font-size:.8rem;font-weight:600}
+.history-meta{font-size:.68rem;color:var(--muted);margin-top:2px}
+
+/* ---- FAB ADD BUTTON ---- */
+.fab{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  z-index:200;
+  display:flex;align-items:center;gap:8px;
+  padding:12px 24px;border-radius:28px;
+  background:linear-gradient(135deg,var(--rescue),var(--rescueL));
+  border:none;color:#fff;cursor:pointer;
+  font-family:'Oswald',sans-serif;font-size:.75rem;letter-spacing:2px;
+  box-shadow:0 6px 24px rgba(230,81,0,.35);
+  transition:all .25s;
+}
+.fab:hover{
+  box-shadow:0 8px 32px rgba(230,81,0,.5);
+  transform:translateX(-50%) translateY(-2px);
+}
+.fab:active{transform:translateX(-50%) scale(.97)}
+
+/* ---- TOAST ---- */
+.toast-wrap{position:fixed;bottom:70px;right:14px;z-index:400;display:flex;flex-direction:column;gap:8px}
+.toast{
+  padding:10px 16px;border-radius:12px;
+  background:rgba(28,16,18,.97);backdrop-filter:blur(16px);
+  font-size:.82rem;font-weight:600;
+  border:1px solid;
+  box-shadow:0 4px 16px rgba(0,0,0,.4);
+  animation:toast-in .35s ease forwards;
+}
+@keyframes toast-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toast-out{from{opacity:1}to{opacity:0;transform:translateY(10px)}}
+.toast.gold{border-color:rgba(212,160,23,.4);color:var(--gold)}
+.toast.green{border-color:rgba(39,174,96,.4);color:var(--green)}
+.toast.red{border-color:rgba(192,57,43,.4);color:var(--manquant)}
+
+/* ---- EMPTY STATE ---- */
+.empty-state{
+  text-align:center;padding:40px 20px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;margin:12px 0;
+}
+
+.qr-result-box{
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  padding:16px;border-radius:12px;
+  background:rgba(12,6,8,.6);border:1px solid var(--border);
+  margin-top:8px;
+}
+.qr-result-box .qr-label{
+  font-family:'Oswald',sans-serif;font-size:.6rem;
+  letter-spacing:2px;color:var(--gold);
+}
+
+/* ---- ANIMATIONS ---- */
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes slide-up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.slide-up{animation:slide-up .4s ease forwards;opacity:0}
+.d1{animation-delay:.05s}.d2{animation-delay:.1s}.d3{animation-delay:.15s}
+.d4{animation-delay:.2s}.d5{animation-delay:.25s}
+
+/* ---- MOBILE ---- */
+@media(max-width:480px){
+  .kpi-strip{grid-template-columns:repeat(2,1fr)}
+  .items-grid{grid-template-columns:1fr}
+  .detail-grid{grid-template-columns:1fr}
+  .modal-status-bar{flex-direction:column}
+  .modal-action-btn{min-width:unset}
+  .hdr-stat{display:none}
+}
+
+/* ═══════════════════════════════════════════
+   VUE CAISSES — JOB 3 & 4
+   ═══════════════════════════════════════════ */
+
+/* View toggle */
+.view-toggle{display:flex;gap:6px;margin:0 16px 16px;max-width:900px;margin-left:auto;margin-right:auto}
+.view-toggle-btn{flex:1;padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:'Oswald',sans-serif;font-size:.75rem;letter-spacing:2px;cursor:pointer;transition:all .2s;text-align:center}
+.view-toggle-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(212,160,23,.08);box-shadow:0 0 12px rgba(212,160,23,.1)}
+.view-toggle-btn:hover:not(.active){border-color:var(--muted);color:var(--txt)}
+
+/* Caisse KPI strip */
+.caisse-kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:0 16px 16px;max-width:900px;margin-left:auto;margin-right:auto}
+.caisse-kpi-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .2s}
+.caisse-kpi-card:hover{border-color:var(--gold);transform:translateY(-1px)}
+.caisse-kpi-card .ckn{font-family:'Oswald',sans-serif;font-size:1.8rem;font-weight:700;line-height:1}
+.caisse-kpi-card .ckl{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--muted);letter-spacing:1px;margin-top:4px}
+
+/* Caisse filters */
+.caisse-filters{display:flex;gap:8px;margin:0 16px 16px;max-width:900px;margin-left:auto;margin-right:auto;flex-wrap:wrap;align-items:center}
+.caisse-filters select,.caisse-filters input{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--txt);font-size:.8rem;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
+.caisse-filters select:focus,.caisse-filters input:focus{border-color:var(--gold)}
+.caisse-filters input{flex:1;min-width:180px}
+.caisse-filter-pills{display:flex;gap:4px}
+.caisse-filter-pill{padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.65rem;cursor:pointer;transition:all .2s;white-space:nowrap}
+.caisse-filter-pill.active{border-color:var(--gold);color:var(--gold);background:rgba(212,160,23,.08)}
+
+/* Caisse list */
+.caisse-list{max-width:900px;margin:0 auto;padding:0 16px 80px}
+.caisse-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:10px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.caisse-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 4px 20px rgba(212,160,23,.08)}
+.caisse-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:4px 0 0 4px}
+.caisse-card.s-ok::before{background:var(--green)}
+.caisse-card.s-attention::before{background:var(--orange)}
+.caisse-card.s-critique::before{background:var(--red)}
+.caisse-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.caisse-card-info{flex:1;min-width:0}
+.caisse-card-nom{font-family:'Oswald',sans-serif;font-size:1rem;letter-spacing:1px;color:var(--txt);margin-bottom:2px;display:flex;align-items:center;gap:8px}
+.caisse-card-nom .cc-icon{font-size:1.1rem}
+.caisse-card-meta{font-size:.72rem;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.caisse-card-meta span{display:flex;align-items:center;gap:3px}
+.cc-badge{padding:4px 10px;border-radius:6px;font-family:'Oswald',sans-serif;font-size:.65rem;letter-spacing:1px;flex-shrink:0}
+.cc-badge.ok{background:rgba(39,174,96,.12);color:var(--green)}
+.cc-badge.attention{background:rgba(230,126,34,.12);color:var(--orange)}
+.cc-badge.critique{background:rgba(192,57,43,.12);color:var(--red)}
+.caisse-card-stats{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.cc-stat{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted)}
+.cc-stat strong{color:var(--txt);font-weight:600}
+.cc-progress{flex:1;min-width:100px;height:6px;background:var(--card2);border-radius:3px;overflow:hidden}
+.cc-progress-bar{height:100%;border-radius:3px;transition:width .4s ease}
+.cc-dates{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);margin-top:8px;display:flex;gap:16px;flex-wrap:wrap}
+.cc-dates .overdue{color:var(--red);font-weight:600}
+
+/* Caisse detail view */
+.caisse-detail{max-width:900px;margin:0 auto;padding:0 16px 80px;display:none}
+.cd-header{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px}
+.cd-header-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.cd-title{font-family:'Oswald',sans-serif;font-size:1.3rem;letter-spacing:2px;color:var(--goldL);display:flex;align-items:center;gap:10px}
+.cd-actions{display:flex;gap:6px}
+.cd-action-btn{padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--muted);font-family:'Oswald',sans-serif;font-size:.65rem;letter-spacing:1px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px}
+.cd-action-btn:hover{border-color:var(--gold);color:var(--gold)}
+.cd-action-btn.danger:hover{border-color:var(--red);color:var(--red)}
+.cd-meta{margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;font-size:.78rem;color:var(--muted)}
+.cd-meta span{display:flex;align-items:center;gap:4px}
+
+/* Inspection panel */
+.cd-inspection{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.cd-insp-info{display:flex;gap:20px;flex-wrap:wrap}
+.cd-insp-item{font-size:.78rem}
+.cd-insp-item .label{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:1px;margin-bottom:2px}
+.cd-insp-item .value{font-weight:600}
+.cd-insp-item .value.overdue{color:var(--red)}
+.cd-insp-btn{padding:10px 20px;border-radius:10px;border:1px solid rgba(39,174,96,.4);background:rgba(39,174,96,.1);color:var(--green);font-family:'Oswald',sans-serif;font-size:.75rem;letter-spacing:2px;cursor:pointer;transition:all .2s}
+.cd-insp-btn:hover{background:rgba(39,174,96,.2)}
+
+/* Item rows in detail */
+.cd-cat-group{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:12px;overflow:hidden}
+.cd-cat-header{padding:14px 18px;font-family:'Oswald',sans-serif;font-size:.8rem;letter-spacing:2px;color:var(--goldL);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.cd-cat-count{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted)}
+.cd-item-row{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid rgba(58,36,40,.3);transition:background .15s}
+.cd-item-row:last-child{border-bottom:none}
+.cd-item-row:hover{background:rgba(212,160,23,.03)}
+.cd-item-info{flex:1;min-width:0}
+.cd-item-name{font-size:.82rem;font-weight:600;display:flex;align-items:center;gap:6px}
+.cd-item-sub{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);margin-top:2px}
+.cd-item-qty{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);min-width:40px;text-align:center}
+.cd-etat-btn{padding:5px 12px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:1px;cursor:pointer;border:1px solid transparent;transition:all .15s;white-space:nowrap}
+.cd-etat-btn.bon{background:rgba(39,174,96,.12);color:var(--green);border-color:rgba(39,174,96,.25)}
+.cd-etat-btn.usure{background:rgba(230,126,34,.12);color:var(--orange);border-color:rgba(230,126,34,.25)}
+.cd-etat-btn.defectueux{background:rgba(192,57,43,.12);color:var(--red);border-color:rgba(192,57,43,.25)}
+.cd-etat-btn.manquant{background:rgba(192,57,43,.2);color:var(--red);border-color:rgba(192,57,43,.4);font-weight:700}
+.cd-item-notes{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);cursor:pointer;padding:2px 6px;border-radius:4px;transition:background .15s;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cd-item-notes:hover{background:var(--card2)}
+.cd-item-date{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--muted);min-width:70px;text-align:right}
+
+/* Report modal */
+.rapport-content{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;max-height:70vh;overflow-y:auto;font-size:.78rem;line-height:1.6;white-space:pre-wrap;font-family:'JetBrains Mono',monospace;color:var(--txt)}
+
+/* Firebase sync badge */
+.fb-badge{font-family:'JetBrains Mono',monospace;font-size:.6rem;padding:3px 8px;border-radius:4px;margin-left:8px}
+.fb-badge.live{background:rgba(39,174,96,.12);color:var(--green)}
+.fb-badge.local{background:rgba(184,169,154,.12);color:var(--muted)}
+
+/* ═══ JOB 1 — MICRO-ANIMATIONS ═══ */
+
+/* Flash on status change */
+@keyframes status-flash{0%{box-shadow:0 0 0 0 rgba(212,160,23,.5)}50%{box-shadow:0 0 16px 4px rgba(212,160,23,.3)}100%{box-shadow:0 0 0 0 transparent}}
+.flash-status{animation:status-flash .3s ease}
+
+/* Slide from right (caisse detail) */
+@keyframes slide-right-in{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}
+.caisse-detail{animation:slide-right-in .18s ease-out}
+
+/* Slide from bottom (messages, cards) */
+@keyframes slide-up-in{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.slide-up-anim{animation:slide-up-in .15s ease-out}
+
+/* Pulse badge */
+@keyframes pulse-orange{0%,100%{box-shadow:0 0 0 0 rgba(230,81,0,.4)}50%{box-shadow:0 0 8px 3px rgba(230,81,0,.2)}}
+.pulse-badge{animation:pulse-orange 1.5s ease infinite}
+
+/* Button tap — scale + ripple */
+.tap-btn{position:relative;overflow:hidden;transition:transform .1s ease}
+.tap-btn:active{transform:scale(.95)}
+.tap-btn::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--ripple-x,50%) var(--ripple-y,50%),rgba(255,255,255,.15) 0%,transparent 60%);opacity:0;transition:opacity .2s}
+.tap-btn:active::after{opacity:1}
+
+/* Skeleton shimmer */
+@keyframes skel-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.skeleton{background:linear-gradient(90deg,var(--card) 25%,var(--card2) 50%,var(--card) 75%);background-size:200% 100%;animation:skel-shimmer 1.2s ease infinite;border-radius:8px;min-height:20px}
+
+/* Tab fade */
+.tab-fade{animation:fadeIn .15s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* Toast slide from top */
+@keyframes toast-slide-in{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.toast{animation:toast-slide-in .2s ease}
+
+/* Caisse card stagger */
+.caisse-card{animation:slide-up-in .18s ease-out both}
+.caisse-card:nth-child(2){animation-delay:30ms}
+.caisse-card:nth-child(3){animation-delay:60ms}
+.caisse-card:nth-child(4){animation-delay:90ms}
+.caisse-card:nth-child(5){animation-delay:120ms}
+
+/* Respect prefers-reduced-motion */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .skeleton{animation:none;background:var(--card2)}
+  .pulse-badge{animation:none}
+  .caisse-card{animation:none}
+}
+
+/* ═══ JOB 2 — LISIBILITÉ TERRAIN ═══ */
+
+/* Min touch target 48px */
+.tap-btn,.cd-etat-btn,.cd-action-btn,.cd-insp-btn,.caisse-filter-pill,.view-toggle-btn,.pill,.cat-tab,.kpi-card,.caisse-kpi-card{min-height:48px;min-width:48px;display:inline-flex;align-items:center;justify-content:center}
+
+/* Font sizes — minimum 14px body */
+.caisse-card-nom{font-size:1.05rem}
+.caisse-card-meta{font-size:.8rem}
+.cc-stat{font-size:.78rem}
+.cc-dates{font-size:.72rem}
+.cd-item-name{font-size:.9rem}
+.cd-item-sub{font-size:.7rem}
+.cd-etat-btn{font-size:.72rem;padding:8px 14px}
+.cd-item-notes{font-size:.7rem;max-width:160px}
+.cd-item-date{font-size:.65rem}
+.cd-cat-header{font-size:.85rem}
+
+/* Badges: icon + text + color (never just color) */
+.cc-badge{font-size:.72rem;padding:6px 12px;min-height:32px;display:inline-flex;align-items:center;gap:4px}
+
+/* Inputs — min 52px height, 16px font (prevents iOS zoom) */
+.caisse-filters input,.caisse-filters select{min-height:52px;font-size:16px;padding:10px 14px}
+
+/* Contrast boost for muted text */
+.cc-stat,.cc-dates span,.cd-item-sub,.caisse-card-meta{color:#C4B5A6}
+
+@media(max-width:480px){
+  .caisse-kpi{grid-template-columns:repeat(2,1fr)}
+  .caisse-kpi .caisse-kpi-card:last-child{grid-column:span 2}
+  .caisse-card-stats{flex-direction:column;gap:8px}
+  .cd-item-row{flex-wrap:wrap;gap:8px}
+  .cd-item-notes{max-width:100%}
+  .cd-item-date{min-width:unset}
+  .view-toggle{flex-direction:row}
+  .cd-header-top{flex-direction:column}
+  .cd-inspection{flex-direction:column;align-items:flex-start}
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<!-- Firebase CDN -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body>
+<script src="error-monitor.js"></script>
+<script src="data.js"></script>
+<script src="logo.js"></script>
+<div class="top-shimmer"></div>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="header-inner">
+    <div class="header-left">
+      <a href="index.html" class="back-btn" title="Retour" aria-label="Retour à l'accueil">←</a>
+      <div class="logo-ring">
+        <img src="eagle_tactic.png" alt="Golden Eagles" onerror="this.parentElement.innerHTML='🦅'">
+      </div>
+      <div>
+        <div class="header-title">INVENTAIRE / STOCKAGE TEMPS RÉEL</div>
+        <div class="header-sub">INVENTAIRE EN TEMPS RÉEL</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="hdr-stat">
+        <span class="hdr-dot" id="hdr-dot" style="background:var(--green);animation:float 1.5s ease infinite"></span>
+        <span id="hdr-status" style="font-size:.68rem;font-weight:600;color:var(--green)">EN LIGNE</span>
+      </div>
+      <div class="hdr-stat">
+        <span id="hdr-clock" style="font-family:'JetBrains Mono',monospace;font-size:.68rem">--:--:--</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- MODAL -->
+<div id="modalRoot"></div>
+
+<!-- MAIN -->
+<div class="main-wrap">
+
+  <!-- VIEW TOGGLE -->
+  <div class="view-toggle slide-up d1" id="viewToggle">
+    <button class="view-toggle-btn active" id="vt-items" onclick="switchView('items')">📦 ITEMS</button>
+    <button class="view-toggle-btn" id="vt-caisses" onclick="switchView('caisses')">📋 CAISSES</button>
+  </div>
+
+  <!-- ═══ ITEMS VIEW (existing) ═══ -->
+  <div id="itemsView">
+
+  <!-- KPI STRIP -->
+  <div class="kpi-strip slide-up d1" id="kpiStrip">
+    <div class="kpi-card" onclick="setFilter('tous',document.querySelector('[data-f=tous]'))" style="cursor:pointer">
+      <div class="kpi-num" id="kpi-total" style="color:var(--goldL)">—</div>
+      <div class="kpi-label">TOTAL</div>
+    </div>
+    <div class="kpi-card" onclick="setFilter('disponible',document.querySelector('[data-f=disponible]'))" style="cursor:pointer">
+      <div class="kpi-num" id="kpi-dispo" style="color:var(--dispo)">—</div>
+      <div class="kpi-label">DISPO</div>
+    </div>
+    <div class="kpi-card" onclick="setFilter('sorti',document.querySelector('[data-f=sorti]'))" style="cursor:pointer">
+      <div class="kpi-num" id="kpi-sorti" style="color:var(--sorti)">—</div>
+      <div class="kpi-label">SORTIS</div>
+    </div>
+    <div class="kpi-card" onclick="toggleAlertPanel()" style="cursor:pointer">
+      <div class="kpi-num" id="kpi-alert" style="color:var(--manquant)">—</div>
+      <div class="kpi-label">ALERTES</div>
+    </div>
+  </div>
+
+  <!-- DEPLOYED BANNER + RESET BUTTON -->
+  <div id="deployedBanner" class="slide-up d1" style="display:none;margin-bottom:12px;background:rgba(230,81,0,.1);border:1px solid rgba(230,81,0,.3);border-radius:12px;padding:14px 16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <div>
+        <div style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;color:var(--rescue)">📤 ITEMS EN SORTIE</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px"><span id="deployedCount">0</span> items marqués déployés dans l'historique</div>
+      </div>
+      <button onclick="resetAllDeployed()" style="padding:10px 20px;border-radius:10px;border:1px solid rgba(39,174,96,.4);background:rgba(39,174,96,.15);color:var(--dispo);font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;cursor:pointer;transition:all .2s;white-space:nowrap" onmouseover="this.style.background='rgba(39,174,96,.3)'" onmouseout="this.style.background='rgba(39,174,96,.15)'">TOUT DISPONIBLE</button>
+    </div>
+  </div>
+
+  <!-- ALERT DETAIL PANEL (hidden by default) -->
+  <div id="alertPanel" class="slide-up d1" style="display:none;margin-bottom:16px"></div>
+
+  <!-- CATEGORY TABS -->
+  <div class="cat-tabs slide-up d2" id="catTabs">
+    <button class="cat-tab active" data-tab="tous" onclick="setCatTab('tous',this)">TOUS <span class="cat-tab-count" id="tab-count-tous"></span></button>
+    <button class="cat-tab" data-tab="sac" onclick="setCatTab('sac',this)">🎒 SACS <span class="cat-tab-count" id="tab-count-sac"></span></button>
+    <button class="cat-tab" data-tab="caisse" onclick="setCatTab('caisse',this)">📦 CAISSES <span class="cat-tab-count" id="tab-count-caisse"></span></button>
+    <button class="cat-tab" data-tab="surplus" onclick="setCatTab('surplus',this)">🗃️ SURPLUS <span class="cat-tab-count" id="tab-count-surplus"></span></button>
+    <button class="cat-tab" data-tab="kit" onclick="setCatTab('kit',this)">🪢 KITS <span class="cat-tab-count" id="tab-count-kit"></span></button>
+    <button class="cat-tab" data-tab="autre" onclick="setCatTab('autre',this)">🔧 AUTRE <span class="cat-tab-count" id="tab-count-autre"></span></button>
+    <button class="cat-tab" data-tab="surv" onclick="setCatTab('surv',this)">👷 SURVEILLANT <span class="cat-tab-count" id="tab-count-surv"></span></button>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar slide-up d2">
+    <div class="search-wrap">
+      <svg class="search-ico" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input id="searchInput" class="search-input" type="text"
+        placeholder="Rechercher item, ID, assigné..."
+        oninput="applyFilters()">
+    </div>
+    <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+      <option value="caisse">Par caisse</option>
+      <option value="cat">Par catégorie</option>
+      <option value="status">Par statut</option>
+      <option value="name">Par nom</option>
+      <option value="alert">Alertes d'abord</option>
+    </select>
+  </div>
+  <div class="filter-pills slide-up d2" id="filterPills">
+    <button class="pill active" data-f="tous" onclick="setFilter('tous',this)">TOUS</button>
+    <button class="pill" data-f="disponible" onclick="setFilter('disponible',this)">✅ DISPO</button>
+    <button class="pill" data-f="sorti" onclick="setFilter('sorti',this)">📤 SORTIS</button>
+    <button class="pill" data-f="inspection" onclick="setFilter('inspection',this)">🔍 INSPECTION</button>
+    <button class="pill" data-f="manquant" onclick="setFilter('manquant',this)">🚨 MANQUANT</button>
+  </div>
+
+  <!-- DESTROYED ITEMS BANNER -->
+  <div id="destroyedBanner" style="display:none;margin:12px 16px 0;padding:12px 14px;background:rgba(107,33,168,.08);border:1px solid rgba(107,33,168,.3);border-radius:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div style="font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:2px;color:var(--destruct)">☠️ ITEMS DÉTRUITS</div>
+      <div style="display:flex;gap:6px">
+        <button onclick="exportDestroyedList()" style="padding:4px 10px;border-radius:6px;background:rgba(107,33,168,.15);border:1px solid rgba(107,33,168,.3);color:var(--destruct);font-family:'Oswald',sans-serif;font-size:.55rem;letter-spacing:1px;cursor:pointer">EXPORTER</button>
+      </div>
+    </div>
+    <div id="destroyedList" style="font-size:.7rem;color:var(--muted);max-height:120px;overflow-y:auto"></div>
+  </div>
+
+  <!-- ITEMS LIST -->
+  <div id="itemsContainer" class="slide-up d3"></div>
+
+  <!-- EMPTY STATE -->
+  <div id="emptyState" class="empty-state slide-up d4" style="display:none">
+    <div style="font-size:2.5rem;margin-bottom:10px">📦</div>
+    <div style="font-family:'Oswald',sans-serif;color:var(--gold);letter-spacing:2px;font-size:.85rem;margin-bottom:6px">AUCUN RÉSULTAT</div>
+    <div style="font-size:.78rem;color:var(--muted)">Aucun item ne correspond à votre recherche</div>
+  </div>
+
+  </div><!-- /itemsView -->
+
+  <!-- ═══ CAISSES VIEW (JOB 3) ═══ -->
+  <div id="caissesView" style="display:none">
+    <div class="caisse-kpi" id="caisseKpi"></div>
+    <div class="caisse-filters" id="caisseFilters"></div>
+    <div class="caisse-list" id="caisseList"></div>
+  </div>
+
+  <!-- ═══ CAISSE DETAIL VIEW (JOB 4) ═══ -->
+  <div id="caisseDetailView" class="caisse-detail"></div>
+
+</div>
+
+<!-- FAB -->
+<button class="fab" onclick="openAddModal()">
+  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+  AJOUTER ITEM
+</button>
+
+<!-- THEME PILL -->
+<div class="theme-pill">
+  <button class="theme-btn active" id="btnDark" onclick="setTheme('dark')" aria-label="Mode sombre">🌙</button>
+  <button class="theme-btn" id="btnLight" onclick="setTheme('light')" aria-label="Mode clair">☀️</button>
+</div>
+
+<script>
+// ================================================================
+//  VOLO SST — Caisses & Stock
+//  Vanilla JS, no frameworks
+// ================================================================
+
+const COULEUR_HEX = {Bleu:"#3B82F6", Vert:"#22C55E", Rouge:"#EF4444", Jaune:"#EAB308"};
+function escapeHtml(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
+
+// ---- USER CONTEXT (passé depuis index.html) ----
+let CURRENT_USER = null;
+try{
+  const raw = localStorage.getItem('volo_caisse_user');
+  if(raw) CURRENT_USER = JSON.parse(raw);
+}catch(e){}
+
+function getUserName(){
+  if(!CURRENT_USER) return 'Superviseur';
+  return CURRENT_USER.name || CURRENT_USER.nom || 'Superviseur';
+}
+
+// ---- THEME ----
+function setTheme(t){
+  const r=document.getElementById('appRoot');
+  const btnL=document.getElementById('btnLight');
+  const btnD=document.getElementById('btnDark');
+  if(!r)return;
+  if(t==='light'){
+    r.classList.add('light');
+    if(btnL)btnL.classList.add('active');
+    if(btnD)btnD.classList.remove('active');
+  }else{
+    r.classList.remove('light');
+    if(btnD)btnD.classList.add('active');
+    if(btnL)btnL.classList.remove('active');
+  }
+  localStorage.setItem('volo_theme_main',t);
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const t=localStorage.getItem('volo_theme_main');
+  if(t)setTheme(t);
+});
+
+// ---- CLOCK ----
+function tick(){
+  const el=document.getElementById('hdr-clock');
+  if(el)el.textContent=new Date().toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+tick();setInterval(tick,1000);
+
+// ---- TOAST ----
+function toast(msg,type='gold'){
+  const w=document.getElementById('toastWrap');
+  const el=document.createElement('div');
+  el.className='toast '+type;
+  el.textContent=msg;
+  w.appendChild(el);
+  setTimeout(()=>{
+    el.style.animation='toast-out .35s ease forwards';
+    setTimeout(()=>el.remove(),400);
+  },3000);
+}
+
+// ---- DATA : chargé depuis data.js (836 items + CAISSES) ----
+// Mapping etat → status pour l'UI
+// ITEMS, CAISSES, GROUPS sont définis dans data.js (chargé via <script src>)
+
+function etatToStatus(etat){
+  if(!etat) return 'disponible';
+  const e = etat.toLowerCase();
+  if(e.includes('destru') || e.includes('retir') || e.includes('rebut')) return 'destruction';
+  if(e.includes('hors') || e.includes('manquant')) return 'manquant';
+  // "A surveiller" = état informatif, pas bloquant → reste disponible
+  // Seul "inspection requise" ou "inspecter" déclenche le statut inspection
+  if(e.includes('inspecter') || e.includes('inspection req')) return 'inspection';
+  if(e.includes('sorti') || e.includes('mission')) return 'sorti';
+  return 'disponible';
+}
+
+// Trouver la caisse d'un item
+function findCaisseForItem(itemId){
+  if(typeof CAISSES === 'undefined') return null;
+  return CAISSES.find(c => (c.items_contenus||c.items||[]).includes(itemId)) || null;
+}
+
+// Enrichir les ITEMS de data.js avec les champs UI + statuts caisses
+function buildUIItems(){
+  if(typeof ITEMS === 'undefined') return [];
+  // Récupérer les statuts de caisses depuis localStorage (partagé avec index.html)
+  let caisseStatuts = {};
+  try { caisseStatuts = JSON.parse(localStorage.getItem('volo_caisse_statuts')||'{}'); } catch(e){}
+  // Récupérer les incidents
+  let incidents = [];
+  try { incidents = JSON.parse(localStorage.getItem('volo_incidents')||'[]'); } catch(e){}
+
+  return ITEMS.map(i => {
+    // Déterminer le statut : d'abord vérifier si la caisse est en mission
+    let status = etatToStatus(i.etat);
+    let assignee = '';
+    let location = '';
+    let since = '';
+    const caisse = findCaisseForItem(i.id);
+    const caisseName = caisse ? (caisse.nom||caisse.name||caisse.id) : '';
+
+    if(caisse && caisseStatuts[caisse.id]){
+      const cs = caisseStatuts[caisse.id];
+      if(cs.statut === 'en_mission'){
+        status = 'sorti';
+        since = cs.since || '';
+        assignee = cs.user || '';
+      }
+    }
+
+    // Vérifier si item est signalé manquant dans les incidents récents
+    const recentIncident = incidents.find(inc =>
+      (inc.type === 'MANQUANT_PICK_OFF' || inc.type === 'MANQUANT_PICK_ON') &&
+      (inc.items||inc.items_manquants||[]).includes(i.id)
+    );
+    if(recentIncident){
+      status = 'manquant';
+    }
+
+    return {
+      id: i.id,
+      name: i.name,
+      cat: i.cat,
+      icon: i.icon || '📦',
+      status,
+      etat: i.etat || 'Bon',
+      desc: i.desc || '',
+      fab: i.fab || '',
+      serial: i.serial || '',
+      volo_id: i.volo_id || '',
+      expiry: i.expiry || '',
+      inspBy: i.inspBy || '',
+      inspDate: i.inspDate || '',
+      notes: i.notes || '',
+      couleur: i.couleur || '',
+      qty: i.qty || 1,
+      group: i.group || '',
+      caisse_id: caisse ? caisse.id : '',
+      caisse_nom: caisseName,
+      assignee,
+      location,
+      since,
+      history: []
+    };
+  });
+}
+let currentFilter = 'tous';
+let currentCatTab = 'tous';
+// V10.2: Default = ALL collapsed. expandedCats tracks which the user has opened.
+let expandedCats;
+const savedExpanded = localStorage.getItem('volo_cat_expanded');
+if(savedExpanded){
+  try { expandedCats = new Set(JSON.parse(savedExpanded)); } catch(e){ expandedCats = new Set(); }
+} else {
+  expandedCats = new Set();
+}
+let UI_ITEMS = []; // chargé depuis data.js via buildUIItems()
+
+// ---- HELPERS ----
+function timeSince(since){
+  if(!since) return '—';
+  const ms = Date.now() - new Date(since).getTime();
+  const h = Math.floor(ms/3600000);
+  const m = Math.floor((ms%3600000)/60000);
+  if(h>24) return Math.floor(h/24)+'j '+h%24+'h';
+  if(h>0) return h+'h'+(m>0?m+'m':'');
+  return m+'m';
+}
+function isOverdue(since){
+  if(!since) return false;
+  return Date.now()-new Date(since).getTime() > 86400000;
+}
+function getStatusLabel(s){
+  return{disponible:'DISPO',sorti:'SORTI',manquant:'MANQUANT',inspection:'INSPECTER',destruction:'DESTRUCTION'}[s]||s.toUpperCase();
+}
+
+// ---- KPI ----
+function updateKPIs(items){
+  // KPI counts use ALL items (not filtered) for a global view
+  const all = UI_ITEMS;
+  document.getElementById('kpi-total').textContent = all.length;
+  document.getElementById('kpi-dispo').textContent = all.filter(i=>i.status==='disponible').length;
+  document.getElementById('kpi-sorti').textContent = all.filter(i=>i.status==='sorti').length;
+  const alertGroups = getAlertItems(all);
+  const alertCount = alertGroups.reduce((s,g)=>s+g.items.length,0);
+  document.getElementById('kpi-alert').textContent = alertCount;
+  window._lastAlertGroups = alertGroups;
+  window._lastAlertCount = alertCount;
+  // Auto-refresh panel if open
+  const panel = document.getElementById('alertPanel');
+  if(panel && panel.style.display !== 'none') buildAlertPanel();
+}
+
+// Categorize ALL items needing attention with specific reasons
+function getAlertItems(items){
+  const groups = [];
+  const now = new Date();
+
+  // 1. MANQUANT — signalé manquant via incidents ou statut
+  const manquants = items.filter(i=>i.status==='manquant');
+  if(manquants.length) groups.push({
+    key:'manquant', title:'MANQUANT', icon:'🚨',
+    color:'var(--manquant)', bg:'rgba(192,57,43,.12)',
+    desc:'Items signalés manquants lors d\'un pick-off ou manuellement',
+    items: manquants.map(i=>({...i, reason:'Signalé manquant', reasonDetail:i.since?'Depuis '+i.since:''}))
+  });
+
+  // 2. INSPECTION REQUISE — statut inspection
+  const inspections = items.filter(i=>i.status==='inspection');
+  if(inspections.length) groups.push({
+    key:'inspection', title:'INSPECTION REQUISE', icon:'🔍',
+    color:'var(--inspect)', bg:'rgba(59,130,246,.12)',
+    desc:'Items nécessitant une inspection avant remise en service',
+    items: inspections.map(i=>({...i, reason:'Inspection requise', reasonDetail:i.etat||''}))
+  });
+
+  // 3. EXPIRÉ — date d'expiration dépassée
+  const expired = items.filter(i=>{
+    if(!i.expiry) return false;
+    const dt = parseExpDate(i.expiry);
+    return dt && dt.getTime() < now.getTime();
+  });
+  if(expired.length) groups.push({
+    key:'expired', title:'EXPIRÉ', icon:'⛔',
+    color:'var(--manquant)', bg:'rgba(192,57,43,.08)',
+    desc:'Certification/inspection expirée — retrait immédiat requis',
+    items: expired.map(i=>({...i, reason:'Expiré', reasonDetail:'EXP '+i.expiry}))
+  });
+
+  // 4. EXPIRATION PROCHE — < 90 jours
+  const expSoon = items.filter(i=>{
+    if(!i.expiry) return false;
+    const dt = parseExpDate(i.expiry);
+    if(!dt) return false;
+    const days = (dt.getTime()-now.getTime())/86400000;
+    return days >= 0 && days < 90;
+  });
+  if(expSoon.length) groups.push({
+    key:'expSoon', title:'EXPIRATION PROCHE', icon:'⚠️',
+    color:'var(--orange)', bg:'rgba(230,126,34,.08)',
+    desc:'Expiration dans moins de 90 jours — planifier remplacement',
+    items: expSoon.map(i=>{
+      const dt=parseExpDate(i.expiry);
+      const days=Math.floor((dt.getTime()-now.getTime())/86400000);
+      return{...i, reason:days+'j restants', reasonDetail:'EXP '+i.expiry};
+    })
+  });
+
+  // 5. EN SORTIE > 24H — sorti depuis plus d'un jour
+  const overdue = items.filter(i=>i.status==='sorti'&&isOverdue(i.since));
+  if(overdue.length) groups.push({
+    key:'overdue', title:'SORTIE > 24H', icon:'📤',
+    color:'var(--rescue)', bg:'rgba(230,81,0,.08)',
+    desc:'Items en sortie depuis plus de 24h — retour à confirmer',
+    items: overdue.map(i=>({...i, reason:'Sortie > 24h', reasonDetail:'Depuis '+timeSince(i.since)+' par '+(i.assignee||'?')}))
+  });
+
+  // 6. ÉTAT DÉGRADÉ — seulement les items PAS déjà comptés en inspection
+  const alreadyCounted = new Set();
+  groups.forEach(g=>g.items.forEach(i=>alreadyCounted.add(i.id)));
+  const degraded = items.filter(i=>{
+    if(!i.etat || alreadyCounted.has(i.id)) return false;
+    const e=i.etat.toLowerCase();
+    return e.includes('usur');
+  });
+  if(degraded.length) groups.push({
+    key:'degraded', title:'ÉTAT À SURVEILLER', icon:'👁️',
+    color:'var(--gold)', bg:'rgba(212,160,23,.08)',
+    desc:'Items avec usure notée lors de la dernière inspection',
+    items: degraded.map(i=>({...i, reason:i.etat, reasonDetail:i.inspBy?'Insp: '+i.inspBy+(i.inspDate?' • '+i.inspDate:''):''}))
+  });
+
+  return groups;
+}
+
+// Toggle alert detail panel
+function toggleAlertPanel(){
+  const panel = document.getElementById('alertPanel');
+  if(panel.style.display !== 'none'){
+    panel.style.display = 'none';
+    return;
+  }
+  buildAlertPanel();
+  panel.style.display = 'block';
+}
+
+function buildAlertPanel(){
+  const panel = document.getElementById('alertPanel');
+  const groups = window._lastAlertGroups || [];
+  const totalCount = window._lastAlertCount || 0;
+
+  if(!totalCount){
+    panel.innerHTML = `
+    <div class="alert-panel" style="text-align:center;padding:30px 16px">
+      <div style="font-size:2rem;margin-bottom:8px">✅</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:.85rem;letter-spacing:2px;color:var(--dispo)">AUCUNE ALERTE</div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Tout l'inventaire est en ordre</div>
+    </div>`;
+    return;
+  }
+
+  panel.innerHTML = `
+  <div class="alert-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div>
+        <div style="font-family:'Oswald',sans-serif;font-size:.9rem;letter-spacing:2px;color:var(--manquant)">DÉTAIL DES ALERTES</div>
+        <div style="font-size:.7rem;color:var(--muted);margin-top:2px">${totalCount} item${totalCount>1?'s':''} nécessitant attention</div>
+      </div>
+      <button onclick="document.getElementById('alertPanel').style.display='none'" style="width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;font-size:.8rem;display:flex;align-items:center;justify-content:center" aria-label="Fermer le panneau d'alertes">✕</button>
+    </div>
+
+    <!-- Summary bar -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+      ${groups.map(g=>`<span style="font-size:.6rem;padding:3px 10px;border-radius:8px;background:${g.bg};color:${g.color};font-family:'Oswald',sans-serif;letter-spacing:1px;cursor:pointer" onclick="document.getElementById('alert-section-${g.key}').scrollIntoView({behavior:'smooth',block:'nearest'})">${g.icon} ${g.items.length} ${g.title}</span>`).join('')}
+    </div>
+
+    ${groups.map(g=>`
+    <div class="alert-section" id="alert-section-${g.key}">
+      <div class="alert-section-title">
+        <span>${g.icon}</span>
+        <span style="color:${g.color}">${g.title}</span>
+        <span style="font-size:.55rem;padding:1px 6px;border-radius:6px;background:${g.bg};color:${g.color}">${g.items.length}</span>
+      </div>
+      <div style="font-size:.65rem;color:var(--muted);margin-bottom:8px;padding-left:2px">${g.desc}</div>
+      ${g.items.map(i=>`
+      <div class="alert-item" onclick="openItemModal('${i.id}')">
+        <div class="alert-item-icon">${i.icon}</div>
+        <div class="alert-item-info">
+          <div class="alert-item-name">${i.name}</div>
+          <div class="alert-item-detail">${i.id}${i.serial?' • '+i.serial.substring(0,18):''}${i.caisse_nom?' • <span style="color:var(--rescue)">'+i.caisse_nom+'</span>':''}</div>
+          ${i.reasonDetail?'<div style="font-size:.58rem;color:var(--muted);margin-top:1px">'+i.reasonDetail+'</div>':''}
+        </div>
+        <span class="alert-item-reason" style="background:${g.bg};color:${g.color}">${i.reason}</span>
+      </div>`).join('')}
+    </div>`).join('')}
+  </div>`;
+}
+
+// ---- FILTER / SORT ----
+function setFilter(f, btn){
+  currentFilter = f;
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  applyFilters();
+}
+
+function setCatTab(tab, btn){
+  currentCatTab = tab;
+  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  applyFilters();
+}
+
+// Get caisse type for an item (sac, caisse, surplus, kit, autre, surv)
+function getCaisseType(item){
+  if(!item.caisse_id || typeof CAISSES==='undefined') return 'autre';
+  const c = CAISSES.find(x=>x.id===item.caisse_id);
+  if(!c) return 'autre';
+  // Surveillant caisses
+  if(c.id.startsWith('CSURV')) return 'surv';
+  return c.type || 'autre';
+}
+
+function updateTabCounts(){
+  const types={tous:0,sac:0,caisse:0,surplus:0,kit:0,autre:0,surv:0};
+  UI_ITEMS.forEach(i=>{
+    types.tous++;
+    const t = getCaisseType(i);
+    if(types[t]!==undefined) types[t]++;
+    else types.autre++;
+  });
+  Object.entries(types).forEach(([k,v])=>{
+    const el=document.getElementById('tab-count-'+k);
+    if(el) el.textContent=v;
+  });
+}
+
+function applyFilters(){
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const sort = document.getElementById('sortSelect').value;
+
+  let list = UI_ITEMS.slice();
+
+  // category tab filter
+  if(currentCatTab !== 'tous'){
+    list = list.filter(i=>getCaisseType(i)===currentCatTab);
+  }
+
+  // status filter
+  if(currentFilter !== 'tous') list = list.filter(i=>i.status===currentFilter);
+
+  // search — nom, id, serial, fabricant, caisse, assigné, localisation
+  if(q) list = list.filter(i=>
+    i.name.toLowerCase().includes(q) ||
+    i.id.toLowerCase().includes(q) ||
+    (i.serial||'').toLowerCase().includes(q) ||
+    (i.fab||'').toLowerCase().includes(q) ||
+    (i.caisse_nom||'').toLowerCase().includes(q) ||
+    (i.assignee||'').toLowerCase().includes(q) ||
+    (i.location||'').toLowerCase().includes(q) ||
+    (i.notes||'').toLowerCase().includes(q)
+  );
+
+  // sort
+  if(sort==='status') list.sort((a,b)=>{
+    const order={destruction:0,manquant:1,inspection:2,sorti:3,disponible:4};
+    return (order[a.status]||9)-(order[b.status]||9);
+  });
+  else if(sort==='name') list.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(sort==='alert') list.sort((a,b)=>{
+    const score = i => (i.status==='manquant'?0:i.status==='inspection'?1:isOverdue(i.since)?2:3);
+    return score(a)-score(b);
+  });
+
+  updateKPIs(list);
+  renderItems(list, sort);
+}
+
+// Helper: descriptive caisse label — "Caisse 16 — Masque + Lunettes + Gants"
+function getCaisseLabel(caisse){
+  const nom = caisse.nom||caisse.name||caisse.id;
+  const itemIds = caisse.items_contenus||caisse.items||[];
+  if(!itemIds.length) return nom;
+  // Get unique item names (short)
+  const names = [];
+  const seen = new Set();
+  itemIds.forEach(id=>{
+    const it = (typeof ITEMS!=='undefined')?ITEMS.find(i=>i.id===id):null;
+    if(it){
+      const short = it.name.split(' ').slice(0,2).join(' ');
+      if(!seen.has(short)){seen.add(short);names.push(short);}
+    }
+  });
+  if(!names.length) return nom;
+  const desc = names.slice(0,3).join(' + ')+(names.length>3?' +':'');
+  return nom + ' \u2014 ' + desc;
+}
+
+// Helper: parse items from a history entry (handles JSON string or array)
+function _parseHistItems(h){
+  let items = h.items_array||h.items||[];
+  if(typeof items==='string'){try{items=JSON.parse(items)}catch(e){items=[]}}
+  if(!Array.isArray(items)) items=[];
+  return items;
+}
+
+// Helper: check if items are currently deployed (EN SORTIE) via volo_history
+function getActiveDeployments(){
+  try{
+    const hist = JSON.parse(localStorage.getItem('volo_history')||'[]');
+    const active = {};
+    hist.forEach(h=>{
+      if(h.mode==='PICK-ON' && h.statut==='ACTIF' && !h.annulé){
+        _parseHistItems(h).forEach(it=>{
+          const id = (typeof it==='string') ? it : (it&&it.id?it.id:null);
+          if(id) active[id] = {since:h.ts||h.date||h.timestamp||'', by:h.user||h.name||h.sauveteur_nom||''};
+        });
+      } else if(h.mode==='PICK-OFF' || h.statut==='RETOURNÉ' || h.statut==='ANNULÉ'){
+        _parseHistItems(h).forEach(it=>{
+          const id = (typeof it==='string') ? it : (it&&it.id?it.id:null);
+          if(id) delete active[id];
+        });
+      }
+    });
+    return active;
+  }catch(e){return {};}
+}
+let _activeDeployments = getActiveDeployments();
+
+// Reset ALL deployed items
+function resetAllDeployed(){
+  const sortiCount = UI_ITEMS.filter(i=>i.status==='sorti').length;
+  const deployCount = Object.keys(_activeDeployments).length;
+  const total = Math.max(sortiCount, deployCount);
+  if(!total){toast('Aucun item déployé','green');return;}
+  const root = document.getElementById('modalRoot');
+  root.innerHTML = `<div style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" onclick="closeModal()">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:400px;width:100%" onclick="event.stopPropagation()">
+      <div style="text-align:center;margin-bottom:16px">
+        <div style="font-size:40px;margin-bottom:8px">✅</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:18px;color:var(--dispo);letter-spacing:2px">TOUT REMETTRE DISPONIBLE</div>
+      </div>
+      <div style="background:var(--bg);border-radius:10px;padding:12px;margin-bottom:16px;text-align:center">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:var(--rescue)">${total}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">items seront remis disponibles</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:16px">Nettoie l'historique de déploiement et remet tous les items à DISPONIBLE.</div>
+      <div style="display:flex;gap:10px">
+        <button onclick="closeModal()" style="flex:1;padding:12px;border-radius:10px;background:var(--card2);border:1px solid var(--border);color:var(--muted);font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1px;cursor:pointer">ANNULER</button>
+        <button onclick="_executeResetAll()" style="flex:1;padding:12px;border-radius:10px;background:linear-gradient(135deg,#27AE60,#1E8449);border:none;color:#fff;font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1px;cursor:pointer">CONFIRMER</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function _executeResetAll(){
+  try{
+    // 1. Close all active PICK-ON entries in volo_history
+    const hist = JSON.parse(localStorage.getItem('volo_history')||'[]');
+    const now = new Date().toISOString().replace('T',' ').slice(0,19);
+    const closures = [];
+    const len = hist.length; // snapshot length to avoid infinite loop
+    for(let i=0;i<len;i++){
+      const h = hist[i];
+      if(h.mode==='PICK-ON' && h.statut==='ACTIF' && !h.annulé){
+        closures.push({
+          mode:'PICK-ON',
+          sauveteur_id:h.sauveteur_id||'',
+          sauveteur_nom:h.sauveteur_nom||'',
+          remorque:h.remorque||'Aucun',
+          depot:h.depot||'',
+          destination:h.destination||'',
+          items:h.items||'[]',
+          nb_items:h.nb_items||0,
+          statut:'RETOURNÉ',
+          original_timestamp:h.timestamp,
+          timestamp:now,
+          note:'Reset via Caisses & Stock — TOUT DISPONIBLE'
+        });
+      }
+    }
+    closures.forEach(c=>hist.push(c));
+    localStorage.setItem('volo_history',JSON.stringify(hist));
+
+    // 2. Clear ALL caisse statuts (en_mission → removed)
+    localStorage.removeItem('volo_caisse_statuts');
+
+    // 3. Clear incidents that mark items as manquant
+    localStorage.removeItem('volo_incidents');
+
+    // 4. Refresh deployments tracking
+    _activeDeployments = getActiveDeployments();
+
+    // 5. Rebuild UI_ITEMS from scratch (re-reads cleaned localStorage)
+    UI_ITEMS = buildUIItems();
+
+    // 6. Force all remaining sorti items to disponible (safety net)
+    UI_ITEMS.forEach(i=>{
+      if(i.status==='sorti'||i.status==='manquant'){
+        i.status='disponible';
+        i.assignee='';
+        i.location='';
+        i.since='';
+      }
+    });
+
+    closeModal();
+    applyFilters();
+    updateKPIs(UI_ITEMS);
+    updateDeployedBanner();
+    toast('Tous les items sont maintenant DISPONIBLES','green');
+  }catch(e){
+    toast('Erreur: '+e.message,'red');
+  }
+}
+
+// Show/hide deployed banner — counts ALL sorti items (from UI + deployments)
+function updateDeployedBanner(){
+  const banner = document.getElementById('deployedBanner');
+  if(!banner) return;
+  const sortiCount = UI_ITEMS.filter(i=>i.status==='sorti').length;
+  const deployCount = Object.keys(_activeDeployments).length;
+  const total = Math.max(sortiCount, deployCount);
+  if(total > 0){
+    banner.style.display='block';
+    document.getElementById('deployedCount').textContent = total;
+  } else {
+    banner.style.display='none';
+  }
+}
+
+// Helper: check if a caisse has any deployed items
+function isCaisseEnSortie(caisseId){
+  if(typeof CAISSES==='undefined') return false;
+  const c = CAISSES.find(x=>x.id===caisseId);
+  if(!c) return false;
+  const items = c.items_contenus||c.items||[];
+  return items.some(id => _activeDeployments[id]);
+}
+
+// Helper: descriptive label for "No Name" / generic groups
+function getGroupDisplayName(caisse){
+  const nom = caisse.nom||caisse.name||caisse.id;
+  // Rename "Autre" group to something descriptive
+  if(nom === 'Autre' || nom === 'No Name'){
+    return 'Planche dorsale / Kit oxyg\u00e8ne / Fourneau planche dorsale';
+  }
+  return nom;
+}
+
+// Helper: build a compact summary of items inside a caisse for the collapsed header
+function getCaisseItemsSummary(caisse){
+  const itemIds = caisse.items_contenus||caisse.items||[];
+  if(!itemIds.length) return '';
+  if(typeof ITEMS === 'undefined') return '';
+  // Count items by name
+  const counts = {};
+  itemIds.forEach(id=>{
+    const it = ITEMS.find(i=>i.id===id);
+    const nm = it ? it.name : id;
+    counts[nm] = (counts[nm]||0) + 1;
+  });
+  // Build summary string: "3x Vulcan, 2x Bm'D, 1x Asap Lock"
+  const parts = Object.entries(counts).map(([nm,c])=> c>1 ? c+'\u00d7 '+nm : nm);
+  // Show max 4 types, then "+N autres"
+  if(parts.length <= 4) return parts.join(', ');
+  const shown = parts.slice(0,4).join(', ');
+  return shown + ' <span>+' + (parts.length-4) + ' autres</span>';
+}
+
+// Helper: caisse EN SORTIE status
+function getCaisseStatus(caisseId){
+  try{
+    const s = JSON.parse(localStorage.getItem('volo_caisse_statuts')||'{}');
+    return s[caisseId]||null;
+  }catch(e){return null;}
+}
+
+// ---- RENDER ----
+function renderItems(list, sort='caisse'){
+  const container = document.getElementById('itemsContainer');
+  const empty = document.getElementById('emptyState');
+
+  if(!list.length){
+    container.innerHTML='';
+    empty.style.display='block';
+    return;
+  }
+  empty.style.display='none';
+
+  if(sort === 'caisse' && currentFilter === 'tous'){
+    // Group items by their caisse_id — each caisse gets its own block
+    const rawGroups = {};
+    const noCaisse = [];
+    list.forEach(i=>{
+      if(i.caisse_id){
+        if(!rawGroups[i.caisse_id]) rawGroups[i.caisse_id]={items:[],caisse:null};
+        rawGroups[i.caisse_id].items.push(i);
+        if(!rawGroups[i.caisse_id].caisse && typeof CAISSES!=='undefined'){
+          rawGroups[i.caisse_id].caisse = CAISSES.find(c=>c.id===i.caisse_id);
+        }
+      } else {
+        noCaisse.push(i);
+      }
+    });
+
+    // Sort blocks: by type, then by item count desc
+    // When a specific tab is active, that type comes first
+    const baseOrder = {sac:0, caisse:1, surplus:2, kit:3, autre:4, surv:5};
+    const typeOrder = Object.assign({}, baseOrder);
+    if(currentCatTab !== 'tous' && typeOrder[currentCatTab] !== undefined){
+      // Move the active tab's type to position 0, shift others
+      const activeVal = typeOrder[currentCatTab];
+      Object.keys(typeOrder).forEach(k=>{
+        if(typeOrder[k] < activeVal) typeOrder[k]++;
+      });
+      typeOrder[currentCatTab] = 0;
+    }
+    function getTypeKey(caisse){
+      if(!caisse) return 'autre';
+      if(caisse.id && caisse.id.startsWith('CSURV')) return 'surv';
+      return caisse.type || 'autre';
+    }
+    const sortedEntries = Object.entries(rawGroups).sort((a,b)=>{
+      const tA = getTypeKey(a[1].caisse);
+      const tB = getTypeKey(b[1].caisse);
+      if(tA !== tB) return (typeOrder[tA]||99) - (typeOrder[tB]||99);
+      return b[1].items.length - a[1].items.length;
+    });
+
+    // Add type divider headers between groups of different types
+    const typeLabels = {sac:'🎒 SACS', caisse:'📦 CAISSES', surplus:'🗃️ SURPLUS', kit:'🪢 KITS', autre:'🔧 AUTRE', surv:'👷 SURVEILLANT'};
+    let lastType = '';
+    let html = sortedEntries.map(([cid, data])=>{
+      const c = data.caisse;
+      const thisType = getTypeKey(c);
+      let divider = '';
+      if(thisType !== lastType){
+        // Count total items for this type
+        const typeTotal = sortedEntries.filter(function(e){return getTypeKey(e[1].caisse)===thisType}).reduce(function(s,e){return s+e[1].items.length},0);
+        divider = `<div style="padding:10px 16px 6px;font-family:'Oswald',sans-serif;font-size:.85rem;letter-spacing:2px;color:var(--gold);border-bottom:1px solid var(--border);margin:12px 0 8px;display:flex;align-items:center;gap:10px">${typeLabels[thisType]||thisType.toUpperCase()} <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">${typeTotal} items</span></div>`;
+        lastType = thisType;
+      }
+      const displayName = c ? (c.nom||c.name||cid) : cid;
+      const icon = c ? (c.icon||'📦') : '📦';
+      const cStatus = getCaisseStatus(cid);
+      const enMission = cStatus && cStatus.statut === 'en_mission';
+      const enSortie = enMission || isCaisseEnSortie(cid);
+      const catKey = 'caisse_'+cid;
+      const collapsed = !expandedCats.has(catKey); // V10.2: default collapsed
+      const alertCount = data.items.filter(i=>i.status==='manquant'||i.status==='inspection'||i.status==='destruction').length;
+      const sortiCount = data.items.filter(i=>i.status==='sorti').length;
+      const _scName = c?(c.nom||c.name||''):'';
+      const _sc = (typeof SAC_COLORS!=='undefined') ? (SAC_COLORS[_scName]||SAC_COLORS[catKey]) : null;
+      const _sacBadge = _sc ? `<span style="display:inline-block;background:${_sc.hex};color:#000;font-weight:700;font-size:10px;padding:2px 8px;border-radius:10px;">● ${_sc.name}</span>` : '';
+      const _sacBorderStyle = _sc ? `border-left:4px solid ${_sc.hex};` : '';
+      return divider + `
+      <div class="cat-block" data-cat="${catKey}" style="${_sacBorderStyle}">
+        <div class="cat-header ${enSortie?'en-sortie-group':''}" onclick="toggleCatByBlock(this)">
+          <div class="cat-header-left" style="flex-wrap:wrap;gap:4px">
+            <span class="cat-icon">${icon}</span>
+            <span class="cat-name">${escapeHtml(displayName).toUpperCase()}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#fff;background:${_sc?_sc.hex:'var(--rescue)'};padding:2px 8px;border-radius:6px">${data.items.length}</span>
+            ${_sacBadge}
+            ${sortiCount?`<span style="font-size:.55rem;padding:2px 8px;border-radius:10px;background:rgba(230,81,0,.15);color:var(--rescue);font-family:'Oswald',sans-serif;letter-spacing:1px">${sortiCount} sorti${sortiCount>1?'s':''}</span>`:''}
+            ${enSortie&&!sortiCount?`<span style="font-size:.55rem;padding:2px 8px;border-radius:10px;background:rgba(230,81,0,.25);color:var(--rescue);font-family:'Oswald',sans-serif;letter-spacing:1px;animation:pulse-badge 2s infinite">📤 EN SORTIE</span>`:''}
+            ${alertCount?`<span style="font-size:.55rem;padding:2px 7px;border-radius:10px;background:rgba(192,57,43,.2);color:var(--manquant);font-family:'Oswald',sans-serif;letter-spacing:1px">⚠ ${alertCount}</span>`:''}
+            <button onclick="event.stopPropagation();printCaissePDF('${cid}')" style="font-size:.55rem;padding:3px 10px;border-radius:10px;background:rgba(249,115,22,.12);color:var(--rescue);border:1px solid rgba(249,115,22,.3);cursor:pointer;font-family:'Oswald',sans-serif;letter-spacing:1px;transition:all .2s" onmouseover="this.style.background='rgba(249,115,22,.25)'" onmouseout="this.style.background='rgba(249,115,22,.12)'">📄 PDF</button>
+          </div>
+          <span class="cat-arrow ${collapsed?'collapsed':''}">▼</span>
+        </div>
+        <div style="padding:2px 16px 6px 40px;font-size:.6rem;color:var(--muted);font-family:'JetBrains Mono',monospace;line-height:1.4;opacity:.75">${getCaisseItemsSummary(c||{})}</div>
+        <div class="items-grid ${collapsed?'collapsed':''}">
+          ${renderGroupedItems(data.items)}
+        </div>
+      </div>`;
+    }).join('');
+
+    if(noCaisse.length){
+      const collapsed = !expandedCats.has('caisse_NONE');
+      html += `
+      <div class="cat-block" data-cat="caisse_NONE">
+        <div class="cat-header" onclick="toggleCatByBlock(this)">
+          <div class="cat-header-left">
+            <span class="cat-icon">📋</span>
+            <span class="cat-name">ITEMS SANS CAISSE</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:800;color:#fff;background:var(--muted);padding:3px 10px;border-radius:8px">${noCaisse.length}</span>
+          </div>
+          <span class="cat-arrow ${collapsed?'collapsed':''}">▼</span>
+        </div>
+        <div class="items-grid ${collapsed?'collapsed':''}">
+          ${renderGroupedItems(noCaisse)}
+        </div>
+      </div>`;
+    }
+    container.innerHTML = html;
+
+  } else if(sort === 'cat' && currentFilter === 'tous'){
+    // Group by category
+    const cats = {};
+    list.forEach(i=>{
+      if(!cats[i.cat]) cats[i.cat]={items:[],icon:i.icon};
+      cats[i.cat].items.push(i);
+    });
+
+    container.innerHTML = Object.entries(cats).map(([cat, data])=>{
+      const collapsed = !expandedCats.has(cat.replace(/"/g,'&quot;'));
+      const alertCount = data.items.filter(i=>i.status==='manquant'||i.status==='inspection'||i.status==='destruction').length;
+      return `
+      <div class="cat-block" data-cat="${cat.replace(/"/g,'&quot;')}">
+        <div class="cat-header" onclick="toggleCatByBlock(this)">
+          <div class="cat-header-left">
+            <span class="cat-icon">${data.icon}</span>
+            <span class="cat-name">${escapeHtml(cat).toUpperCase()}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:800;color:#fff;background:var(--rescue);padding:3px 10px;border-radius:8px">${data.items.length}</span>
+            ${alertCount?`<span style="font-size:.6rem;padding:2px 7px;border-radius:10px;background:rgba(192,57,43,.2);color:var(--manquant);font-family:'Oswald',sans-serif;letter-spacing:1px">⚠ ${alertCount}</span>`:''}
+          </div>
+          <span class="cat-arrow ${collapsed?'collapsed':''}">▼</span>
+        </div>
+        <div class="items-grid ${collapsed?'collapsed':''}">
+          ${renderGroupedItems(data.items)}
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    // Filtered view — group by caisse for easy navigation
+    const fGroups = {};
+    const fNone = [];
+    list.forEach(i=>{
+      const key = i.caisse_nom || i.cat || 'Autre';
+      if(!fGroups[key]) fGroups[key] = [];
+      fGroups[key].push(i);
+    });
+    const fEntries = Object.entries(fGroups).sort((a,b)=>a[0].localeCompare(b[0]));
+    if(fEntries.length <= 1){
+      // Single group or very few — just flat render
+      container.innerHTML = `<div class="items-grid">${renderGroupedItems(list)}</div>`;
+    } else {
+      container.innerHTML = fEntries.map(([grpName, grpItems])=>{
+        const catKey = 'filt_'+grpName;
+        const collapsed = !expandedCats.has(catKey);
+        const icon = grpItems[0] ? grpItems[0].icon : '📦';
+        return `
+        <div class="cat-block" data-cat="${catKey.replace(/"/g,'&quot;')}">
+          <div class="cat-header" onclick="toggleCatByBlock(this)">
+            <div class="cat-header-left">
+              <span class="cat-icon">${icon}</span>
+              <span class="cat-name">${escapeHtml(grpName).toUpperCase()}</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:800;color:#fff;background:var(--rescue);padding:3px 10px;border-radius:8px">${grpItems.length}</span>
+            </div>
+            <span class="cat-arrow ${collapsed?'collapsed':''}">▼</span>
+          </div>
+          <div class="items-grid ${collapsed?'collapsed':''}">
+            ${renderGroupedItems(grpItems)}
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+}
+
+// Parse flexible date formats from data.js (e.g. "2026-05", "2027", "05/2026", "2026-05-15")
+function parseExpDate(d){
+  if(!d) return null;
+  d = String(d).trim();
+  // YYYY-MM-DD or YYYY-MM
+  let m = d.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/);
+  if(m) return new Date(+m[1], +m[2]-1, m[3]?+m[3]:28);
+  // MM/YYYY
+  m = d.match(/^(\d{1,2})\/(\d{4})$/);
+  if(m) return new Date(+m[2], +m[1]-1, 28);
+  // YYYY only
+  m = d.match(/^(\d{4})$/);
+  if(m) return new Date(+m[1], 11, 31);
+  return null;
+}
+function getExpClass(d){
+  const dt = parseExpDate(d);
+  if(!dt) return '';
+  const now = new Date();
+  const diff = dt.getTime() - now.getTime();
+  const days = diff / 86400000;
+  if(days < 0) return 'exp-danger';
+  if(days < 90) return 'exp-warn';
+  return 'exp';
+}
+function getExpLabel(d){
+  const dt = parseExpDate(d);
+  if(!dt) return d;
+  const now = new Date();
+  const diff = dt.getTime() - now.getTime();
+  const days = Math.floor(diff / 86400000);
+  if(days < 0) return 'EXP ' + d + ' (expiré)';
+  if(days < 90) return 'EXP ' + d + ' (' + days + 'j)';
+  return 'EXP ' + d;
+}
+function getEtatClass(etat){
+  if(!etat) return '';
+  const e = etat.toLowerCase();
+  if(e.includes('hors')) return 'bad';
+  if(e.includes('surveiller')) return 'warn';
+  return '';
+}
+
+// V10.2: Find which items are "inside" a SAC item (same caisse, SAC is container)
+function getSacChildren(sacItem, allItems){
+  if(!sacItem || !sacItem.caisse_id || typeof CAISSES==='undefined') return [];
+  const caisse = CAISSES.find(c=>c.id===sacItem.caisse_id);
+  if(!caisse) return [];
+  const childIds = (caisse.items_contenus||[]).filter(id=>id!==sacItem.id);
+  return allItems.filter(i=>childIds.includes(i.id));
+}
+
+// Group identical items (3+) into expandable row with ×N badge
+// V10.2: SAC items become container cards with their items inside
+function renderGroupedItems(items){
+  if(!items||!items.length) return '<div style="padding:12px;color:var(--muted);font-size:.75rem">Aucun item</div>';
+
+  // Step 1: Identify SAC items and collect child IDs to exclude from main list
+  const sacItems = items.filter(i=>i.id && i.id.startsWith('SAC-'));
+  const childIds = new Set();
+  sacItems.forEach(sac=>{
+    getSacChildren(sac, items).forEach(c=>childIds.add(c.id));
+  });
+
+  // Step 2: Separate items — SAC containers vs regular items (exclude children)
+  const regularItems = items.filter(i=>!childIds.has(i.id) && !(i.id && i.id.startsWith('SAC-')));
+
+  // Step 3: Group regular items by name|couleur (identical items ×N)
+  const groups = {};
+  const order = [];
+  regularItems.forEach(i=>{
+    const key = (i.name||'')+'|'+(i.couleur||'');
+    if(!groups[key]){groups[key]=[];order.push(key);}
+    groups[key].push(i);
+  });
+  order.sort((a,b)=>groups[b].length - groups[a].length);
+
+  let html = '';
+
+  // Step 4: Render SAC container cards FIRST
+  sacItems.forEach(sac=>{
+    const children = getSacChildren(sac, items);
+    const sid = 'sac_'+sac.id.replace(/[^a-zA-Z0-9_-]/g,'');
+    const couleurHex = sac.couleur ? COULEUR_HEX[sac.couleur] : null;
+    const couleurDot = couleurHex ? '<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:'+couleurHex+';flex-shrink:0" title="'+escapeHtml(sac.couleur)+'"></span>' : '';
+    const sacBorder = couleurHex ? 'border-left:4px solid '+couleurHex+';' : 'border-left:4px solid var(--rescue);';
+    const statusBadge = '<span class="status-badge s-'+sac.status+'">'+getStatusLabel(sac.status)+'</span>';
+
+    html += '<div style="margin-bottom:8px">';
+    // SAC header card — clickable to expand children
+    html += '<div class="sac-container-card" style="'+sacBorder+'display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden" onclick="toggleSacContainer(\''+sid+'\',event)">';
+    html += '<div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1">';
+    html += '<div style="font-size:1.4rem;width:42px;height:42px;background:rgba(58,36,40,.5);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(68,40,46,.4)">'+sac.icon+'</div>';
+    html += '<div style="min-width:0">';
+    html += '<div style="font-size:.88rem;font-weight:700;color:var(--txt);display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+escapeHtml(sac.name)+' '+couleurDot+'</div>';
+    html += '<div style="font-family:\'JetBrains Mono\',monospace;font-size:.6rem;color:var(--gold);margin-top:2px">'+escapeHtml(sac.id)+(sac.fab?' \u2022 '+escapeHtml(sac.fab):'')+'</div>';
+    html += '</div>';
+    html += '</div>';
+    html += '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">';
+    html += statusBadge;
+    html += '<span class="group-badge" style="font-size:14px;min-width:36px">'+(children.length+1)+'</span>';
+    html += '<span style="font-size:16px;color:var(--muted);transition:transform .2s" id="'+sid+'_arrow">▸</span>';
+    html += '</div>';
+    html += '</div>';
+
+    // Expandable children — individual items inside the sac
+    html += '<div id="'+sid+'" style="display:none;padding:6px 0 2px 16px;border-left:2px solid var(--border);margin-left:20px;margin-top:4px">';
+    // Action buttons for the SAC itself
+    html += '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">';
+    html += '<button onclick="event.stopPropagation();openItemModal(\''+sac.id+'\')" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--txt);font-family:Oswald,sans-serif;font-size:.6rem;letter-spacing:1px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor=\'var(--gold)\'" onmouseout="this.style.borderColor=\'var(--border)\'">📋 DÉTAILS SAC</button>';
+    html += '</div>';
+    // Render children with grouping (identical items inside the sac get ×N)
+    const childGroups = {};
+    const childOrder = [];
+    children.forEach(c=>{
+      const ck = (c.name||'')+'|'+(c.couleur||'');
+      if(!childGroups[ck]){childGroups[ck]=[];childOrder.push(ck);}
+      childGroups[ck].push(c);
+    });
+    childOrder.sort((a,b)=>childGroups[b].length - childGroups[a].length);
+    childOrder.forEach(ck=>{
+      const cgrp = childGroups[ck];
+      const cfirst = cgrp[0];
+      if(cgrp.length >= 3){
+        const cgid = sid+'_g_'+cfirst.id.replace(/[^a-zA-Z0-9_-]/g,'');
+        const cDot = cfirst.couleur && COULEUR_HEX[cfirst.couleur] ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+COULEUR_HEX[cfirst.couleur]+';margin-right:4px"></span>' : '';
+        html += '<div style="margin-bottom:4px">';
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer" onclick="toggleGroup(\''+cgid+'\',event)">';
+        html += '<div style="display:flex;align-items:center;gap:8px">';
+        html += '<span style="font-size:1rem">'+cfirst.icon+'</span>';
+        html += '<span style="font-family:Oswald,sans-serif;font-size:.75rem;letter-spacing:1px;color:var(--txt)">'+cDot+escapeHtml(cfirst.name)+'</span>';
+        html += '<span class="group-badge">&times;'+cgrp.length+'</span>';
+        html += '</div>';
+        html += '<span style="font-size:14px;color:var(--muted)" id="'+cgid+'_arrow">▸</span>';
+        html += '</div>';
+        html += '<div id="'+cgid+'" style="display:none;padding:4px 0 4px 20px">';
+        html += cgrp.map(ci=>renderItemCard(ci)).join('');
+        html += '</div>';
+        html += '</div>';
+      } else {
+        html += cgrp.map(ci=>renderItemCard(ci)).join('');
+      }
+    });
+    if(!children.length){
+      html += '<div style="padding:8px;color:var(--muted);font-size:.72rem;font-style:italic">Aucun item dans ce sac</div>';
+    }
+    html += '</div>';
+    html += '</div>';
+  });
+
+  // Step 5: Render regular (non-sac) items with ×N grouping
+  order.forEach(key=>{
+    const grp = groups[key];
+    const first = grp[0];
+    const couleurHex = first.couleur ? COULEUR_HEX[first.couleur] : null;
+    const dot = couleurHex ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+couleurHex+';margin-right:4px"></span>' : '';
+    if(grp.length >= 3){
+      const gid = 'grp_'+first.id.replace(/[^a-zA-Z0-9_-]/g,'');
+      html += '<div style="margin-bottom:4px">';
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer" onclick="toggleGroup(\''+gid+'\',event)">';
+      html += '<div style="display:flex;align-items:center;gap:8px">';
+      html += '<span style="font-size:1rem">'+first.icon+'</span>';
+      html += '<span style="font-family:Oswald,sans-serif;font-size:.75rem;letter-spacing:1px;color:var(--txt)">'+dot+escapeHtml(first.name)+'</span>';
+      html += '<span class="group-badge">&times;'+grp.length+'</span>';
+      html += '</div>';
+      html += '<span style="font-size:14px;color:var(--muted)" id="'+gid+'_arrow">▸</span>';
+      html += '</div>';
+      html += '<div id="'+gid+'" style="display:none;padding:4px 0 4px 20px">';
+      html += grp.map(i=>renderItemCard(i)).join('');
+      html += '</div>';
+      html += '</div>';
+    } else {
+      html += grp.map(i=>renderItemCard(i)).join('');
+    }
+  });
+  return html;
+}
+
+// V10.2: Toggle SAC container expand/collapse
+function toggleSacContainer(sacId, e){
+  if(e){
+    if(e.target.closest('.item-card') || e.target.closest('button')){return;}
+    e.stopPropagation();
+  }
+  const el = document.getElementById(sacId);
+  const arrow = document.getElementById(sacId+'_arrow');
+  if(!el) return;
+  const isHidden = el.style.display === 'none';
+  el.style.display = isHidden ? 'block' : 'none';
+  if(arrow){
+    arrow.textContent = isHidden ? '▾' : '▸';
+  }
+}
+
+function toggleGroup(groupId,e){
+  if(e){
+    if(e.target.closest('.item-card')){return;}
+    e.stopPropagation();
+  }
+  const el = document.getElementById(groupId);
+  const arrow = document.getElementById(groupId+'_arrow');
+  if(!el) return;
+  const isHidden = el.style.display === 'none';
+  el.style.display = isHidden ? 'block' : 'none';
+  if(arrow) arrow.style.transform = isHidden ? 'rotate(90deg)' : '';
+}
+
+function renderItemCard(i){
+  const over = i.status==='sorti' && isOverdue(i.since);
+  const dur = timeSince(i.since);
+  const deployed = !!_activeDeployments[i.id];
+  const expCls = i.expiry ? getExpClass(i.expiry) : '';
+  const etatCls = getEtatClass(i.etat);
+  const sc = (typeof SAC_COLORS!=='undefined' && i.cat) ? SAC_COLORS[i.cat] : null;
+  const sacBorder = sc ? `border-left:4px solid ${sc.hex};` : '';
+  const couleurHex = i.couleur ? COULEUR_HEX[i.couleur] : null;
+  const couleurDot = couleurHex ? `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${couleurHex};margin-left:4px;vertical-align:middle;flex-shrink:0;" title="${i.couleur}"></span>` : '';
+  return `
+  <div class="item-card s-${i.status}${deployed?' en-sortie':''}" style="${sacBorder}" onclick="openItemModal('${i.id}')">
+    <div class="item-left">
+      <div class="item-icon">${i.icon}</div>
+      <div class="item-info">
+        <div class="item-name">${escapeHtml(i.name)}${couleurDot}</div>
+        <div class="item-id">${escapeHtml(i.id)}${i.serial?' \u2022 <span style="color:var(--muted);font-size:.58rem">'+escapeHtml(i.serial.substring(0,15))+'</span>':''}</div>
+        ${i.fab?'<div class="item-fab">'+escapeHtml(i.fab)+'</div>':''}
+        <div class="item-sub">${i.assignee||i.location||(i.caisse_nom?'<span style="color:var(--rescue);opacity:.7">'+i.caisse_nom+'</span>':'\u2014 D\u00e9p\u00f4t')}</div>
+        <div class="item-dates">
+          ${i.expiry?'<span class="item-date '+expCls+'">'+getExpLabel(i.expiry)+'</span>':''}
+          ${i.inspDate?'<span class="item-date insp">INSP '+i.inspDate+'</span>':''}
+        </div>
+      </div>
+    </div>
+    <div class="item-right">
+      <span class="status-badge s-${i.status}">${getStatusLabel(i.status)}</span>
+      ${etatCls?'<span class="item-etat '+etatCls+'">'+(i.etat||'')+'</span>':''}
+      ${i.since?`<span class="item-duration ${over?'item-since-over':''}">${over?'\u26A0 ':''}${dur}</span>`:''}
+    </div>
+  </div>`;
+}
+
+// ---- CATEGORY TOGGLE (V10.2: expandedCats — default=collapsed) ----
+function toggleCat(cat){
+  if(expandedCats.has(cat)) expandedCats.delete(cat);
+  else expandedCats.add(cat);
+  localStorage.setItem('volo_cat_expanded', JSON.stringify([...expandedCats]));
+
+  const block = document.querySelector('[data-cat="'+CSS.escape(cat)+'"]');
+  if(!block) return;
+  const grid = block.querySelector('.items-grid');
+  const arrow = block.querySelector('.cat-arrow');
+  const desc = block.querySelector('.caisse-desc');
+  const isCollapsed = !expandedCats.has(cat);
+  if(grid) grid.classList.toggle('collapsed', isCollapsed);
+  if(arrow) arrow.classList.toggle('collapsed', isCollapsed);
+  if(desc) desc.style.display = isCollapsed ? 'none' : '';
+}
+
+// Toggle using the parent block's data-cat attribute (avoids apostrophe escaping issues)
+function toggleCatByBlock(headerEl){
+  const block = headerEl.closest('.cat-block');
+  if(!block) return;
+  const cat = block.getAttribute('data-cat');
+  if(!cat) return;
+  // Toggle state (V10.2: expandedCats)
+  if(expandedCats.has(cat)) expandedCats.delete(cat);
+  else expandedCats.add(cat);
+  localStorage.setItem('volo_cat_expanded', JSON.stringify([...expandedCats]));
+  // Direct DOM manipulation
+  const isCollapsed = !expandedCats.has(cat);
+  const grid = block.querySelector('.items-grid');
+  const arrow = block.querySelector('.cat-arrow');
+  if(grid) grid.classList.toggle('collapsed', isCollapsed);
+  if(arrow) arrow.classList.toggle('collapsed', isCollapsed);
+}
+
+// ---- ITEM MODAL ----
+function openItemModal(id){
+  const item = UI_ITEMS.find(i=>i.id===id);
+  if(!item) return;
+  const over = item.status==='sorti' && isOverdue(item.since);
+
+  const statusActions = [
+    {s:'disponible', label:'✅ DISPO', bg:'rgba(39,174,96,.18)', border:'rgba(39,174,96,.4)', color:'var(--dispo)'},
+    {s:'sorti',      label:'📤 SORTI', bg:'rgba(212,160,23,.18)', border:'rgba(212,160,23,.4)', color:'var(--sorti)'},
+    {s:'inspection', label:'🔍 INSPECTER', bg:'rgba(59,130,246,.18)', border:'rgba(59,130,246,.4)', color:'var(--inspect)'},
+    {s:'manquant',   label:'🚨 MANQUANT', bg:'rgba(192,57,43,.18)', border:'rgba(192,57,43,.4)', color:'var(--manquant)'},
+  ];
+
+  document.getElementById('modalRoot').innerHTML = `
+  <div class="modal-bg" onclick="if(event.target.classList.contains('modal-bg'))closeModal()">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+            <span style="font-size:1.6rem">${item.icon}</span>
+            <div>
+              <div style="font-family:'Oswald',sans-serif;font-size:1rem;letter-spacing:1px;color:var(--goldL)">${escapeHtml(item.name)}${item.couleur&&COULEUR_HEX[item.couleur]?`<span class="color-dot" style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${COULEUR_HEX[item.couleur]};margin-left:8px;vertical-align:middle;" title="${escapeHtml(item.couleur)}"></span>`:''}</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--gold);margin-top:1px">${escapeHtml(item.id)}</div>
+            </div>
+          </div>
+          ${over?'<div style="font-size:.7rem;color:var(--manquant);font-weight:600;margin-top:4px">⚠️ DÉPASSEMENT +24H — Retour requis</div>':''}
+        </div>
+        <button class="modal-close" onclick="closeModal()" aria-label="Fermer">✕</button>
+      </div>
+
+      <!-- STATUS ACTIONS -->
+      <div style="font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:2px;color:var(--muted);margin-bottom:8px">CHANGER STATUT</div>
+      <div class="modal-status-bar">
+        ${statusActions.map(a=>`
+          <button class="modal-action-btn" onclick="changeStatus('${id}','${a.s}')"
+            style="background:${a.bg};border-color:${a.border};color:${a.color};${item.status===a.s?'outline:2px solid '+a.border+';font-weight:700':''}"
+          >${a.label}</button>
+        `).join('')}
+      </div>
+      ${item.caisse_id?(()=>{
+        const caisseItems=UI_ITEMS.filter(i=>i.caisse_id===item.caisse_id);
+        const caisseNom=item.caisse_nom||item.caisse_id;
+        return caisseItems.length>1?`
+      <div style="margin-top:10px;padding:10px 12px;background:rgba(212,160,23,.08);border:1px solid rgba(212,160,23,.2);border-radius:10px">
+        <div style="font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:2px;color:var(--gold);margin-bottom:8px">📦 APPLIQUER À TOUT : ${escapeHtml(caisseNom).toUpperCase()} (${caisseItems.length} items)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${statusActions.map(a=>`<button onclick="changeCaisseStatus('${item.caisse_id}','${a.s}')" style="flex:1;min-width:70px;padding:8px 6px;border-radius:8px;border:1px solid ${a.border};background:${a.bg};color:${a.color};font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:1px;cursor:pointer;transition:all .2s" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">${a.label} ×${caisseItems.length}</button>`).join('')}
+        </div>
+      </div>`:''})():''}
+
+      <!-- DETAILS GRID -->
+      <div class="detail-grid">
+        <div class="detail-cell">
+          <div class="detail-cell-label">CATÉGORIE</div>
+          <div class="detail-cell-val">${item.cat}</div>
+        </div>
+        <div class="detail-cell">
+          <div class="detail-cell-label">STATUT ACTUEL</div>
+          <div class="detail-cell-val" style="color:${{disponible:'var(--dispo)',sorti:'var(--sorti)',manquant:'var(--manquant)',inspection:'var(--inspect)',destruction:'var(--destruct)'}[item.status]}">${getStatusLabel(item.status)}</div>
+        </div>
+        ${item.caisse_nom?`<div class="detail-cell">
+          <div class="detail-cell-label">CAISSE</div>
+          <div class="detail-cell-val" style="color:var(--gold)">${item.caisse_nom}</div>
+        </div>`:''}
+        ${item.couleur&&COULEUR_HEX[item.couleur]?`<div class="detail-cell">
+          <div class="detail-cell-label">COULEUR</div>
+          <div class="detail-cell-val" style="display:flex;align-items:center;gap:8px"><span class="color-dot" style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${COULEUR_HEX[item.couleur]};flex-shrink:0;"></span>${item.couleur}</div>
+        </div>`:''}
+        <div class="detail-cell">
+          <div class="detail-cell-label">ASSIGNÉ À</div>
+          <div class="detail-cell-val">${item.assignee||'—'}</div>
+        </div>
+        <div class="detail-cell">
+          <div class="detail-cell-label">LOCALISATION</div>
+          <div class="detail-cell-val">${item.location||'Dépôt'}</div>
+        </div>
+        <div class="detail-cell">
+          <div class="detail-cell-label">DEPUIS</div>
+          <div class="detail-cell-val ${over?'item-since-over':''}">${item.since||'—'}</div>
+        </div>
+        ${item.serial?`<div class="detail-cell">
+          <div class="detail-cell-label">N° SÉRIE</div>
+          <div class="detail-cell-val" style="font-family:'JetBrains Mono',monospace;font-size:.7rem">${escapeHtml(item.serial)}</div>
+        </div>`:''}
+        ${item.fab?`<div class="detail-cell">
+          <div class="detail-cell-label">FABRICANT</div>
+          <div class="detail-cell-val">${escapeHtml(item.fab)}</div>
+        </div>`:''}
+        ${item.expiry?`<div class="detail-cell">
+          <div class="detail-cell-label">EXPIRATION</div>
+          <div class="detail-cell-val">${escapeHtml(item.expiry)}</div>
+        </div>`:''}
+        ${item.inspBy?`<div class="detail-cell">
+          <div class="detail-cell-label">INSPECTÉ PAR</div>
+          <div class="detail-cell-val">${escapeHtml(item.inspBy)}${item.inspDate?' • '+escapeHtml(item.inspDate):''}</div>
+        </div>`:''}
+        ${item.notes?`<div class="detail-cell" style="grid-column:1/-1">
+          <div class="detail-cell-label">NOTES</div>
+          <div class="detail-cell-val" style="font-size:.72rem;line-height:1.4;max-height:80px;overflow-y:auto">${escapeHtml(item.notes)}</div>
+        </div>`:''}
+      </div>
+
+      <!-- ASSIGN QUICK FORM -->
+      <div style="margin-bottom:16px">
+        <div style="font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:2px;color:var(--muted);margin-bottom:6px">ASSIGNATION RAPIDE</div>
+        <div style="display:flex;gap:8px">
+          <input id="assignInput" type="text" placeholder="Nom du sauveteur..."
+            value="${item.assignee||''}"
+            style="flex:1;padding:8px 12px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.8rem;outline:none"
+            onfocus="this.style.borderColor='rgba(212,160,23,.45)'"
+            onblur="this.style.borderColor='var(--border)'">
+          <input id="destInput" type="text" placeholder="Destination..."
+            value="${item.location||''}"
+            style="flex:1;padding:8px 12px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.8rem;outline:none"
+            onfocus="this.style.borderColor='rgba(230,81,0,.45)'"
+            onblur="this.style.borderColor='var(--border)'">
+          <button onclick="assignItem('${id}')"
+            style="padding:8px 14px;border-radius:9px;background:linear-gradient(135deg,var(--rescue),var(--rescueL));border:none;color:#fff;font-family:'Oswald',sans-serif;font-size:.65rem;letter-spacing:1px;cursor:pointer;white-space:nowrap">
+            ✓ ASSIGNER
+          </button>
+        </div>
+      </div>
+
+      <!-- HISTORIQUE -->
+      ${item.history.length?`
+      <div>
+        <div style="font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:2px;color:var(--muted);margin-bottom:8px">HISTORIQUE</div>
+        <div style="max-height:160px;overflow-y:auto;padding-right:4px">
+          ${item.history.map(h=>`
+          <div class="history-item">
+            <div class="history-dot" style="background:${({'PICK-ON':'var(--green)','RETOUR':'var(--gold)','PICK-OFF':'var(--gold)','MANQUANT':'var(--manquant)','INSPECTION':'var(--inspect)'}[h.a]||'var(--muted)')}"></div>
+            <div class="history-content">
+              <div class="history-action">${h.a} — ${h.dest}</div>
+              <div class="history-meta">${h.by} • ${h.at}</div>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>
+      `:''}
+
+      <!-- DESTRUCTION -->
+      <div id="destroySection-${item.id}" style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px">
+        <button onclick="document.getElementById('destroyConfirm-${item.id}').style.display='block';this.style.display='none'"
+          style="width:100%;padding:10px;border-radius:10px;background:rgba(107,33,168,.1);border:1px solid rgba(107,33,168,.3);color:var(--destruct);font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:2px;cursor:pointer">
+          ☠️ DÉTRUIRE CET ITEM
+        </button>
+        <div id="destroyConfirm-${item.id}" style="display:none;margin-top:8px;padding:12px;background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.4);border-radius:12px;text-align:center">
+          <div style="font-family:'Oswald',sans-serif;font-size:.8rem;color:var(--manquant);letter-spacing:1px;margin-bottom:4px">CONFIRMER LA DESTRUCTION</div>
+          <div style="font-size:.7rem;color:var(--muted);margin-bottom:8px">${item.name} (${item.id}) sera retiré de l'inventaire</div>
+          <textarea id="destroyNote-${item.id}" rows="2" placeholder="Raison (expiré, brisé, perdu...)"
+            style="width:100%;margin-bottom:10px;padding:8px 10px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-family:Inter,sans-serif;font-size:.75rem;resize:none"></textarea>
+          <div style="display:flex;gap:8px">
+            <button onclick="document.getElementById('destroyConfirm-${item.id}').style.display='none';document.querySelector('#destroySection-${item.id}>button').style.display='block'"
+              style="flex:1;padding:8px;border-radius:8px;background:var(--card);border:1px solid var(--border);color:var(--muted);font-family:'Oswald',sans-serif;font-size:.65rem;letter-spacing:1px;cursor:pointer">ANNULER</button>
+            <button onclick="destroyItem('${item.id}')"
+              style="flex:1;padding:8px;border-radius:8px;background:linear-gradient(135deg,#C0392B,#7B1A00);border:none;color:#fff;font-family:'Oswald',sans-serif;font-size:.65rem;letter-spacing:1px;cursor:pointer">☠️ CONFIRMER</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function closeModal(){
+  document.getElementById('modalRoot').innerHTML='';
+}
+
+// Change status for ALL items in a caisse at once
+function changeCaisseStatus(caisseId, newStatus){
+  const items = UI_ITEMS.filter(i=>i.caisse_id===caisseId);
+  if(!items.length) return;
+  const userName = getUserName();
+  let count = 0;
+  items.forEach(item=>{
+    if(item.status===newStatus) return; // skip already at target status
+    item.history.unshift({a:newStatus.toUpperCase(),by:userName,at:new Date().toLocaleString('fr-CA'),dest:item.location||'?'});
+    item.status = newStatus;
+    if(newStatus==='disponible'){item.assignee='';item.location='';item.since='';}
+    else if(!item.since) item.since = new Date().toISOString().slice(0,16).replace('T',' ');
+    count++;
+  });
+  // If setting to disponible, also clean caisse statut in localStorage
+  if(newStatus==='disponible'){
+    try{
+      const cs = JSON.parse(localStorage.getItem('volo_caisse_statuts')||'{}');
+      delete cs[caisseId];
+      localStorage.setItem('volo_caisse_statuts',JSON.stringify(cs));
+    }catch(e){}
+  }
+  closeModal();
+  applyFilters();
+  updateKPIs(UI_ITEMS);
+  updateDeployedBanner();
+  const cName = items[0]?items[0].caisse_nom||caisseId:caisseId;
+  toast(`${cName} — ${count} items → ${getStatusLabel(newStatus)}`, newStatus==='disponible'?'green':newStatus==='manquant'?'red':'gold');
+}
+
+function changeStatus(id, newStatus){
+  const item = UI_ITEMS.find(i=>i.id===id);
+  if(!item) return;
+  item.history.unshift({a:newStatus.toUpperCase(),by:getUserName(),at:new Date().toLocaleString('fr-CA'),dest:item.location||'?'});
+  item.status = newStatus;
+  if(newStatus==='disponible'){item.assignee='';item.location='';item.since='';}
+  else if(!item.since) item.since = new Date().toISOString().slice(0,16).replace('T',' ');
+  closeModal();
+  applyFilters();
+  toast(`${item.name} → ${getStatusLabel(newStatus)}`, newStatus==='manquant'||newStatus==='destruction'?'red':newStatus==='disponible'?'green':'gold');
+}
+
+function assignItem(id){
+  const item = UI_ITEMS.find(i=>i.id===id);
+  if(!item) return;
+  const newAssignee = document.getElementById('assignInput').value.trim();
+  const newDest = document.getElementById('destInput').value.trim();
+  item.assignee = newAssignee;
+  item.location = newDest;
+  if(newAssignee && item.status==='disponible') item.status='sorti';
+  if(!item.since && newAssignee) item.since=new Date().toISOString().slice(0,16).replace('T',' ');
+  item.history.unshift({a:'ASSIGNÉ',by:newAssignee||'—',at:new Date().toLocaleString('fr-CA'),dest:newDest||'?'});
+  closeModal();
+  applyFilters();
+  toast(`${item.name} assigné à ${newAssignee||'—'}`, 'green');
+}
+
+// ---- ADD ITEM MODAL ----
+// Auto-generate next CUSTOM-XXX id
+function getNextCustomId(){
+  let max = 0;
+  UI_ITEMS.forEach(i=>{
+    const m = i.id.match(/^CUSTOM-(\d+)$/);
+    if(m) max = Math.max(max, parseInt(m[1]));
+  });
+  if(typeof ITEMS!=='undefined') ITEMS.forEach(i=>{
+    const m = i.id.match(/^CUSTOM-(\d+)$/);
+    if(m) max = Math.max(max, parseInt(m[1]));
+  });
+  return 'CUSTOM-' + String(max+1).padStart(3,'0');
+}
+
+function openAddModal(){
+  const cats = [...new Set(UI_ITEMS.map(i=>i.cat))];
+  const caisses = (typeof CAISSES!=='undefined') ? CAISSES : [];
+  const autoId = getNextCustomId();
+  document.getElementById('modalRoot').innerHTML = `
+  <div class="modal-bg" onclick="if(event.target.classList.contains('modal-bg'))closeModal()">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div style="font-family:'Oswald',sans-serif;font-size:.95rem;letter-spacing:2px;color:var(--rescue)">➕ NOUVEL ITEM</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:3px">Ajouter un équipement au stock avec QR auto</div>
+        </div>
+        <button class="modal-close" onclick="closeModal()" aria-label="Fermer">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div>
+          <label style="font-size:.6rem;letter-spacing:1.5px;color:var(--muted);font-family:'Oswald',sans-serif;display:block;margin-bottom:4px">NOM *</label>
+          <input id="add-name" type="text" placeholder="Nom de l'item"
+            style="width:100%;padding:9px 12px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.82rem;outline:none">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label style="font-size:.6rem;letter-spacing:1.5px;color:var(--muted);font-family:'Oswald',sans-serif;display:block;margin-bottom:4px">ID (AUTO)</label>
+            <input id="add-id" type="text" value="${autoId}"
+              style="width:100%;padding:9px 12px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:.78rem;outline:none">
+          </div>
+          <div>
+            <label style="font-size:.6rem;letter-spacing:1.5px;color:var(--muted);font-family:'Oswald',sans-serif;display:block;margin-bottom:4px">ICÔNE</label>
+            <input id="add-icon" type="text" value="📦" maxlength="2"
+              style="width:100%;padding:9px 12px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:1.1rem;outline:none;text-align:center">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label style="font-size:.6rem;letter-spacing:1.5px;color:var(--muted);font-family:'Oswald',sans-serif;display:block;margin-bottom:4px">CATÉGORIE</label>
+            <select id="add-cat" onchange="document.getElementById('add-cat-custom').style.display=this.value==='__new__'?'block':'none'"
+              style="width:100%;padding:9px 12px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.82rem;outline:none;-webkit-appearance:none">
+              ${cats.map(c=>`<option value="${c.replace(/"/g,'&quot;')}">${c}</option>`).join('')}
+              <option value="__new__">➕ Nouvelle catégorie...</option>
+            </select>
+            <input id="add-cat-custom" placeholder="Nom catégorie..." style="display:none;width:100%;padding:8px 12px;margin-top:6px;background:rgba(12,6,8,.6);border:1px solid var(--rescue);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.82rem;outline:none">
+          </div>
+          <div>
+            <label style="font-size:.6rem;letter-spacing:1.5px;color:var(--muted);font-family:'Oswald',sans-serif;display:block;margin-bottom:4px">CAISSE / GROUPE</label>
+            <select id="add-caisse"
+              style="width:100%;padding:9px 12px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.82rem;outline:none;-webkit-appearance:none">
+              <option value="">— Aucune —</option>
+              ${caisses.map(c=>`<option value="${c.id}">${c.icon||'📦'} ${c.nom||c.name||c.id} (${(c.items_contenus||[]).length})</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <button onclick="submitAddItem()"
+          style="width:100%;padding:13px;border-radius:12px;
+            background:linear-gradient(135deg,var(--rescue),var(--rescueL));
+            border:none;color:#fff;font-family:'Oswald',sans-serif;
+            font-size:.78rem;letter-spacing:2px;cursor:pointer;margin-top:4px">
+          ✓ AJOUTER AU STOCK
+        </button>
+        <div id="add-qr-result" style="display:none"></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function submitAddItem(){
+  const name = document.getElementById('add-name').value.trim();
+  const id = document.getElementById('add-id').value.trim();
+  const catSel = document.getElementById('add-cat').value;
+  const icon = document.getElementById('add-icon').value.trim()||'📦';
+  const caisseId = document.getElementById('add-caisse').value;
+
+  if(!name){toast('Nom requis','red');return;}
+  if(!id){toast('ID requis','red');return;}
+  if(UI_ITEMS.find(i=>i.id===id)){toast('ID déjà existant','red');return;}
+
+  const cat = catSel==='__new__' ? (document.getElementById('add-cat-custom').value.trim()||'Autre') : catSel;
+
+  // Add to ITEMS array in memory if available
+  if(typeof ITEMS!=='undefined'){
+    ITEMS.push({id,name,cat,icon,etat:'Bon',desc:'',fab:'',serial:'',notes:'Ajouté manuellement'});
+  }
+
+  // Add to selected caisse's items_contenus
+  if(caisseId && typeof CAISSES!=='undefined'){
+    const caisse = CAISSES.find(c=>c.id===caisseId);
+    if(caisse){
+      if(!caisse.items_contenus) caisse.items_contenus = [];
+      caisse.items_contenus.push(id);
+      caisse.count = caisse.items_contenus.length;
+    }
+  }
+
+  // Rebuild UI_ITEMS and re-render
+  UI_ITEMS = buildUIItems();
+
+  // Show QR code in the modal before closing
+  const qrBox = document.getElementById('add-qr-result');
+  if(qrBox && typeof QRCode !== 'undefined'){
+    qrBox.style.display = 'block';
+    qrBox.innerHTML = `
+      <div class="qr-result-box">
+        <div class="qr-label">QR CODE GÉNÉRÉ</div>
+        <div id="add-qr-canvas" style="background:#fff;padding:8px;border-radius:8px"></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--gold);margin-top:4px">${id}</div>
+        <div style="font-size:.72rem;color:var(--txt);font-weight:600">${icon} ${name}</div>
+        ${caisseId ? `<div style="font-size:.62rem;color:var(--muted)">→ ${(typeof CAISSES!=='undefined' && CAISSES.find(c=>c.id===caisseId)) ? (CAISSES.find(c=>c.id===caisseId).nom||caisseId) : caisseId}</div>` : ''}
+        <button onclick="closeModal()" style="margin-top:8px;padding:8px 20px;border-radius:10px;background:var(--card);border:1px solid var(--border);color:var(--txt);font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:1.5px;cursor:pointer">FERMER</button>
+      </div>`;
+    try{
+      new QRCode(document.getElementById('add-qr-canvas'),{
+        text: id,
+        width: 140,
+        height: 140,
+        colorDark: '#0C0608',
+        colorLight: '#FFFFFF',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }catch(e){ console.warn('QR generation failed:',e); }
+  } else {
+    closeModal();
+  }
+
+  applyFilters();
+  toast(`${name} ajouté au stock`,'green');
+}
+
+// ---- DESTRUCTION SYSTEM ----
+function getDestroyedIds(){try{return JSON.parse(localStorage.getItem('volo_destroyed')||'[]')}catch(e){return[]}}
+function destroyItem(id){
+  // Save with note + date
+  const noteEl=document.getElementById('destroyNote-'+id);
+  const note=noteEl?noteEl.value.trim():'';
+  let destroyedLog=[];
+  try{destroyedLog=JSON.parse(localStorage.getItem('volo_destroyed_log')||'[]')}catch(e){}
+  const item=(typeof ITEMS!=='undefined')?ITEMS.find(i=>i.id===id):null;
+  destroyedLog.push({id,name:item?item.name:'',note,date:new Date().toISOString().slice(0,10),by:localStorage.getItem('volo_last_user')||'?'});
+  localStorage.setItem('volo_destroyed_log',JSON.stringify(destroyedLog));
+  const destroyed=getDestroyedIds();
+  if(!destroyed.includes(id))destroyed.push(id);
+  localStorage.setItem('volo_destroyed',JSON.stringify(destroyed));
+  // Remove from CAISSES items_contenus
+  if(typeof CAISSES!=='undefined'){
+    CAISSES.forEach(c=>{
+      if(c.items_contenus){
+        const idx=c.items_contenus.indexOf(id);
+        if(idx>=0){c.items_contenus.splice(idx,1);c.count=c.items_contenus.length;}
+      }
+    });
+  }
+  closeModal();
+  UI_ITEMS=buildUIItems();
+  applyFilters();
+  toast('☠️ '+id+' marqué pour destruction','red');
+}
+function undoDestroy(id){
+  let destroyed=getDestroyedIds();
+  destroyed=destroyed.filter(x=>x!==id);
+  localStorage.setItem('volo_destroyed',JSON.stringify(destroyed));
+  UI_ITEMS=buildUIItems();
+  applyFilters();
+  toast('↩️ '+id+' restauré','green');
+}
+function printCaissePDF(caisseId){
+  const caisse = CAISSES.find(c=>c.id===caisseId);
+  if(!caisse){toast('Caisse introuvable','red');return;}
+  toast('Génération du PDF...','green');
+  const itemIds = caisse.items_contenus||caisse.items||[];
+  const items = itemIds.map(id=>ITEMS.find(i=>i.id===id)).filter(Boolean);
+  const nom = caisse.nom||caisse.name||caisse.id;
+  const icon = caisse.icon||'📦';
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('fr-CA',{year:'numeric',month:'long',day:'numeric'});
+  const timeStr = now.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'});
+  const sacColor = (typeof SAC_COLORS!=='undefined') ? SAC_COLORS[nom] : null;
+
+  const V={bg:'#0A0F1A',panel:'#111827',orange:'#F97316',green:'#10B981',yellow:'#F59E0B',red:'#EF4444',gold:'#D4A017',muted:'#94A3B8',txt:'#E2E8F0',blue:'#3B82F6',border:'rgba(249,115,22,.15)'};
+  const esc=s=>s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const accentColor=sacColor?sacColor.hex:V.orange;
+
+  // Group by name → qty, collect unique cats
+  const byName={};
+  items.forEach(it=>{
+    const n=it.name||it.id;
+    if(!byName[n]){byName[n]={name:n,icon:it.icon||'📦',cat:it.cat||'Autre',count:0,ids:[],etat:it.etat,couleur:it.couleur};}
+    byName[n].count++;
+    byName[n].ids.push(it.id);
+  });
+  // Group by category
+  const cats={};
+  Object.values(byName).forEach(g=>{
+    if(!cats[g.cat])cats[g.cat]={rows:[],icon:g.icon,totalItems:0};
+    cats[g.cat].rows.push(g);
+    cats[g.cat].totalItems+=g.count;
+  });
+  // Sort rows in each cat by count desc
+  Object.values(cats).forEach(c=>c.rows.sort((a,b)=>b.count-a.count));
+  const catKeys=Object.keys(cats).sort();
+
+  const uniqueTypes=Object.keys(byName).length;
+
+  let html=`<div style="font-family:Inter,Segoe UI,Arial,sans-serif;color:${V.txt};width:100%;font-size:10.5px;line-height:1.5;-webkit-print-color-adjust:exact;print-color-adjust:exact">`;
+
+  /* ─── HEADER ─── */
+  html+=`<div style="background:linear-gradient(160deg,${V.bg} 0%,#0F172A 40%,${V.panel} 100%);padding:28px 24px 22px 24px;border-radius:8px 8px 0 0;position:relative;overflow:hidden">`;
+  html+=`<div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,${accentColor},${V.gold},${accentColor})"></div>`;
+  html+=`<div style="display:flex;justify-content:space-between;align-items:flex-start">`;
+  html+=`<div>`;
+  html+=`<div style="margin-bottom:6px"><img src="${typeof VOLO_LOGO_B64!=='undefined'?VOLO_LOGO_B64:'eagle_tactic.png'}" style="width:50px;height:50px;border-radius:50%;border:2px solid rgba(212,160,23,.4)" /></div>`;
+  html+=`<div style="font-size:10px;color:${V.muted};letter-spacing:3px;font-weight:600">VOLO CONSTRUCTION SST — GOLDEN EAGLES</div>`;
+  html+=`<div style="font-family:Oswald,sans-serif;font-size:30px;font-weight:700;color:${accentColor};letter-spacing:3px;margin-top:4px">${icon} ${esc(nom).toUpperCase()}</div>`;
+  html+=`<div style="font-size:11px;color:${V.gold};margin-top:4px;letter-spacing:1px">Contenu du sac — ${esc(dateStr)}</div>`;
+  html+=`</div>`;
+  html+=`<div style="text-align:right">`;
+  if(sacColor) html+=`<div style="display:inline-block;background:${sacColor.hex};color:#000;font-weight:800;font-size:14px;padding:8px 20px;border-radius:8px;letter-spacing:2px">TAPE ${sacColor.name.toUpperCase()}</div>`;
+  html+=`<div style="font-family:JetBrains Mono,monospace;font-size:10px;color:${V.muted};margin-top:6px">${esc(caisse.id)}</div>`;
+  html+=`</div></div></div>`;
+
+  /* ─── KPI BAR ─── */
+  html+=`<div style="background:${V.bg};padding:14px 24px;display:flex;gap:10px">`;
+  [{n:items.length,l:'ITEMS TOTAL',c:accentColor},{n:uniqueTypes,l:'TYPES UNIQUES',c:V.gold},{n:catKeys.length,l:'CATÉGORIES',c:V.blue}].forEach(k=>{
+    html+=`<div style="flex:1;background:${V.panel};border:1px solid ${V.border};border-radius:10px;padding:14px 10px;text-align:center">`;
+    html+=`<div style="font-family:Oswald,sans-serif;font-size:28px;font-weight:700;color:${k.c};line-height:1">${k.n}</div>`;
+    html+=`<div style="font-size:7.5px;font-weight:700;color:${V.muted};letter-spacing:2px;margin-top:5px;text-transform:uppercase">${k.l}</div>`;
+    html+=`</div>`;
+  });
+  html+=`</div>`;
+
+  /* ─── ITEMS BY CATEGORY (GROUPED) ─── */
+  html+=`<div style="background:${V.bg};padding:8px 24px 20px 24px">`;
+
+  catKeys.forEach(catName=>{
+    const group=cats[catName];
+    html+=`<div style="display:flex;align-items:center;gap:8px;margin:18px 0 10px 0;padding-bottom:6px;border-bottom:2px solid ${accentColor}">`;
+    html+=`<span style="font-size:15px">${group.icon}</span>`;
+    html+=`<span style="font-family:Oswald,sans-serif;font-size:13px;font-weight:700;color:${accentColor};letter-spacing:2.5px;text-transform:uppercase">${esc(catName)}</span>`;
+    html+=`<span style="font-size:10px;color:${V.muted};font-weight:600">${group.totalItems} items — ${group.rows.length} types</span>`;
+    html+=`</div>`;
+
+    html+=`<table style="width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden">`;
+    html+=`<tr>`;
+    ['ÉQUIPEMENT','QTÉ','IDs'].forEach(h=>{
+      html+=`<td style="padding:8px 10px;background:${V.panel};color:${V.gold};font-size:8px;font-weight:700;letter-spacing:1.5px;border-bottom:2px solid ${accentColor}">${h}</td>`;
+    });
+    html+=`</tr>`;
+    group.rows.forEach((row,i)=>{
+      const bg=i%2===0?'rgba(17,24,39,.6)':'rgba(10,15,26,.8)';
+      const qtyColor=row.count>=6?accentColor:(row.count>=3?V.gold:V.txt);
+      // Compact IDs: show range if sequential, else first few
+      let idsStr='';
+      if(row.count===1){idsStr=row.ids[0];}
+      else if(row.count<=4){idsStr=row.ids.join(', ');}
+      else{idsStr=row.ids[0]+' ... '+row.ids[row.ids.length-1];}
+      html+=`<tr>`;
+      html+=`<td style="padding:7px 10px;font-size:11px;color:${V.txt};font-weight:600;border-bottom:1px solid rgba(148,163,184,.08);background:${bg}">${row.icon} ${esc(row.name)}</td>`;
+      html+=`<td style="padding:7px 10px;font-family:Oswald,sans-serif;font-size:16px;font-weight:700;color:${qtyColor};border-bottom:1px solid rgba(148,163,184,.08);background:${bg};width:70px;text-align:center">x${row.count}</td>`;
+      html+=`<td style="padding:7px 10px;font-family:JetBrains Mono,monospace;font-size:8px;color:${V.muted};border-bottom:1px solid rgba(148,163,184,.08);background:${bg}">${esc(idsStr)}</td>`;
+      html+=`</tr>`;
+    });
+    html+=`</table>`;
+  });
+
+  html+=`</div>`;
+
+  /* ─── CHECKLIST ZONE ─── */
+  html+=`<div style="background:${V.panel};padding:16px 24px;border-top:1px solid ${V.border}">`;
+  html+=`<div style="font-family:Oswald,sans-serif;font-size:11px;color:${accentColor};letter-spacing:2px;margin-bottom:10px">VÉRIFICATION TERRAIN</div>`;
+  html+=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">`;
+  ['Tous les items présents','États vérifiés','Tape couleur OK','Sangles intactes','Mousquetons verrouillés','Cordes sans usure'].forEach(chk=>{
+    html+=`<div style="display:flex;align-items:center;gap:6px;font-size:9px;color:${V.txt}">`;
+    html+=`<div style="width:14px;height:14px;border:1.5px solid ${V.muted};border-radius:3px;flex-shrink:0"></div>`;
+    html+=`${esc(chk)}</div>`;
+  });
+  html+=`</div>`;
+  html+=`<div style="display:flex;gap:30px;margin-top:14px;padding-top:10px;border-top:1px solid ${V.border}">`;
+  ['Vérifié par','Date','Signature'].forEach(lbl=>{
+    html+=`<div style="flex:1;text-align:center">`;
+    html+=`<div style="font-size:8px;color:${V.muted};letter-spacing:1.5px;margin-bottom:20px">${lbl.toUpperCase()}</div>`;
+    html+=`<div style="border-bottom:1px solid ${V.muted}"></div>`;
+    html+=`</div>`;
+  });
+  html+=`</div></div>`;
+
+  /* ─── FOOTER ─── */
+  html+=`<div style="background:${V.bg};text-align:center;padding:12px 0;border-top:1px solid ${V.border}">`;
+  html+=`<div style="width:50px;height:2px;background:${accentColor};margin:0 auto 6px auto"></div>`;
+  html+=`<img src="${typeof VOLO_LOGO_B64!=='undefined'?VOLO_LOGO_B64:'eagle_tactic.png'}" style="width:28px;height:28px;border-radius:50%;opacity:0.4" />`;
+  html+=`<div style="font-size:7px;color:${V.muted};letter-spacing:2px">VOLO CONSTRUCTION — GOLDEN EAGLES SST — ${esc(dateStr)} ${esc(timeStr)}</div>`;
+  html+=`</div>`;
+
+  html+=`</div>`;
+
+  const container=document.createElement('div');
+  container.innerHTML=html;
+  container.style.position='absolute';
+  container.style.left='-9999px';
+  container.style.top='0';
+  container.style.width='210mm';
+  container.style.background=V.bg;
+  document.body.appendChild(container);
+
+  // Pre-load images before capture
+  const imgs=container.querySelectorAll('img');
+  Promise.all([...imgs].map(img=>img.complete?Promise.resolve():new Promise(r=>{img.onload=r;img.onerror=r}))).then(()=>{
+
+  const fname='VOLO-'+nom.replace(/[^a-zA-ZÀ-ÿ0-9]/g,'-').replace(/-+/g,'-')+'-'+now.toISOString().slice(0,10)+'.pdf';
+  html2pdf().set({
+    margin:[5,5,8,5],
+    filename:fname,
+    image:{type:'jpeg',quality:0.95},
+    html2canvas:{scale:2.5,useCORS:true,allowTaint:true,backgroundColor:V.bg,logging:false},
+    jsPDF:{unit:'mm',format:'letter',orientation:'portrait'},
+    pagebreak:{mode:['css','legacy']}
+  }).from(container.firstElementChild).save().then(()=>{
+    document.body.removeChild(container);
+    toast('PDF: '+fname,'green');
+  }).catch(err=>{
+    document.body.removeChild(container);
+    toast('Erreur PDF','red');
+    console.error(err);
+  });
+  }); // end Promise.all images
+}
+
+function exportDestroyedList(){
+  const ids=getDestroyedIds();
+  if(!ids.length){toast('Aucun item à exporter','red');return;}
+  const text='# Items détruits — '+new Date().toLocaleDateString('fr-CA')+'\n# Utiliser: python destroy_item.py '+ids.join(' ')+'\n\n'+ids.join('\n');
+  const blob=new Blob([text],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='volo_destructions.txt';a.click();
+}
+
+// ---- INIT ----
+// Filter destroyed items from ITEMS before building UI
+(function(){
+  const destroyed=getDestroyedIds();
+  if(destroyed.length&&typeof ITEMS!=='undefined'){
+    const set=new Set(destroyed);
+    for(let i=ITEMS.length-1;i>=0;i--){if(set.has(ITEMS[i].id))ITEMS.splice(i,1);}
+    if(typeof CAISSES!=='undefined'){
+      CAISSES.forEach(c=>{
+        if(c.items_contenus)c.items_contenus=c.items_contenus.filter(id=>!set.has(id));
+        c.count=c.items_contenus?c.items_contenus.length:0;
+      });
+    }
+  }
+})();
+UI_ITEMS = buildUIItems();
+// V10.2: Default = ALL blocks COLLAPSED. expandedCats tracks which are open.
+// Clean up old localStorage key
+localStorage.removeItem('volo_cat_collapsed');
+if(!UI_ITEMS.length){
+  document.getElementById('emptyState').style.display='block';
+  document.getElementById('emptyState').innerHTML='<div style="font-size:2rem;margin-bottom:10px">⚠️</div><div style="font-family:\'Oswald\',sans-serif;color:var(--manquant);letter-spacing:2px;font-size:.85rem;margin-bottom:6px">DATA.JS NON CHARGÉ</div><div style="font-size:.78rem;color:var(--muted)">Vérifier que data.js est dans le même dossier</div>';
+}
+updateTabCounts();
+// Show destroyed items banner with notes
+(function(){
+  const destroyed=getDestroyedIds();
+  if(destroyed.length){
+    let log=[];try{log=JSON.parse(localStorage.getItem('volo_destroyed_log')||'[]')}catch(e){}
+    const logMap={};log.forEach(l=>{logMap[l.id]=l;});
+    const banner=document.getElementById('destroyedBanner');
+    const list=document.getElementById('destroyedList');
+    if(banner)banner.style.display='block';
+    if(list)list.innerHTML=destroyed.map(id=>{
+      const info=logMap[id]||{};
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(107,33,168,.1)">'+
+        '<div>'+
+          '<span style="font-family:JetBrains Mono,monospace;font-size:.65rem;color:var(--destruct)">'+id+'</span>'+
+          (info.name?' <span style="font-size:.65rem;color:var(--muted)">'+info.name+'</span>':'')+
+          (info.note?'<div style="font-size:.6rem;color:var(--muted);margin-top:1px">📝 '+info.note+'</div>':'')+
+          (info.date?'<div style="font-size:.55rem;color:rgba(255,255,255,.3)">'+info.date+(info.by?' — '+info.by:'')+'</div>':'')+
+        '</div>'+
+        '<button onclick="undoDestroy(\''+id+'\')" style="padding:3px 8px;border-radius:4px;background:rgba(39,174,96,.12);border:1px solid rgba(39,174,96,.25);color:var(--dispo);font-size:.55rem;cursor:pointer;font-family:Oswald,sans-serif;letter-spacing:1px;flex-shrink:0">RESTAURER</button>'+
+      '</div>';
+    }).join('');
+  }
+})();
+// Check URL params for pre-search or pre-filter
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const q = params.get('q') || params.get('search') || '';
+  const f = params.get('filter') || '';
+  const tab = params.get('tab') || '';
+  if(q){
+    const inp = document.getElementById('searchInput');
+    if(inp) inp.value = q;
+  }
+  if(f && ['disponible','sorti','manquant','inspection','destruction'].includes(f)){
+    currentFilter = f;
+    document.querySelectorAll('.pill').forEach(p=>{
+      p.classList.toggle('active', p.dataset.f===f);
+    });
+  }
+  if(tab && ['sac','caisse','surplus','kit','autre','surv'].includes(tab)){
+    currentCatTab = tab;
+    document.querySelectorAll('.cat-tab').forEach(t=>{
+      t.classList.toggle('active', t.dataset.tab===tab);
+    });
+  }
+})();
+applyFilters();
+updateDeployedBanner();
+// V10.1 version marker
+document.title='VOLO SST — V10.5 Inventaire';
+console.log('🦅 VOLO CAISSES V10.5 LOADED');
+
+// ================================================================
+//  JOB 2 — STRUCTURE DE DONNÉES SOLIDE + FIREBASE
+// ================================================================
+
+// Firebase init (same config as agenda.html)
+let firebaseDB = null;
+let _fbListeners = [];
+try {
+  const fbConfig = {
+    apiKey: "AIzaSyPlaceholder",
+    authDomain: "volo-sst.firebaseapp.com",
+    databaseURL: "https://volo-sst-default-rtdb.firebaseio.com",
+    projectId: "volo-sst",
+    storageBucket: "volo-sst.appspot.com",
+    messagingSenderId: "000000000000",
+    appId: "1:000000000000:web:placeholder"
+  };
+  if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+    firebase.initializeApp(fbConfig);
+    firebaseDB = firebase.database();
+    console.log('🔥 Firebase inventaire: init OK');
+  } else if (typeof firebase !== 'undefined' && firebase.apps.length) {
+    firebaseDB = firebase.database();
+  }
+} catch(e) {
+  console.warn('Firebase inventaire skip:', e.message);
+}
+
+// ---- Firebase helpers ----
+function fbRef(path) { return firebaseDB ? firebaseDB.ref(path) : null; }
+function fbSet(path, data) {
+  const ref = fbRef(path);
+  if (ref) {
+    ref.set(data).catch(e => {
+      console.warn('fbSet fail:', path, e.message);
+      _queueOfflineInv({ path, data, ts: Date.now() });
+    });
+  } else {
+    _queueOfflineInv({ path, data, ts: Date.now() });
+  }
+}
+function fbRemove(path) {
+  const ref = fbRef(path);
+  if (ref) ref.remove().catch(() => {});
+}
+
+// ---- Offline queue ----
+let _offlineQueueInv = [];
+try { _offlineQueueInv = JSON.parse(localStorage.getItem('volo_inv_offline_queue') || '[]'); } catch(e) {}
+function _queueOfflineInv(entry) {
+  _offlineQueueInv.push(entry);
+  localStorage.setItem('volo_inv_offline_queue', JSON.stringify(_offlineQueueInv));
+}
+function flushOfflineQueueInv() {
+  if (!firebaseDB || !_offlineQueueInv.length) return;
+  const q = [..._offlineQueueInv];
+  _offlineQueueInv = [];
+  localStorage.removeItem('volo_inv_offline_queue');
+  q.forEach(entry => {
+    const ref = fbRef(entry.path);
+    if (ref) ref.set(entry.data).catch(() => _queueOfflineInv(entry));
+  });
+}
+window.addEventListener('online', flushOfflineQueueInv);
+
+// ---- Enriched caisse data (JOB 2) ----
+const INV_LS_KEY = 'volo_inventaire_data';
+let _invCache = {}; // { caisseId: { items: { itemId: { etat, notes, dateVerif } }, dateInspection, prochainInspection, inspPar, responsable } }
+
+// Load from localStorage
+try { _invCache = JSON.parse(localStorage.getItem(INV_LS_KEY) || '{}'); } catch(e) {}
+
+function _saveInvCache() {
+  localStorage.setItem(INV_LS_KEY, JSON.stringify(_invCache));
+}
+
+function _getInvData(caisseId) {
+  if (!_invCache[caisseId]) {
+    _invCache[caisseId] = { items: {}, dateInspection: null, prochainInspection: null, inspPar: null, responsable: null };
+  }
+  return _invCache[caisseId];
+}
+
+function _getItemState(caisseId, itemId) {
+  const d = _getInvData(caisseId);
+  if (!d.items[itemId]) d.items[itemId] = { etat: 'BON', notes: '', dateVerif: null };
+  return d.items[itemId];
+}
+
+// Build ITEMS_MAP for quick lookup
+const _ITEMS_MAP = {};
+if (typeof ITEMS !== 'undefined') ITEMS.forEach(i => { _ITEMS_MAP[i.id] = i; });
+
+// Build enriched caisses from data.js + saved state
+function buildEnrichedCaisses() {
+  if (typeof CAISSES === 'undefined') return [];
+  return CAISSES.map(c => {
+    const inv = _getInvData(c.id);
+    const itemIds = c.items_contenus || c.items || [];
+    const items = itemIds.map(iid => {
+      const raw = _ITEMS_MAP[iid];
+      const st = _getItemState(c.id, iid);
+      return {
+        id: iid,
+        nom: raw ? raw.name : iid,
+        categorie: raw ? (raw.cat || '') : '',
+        quantite: raw && raw.qty ? parseInt(raw.qty) || 1 : 1,
+        quantiteMin: 1,
+        etat: st.etat || 'BON',
+        dateVerif: st.dateVerif || (raw ? raw.inspDate : null),
+        notes: st.notes || (raw ? raw.notes : ''),
+        icon: raw ? raw.icon : '📦',
+        fab: raw ? raw.fab : '',
+        serial: raw ? raw.serial : '',
+        couleur: raw ? raw.couleur : ''
+      };
+    });
+    // Determine region from depot
+    let region = 'ESTRIE';
+    if (typeof DEPOTS !== 'undefined' && c.depot_assigne) {
+      const dep = DEPOTS.find(d => d.id === c.depot_assigne);
+      if (dep) region = dep.region;
+    }
+    // Find responsable name
+    let respName = inv.responsable || c.responsable || null;
+    // Calculate statut
+    const statut = calcCaisseStatut(items);
+    // Dates
+    const dateInspection = inv.dateInspection || c.derniere_verification || null;
+    let prochainInspection = inv.prochainInspection || null;
+    if (dateInspection && !prochainInspection) {
+      // Default: 30 days after last inspection
+      const d = parseInvDate(dateInspection);
+      if (d) {
+        d.setDate(d.getDate() + 30);
+        prochainInspection = fmtDate(d);
+      }
+    }
+    return {
+      id: c.id,
+      nom: c.nom,
+      icon: c.icon || '📦',
+      type: c.type || 'autre',
+      region: region,
+      responsable: respName,
+      items: items,
+      count: items.length,
+      dateInspection: dateInspection,
+      prochainInspection: prochainInspection,
+      inspPar: inv.inspPar || null,
+      statut: statut,
+      depot_assigne: c.depot_assigne
+    };
+  });
+}
+
+function calcCaisseStatut(items) {
+  let hasCritique = false, hasAttention = false;
+  items.forEach(it => {
+    const e = (it.etat || 'BON').toUpperCase();
+    if (e === 'MANQUANT' || e === 'DEFECTUEUX') hasCritique = true;
+    else if (e === 'USURE') hasAttention = true;
+  });
+  if (hasCritique) return 'CRITIQUE';
+  if (hasAttention) return 'ATTENTION';
+  return 'OK';
+}
+
+function parseInvDate(s) {
+  if (!s) return null;
+  // Handle DD/MM/YYYY or YYYY-MM-DD
+  if (s.includes('/')) {
+    const p = s.split('/');
+    if (p.length === 3) return new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
+  }
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function fmtDate(d) {
+  if (!d) return '';
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+
+function fmtDateFR(s) {
+  const d = parseInvDate(s);
+  if (!d) return s || '—';
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+}
+
+function isInspOverdue(dateStr) {
+  const d = parseInvDate(dateStr);
+  if (!d) return false;
+  return d < new Date();
+}
+
+// Save a caisse's inventory data to Firebase + localStorage
+function saveCaisseInv(caisseId) {
+  const data = _getInvData(caisseId);
+  _saveInvCache();
+  fbSet('inventaire/' + caisseId, data);
+}
+
+// Start Firebase listeners for inventory
+function startInvListeners() {
+  if (!firebaseDB) return;
+  const ref = fbRef('inventaire');
+  if (!ref) return;
+  const unsub = ref.on('value', snap => {
+    const val = snap.val();
+    if (val && typeof val === 'object') {
+      // Merge Firebase data into cache (Firebase wins)
+      Object.keys(val).forEach(cid => {
+        _invCache[cid] = val[cid];
+      });
+      _saveInvCache();
+      // Re-render if caisse view is active
+      if (_currentView === 'caisses') renderCaisseList();
+    }
+  }, err => {
+    console.warn('Firebase inventaire listener error:', err.message);
+  });
+  _fbListeners.push({ ref, event: 'value', cb: unsub });
+}
+startInvListeners();
+
+// ================================================================
+//  VIEW TOGGLE
+// ================================================================
+let _currentView = 'items';
+
+function switchView(view) {
+  _currentView = view;
+  const itemsView = document.getElementById('itemsView');
+  const caissesView = document.getElementById('caissesView');
+  const detailView = document.getElementById('caisseDetailView');
+  const fab = document.querySelector('.fab');
+  document.getElementById('vt-items').classList.toggle('active', view === 'items');
+  document.getElementById('vt-caisses').classList.toggle('active', view === 'caisses');
+  if (view === 'items') {
+    itemsView.style.display = '';
+    caissesView.style.display = 'none';
+    detailView.style.display = 'none';
+    if (fab) fab.style.display = '';
+  } else {
+    itemsView.style.display = 'none';
+    caissesView.style.display = '';
+    detailView.style.display = 'none';
+    if (fab) fab.style.display = 'none';
+    renderCaisseList();
+  }
+}
+
+// ================================================================
+//  JOB 3 — VUE LISTE CAISSES
+// ================================================================
+
+let _caisseFilterRegion = 'TOUTES';
+let _caisseFilterStatut = 'TOUS';
+let _caisseSearch = '';
+
+function renderCaisseList() {
+  const caisses = buildEnrichedCaisses();
+
+  // Filters
+  let filtered = caisses;
+  if (_caisseFilterRegion !== 'TOUTES') {
+    filtered = filtered.filter(c => c.region === _caisseFilterRegion);
+  }
+  if (_caisseFilterStatut !== 'TOUS') {
+    filtered = filtered.filter(c => c.statut === _caisseFilterStatut);
+  }
+  if (_caisseSearch) {
+    const q = _caisseSearch.toLowerCase();
+    filtered = filtered.filter(c =>
+      (c.nom || '').toLowerCase().includes(q) ||
+      (c.region || '').toLowerCase().includes(q) ||
+      (c.responsable || '').toLowerCase().includes(q) ||
+      (c.id || '').toLowerCase().includes(q) ||
+      (c.type || '').toLowerCase().includes(q)
+    );
+  }
+
+  // Stats
+  const total = caisses.length;
+  const ok = caisses.filter(c => c.statut === 'OK').length;
+  const attention = caisses.filter(c => c.statut === 'ATTENTION').length;
+  const critique = caisses.filter(c => c.statut === 'CRITIQUE').length;
+  const overdue = caisses.filter(c => c.prochainInspection && isInspOverdue(c.prochainInspection)).length;
+
+  // KPI
+  document.getElementById('caisseKpi').innerHTML = `
+    <div class="caisse-kpi-card" onclick="_setCaisseStatutFilter('TOUS')">
+      <div class="ckn" style="color:var(--goldL)">${total}</div><div class="ckl">TOTAL</div></div>
+    <div class="caisse-kpi-card" onclick="_setCaisseStatutFilter('OK')">
+      <div class="ckn" style="color:var(--green)">${ok}</div><div class="ckl">OK</div></div>
+    <div class="caisse-kpi-card" onclick="_setCaisseStatutFilter('ATTENTION')">
+      <div class="ckn" style="color:var(--orange)">${attention}</div><div class="ckl">ATTENTION</div></div>
+    <div class="caisse-kpi-card" onclick="_setCaisseStatutFilter('CRITIQUE')">
+      <div class="ckn" style="color:var(--red)">${critique}</div><div class="ckl">CRITIQUE</div></div>
+    <div class="caisse-kpi-card">
+      <div class="ckn" style="color:${overdue > 0 ? 'var(--red)' : 'var(--muted)'}">${overdue}</div><div class="ckl">EN RETARD</div></div>
+  `;
+
+  // Get unique regions
+  const regions = [...new Set(caisses.map(c => c.region))].sort();
+
+  // Filters bar
+  document.getElementById('caisseFilters').innerHTML = `
+    <select onchange="_caisseFilterRegion=this.value;renderCaisseList()">
+      <option value="TOUTES">Toutes les régions</option>
+      ${regions.map(r => `<option value="${r}" ${r === _caisseFilterRegion ? 'selected' : ''}>${r}</option>`).join('')}
+    </select>
+    <div class="caisse-filter-pills">
+      <button class="caisse-filter-pill ${_caisseFilterStatut === 'TOUS' ? 'active' : ''}" onclick="_setCaisseStatutFilter('TOUS')">TOUS</button>
+      <button class="caisse-filter-pill ${_caisseFilterStatut === 'OK' ? 'active' : ''}" onclick="_setCaisseStatutFilter('OK')">OK</button>
+      <button class="caisse-filter-pill ${_caisseFilterStatut === 'ATTENTION' ? 'active' : ''}" onclick="_setCaisseStatutFilter('ATTENTION')">ATTENTION</button>
+      <button class="caisse-filter-pill ${_caisseFilterStatut === 'CRITIQUE' ? 'active' : ''}" onclick="_setCaisseStatutFilter('CRITIQUE')">CRITIQUE</button>
+    </div>
+    <input type="text" placeholder="Rechercher caisse, région, responsable..." value="${escapeHtml(_caisseSearch)}" oninput="_caisseSearch=this.value;renderCaisseList()">
+  `;
+
+  // Sort: critique first, then attention, then OK
+  const statutOrder = { CRITIQUE: 0, ATTENTION: 1, OK: 2 };
+  filtered.sort((a, b) => (statutOrder[a.statut] || 2) - (statutOrder[b.statut] || 2));
+
+  // Render cards
+  if (!filtered.length) {
+    document.getElementById('caisseList').innerHTML = `
+      <div style="text-align:center;padding:40px;color:var(--muted)">
+        <div style="font-size:2rem;margin-bottom:10px">📋</div>
+        <div style="font-family:'Oswald',sans-serif;letter-spacing:2px;font-size:.8rem">AUCUNE CAISSE</div>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('caisseList').innerHTML = filtered.map(c => {
+    const s = c.statut.toLowerCase();
+    const totalItems = c.items.length;
+    const okItems = c.items.filter(i => i.etat === 'BON').length;
+    const problemItems = c.items.filter(i => ['MANQUANT', 'DEFECTUEUX', 'USURE'].includes(i.etat)).length;
+    const pct = totalItems > 0 ? Math.round((okItems / totalItems) * 100) : 100;
+    const barColor = pct === 100 ? 'var(--green)' : pct >= 70 ? 'var(--orange)' : 'var(--red)';
+    const overdueClass = c.prochainInspection && isInspOverdue(c.prochainInspection) ? ' overdue' : '';
+    const respLabel = c.responsable ? _lookupPersonName(c.responsable) : '—';
+
+    return `<div class="caisse-card s-${s}" onclick="openCaisseDetail('${c.id}')">
+      <div class="caisse-card-top">
+        <div class="caisse-card-info">
+          <div class="caisse-card-nom"><span class="cc-icon">${c.icon}</span> ${escapeHtml(c.nom)}</div>
+          <div class="caisse-card-meta">
+            <span>📍 ${escapeHtml(c.region)}</span>
+            <span>👤 ${escapeHtml(respLabel)}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted)">${c.id}</span>
+          </div>
+        </div>
+        <span class="cc-badge ${s}">${c.statut === 'OK' ? '🟢' : c.statut === 'ATTENTION' ? '🟡' : '🔴'} ${c.statut}</span>
+      </div>
+      <div class="caisse-card-stats">
+        <div class="cc-stat"><strong>${totalItems}</strong> items</div>
+        ${problemItems > 0 ? `<div class="cc-stat" style="color:var(--red)"><strong>${problemItems}</strong> problème${problemItems > 1 ? 's' : ''}</div>` : ''}
+        <div class="cc-progress"><div class="cc-progress-bar" style="width:${pct}%;background:${barColor}"></div></div>
+        <div class="cc-stat">${pct}%</div>
+      </div>
+      <div class="cc-dates">
+        <span>Dernière insp: ${c.dateInspection ? fmtDateFR(c.dateInspection) : '—'}</span>
+        <span class="${overdueClass}">Prochaine: ${c.prochainInspection ? fmtDateFR(c.prochainInspection) : '—'}${overdueClass ? ' ⚠️ EN RETARD' : ''}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function _setCaisseStatutFilter(s) {
+  _caisseFilterStatut = s;
+  renderCaisseList();
+}
+
+function _lookupPersonName(voloOrName) {
+  if (!voloOrName) return '—';
+  if (typeof PERSONNEL !== 'undefined') {
+    const p = PERSONNEL.find(p => p.volo === voloOrName || p.id === voloOrName || p.name === voloOrName);
+    if (p) return p.name;
+  }
+  return voloOrName;
+}
+
+// ================================================================
+//  JOB 4 — VUE DÉTAIL CAISSE
+// ================================================================
+
+let _currentCaisseId = null;
+
+function openCaisseDetail(caisseId) {
+  _currentCaisseId = caisseId;
+  const caisses = buildEnrichedCaisses();
+  const c = caisses.find(cc => cc.id === caisseId);
+  if (!c) { toast('Caisse introuvable', 'err'); return; }
+
+  const detailView = document.getElementById('caisseDetailView');
+  const caissesView = document.getElementById('caissesView');
+  caissesView.style.display = 'none';
+  detailView.style.display = 'block';
+
+  const isChef = _isChefUser();
+  const overdueClass = c.prochainInspection && isInspOverdue(c.prochainInspection) ? ' overdue' : '';
+  const respLabel = c.responsable ? _lookupPersonName(c.responsable) : '—';
+
+  // Group items by category
+  const cats = {};
+  c.items.forEach(it => {
+    const cat = it.categorie || 'AUTRE';
+    if (!cats[cat]) cats[cat] = [];
+    cats[cat].push(it);
+  });
+
+  let html = `
+    <div class="cd-header">
+      <div class="cd-header-top">
+        <div>
+          <div class="cd-title">${c.icon} ${escapeHtml(c.nom)} <span class="cc-badge ${c.statut.toLowerCase()}">${c.statut === 'OK' ? '🟢' : c.statut === 'ATTENTION' ? '🟡' : '🔴'} ${c.statut}</span></div>
+          <div class="cd-meta">
+            <span>📍 ${escapeHtml(c.region)}</span>
+            <span>👤 ${escapeHtml(respLabel)}</span>
+            <span style="font-family:'JetBrains Mono',monospace">${c.id}</span>
+            <span>${c.items.length} items</span>
+          </div>
+        </div>
+        <div class="cd-actions">
+          <button class="cd-action-btn" onclick="backToCaisseList()">← RETOUR</button>
+          ${isChef ? `
+            <button class="cd-action-btn" onclick="editCaisse('${c.id}')">✏️ MODIFIER</button>
+            <button class="cd-action-btn danger" onclick="deleteCaisse('${c.id}')" aria-label="Supprimer la caisse">🗑</button>
+          ` : ''}
+          <button class="cd-action-btn" onclick="generateRapport('${c.id}')">📄 RAPPORT</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cd-inspection">
+      <div class="cd-insp-info">
+        <div class="cd-insp-item">
+          <div class="label">DERNIÈRE INSPECTION</div>
+          <div class="value">${c.dateInspection ? fmtDateFR(c.dateInspection) : '—'}${c.inspPar ? ' — ' + escapeHtml(c.inspPar) : ''}</div>
+        </div>
+        <div class="cd-insp-item">
+          <div class="label">PROCHAINE INSPECTION</div>
+          <div class="value${overdueClass}">${c.prochainInspection ? fmtDateFR(c.prochainInspection) : '—'}${overdueClass ? ' ⚠️ EN RETARD' : ''}</div>
+        </div>
+      </div>
+      <button class="cd-insp-btn" onclick="markInspected('${c.id}')">✅ MARQUER INSPECTÉ</button>
+    </div>
+  `;
+
+  // Items grouped by category
+  const catKeys = Object.keys(cats).sort();
+  catKeys.forEach(cat => {
+    const items = cats[cat];
+    const catBon = items.filter(i => i.etat === 'BON').length;
+    html += `
+      <div class="cd-cat-group">
+        <div class="cd-cat-header">
+          ${escapeHtml(cat)}
+          <span class="cd-cat-count">${catBon}/${items.length} BON</span>
+        </div>
+        ${items.map(it => {
+          const etatClass = it.etat === 'BON' ? 'bon' : it.etat === 'USURE' ? 'usure' : it.etat === 'DEFECTUEUX' ? 'defectueux' : 'manquant';
+          const etatLabel = it.etat === 'BON' ? '✅ BON' : it.etat === 'USURE' ? '⚠️ USURE' : it.etat === 'DEFECTUEUX' ? '🔴 DÉFECTUEUX' : '❌ MANQUANT';
+          const dateVerif = it.dateVerif ? fmtDateFR(it.dateVerif) : '';
+          const notesDisplay = it.notes || '+ note';
+          const couleurDot = it.couleur && COULEUR_HEX[it.couleur] ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${COULEUR_HEX[it.couleur]}"></span>` : '';
+          return `<div class="cd-item-row" id="cd-row-${it.id}">
+            <div class="cd-item-info">
+              <div class="cd-item-name">${couleurDot} ${escapeHtml(it.nom)}</div>
+              <div class="cd-item-sub">${it.id}${it.serial ? ' · ' + escapeHtml(it.serial.substring(0, 15)) : ''}${it.fab ? ' · ' + escapeHtml(it.fab) : ''}</div>
+            </div>
+            <div class="cd-item-qty">${it.quantite > 1 ? '×' + it.quantite : ''}</div>
+            <button class="cd-etat-btn ${etatClass}" onclick="cycleItemEtat('${caisseId}','${it.id}')" title="Cliquer pour changer l'état">${etatLabel}</button>
+            <div class="cd-item-notes" onclick="editItemNotes('${caisseId}','${it.id}')" title="Cliquer pour éditer">${escapeHtml(notesDisplay)}</div>
+            <div class="cd-item-date">${dateVerif}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+  });
+
+  detailView.innerHTML = html;
+}
+
+function backToCaisseList() {
+  _currentCaisseId = null;
+  document.getElementById('caisseDetailView').style.display = 'none';
+  document.getElementById('caissesView').style.display = '';
+  renderCaisseList();
+}
+
+// Cycle item state: BON → USURE → DEFECTUEUX → MANQUANT → BON
+const ETAT_CYCLE = ['BON', 'USURE', 'DEFECTUEUX', 'MANQUANT'];
+
+function cycleItemEtat(caisseId, itemId) {
+  const st = _getItemState(caisseId, itemId);
+  const idx = ETAT_CYCLE.indexOf(st.etat);
+  st.etat = ETAT_CYCLE[(idx + 1) % ETAT_CYCLE.length];
+  st.dateVerif = fmtDate(new Date());
+  saveCaisseInv(caisseId);
+  // Re-render detail
+  if (_currentCaisseId === caisseId) openCaisseDetail(caisseId);
+  toast(`${itemId} → ${st.etat}`, st.etat === 'BON' ? 'green' : st.etat === 'USURE' ? 'gold' : 'red');
+}
+
+function editItemNotes(caisseId, itemId) {
+  const st = _getItemState(caisseId, itemId);
+  // Use modal instead of prompt
+  const modalRoot = document.getElementById('modalRoot');
+  modalRoot.innerHTML = `
+    <div class="modal-bg" onclick="closeModal()" style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center">
+      <div onclick="event.stopPropagation()" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:400px;width:90%;z-index:201">
+        <div style="font-family:'Oswald',sans-serif;font-size:.85rem;letter-spacing:2px;color:var(--goldL);margin-bottom:12px">NOTES — ${escapeHtml(itemId)}</div>
+        <textarea id="noteInput" style="width:100%;height:80px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.8rem;resize:vertical">${escapeHtml(st.notes || '')}</textarea>
+        <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
+          <button onclick="closeModal()" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:1px;cursor:pointer">ANNULER</button>
+          <button onclick="_saveItemNote('${caisseId}','${itemId}')" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(39,174,96,.4);background:rgba(39,174,96,.1);color:var(--green);font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:1px;cursor:pointer">SAUVEGARDER</button>
+        </div>
+      </div>
+    </div>`;
+  setTimeout(() => { const inp = document.getElementById('noteInput'); if (inp) inp.focus(); }, 100);
+}
+
+function _saveItemNote(caisseId, itemId) {
+  const inp = document.getElementById('noteInput');
+  if (!inp) return;
+  const st = _getItemState(caisseId, itemId);
+  st.notes = inp.value.trim();
+  saveCaisseInv(caisseId);
+  closeModal();
+  if (_currentCaisseId === caisseId) openCaisseDetail(caisseId);
+  toast('Note sauvegardée', 'green');
+}
+
+function markInspected(caisseId) {
+  const inv = _getInvData(caisseId);
+  const today = fmtDate(new Date());
+  inv.dateInspection = today;
+  // Next inspection in 30 days
+  const next = new Date();
+  next.setDate(next.getDate() + 30);
+  inv.prochainInspection = fmtDate(next);
+  inv.inspPar = getUserName();
+  // Mark all items as verified today
+  const c = (typeof CAISSES !== 'undefined') ? CAISSES.find(cc => cc.id === caisseId) : null;
+  if (c) {
+    (c.items_contenus || []).forEach(iid => {
+      const st = _getItemState(caisseId, iid);
+      st.dateVerif = today;
+    });
+  }
+  saveCaisseInv(caisseId);
+  if (_currentCaisseId === caisseId) openCaisseDetail(caisseId);
+  toast('Inspection marquée — ' + fmtDateFR(today), 'green');
+}
+
+function _isChefUser() {
+  if (!CURRENT_USER) return true; // If no user context, allow (supervisor mode)
+  const role = (CURRENT_USER.role || '').toUpperCase();
+  return role.includes('CHEF') || role.includes('COORD');
+}
+
+function editCaisse(caisseId) {
+  const caisses = buildEnrichedCaisses();
+  const c = caisses.find(cc => cc.id === caisseId);
+  if (!c) return;
+  const inv = _getInvData(caisseId);
+
+  // Build responsable options
+  let persOptions = '<option value="">— Aucun —</option>';
+  if (typeof PERSONNEL !== 'undefined') {
+    PERSONNEL.filter(p => p.role && p.role.toUpperCase().includes('CHEF')).forEach(p => {
+      persOptions += `<option value="${p.volo}" ${inv.responsable === p.volo ? 'selected' : ''}>${p.name} (${p.volo})</option>`;
+    });
+  }
+
+  const modalRoot = document.getElementById('modalRoot');
+  modalRoot.innerHTML = `
+    <div class="modal-bg" onclick="closeModal()" style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center">
+      <div onclick="event.stopPropagation()" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:450px;width:90%;z-index:201">
+        <div style="font-family:'Oswald',sans-serif;font-size:.9rem;letter-spacing:2px;color:var(--goldL);margin-bottom:16px">MODIFIER — ${escapeHtml(c.nom)}</div>
+        <label style="font-size:.7rem;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:1px">RESPONSABLE</label>
+        <select id="editResp" style="width:100%;margin:4px 0 12px;padding:8px;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-size:.8rem">
+          ${persOptions}
+        </select>
+        <label style="font-size:.7rem;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:1px">PROCHAINE INSPECTION</label>
+        <input type="date" id="editNextInsp" value="${inv.prochainInspection || ''}" style="width:100%;margin:4px 0 16px;padding:8px;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-size:.8rem">
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button onclick="closeModal()" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:1px;cursor:pointer">ANNULER</button>
+          <button onclick="_saveEditCaisse('${caisseId}')" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(212,160,23,.4);background:rgba(212,160,23,.1);color:var(--gold);font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:1px;cursor:pointer">SAUVEGARDER</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function _saveEditCaisse(caisseId) {
+  const inv = _getInvData(caisseId);
+  const resp = document.getElementById('editResp');
+  const nextInsp = document.getElementById('editNextInsp');
+  if (resp) inv.responsable = resp.value || null;
+  if (nextInsp && nextInsp.value) inv.prochainInspection = nextInsp.value;
+  saveCaisseInv(caisseId);
+  closeModal();
+  if (_currentCaisseId === caisseId) openCaisseDetail(caisseId);
+  toast('Caisse modifiée', 'green');
+}
+
+function deleteCaisse(caisseId) {
+  const modalRoot = document.getElementById('modalRoot');
+  modalRoot.innerHTML = `
+    <div class="modal-bg" onclick="closeModal()" style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center">
+      <div onclick="event.stopPropagation()" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:380px;width:90%;text-align:center;z-index:201">
+        <div style="font-size:2rem;margin-bottom:8px">⚠️</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:.9rem;letter-spacing:2px;color:var(--red);margin-bottom:12px">SUPPRIMER CETTE CAISSE ?</div>
+        <div style="font-size:.78rem;color:var(--muted);margin-bottom:16px">Cette action marquera la caisse comme supprimée. Les items seront conservés.</div>
+        <div style="display:flex;gap:8px;justify-content:center">
+          <button onclick="closeModal()" style="padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:1px;cursor:pointer">ANNULER</button>
+          <button onclick="_confirmDeleteCaisse('${caisseId}')" style="padding:10px 20px;border-radius:8px;border:1px solid rgba(192,57,43,.4);background:rgba(192,57,43,.15);color:var(--red);font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:1px;cursor:pointer">SUPPRIMER</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function _confirmDeleteCaisse(caisseId) {
+  // Store in deleted list
+  let deleted = [];
+  try { deleted = JSON.parse(localStorage.getItem('volo_inv_deleted_caisses') || '[]'); } catch(e) {}
+  if (!deleted.includes(caisseId)) deleted.push(caisseId);
+  localStorage.setItem('volo_inv_deleted_caisses', JSON.stringify(deleted));
+  fbSet('inventaire_deleted/' + caisseId, { deletedAt: new Date().toISOString(), by: getUserName() });
+  closeModal();
+  backToCaisseList();
+  toast('Caisse supprimée', 'red');
+}
+
+// ---- Rapport inspection ----
+function generateRapport(caisseId) {
+  const caisses = buildEnrichedCaisses();
+  const c = caisses.find(cc => cc.id === caisseId);
+  if (!c) return;
+
+  const lines = [];
+  lines.push('═══════════════════════════════════════');
+  lines.push('RAPPORT D\'INSPECTION — VOLO SST');
+  lines.push('═══════════════════════════════════════');
+  lines.push('');
+  lines.push(`Caisse : ${c.nom} (${c.id})`);
+  lines.push(`Région : ${c.region}`);
+  lines.push(`Responsable : ${c.responsable ? _lookupPersonName(c.responsable) : '—'}`);
+  lines.push(`Statut : ${c.statut}`);
+  lines.push(`Date : ${fmtDate(new Date())}`);
+  lines.push(`Dernière inspection : ${c.dateInspection ? fmtDateFR(c.dateInspection) : '—'}${c.inspPar ? ' par ' + c.inspPar : ''}`);
+  lines.push(`Prochaine inspection : ${c.prochainInspection ? fmtDateFR(c.prochainInspection) : '—'}`);
+  lines.push('');
+  lines.push(`ITEMS (${c.items.length}) :`);
+  lines.push('───────────────────────────────────────');
+
+  const cats = {};
+  c.items.forEach(it => {
+    const cat = it.categorie || 'AUTRE';
+    if (!cats[cat]) cats[cat] = [];
+    cats[cat].push(it);
+  });
+
+  Object.keys(cats).sort().forEach(cat => {
+    lines.push('');
+    lines.push(`[${cat}]`);
+    cats[cat].forEach(it => {
+      const etatIcon = it.etat === 'BON' ? '✅' : it.etat === 'USURE' ? '⚠️' : it.etat === 'DEFECTUEUX' ? '🔴' : '❌';
+      lines.push(`  ${etatIcon} ${it.nom}${it.quantite > 1 ? ' ×' + it.quantite : ''} — ${it.etat}${it.notes ? ' [' + it.notes + ']' : ''}`);
+    });
+  });
+
+  lines.push('');
+  lines.push('═══════════════════════════════════════');
+  const bon = c.items.filter(i => i.etat === 'BON').length;
+  lines.push(`RÉSUMÉ : ${bon}/${c.items.length} items BON (${Math.round(bon / c.items.length * 100)}%)`);
+  lines.push('Généré par VOLO SST — Golden Eagles');
+  lines.push('═══════════════════════════════════════');
+
+  const rapportText = lines.join('\n');
+
+  const modalRoot = document.getElementById('modalRoot');
+  modalRoot.innerHTML = `
+    <div class="modal-bg" onclick="closeModal()" style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center">
+      <div onclick="event.stopPropagation()" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:600px;width:95%;z-index:201">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-family:'Oswald',sans-serif;font-size:.85rem;letter-spacing:2px;color:var(--goldL)">📄 RAPPORT — ${escapeHtml(c.nom)}</div>
+          <button onclick="closeModal()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer" aria-label="Fermer le rapport">✕</button>
+        </div>
+        <div class="rapport-content" id="rapportContent">${escapeHtml(rapportText)}</div>
+        <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end;flex-wrap:wrap">
+          <button onclick="_copyRapport()" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(212,160,23,.4);background:rgba(212,160,23,.1);color:var(--gold);font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:1px;cursor:pointer">📋 COPIER</button>
+          <button onclick="_emailRapport('${caisseId}')" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(59,130,246,.4);background:rgba(59,130,246,.1);color:var(--blue);font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:1px;cursor:pointer">📧 EMAIL</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function _copyRapport() {
+  const el = document.getElementById('rapportContent');
+  if (el) {
+    navigator.clipboard.writeText(el.textContent).then(() => toast('Rapport copié', 'green')).catch(() => toast('Erreur copie', 'err'));
+  }
+}
+
+function _emailRapport(caisseId) {
+  const el = document.getElementById('rapportContent');
+  if (!el) return;
+  const body = encodeURIComponent(el.textContent);
+  const subject = encodeURIComponent('Rapport inspection VOLO SST — ' + caisseId);
+  window.location.href = `mailto:?subject=${subject}&body=${body}`;
+}
+
+// ---- URL param: ?view=caisses ----
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('view') === 'caisses') {
+    switchView('caisses');
+  }
+  const cid = params.get('caisse');
+  if (cid) {
+    switchView('caisses');
+    setTimeout(() => openCaisseDetail(cid), 100);
+  }
+})();
+
+</script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}</script>
+</body>
+</html>

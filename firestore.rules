@@ -1,0 +1,166 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ══════════════════════════════════════════
+    //  HELPERS — Custom Claims
+    // ══════════════════════════════════════════
+
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function hasRole(role) {
+      return isAuth() && request.auth.token.role == role;
+    }
+
+    function isAdmin() {
+      return hasRole('admin');
+    }
+
+    function isChef() {
+      return hasRole('chef');
+    }
+
+    function isChefOrAdmin() {
+      return isAdmin() || isChef();
+    }
+
+    function isAdminOrRH() {
+      return hasRole('admin') || hasRole('rh');
+    }
+
+    function isSurveillant() {
+      return hasRole('surveillant');
+    }
+
+    // ══════════════════════════════════════════
+    //  PHASE 2 — REGLES STRICTES (custom claims)
+    // ══════════════════════════════════════════
+
+    // ── Users (profils personnel) ──
+    match /users/{userId} {
+      allow read: if isAuth();
+      allow write: if isAdminOrRH();
+    }
+
+    // ── Items (equipements EPI) ──
+    match /items/{itemId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // ── Vehicules ──
+    match /vehicules/{vehiculeId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // ── Chantiers ──
+    match /chantiers/{chantierId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // ── Pointages ──
+    // Tout le monde peut pointer, personne ne supprime
+    match /pointages/{docId} {
+      allow read: if isAuth();
+      allow create: if isAuth();
+      allow update, delete: if false;
+    }
+
+    // ── KM Logs ──
+    // Tout le monde peut soumettre ses km, personne ne supprime
+    match /km_logs/{docId} {
+      allow read: if isAuth();
+      allow create: if isAuth();
+      allow update, delete: if false;
+    }
+
+    // ── Incidents (Pick-On / Pick-Off) ──
+    // Surveillants ne peuvent PAS creer d'incidents (pas d'acces inventaire)
+    match /incidents/{docId} {
+      allow read: if isAuth();
+      allow create: if isAuth() && !isSurveillant();
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // ── Transactions ──
+    // Surveillants ne peuvent PAS creer de transactions inventaire
+    match /transactions/{docId} {
+      allow read: if isAuth();
+      allow create: if isAuth() && !isSurveillant();
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // ── Certifications ──
+    // Chefs et admins peuvent modifier les dates de certification
+    match /certifications/{voloId} {
+      allow read: if isAuth();
+      allow write: if isChefOrAdmin();
+    }
+
+    // ── Audit logs — append-only ──
+    match /audit_logs/{docId} {
+      allow read: if isAdmin();
+      allow create: if isAuth();
+      allow update, delete: if false;
+    }
+
+    // ── Config app ──
+    match /config/{docId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // ── Caisses ──
+    match /caisses/{caisseId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // ── Photos (metadonnees) ──
+    match /photos/{docId} {
+      allow read: if isAuth();
+      allow create: if isAuth();
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // ── Urgences — tout le monde peut creer, pas de suppression ──
+    match /urgences/{docId} {
+      allow read: if isAuth();
+      allow create: if isAuth();
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // ── Personnel (legacy — compat data.js) ──
+    // RH peut lire mais PAS modifier (admin only pour write)
+    match /personnel/{voloId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // ── Organizations ──
+    match /organizations/{orgId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // ── Destroyed items — append-only ──
+    match /destroyed_items/{itemId} {
+      allow read: if isAuth();
+      allow create: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // Bloquer tout le reste
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

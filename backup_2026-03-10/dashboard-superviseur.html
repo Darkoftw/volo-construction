@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="fr" id="appRoot">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0C0608">
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+<title>VOLO SST — Dashboard Superviseur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="data.js"></script>
+<script src="logo.js"></script>
+<script>
+// Filter destroyed items (synced from caisses-stock.html destruction system)
+(function(){
+  try{
+    var d=JSON.parse(localStorage.getItem('volo_destroyed')||'[]');
+    if(d.length&&typeof ITEMS!=='undefined'){
+      var s=new Set(d);
+      ITEMS=ITEMS.filter(function(i){return !s.has(i.id);});
+    }
+  }catch(e){}
+})();
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0C0608;--card:rgba(28,16,18,.90);--card2:rgba(38,22,26,.94);--cardSolid:#1C1012;
+  --gold:#D4A017;--goldL:#E8C547;
+  --rescue:#E65100;--rescueL:#FF6D00;--rescueD:#BF360C;--rescueGlow:rgba(230,81,0,.15);
+  --red:#C0392B;--green:#27AE60;--orange:#E67E22;--blue:#3B82F6;--violet:#8B5CF6;
+  --warning:#F59E0B;--danger:#EF4444;--success:#10B981;
+  --txt:#F5F0EB;--muted:#C9BAA9;--border:rgba(68,40,46,.55);
+  --glow:0 0 30px rgba(230,81,0,.08);
+  --radius:14px;--radius-sm:10px;
+}
+html.light{
+  --bg:#F8FAFC;--card:rgba(255,255,255,.96);--card2:rgba(241,245,249,.98);--cardSolid:#fff;
+  --gold:#C2410C;--goldL:#EA580C;
+  --rescue:#E65100;--rescueL:#EA580C;--rescueD:#BF360C;--rescueGlow:rgba(230,81,0,.09);
+  --txt:#0F172A;--muted:#64748B;--border:rgba(203,213,225,.9);
+}
+html.light .header{background:rgba(248,250,252,.97)!important;border-bottom-color:#E2E8F0}
+html.light .card{backdrop-filter:none;-webkit-backdrop-filter:none}
+html.light .slide-panel{background:#fff!important}
+html.light .gold-bar{opacity:.6}
+html.light input,html.light select{background:rgba(255,255,255,.95)!important;color:#0F172A!important;border-color:#CBD5E1!important}
+body{font-family:'Inter',sans-serif;font-size:15px;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.025'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.6}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse at 20% 0%,rgba(230,81,0,.06) 0%,transparent 50%),
+  radial-gradient(ellipse at 80% 0%,rgba(230,81,0,.04) 0%,transparent 50%),
+  radial-gradient(ellipse at 50% 100%,rgba(230,81,0,.03) 0%,transparent 40%);
+  animation:breathe 6s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.7}50%{opacity:1}}
+.gold-bar{position:fixed;top:0;left:0;right:0;height:4px;z-index:999;
+  background:linear-gradient(90deg,var(--rescueD),var(--rescue),var(--rescueL),var(--rescue),var(--rescueD));
+  background-size:300% 100%;animation:shimmer 4s ease infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--rescue);border-radius:4px}
+.app{max-width:1400px;margin:0 auto;padding:4px 16px 40px;position:relative;z-index:1}
+.header{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--border);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);position:sticky;top:4px;z-index:50;
+  background:rgba(12,6,8,.94);border-radius:0 0 var(--radius) var(--radius);flex-wrap:wrap}
+.header-left{display:flex;align-items:center;gap:12px}
+.header-left img{width:44px;height:44px;border-radius:50%;border:2px solid var(--rescue);
+  box-shadow:0 0 16px rgba(230,81,0,.2);transition:all .3s cubic-bezier(.4,0,.2,1)}
+.header-left img:hover{transform:scale(1.12) rotate(3deg);box-shadow:0 0 24px rgba(230,81,0,.35)}
+.header-brand{display:flex;flex-direction:column}
+.header-brand .title{font-family:'Oswald',sans-serif;font-size:18px;letter-spacing:3px;color:var(--rescue);text-shadow:0 0 20px rgba(230,81,0,.15)}
+.header-brand .subtitle{font-size:11px;color:var(--muted);letter-spacing:2px;font-family:'Oswald',sans-serif}
+.header-center{display:flex;align-items:center;gap:16px;margin-left:auto}
+.net-badge{padding:5px 12px;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:1px;display:flex;align-items:center;gap:6px}
+.net-on{background:rgba(39,174,96,.15);color:var(--green);border:1px solid rgba(39,174,96,.3)}
+.net-off{background:rgba(192,57,43,.15);color:var(--red);border:1px solid rgba(192,57,43,.3);animation:pulse-danger 2s infinite}
+.pulse-dot{width:7px;height:7px;border-radius:50%;animation:pulse-dot 2s infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.clock{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--goldL);letter-spacing:1px}
+.header-user{font-size:12px;color:var(--muted)}
+.header-actions{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.btn-head{padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);
+  color:var(--txt);font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1px;cursor:pointer;
+  transition:all .25s cubic-bezier(.22,1,.36,1);white-space:nowrap}
+.btn-head:hover{border-color:var(--rescue);background:var(--rescueGlow);transform:translateY(-1px)}
+.btn-head:active{transform:scale(.97)}
+.btn-head.danger{border-color:var(--red);color:var(--red)}
+.btn-head.danger:hover{background:rgba(192,57,43,.15)}
+.theme-pill{position:fixed;bottom:16px;right:16px;display:flex;gap:4px;background:var(--card);
+  border:1px solid var(--border);border-radius:20px;padding:4px;z-index:80;backdrop-filter:blur(12px)}
+.theme-pill button{padding:6px 12px;border:none;border-radius:16px;background:transparent;color:var(--muted);
+  font-size:12px;cursor:pointer;transition:all .2s}
+.theme-pill button.active{background:var(--rescue);color:var(--txt)}
+.section{margin-top:24px;animation:riseUp .5s cubic-bezier(.22,1,.36,1)}
+@keyframes riseUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.section-title{font-family:'Oswald',sans-serif;font-size:20px;letter-spacing:3px;color:var(--rescue);
+  margin-bottom:14px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;transition:opacity .2s}
+.section-title:hover{opacity:.8}
+.section-title .icon{font-size:22px}
+.section-title .toggle-arrow{margin-left:auto;font-size:14px;color:var(--gold);transition:transform .3s}
+.section-title .toggle-arrow.collapsed{transform:rotate(-90deg)}
+.section-body{transition:max-height .4s cubic-bezier(.4,0,.2,1),opacity .3s;overflow:hidden;max-height:2000px;opacity:1}
+.section-body.collapsed{max-height:0;opacity:0;margin:0;padding:0}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;
+  transition:all .3s cubic-bezier(.22,1,.36,1);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(230,81,0,.15),transparent);opacity:0;transition:opacity .3s}
+.card:hover{border-color:var(--rescue);transform:translateY(-2px);box-shadow:0 8px 32px rgba(230,81,0,.08)}
+.card:hover::before{opacity:1}
+.kpi-bar{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.kpi{text-align:center;padding:18px 10px 14px;border-radius:var(--radius);background:var(--card);
+  border:1px solid var(--border);cursor:pointer;transition:all .3s cubic-bezier(.22,1,.36,1);position:relative;overflow:hidden}
+.kpi:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(230,81,0,.08)}
+.kpi .num{font-family:'Oswald',sans-serif;font-size:42px;font-weight:700;line-height:1}
+.kpi .label{font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:6px;font-family:'Oswald',sans-serif}
+.kpi .bar{position:absolute;bottom:0;left:0;right:0;height:2px}
+.badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;letter-spacing:1px}
+.badge-green{background:rgba(39,174,96,.12);color:var(--green);border:1px solid rgba(39,174,96,.2)}
+.badge-red{background:rgba(192,57,43,.12);color:var(--red);border:1px solid rgba(192,57,43,.2)}
+.badge-orange{background:rgba(255,109,0,.12);color:var(--rescueL);border:1px solid rgba(255,109,0,.2)}
+.badge-gold{background:var(--rescueGlow);color:var(--rescue);border:1px solid rgba(230,81,0,.2)}
+.badge-blue{background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.2)}
+.badge-warning{background:rgba(245,158,11,.12);color:var(--warning);border:1px solid rgba(245,158,11,.2)}
+.badge-danger{background:rgba(239,68,68,.12);color:var(--danger);border:1px solid rgba(239,68,68,.2)}
+.alert-zone .alert-card{background:var(--card);border:1px solid var(--red);border-radius:var(--radius);padding:16px;
+  margin-bottom:10px;animation:riseUp .5s;display:flex;align-items:center;gap:14px;
+  box-shadow:0 0 20px rgba(192,57,43,.1)}
+.alert-card .dot{width:10px;height:10px;border-radius:50%;background:var(--red);flex-shrink:0;animation:pulse-dot 1.5s infinite}
+.alert-card .info{flex:1}
+.alert-card .site{font-weight:700;font-size:16px}
+.alert-card .dur{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--red)}
+.alert-card .actions{display:flex;gap:6px}
+.alert-card .btn-sm{padding:7px 12px;border-radius:var(--radius-sm);font-size:11px;font-weight:700;
+  letter-spacing:1px;cursor:pointer;border:none;transition:all .2s}
+.alert-card .btn-contact{background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
+.alert-card .btn-close{background:rgba(39,174,96,.15);color:var(--green);border:1px solid rgba(39,174,96,.3)}
+#map{height:420px;border-radius:var(--radius);border:1px solid var(--border);z-index:1}
+.map-marker{width:16px;height:16px;border-radius:50%;border:2px solid var(--txt);cursor:pointer}
+.map-marker.actif{background:var(--green);box-shadow:0 0 12px rgba(39,174,96,.5)}
+.map-marker.attention{background:var(--warning);box-shadow:0 0 12px rgba(245,158,11,.5);animation:pulse-dot 1.5s infinite}
+.map-marker.danger{background:var(--danger);box-shadow:0 0 16px rgba(239,68,68,.6);animation:pulse-dot 1s infinite}
+.leaflet-popup-content-wrapper{background:var(--cardSolid)!important;color:var(--txt)!important;border:1px solid var(--border)!important;border-radius:var(--radius-sm)!important}
+.leaflet-popup-tip{background:var(--cardSolid)!important}
+.leaflet-popup-content{font-family:'Inter',sans-serif;font-size:13px}
+.personnel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.person-card{padding:14px;display:flex;align-items:center;gap:12px}
+.avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;color:var(--txt);flex-shrink:0}
+.avatar.sauveteur{background:linear-gradient(135deg,var(--rescue),var(--rescueD))}
+.avatar.chef{background:linear-gradient(135deg,var(--gold),#B8860B)}
+.avatar.surveillant{background:linear-gradient(135deg,var(--blue),#1D4ED8)}
+.avatar.active{animation:breathe-slow 4s ease-in-out infinite}
+.avatar.urgence{animation:breathe-fast 1s ease-in-out infinite}
+@keyframes breathe-slow{0%,100%{box-shadow:0 0 0 0 rgba(230,81,0,.3)}50%{box-shadow:0 0 12px 4px rgba(230,81,0,.15)}}
+@keyframes breathe-fast{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.5)}50%{box-shadow:0 0 16px 6px rgba(239,68,68,.3)}}
+.person-info .pname{font-weight:600;font-size:14px}
+.person-info .prole{font-size:11px;letter-spacing:1px}
+.person-info .ptimer{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);margin-top:2px}
+.person-card.overdue{border-color:var(--red)!important;animation:pulse-border 2s infinite}
+@keyframes pulse-border{0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,.4)}50%{box-shadow:0 0 15px 5px rgba(192,57,43,.15)}}
+.filter-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.filter-row input,.filter-row select{padding:8px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);
+  background:var(--card);color:var(--txt);font-size:13px;font-family:'Inter',sans-serif}
+.filter-row input:focus,.filter-row select:focus{outline:none;border-color:var(--rescue)}
+.btn-filter{padding:7px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);
+  color:var(--muted);font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1px;cursor:pointer;transition:all .2s}
+.btn-filter.active{border-color:var(--rescue);color:var(--rescue);background:var(--rescueGlow)}
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--card2);font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;color:var(--muted);
+  padding:10px 12px;text-align:left;white-space:nowrap;position:sticky;top:0}
+td{padding:10px 12px;border-top:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:var(--rescueGlow)}
+.mono{font-family:'JetBrains Mono',monospace;font-size:12px}
+.btn-force{padding:5px 10px;border-radius:6px;border:1px solid var(--red);background:rgba(192,57,43,.1);
+  color:var(--red);font-size:11px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-force:hover{background:rgba(192,57,43,.25)}
+.timeline{position:relative;padding-left:28px}
+.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--border)}
+.tl-item{position:relative;margin-bottom:14px;padding:12px 14px;background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-sm);animation:fadeUp .4s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.tl-item::before{content:'';position:absolute;left:-24px;top:16px;width:10px;height:10px;border-radius:50%;
+  background:var(--rescue);border:2px solid var(--bg)}
+.tl-item.hot{border-color:var(--rescue);box-shadow:0 0 12px rgba(230,81,0,.1)}
+.tl-item.hot::before{box-shadow:0 0 8px rgba(230,81,0,.4)}
+.tl-item .tl-time{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+.tl-item .tl-type{font-weight:700;font-size:13px;margin:4px 0 2px}
+.tl-item .tl-detail{font-size:12px;color:var(--muted)}
+.donut-wrap{display:flex;align-items:center;gap:24px;justify-content:center;flex-wrap:wrap}
+.donut-container{position:relative;width:200px;height:200px}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut-center .num{font-family:'Oswald',sans-serif;font-size:36px;font-weight:700;color:var(--rescue)}
+.donut-center .lbl{font-size:11px;color:var(--muted);letter-spacing:2px}
+.donut-legend{display:flex;flex-direction:column;gap:8px}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:13px}
+.legend-dot{width:12px;height:12px;border-radius:3px}
+.mission-card{margin-bottom:10px;cursor:pointer}
+.mission-head{display:flex;align-items:center;gap:12px;padding:14px 16px}
+.mission-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.mission-dot.actif{background:var(--green)}
+.mission-dot.attention{background:var(--warning)}
+.mission-body{padding:0 16px 16px;display:none;border-top:1px solid var(--border);margin-top:8px;padding-top:12px}
+.mission-card.open .mission-body{display:block;animation:fadeUp .3s}
+.mission-head .arrow{margin-left:auto;transition:transform .2s;color:var(--muted)}
+.mission-card.open .arrow{transform:rotate(180deg)}
+.plans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.plan-card{cursor:pointer}
+.plan-card .plan-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.plan-card .plan-icon{font-size:24px}
+.plan-card .plan-company{font-weight:700;font-size:15px}
+.plan-card .plan-date{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)}
+.plan-card .plan-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.weather-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.weather-card{text-align:center;padding:18px}
+.weather-card .wemoji{font-size:36px}
+.weather-card .temp{font-family:'Oswald',sans-serif;font-size:28px;margin:6px 0}
+.weather-card .wsite{font-size:12px;color:var(--muted);letter-spacing:1px}
+.photo-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.photo-gallery img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:var(--radius-sm);
+  border:1px solid var(--border);cursor:pointer;transition:all .3s}
+.photo-gallery img:hover{transform:scale(1.03);border-color:var(--rescue)}
+.contacts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.contact-card{display:flex;align-items:center;gap:14px;padding:16px}
+.contact-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#B8860B);
+  display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;color:var(--txt)}
+.contact-info .cname{font-weight:700;font-size:15px}
+.contact-info .cemail{font-size:12px;color:var(--blue);text-decoration:none}
+.contact-info .cstatus{font-size:11px;margin-top:2px}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);z-index:90;cursor:pointer}
+.overlay.show{display:block}
+.slide-panel{position:fixed;top:0;right:-460px;width:440px;max-width:90vw;height:100vh;
+  background:var(--cardSolid);border-left:2px solid var(--rescue);box-shadow:-8px 0 40px rgba(0,0,0,.5);
+  z-index:91;transition:right .35s cubic-bezier(.22,1,.36,1);overflow-y:auto;padding:24px}
+.slide-panel.open{right:0}
+.slide-panel .close-btn{position:absolute;top:12px;right:12px;background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer}
+.slide-panel h3{font-family:'Oswald',sans-serif;font-size:18px;letter-spacing:2px;color:var(--rescue);margin-bottom:16px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);z-index:95;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--cardSolid);border:1px solid var(--border);border-radius:var(--radius);
+  padding:28px;max-width:520px;width:90%;max-height:85vh;overflow-y:auto}
+.modal h3{font-family:'Oswald',sans-serif;font-size:20px;letter-spacing:2px;color:var(--rescue);margin-bottom:16px}
+.modal .btn-modal{width:100%;padding:14px;border:none;border-radius:var(--radius-sm);font-family:'Oswald',sans-serif;
+  font-size:15px;letter-spacing:2px;cursor:pointer;transition:all .25s;font-weight:600;margin-bottom:8px}
+.modal .btn-modal:active{transform:scale(.97)}
+.focus-urgence .section:not(.alert-zone):not(.header-wrap){filter:blur(3px) brightness(.4);pointer-events:none}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100%);padding:12px 24px;
+  border-radius:14px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;z-index:9999;
+  pointer-events:none;max-width:90%;text-align:center;backdrop-filter:blur(12px);animation:toastIn .4s forwards}
+@keyframes toastIn{from{transform:translateX(-50%) translateY(-100%)}to{transform:translateX(-50%) translateY(0)}}
+.toast-ok{background:rgba(39,174,96,.92);color:var(--txt)}
+.toast-err{background:rgba(192,57,43,.92);color:var(--txt)}
+.toast-info{background:rgba(59,130,246,.92);color:var(--txt)}
+@keyframes pulse-danger{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 12px 4px rgba(239,68,68,.2)}}
+@keyframes badge-glow{0%,100%{box-shadow:0 0 4px rgba(230,81,0,.2)}50%{box-shadow:0 0 12px rgba(230,81,0,.4)}}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:99;align-items:center;justify-content:center;cursor:pointer}
+.lightbox.show{display:flex}
+.lightbox img{max-width:90vw;max-height:90vh;border-radius:var(--radius)}
+@media(max-width:900px){
+  .kpi-bar{grid-template-columns:repeat(3,1fr)}
+  .header{flex-direction:column;align-items:flex-start;gap:8px}
+  .header-center,.header-actions{width:100%;justify-content:flex-start}
+  .photo-gallery{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+  .kpi-bar{grid-template-columns:repeat(2,1fr)}
+  .personnel-grid{grid-template-columns:1fr}
+  .plans-grid{grid-template-columns:1fr}
+  .weather-grid{grid-template-columns:repeat(2,1fr)}
+  .contacts-grid{grid-template-columns:1fr}
+  .photo-gallery{grid-template-columns:1fr}
+  .app{padding:4px 8px 40px}
+  .slide-panel{width:100%;max-width:100%}
+}
+@media print{
+  @page{size:letter;margin:18mm 14mm 22mm 14mm}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  body{background:#FAFAF8!important;color:#1A1A1A!important;font-size:11pt;line-height:1.5}
+  body::before,body::after,.gold-bar,.theme-pill,.overlay,.slide-panel,.modal-overlay,.lightbox,
+  .header-actions,.btn-force,.btn-contact,.btn-close,.btn-filter,.filter-row,#map,.alert-card .actions,
+  .net-badge,.clock,.header-user,.photo-gallery,.weather-grid,.secMeteo,.secPhotos,.secRecent,.secContacts,
+  audio,.toast,.focus-urgence{display:none!important}
+  .app{max-width:100%!important;padding:0!important}
+  .header{position:static!important;background:#FAFAF8!important;border:none!important;backdrop-filter:none!important;padding:0!important;display:none!important}
+  .section{page-break-inside:avoid;animation:none!important;margin-top:8px!important}
+  .card{backdrop-filter:none!important;border:1px solid #ccc!important;background:#fff!important;box-shadow:none!important;transform:none!important}
+  .section-title{color:#D4A017!important;font-size:15pt;border-bottom:2px solid #D4A017;padding-bottom:4px;margin-bottom:10px!important}
+  .kpi-bar{grid-template-columns:repeat(6,1fr)!important;gap:8px!important}
+  .kpi{border:1px solid #ddd!important;padding:10px 6px!important}
+  .kpi .num{font-size:24pt!important}
+  .kpi .label{font-size:8pt!important}
+  .kpi .bar{height:3px!important}
+  table{font-size:9pt;width:100%;border:1px solid #999}
+  th{background:#D4A017!important;color:#fff!important;font-size:8pt;padding:6px 8px!important;text-transform:uppercase}
+  td{padding:5px 8px!important;border:1px solid #ddd!important}
+  tr:nth-child(even) td{background:#F8F6F3!important}
+  tr.overdue td{background:#FFF0F0!important;color:#C0392B!important}
+  .alert-zone{page-break-after:always}
+  .alert-card{border:2px solid #C0392B!important;background:#FFF5F5!important;margin-bottom:8px!important;box-shadow:none!important}
+  .alert-card .dot{background:#C0392B!important}
+  .alert-card .site{color:#C0392B!important}
+  .personnel-grid{grid-template-columns:repeat(3,1fr)!important;gap:6px!important}
+  .person-card{padding:8px!important}
+  .avatar{width:32px!important;height:32px!important;font-size:12px!important;color:#fff!important}
+  .avatar.sauveteur{background:#E65100!important}
+  .avatar.chef{background:#D4A017!important}
+  .avatar.surveillant{background:#3B82F6!important}
+  .person-info .pname{font-size:11px!important}
+  .person-info .prole{font-size:9px!important}
+  .person-info .ptimer{font-size:9px!important}
+  .badge{font-size:8px!important;padding:2px 6px!important}
+  .badge-green{background:#E8F5E9!important;color:#2E7D32!important;border:1px solid #A5D6A7!important}
+  .badge-red{background:#FFEBEE!important;color:#C62828!important;border:1px solid #EF9A9A!important}
+  .badge-orange{background:#FFF3E0!important;color:#E65100!important;border:1px solid #FFCC80!important}
+  .badge-gold{background:#FFF8E1!important;color:#C2410C!important;border:1px solid #FFE082!important}
+  .badge-danger{background:#FFEBEE!important;color:#C62828!important;border:1px solid #EF9A9A!important}
+  .mission-card{border:1px solid #ddd!important;margin-bottom:6px!important}
+  .mission-body{display:block!important}
+  .mission-card .arrow{display:none!important}
+  .plans-grid{grid-template-columns:repeat(2,1fr)!important}
+  .plan-card{border:1px solid #ddd!important;padding:10px!important}
+  .timeline{padding-left:20px!important}
+  .timeline::before{background:#D4A017!important}
+  .tl-item{padding:8px 10px!important;margin-bottom:8px!important;border:1px solid #ddd!important}
+  .tl-item::before{background:#D4A017!important;left:-18px!important}
+  .tl-item.hot{border-color:#E65100!important}
+  .donut-wrap{page-break-inside:avoid}
+  .print-cover{display:block!important;page-break-after:always;text-align:center;padding:60px 40px;position:relative}
+  .print-cover h1{font-family:'Oswald',sans-serif;font-size:42pt;color:#D4A017;letter-spacing:6px;margin-bottom:4px}
+  .print-cover .pc-sub{font-family:'Oswald',sans-serif;font-size:16pt;letter-spacing:4px;color:#666;margin-top:8px}
+  .print-cover .pc-line{width:120px;height:3px;background:#D4A017;margin:24px auto}
+  .print-cover .pc-type{font-family:'Oswald',sans-serif;font-size:14pt;letter-spacing:3px;color:#333;margin-top:20px}
+  .print-cover .pc-date{font-family:'JetBrains Mono',monospace;font-size:12pt;margin-top:20px;color:#555}
+  .print-cover .pc-supervisor{font-size:11pt;margin-top:10px;color:#333}
+  .print-cover .pc-role{font-size:10pt;color:#888;letter-spacing:2px}
+  .print-cover .pc-kpis{margin-top:40px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center}
+  .print-cover .pc-kpi{border:1px solid #ddd;border-radius:8px;padding:14px 8px}
+  .print-cover .pc-kpi .k-num{font-family:'Oswald',sans-serif;font-size:28pt;font-weight:700}
+  .print-cover .pc-kpi .k-lbl{font-size:8pt;letter-spacing:2px;color:#888;margin-top:2px}
+  .print-cover .pc-alerts{margin-top:30px;text-align:left;border:2px solid #C0392B;border-radius:8px;padding:14px;background:#FFF5F5}
+  .print-cover .pc-alerts h4{color:#C0392B;font-family:'Oswald',sans-serif;font-size:11pt;letter-spacing:2px;margin-bottom:6px}
+  .print-cover .pc-alerts p{font-size:10pt;margin:3px 0;color:#333}
+  .print-cover .watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-45deg);
+    font-size:80pt;color:rgba(0,0,0,.025);font-family:'Oswald',sans-serif;letter-spacing:12px;white-space:nowrap;pointer-events:none;z-index:0}
+  .print-footer{display:block!important;position:fixed;bottom:0;left:0;right:0;text-align:center;font-size:8pt;color:#999;
+    border-top:1px solid #ddd;padding:6px 0;font-family:'JetBrains Mono',monospace}
+  .print-sig{display:block!important;margin-top:30px;page-break-inside:avoid;border-top:2px solid #D4A017;padding-top:16px}
+  .print-sig table{border:none!important;font-size:10pt}
+  .print-sig td{border:none!important;padding:10px 20px!important;text-align:center}
+  .print-sig .sig-line{display:inline-block;width:180px;border-bottom:1px solid #333;margin-top:30px}
+  #secInventaire{page-break-before:always}
+  #secAudit{page-break-before:always}
+  #secMissions{page-break-before:always}
+  #secPlans{page-break-before:always}
+}
+.print-cover{display:none}
+.print-footer{display:none}
+.print-sig{display:none}
+.ds-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.ds-modal{background:var(--cardSolid);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.ds-modal h3{font-family:'Oswald',sans-serif;letter-spacing:2px;margin-bottom:12px;font-size:16px}
+.ds-modal p{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+.ds-modal textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;font-size:13px;resize:vertical;margin-bottom:14px}
+.ds-modal .ds-modal-btns{display:flex;gap:10px}
+.ds-modal .ds-modal-btns button{flex:1;padding:12px;border-radius:10px;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:1px;cursor:pointer;border:1px solid var(--border);transition:all .2s}
+</style>
+</head>
+<body>
+<div class="gold-bar"></div>
+<div class="print-cover" id="printCover">
+  <h1>GOLDEN EAGLES</h1>
+  <div class="pc-sub">VOLO CONSTRUCTION &mdash; SST</div>
+  <div class="pc-line"></div>
+  <div class="pc-type" id="printType">RAPPORT OP&Eacute;RATIONNEL</div>
+  <div class="pc-date" id="printDate"></div>
+  <div class="pc-supervisor" id="printSupervisor"></div>
+  <div class="pc-role" id="printRole"></div>
+  <div class="pc-kpis" id="printKpis"></div>
+  <div class="pc-alerts" id="printAlerts" style="display:none"></div>
+  <div class="watermark">CONFIDENTIEL</div>
+</div>
+<div class="print-footer">VOLO Construction &mdash; Golden Eagles SST &middot; CONFIDENTIEL &middot; G&eacute;n&eacute;r&eacute; le <span class="pf-date"></span></div>
+<div class="print-sig" id="printSig">
+  <table style="width:100%"><tr>
+    <td>Superviseur<br><span class="sig-line">&nbsp;</span><br><span style="font-size:9pt;color:#888" id="sigName"></span></td>
+    <td>Date<br><span class="sig-line">&nbsp;</span><br><span style="font-size:9pt;color:#888" id="sigDate"></span></td>
+    <td>Signature<br><span class="sig-line">&nbsp;</span></td>
+  </tr></table>
+</div>
+<div class="app" id="appContainer">
+  <div class="header-wrap">
+    <div class="header">
+      <div class="header-left">
+        <a href="index.html" style="width:36px;height:36px;border-radius:10px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:16px;text-decoration:none;transition:all .2s;flex-shrink:0" title="Retour">&larr;</a>
+        <img src="eagle_tactic.png" alt="Golden Eagles" onerror="this.style.display='none'">
+        <div class="header-brand">
+          <div class="title">GOLDEN EAGLES</div>
+          <div class="subtitle">DASHBOARD SUPERVISEUR</div>
+        </div>
+      </div>
+      <div class="header-center">
+        <div class="net-badge" id="netBadge"><span class="pulse-dot" style="background:var(--green)"></span> EN LIGNE</div>
+        <div class="clock" id="clock">00:00:00</div>
+        <div class="header-user" id="headerUser"></div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-head" onclick="openReportModal()">&#128228; ENVOYER</button>
+        <button class="btn-head" onclick="openPrintModal()">&#128424; IMPRIMER</button>
+        <button class="btn-head" onclick="exportCSV()">&#128202; CSV</button>
+        <button class="btn-head danger" onclick="sendUrgence()">&#128680; URGENCE</button>
+      </div>
+    </div>
+  </div>
+  <div class="section" id="secKpi"><div class="kpi-bar" id="kpiBar"></div></div>
+  <div class="section alert-zone" id="secAlerts">
+    <div class="section-title" onclick="toggleSection('secAlerts')"><span class="icon">&#128680;</span> ALERTES PRIORITAIRES<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-body" id="body-secAlerts"><div id="alertList"></div></div>
+  </div>
+  <div class="section" id="secMap">
+    <div class="section-title" onclick="toggleSection('secMap')"><span class="icon">&#128506;</span> CARTE DES SITES<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-body" id="body-secMap"><div id="map"></div></div>
+  </div>
+  <div class="section" id="secPersonnel">
+    <div class="section-title" onclick="toggleSection('secPersonnel')"><span class="icon">&#128101;</span> PERSONNEL D&Eacute;PLOY&Eacute;<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-body" id="body-secPersonnel">
+      <div class="filter-row">
+        <input type="text" id="filterPersonSearch" placeholder="Rechercher..." oninput="renderPersonnel()">
+        <select id="filterPersonRegion" onchange="renderPersonnel()"><option value="">Toutes r&eacute;gions</option></select>
+        <select id="filterPersonRole" onchange="renderPersonnel()">
+          <option value="">Tous r&ocirc;les</option><option value="CHEF">Chef</option><option value="SAUVETEUR">Sauveteur</option><option value="SURVEILLANT">Surveillant</option>
+        </select>
+      </div>
+      <div class="personnel-grid" id="personnelGrid"></div>
+    </div>
+  </div>
+  <div class="section" id="secInventaire">
+    <div class="section-title" onclick="toggleSection('secInventaire')"><span class="icon">&#128230;</span> INVENTAIRE EN CIRCULATION<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-body" id="body-secInventaire">
+      <div class="filter-row">
+        <input type="text" id="filterItemSearch" placeholder="Rechercher item..." oninput="renderInventaire()">
+        <select id="filterItemCat" onchange="renderInventaire()"><option value="">Toutes cat&eacute;gories</option></select>
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr><th>ITEM</th><th>S&Eacute;RIE</th><th>ID</th><th>SAUVETEUR</th><th>SITE</th><th>DEPUIS</th><th>STATUT</th><th>ACTIONS</th></tr></thead>
+        <tbody id="invBody"></tbody></table>
+      </div>
+    </div>
+  </div>
+  <div class="section" id="secAudit">
+    <div class="section-title" onclick="toggleSection('secAudit')"><span class="icon">&#128209;</span> TRA&Ccedil;ABILIT&Eacute; AUDIT<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-body" id="body-secAudit">
+      <div class="filter-row">
+        <input type="text" id="filterAuditSearch" placeholder="Filtrer..." oninput="renderAudit()">
+        <button class="btn-filter" onclick="exportAuditCSV()">&#128202; Export CSV</button>
+      </div>
+      <div class="timeline" id="auditTimeline"></div>
+    </div>
+  </div>
+  <div class="section" id="secCritique">
+    <div class="section-title" onclick="toggleSection('secCritique')"><span class="icon">&#128200;</span> INVENTAIRE CRITIQUE<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-body" id="body-secCritique">
+      <div class="donut-wrap">
+        <div class="donut-container"><canvas id="donutCanvas" width="200" height="200"></canvas>
+          <div class="donut-center"><span class="num" id="donutTotal">0</span><span class="lbl">ITEMS</span></div>
+        </div>
+        <div class="donut-legend" id="donutLegend"></div>
+      </div>
+      <div id="expiringList" style="margin-top:16px"></div>
+    </div>
+  </div>
+  <div class="section" id="secMissions">
+    <div class="section-title" onclick="toggleSection('secMissions')"><span class="icon">&#127919;</span> MISSIONS EN COURS<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-body" id="body-secMissions"><div id="missionsList"></div></div>
+  </div>
+  <div class="section" id="secPlans">
+    <div class="section-title" onclick="toggleSection('secPlans')"><span class="icon">&#128203;</span> PLANS DE TRAVAIL<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-body" id="body-secPlans">
+      <div class="filter-row" id="plansTabs">
+        <button class="btn-filter active" data-tab="all" onclick="setPlanTab('all')">Tous</button>
+        <button class="btn-filter" data-tab="current" onclick="setPlanTab('current')">En cours</button>
+        <button class="btn-filter" data-tab="history" onclick="setPlanTab('history')">Historique</button>
+      </div>
+      <div class="filter-row"><input type="text" id="filterPlanSearch" placeholder="Rechercher plan..." oninput="renderPlans()"></div>
+      <div class="plans-grid" id="plansGrid"></div>
+    </div>
+  </div>
+  <div class="section" id="secMeteo">
+    <div class="section-title" onclick="toggleSection('secMeteo')"><span class="icon">&#9925;</span> M&Eacute;T&Eacute;O SITES<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-body" id="body-secMeteo"><div class="weather-grid" id="weatherGrid"></div></div>
+  </div>
+  <div class="section" id="secPhotos">
+    <div class="section-title" onclick="toggleSection('secPhotos')"><span class="icon">&#128247;</span> PHOTOS<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-body" id="body-secPhotos"><div class="photo-gallery" id="photoGallery"><p style="color:var(--muted);grid-column:1/-1;text-align:center">Aucune photo pour le moment.</p></div></div>
+  </div>
+  <div class="section" id="secRecent">
+    <div class="section-title" onclick="toggleSection('secRecent')"><span class="icon">&#128338;</span> ACTIVIT&Eacute; R&Eacute;CENTE<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-body" id="body-secRecent"><div class="timeline" id="recentTimeline"></div></div>
+  </div>
+  <div class="section" id="secContacts">
+    <div class="section-title" onclick="toggleSection('secContacts')"><span class="icon">&#128222;</span> CONTACTS CHEFS<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-body" id="body-secContacts"><div class="contacts-grid" id="contactsGrid"></div></div>
+  </div>
+</div>
+<div class="overlay" id="overlay" onclick="closePanel()"></div>
+<div class="slide-panel" id="slidePanel"><button class="close-btn" onclick="closePanel()">&times;</button><div id="panelContent"></div></div>
+<div class="lightbox" id="lightbox" onclick="closeLightbox()"><img id="lbImg" src=""></div>
+<audio id="eagle-snd" src="eagle.mp3" preload="none"></audio>
+<div class="modal-overlay" id="reportModal">
+  <div class="modal">
+    <h3>&#128228; ENVOYER RAPPORT</h3>
+    <div style="margin-bottom:14px">
+      <label style="font-size:12px;color:var(--muted);letter-spacing:1px">TYPE DE RAPPORT</label>
+      <select id="reportType" style="width:100%;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);color:var(--txt);margin-top:4px;font-size:14px">
+        <option value="quotidien">Rapport Quotidien</option><option value="mission">Rapport de Mission</option>
+        <option value="hebdo">Rapport Hebdomadaire</option><option value="ondemand">Rapport On-demand</option>
+      </select>
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:12px;color:var(--muted);letter-spacing:1px">DESTINATAIRES</label>
+      <div style="margin-top:6px;font-size:13px" id="recipientsList"></div>
+    </div>
+    <button class="btn-modal" style="background:linear-gradient(135deg,#3B82F6,#2563EB);color:var(--txt);box-shadow:0 4px 16px rgba(59,130,246,.2)" onclick="sendGmail()">&#128231; ENVOYER PAR GMAIL</button>
+    <button class="btn-modal" style="background:linear-gradient(135deg,#25D366,#128C7E);color:var(--txt);box-shadow:0 4px 16px rgba(37,211,102,.2)" onclick="sendWhatsApp()">&#128172; ENVOYER PAR WHATSAPP</button>
+    <button class="btn-modal" style="background:linear-gradient(135deg,var(--gold),#B8860B);color:var(--txt);box-shadow:0 4px 16px rgba(212,160,23,.2)" onclick="sendDrive()">🖨️ IMPRIMER PDF</button>
+    <button class="btn-modal" style="background:var(--card);color:var(--muted);border:1px solid var(--border)" onclick="closeReportModal()">ANNULER</button>
+  </div>
+</div>
+<div class="modal-overlay" id="printModal">
+  <div class="modal">
+    <h3>&#128424; IMPRIMER / G&Eacute;N&Eacute;RER PDF</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Choisissez le type de rapport. Le PDF sera nomm&eacute; automatiquement.</p>
+    <button class="btn-modal" style="background:linear-gradient(135deg,var(--rescue),var(--rescueD));color:var(--txt)" onclick="doPrint('full')">
+      &#128196; RAPPORT COMPLET<br><span style="font-size:11px;opacity:.7">Couverture + KPIs + Alertes + Personnel + Inventaire + Audit + Missions + Plans</span>
+    </button>
+    <button class="btn-modal" style="background:linear-gradient(135deg,var(--gold),#B8860B);color:var(--txt)" onclick="doPrint('personnel')">
+      &#128101; HORAIRES PERSONNEL<br><span style="font-size:11px;opacity:.7">Couverture + KPIs + Grille personnel d&eacute;ploy&eacute; avec heures</span>
+    </button>
+    <button class="btn-modal" style="background:linear-gradient(135deg,var(--blue),#2563EB);color:var(--txt)" onclick="doPrint('inventory')">
+      &#128230; INVENTAIRE<br><span style="font-size:11px;opacity:.7">Couverture + Tableau items en circulation + Donut critique + Audit</span>
+    </button>
+    <div style="margin-top:8px;padding:10px;border-radius:var(--radius-sm);background:var(--card2);font-size:11px;color:var(--muted)">
+      &#128161; Astuce : Dans la fen&ecirc;tre d'impression, choisissez &laquo; Enregistrer en PDF &raquo; comme imprimante pour g&eacute;n&eacute;rer un fichier PDF.
+    </div>
+    <button class="btn-modal" style="background:var(--card);color:var(--muted);border:1px solid var(--border);margin-top:4px" onclick="closePrintModal()">ANNULER</button>
+  </div>
+</div>
+<div class="theme-pill">
+  <button id="btnDark" class="active" onclick="setTheme('dark')">&#127769;</button>
+  <button id="btnLight" onclick="setTheme('light')">&#9728;&#65039;</button>
+</div>
+<script>
+/* ═══════════════════════════════════════════
+   VOLO SST V9.2 — Dashboard Superviseur
+   ═══════════════════════════════════════════ */
+function escapeHtml(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function sanitizeCSV(s){if(!s)return '';s=String(s);if(/^[=+\-@\t\r]/.test(s))return "'"+s;return s;}
+
+// ── Section toggle (ouvrir/fermer) ──
+var _collapsedSections=new Set(JSON.parse(localStorage.getItem('volo_dash_collapsed')||'[]'));
+function toggleSection(secId){
+  var body=document.getElementById('body-'+secId);
+  var arrow=document.querySelector('#'+secId+' .toggle-arrow');
+  if(!body)return;
+  if(_collapsedSections.has(secId)){
+    _collapsedSections.delete(secId);
+    body.classList.remove('collapsed');
+    if(arrow)arrow.classList.remove('collapsed');
+  }else{
+    _collapsedSections.add(secId);
+    body.classList.add('collapsed');
+    if(arrow)arrow.classList.add('collapsed');
+  }
+  localStorage.setItem('volo_dash_collapsed',JSON.stringify([..._collapsedSections]));
+}
+function restoreCollapsed(){
+  _collapsedSections.forEach(function(secId){
+    var body=document.getElementById('body-'+secId);
+    var arrow=document.querySelector('#'+secId+' .toggle-arrow');
+    if(body)body.classList.add('collapsed');
+    if(arrow)arrow.classList.add('collapsed');
+  });
+}
+document.addEventListener('DOMContentLoaded',restoreCollapsed);
+var AUTH_ROLES=["CHEF D'EQUIPE","COORDONNATEUR"];
+var WEBHOOK_MAIN='/.netlify/functions/webhook-main';
+var WEBHOOK_URGENCE='/.netlify/functions/webhook-urgence';
+var SITES=[
+  {id:'KRUGER',name:'Kruger Windsor',ville:'Windsor',lat:45.5653,lng:-71.9942,region:'ESTRIE',status:'actif'},
+  {id:'DOMTAR-W',name:'Domtar Windsor',ville:'Windsor',lat:45.5710,lng:-71.9910,region:'ESTRIE',status:'actif'},
+  {id:'DOMTAR-LT',name:'Domtar La Tuque',ville:'La Tuque',lat:47.4558,lng:-72.7890,region:'MAURICIE',status:'actif'},
+  {id:'DOMTAR-SF',name:'Domtar Saint-Felicien',ville:'Saint-Felicien',lat:48.6490,lng:-72.4580,region:'SAGUENAY-LAC',status:'actif'},
+  {id:'QC-VALERO',name:'Quebec - Valero',ville:'Quebec',lat:46.8139,lng:-71.2080,region:'CAPITALE-NAT.',status:'actif'},
+  {id:'TR-HYDRO',name:'Trois-Rivieres Hydro-QC',ville:'Trois-Rivieres',lat:46.3432,lng:-72.5432,region:'MAURICIE',status:'actif'},
+  {id:'MEGANTIC',name:'Lac-Megantic',ville:'Lac-Megantic',lat:45.5774,lng:-70.8833,region:'ESTRIE',status:'attention',since:'14:00 (hier)',alerte:'+24H'}
+];
+var CHEFS=[
+  {id:'SAUV-AG-075',volo:'V0075',name:'Alexandre Gendreau',region:'ESTRIE',ville:'Austin',email:'a****u@voloconstruction.com'},
+  {id:'SAUV-YB-077',volo:'V0077',name:'Yann-Alexandre Belley',region:'ESTRIE',ville:'Austin',email:'y****y@voloconstruction.com'},
+  {id:'SAUV-MB-180',volo:'V0180',name:'Maxime Boisvert',region:'ESTRIE',ville:'Sherbrooke',email:'m****1@gmail.com'},
+  {id:'SAUV-PM-889',volo:'V0889',name:'Philippe Monnier',region:'CAPITALE-NAT.',ville:'Saint-Augustin-Desmaures',email:'p****r@hotmail.com'},
+  {id:'SAUV-JN-357',volo:'V0357',name:'Jean-Nicolas Maisonneuve',region:'BAS-ST-LAURENT',ville:'Rimouski',email:'n****3@hotmail.com'}
+];
+var DESTINATAIRES={
+  manager:{nom:'Yann-Alexandre Belley',email:'y****y@voloconstruction.com'},
+  chefs:[
+    {nom:'Alexandre Gendreau',email:'a****u@voloconstruction.com'},
+    {nom:'Yann-Alexandre Belley',email:'y****y@voloconstruction.com'},
+    {nom:'Maxime Boisvert',email:'m****1@gmail.com'},
+    {nom:'Philippe Monnier',email:'p****r@hotmail.com'},
+    {nom:'Jean-Nicolas Maisonneuve',email:'n****3@hotmail.com'}
+  ]
+};
+var deployedPersonnel=[],circulatingItems=[],auditLog=[],plans=[];
+var focusUrgence=false,planTab='all',leafletMap=null,mapMarkers=[];
+
+function checkAuth(){
+  var pin=localStorage.getItem('volo_pin')||localStorage.getItem('volo_last_pin');
+  if(!pin) return null;
+  var volo='V'+pin.padStart(4,'0');
+  var p=(typeof PERSONNEL!=='undefined')?PERSONNEL.find(function(x){return x.volo===volo;}):null;
+  if(!p) return null;
+  // Tous les SAUVETEURS et CHEFS ont accès au dashboard
+  if(p.type==='SAUVETEUR'||AUTH_ROLES.indexOf(p.role)!==-1) return p;
+  return null;
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  var user=checkAuth();
+  if(!user){
+    document.getElementById('appContainer').innerHTML='<div style="text-align:center;padding:80px 20px"><h2 style="font-family:Oswald,sans-serif;color:var(--red);letter-spacing:3px">ACCES REFUSE</h2><p style="color:var(--muted);margin-top:12px">Connectez-vous via l\'app principale avec un compte Chef ou Coordonnateur.</p><a href="index.html" style="color:var(--rescue);margin-top:20px;display:inline-block">Retour</a></div>';
+    return;
+  }
+  document.getElementById('headerUser').textContent=user.name+' ('+user.volo+')';
+  loadData();
+  initTheme();
+  startClock();
+  initMap();
+  renderAll();
+  populateFilters();
+  loadWeather();
+  renderContacts();
+  renderRecipients();
+  setInterval(loadAndRender,120000);
+  setInterval(updateTimers,30000);
+  setInterval(loadWeather,600000);
+  updateNetStatus();
+  window.addEventListener('online',updateNetStatus);
+  window.addEventListener('offline',updateNetStatus);
+});
+
+function updateNetStatus(){
+  var b=document.getElementById('netBadge');
+  if(navigator.onLine){
+    b.className='net-badge net-on';
+    b.innerHTML='<span class="pulse-dot" style="background:var(--green)"></span> EN LIGNE';
+  } else {
+    b.className='net-badge net-off';
+    b.innerHTML='<span class="pulse-dot" style="background:var(--red)"></span> HORS LIGNE';
+  }
+}
+function initTheme(){setTheme(localStorage.getItem('volo_theme_main')||'dark');}
+function setTheme(t){
+  var r=document.getElementById('appRoot');
+  if(t==='light') r.classList.add('light'); else r.classList.remove('light');
+  document.getElementById('btnDark').classList.toggle('active',t==='dark');
+  document.getElementById('btnLight').classList.toggle('active',t==='light');
+  localStorage.setItem('volo_theme_main',t);
+}
+function startClock(){
+  function tick(){
+    var d=new Date();
+    document.getElementById('clock').textContent=d.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  }
+  tick();
+  setInterval(tick,1000);
+}
+function loadData(){
+  deployedPersonnel=loadDeployedPersonnel();
+  circulatingItems=loadCirculatingItems();
+  auditLog=loadAuditLog();
+  plans=loadPlans();
+  if(!deployedPersonnel.length&&!circulatingItems.length&&!auditLog.length&&!plans.length){
+    injectDemoData();
+    deployedPersonnel=loadDeployedPersonnel();
+    circulatingItems=loadCirculatingItems();
+    auditLog=loadAuditLog();
+    plans=loadPlans();
+    setTimeout(function(){
+      var banner=document.createElement('div');
+      banner.id='demoBanner';
+      banner.style.cssText='position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:999;padding:8px 24px;border-radius:8px;background:rgba(245,158,11,.9);color:#000;font-family:Oswald,sans-serif;font-size:13px;letter-spacing:2px;backdrop-filter:blur(8px);cursor:pointer;box-shadow:0 4px 16px rgba(245,158,11,.3)';
+      banner.textContent='DONNEES DEMO — Cliquez pour fermer';
+      banner.onclick=function(){banner.remove();};
+      document.body.appendChild(banner);
+    },500);
+  }
+}
+function loadDeployedPersonnel(){
+  try{
+    var raw=JSON.parse(localStorage.getItem('volo-ptg-onsite')||'[]');
+    return raw.map(function(r){
+      var p=(typeof PERSONNEL!=='undefined')?PERSONNEL.find(function(x){return x.id===r.id||x.volo===r.volo;}):null;
+      return Object.assign({},r,p||{});
+    });
+  }catch(e){return [];}
+}
+function loadCirculatingItems(){
+  try{
+    var items=JSON.parse(localStorage.getItem('volo_transactions')||'[]').filter(function(t){
+      return t.mode==='PICK-ON'&&t.status!=='ANNULE'&&t.status!=='RETOURNE';
+    });
+    // Join .cat from ITEMS so category filter works
+    if(typeof ITEMS!=='undefined'){
+      items.forEach(function(it){
+        if(!it.cat&&it.itemId){var src=ITEMS.find(function(x){return x.id===it.itemId;});if(src)it.cat=src.cat;}
+      });
+    }
+    return items;
+  }catch(e){return [];}
+}
+function loadAuditLog(){try{return JSON.parse(localStorage.getItem('volo_audit_log')||'[]');}catch(e){return [];}}
+function loadPlans(){try{return JSON.parse(localStorage.getItem('volo_plans_travail')||'[]');}catch(e){return [];}}
+function loadAndRender(){loadData();renderAll();}
+
+function injectDemoData(){
+  var now=Date.now();
+  var h=function(hrs){return new Date(now-hrs*3600000).toISOString();};
+  var dp=[
+    {id:'SAUV-AG-075',volo:'V0075',name:'Alexandre Gendreau',role:"CHEF D'EQUIPE",type:'SAUVETEUR',region:'ESTRIE',site:'KRUGER',inTime:h(6)},
+    {id:'SAUV-YB-077',volo:'V0077',name:'Yann-Alexandre Belley',role:"CHEF D'EQUIPE",type:'SAUVETEUR',region:'ESTRIE',site:'DOMTAR-W',inTime:h(4)},
+    {id:'SAUV-MB-180',volo:'V0180',name:'Maxime Boisvert',role:"CHEF D'EQUIPE",type:'SAUVETEUR',region:'ESTRIE',site:'KRUGER',inTime:h(7)},
+    {id:'SAUV-PM-889',volo:'V0889',name:'Philippe Monnier',role:"CHEF D'EQUIPE",type:'SAUVETEUR',region:'CAPITALE-NAT.',site:'QC-VALERO',inTime:h(5)},
+    {id:'SAUV-JN-357',volo:'V0357',name:'Jean-Nicolas Maisonneuve',role:"CHEF D'EQUIPE",type:'SAUVETEUR',region:'BAS-ST-LAURENT',site:'MEGANTIC',inTime:h(26)},
+    {id:'SAUV-CS-178',volo:'V0178',name:'Carl St-Pierre',role:'SAUVETEUR',type:'SAUVETEUR',region:'ESTRIE',site:'KRUGER',inTime:h(6)},
+    {id:'SAUV-CL-115',volo:'V0115',name:'Cedric Lapointe-Stewart',role:'SAUVETEUR',type:'SAUVETEUR',region:'ESTRIE',site:'KRUGER',inTime:h(5)},
+    {id:'SAUV-FM-182',volo:'V0182',name:'Frederic Massicotte',role:'SAUVETEUR',type:'SAUVETEUR',region:'ESTRIE',site:'DOMTAR-W',inTime:h(4)},
+    {id:'SAUV-JM-205',volo:'V0205',name:'Jonathan Milone',role:'SAUVETEUR',type:'SAUVETEUR',region:'ESTRIE',site:'KRUGER',inTime:h(3)},
+    {id:'SAUV-ML-113',volo:'V0113',name:'Mathieu Lapalme',role:'SAUVETEUR',type:'SAUVETEUR',region:'ESTRIE',site:'DOMTAR-W',inTime:h(8)},
+    {id:'SAUV-DB-172',volo:'V0172',name:'Denis Belanger',role:'SAUVETEUR',type:'SAUVETEUR',region:'ESTRIE',site:'DOMTAR-LT',inTime:h(9)},
+    {id:'SAUV-GM-206',volo:'V0206',name:'Gerard Morin',role:'SAUVETEUR',type:'SAUVETEUR',region:'ESTRIE',site:'DOMTAR-LT',inTime:h(7)},
+    {id:'SAUV-OL-114',volo:'V0114',name:'Olivier Lessard',role:'SAUVETEUR',type:'SAUVETEUR',region:'ESTRIE',site:'MEGANTIC',inTime:h(28)},
+    {id:'SAUV-ML-339',volo:'V0339',name:'Maxime Lavigne',role:'SAUVETEUR',type:'SAUVETEUR',region:'ESTRIE',site:'QC-VALERO',inTime:h(5)},
+    {id:'SURV-AA-364',volo:'V0364',name:'Alexis Allain',role:'SURVEILLANT',type:'SURVEILLANT',region:'ESTRIE',site:'KRUGER',inTime:h(6)},
+    {id:'SURV-AB-272',volo:'V0272',name:'Andre Boucher',role:'SURVEILLANT',type:'SURVEILLANT',region:'ESTRIE',site:'KRUGER',inTime:h(5)},
+    {id:'SURV-AG-348',volo:'V0348',name:'Antoine Gagnon',role:'SURVEILLANT',type:'SURVEILLANT',region:'ESTRIE',site:'DOMTAR-W',inTime:h(4)},
+    {id:'SURV-DL-320',volo:'V0320',name:'David Laroche',role:'SURVEILLANT',type:'SURVEILLANT',region:'ESTRIE',site:'DOMTAR-W',inTime:h(7)},
+    {id:'SURV-GG-122',volo:'V0122',name:'Gilles Gaudette',role:'SURVEILLANT',type:'SURVEILLANT',region:'ESTRIE',site:'DOMTAR-LT',inTime:h(8)},
+    {id:'SURV-JP-124',volo:'V0124',name:'Jean Parr',role:'SURVEILLANT',type:'SURVEILLANT',region:'ESTRIE',site:'TR-HYDRO',inTime:h(3)},
+    {id:'SURV-MT-100',volo:'V0100',name:'Michel Trudeau',role:'SURVEILLANT',type:'SURVEILLANT',region:'ESTRIE',site:'TR-HYDRO',inTime:h(6)},
+    {id:'SURV-CP-111',volo:'V0111',name:'Charles Poisson',role:'SURVEILLANT',type:'SURVEILLANT',region:'ESTRIE',site:'QC-VALERO',inTime:h(5)},
+    {id:'SURV-PH-193',volo:'V0193',name:'Pierre Heroux',role:'SURVEILLANT',type:'SURVEILLANT',region:'ESTRIE',site:'MEGANTIC',inTime:h(25)},
+    {id:'SURV-MB-187',volo:'V0187',name:'Marc Bergeron',role:'SURVEILLANT',type:'SURVEILLANT',region:'ESTRIE',site:'MEGANTIC',inTime:h(27)},
+    {id:'SURV-RH-112',volo:'V0112',name:'Robert Hamel',role:'SURVEILLANT',type:'SURVEILLANT',region:'ESTRIE',site:'DOMTAR-SF',inTime:h(6)},
+    {id:'SURV-FL-342',volo:'V0342',name:'Frederic Lalonde',role:'SURVEILLANT',type:'SURVEILLANT',region:'ESTRIE',site:'DOMTAR-SF',inTime:h(4)}
+  ];
+  localStorage.setItem('volo-ptg-onsite',JSON.stringify(dp));
+
+  var iNames=['Harnais complet','Corde 60m','Corde 30m','SCBA Drager','Masque SCBA','Detecteur 4-gaz','Civiere panier','Civiere souple','Trousse O2','DEA','Tripode','Treuil','Mousqueton acier','Descendeur ID','Poulie double','Ancrage portatif','Sangle tubulaire','Casque Petzl','Lampe frontale','Radio Motorola','Extincteur','Kit espaces clos','Echelle telescopique','Brancard Neil Robertson','Planche dorsale','Couverture thermique','Attelle SAM','Collet cervical','Elingue','Bouteille air 30min','Pince coupe-boulon','Harnais evacuation','Longe double','Bloqueur'];
+  var di=[];
+  for(var i=0;i<34;i++){
+    var hrs=i<4?50:2+i*2;
+    di.push({txId:'TX-DEMO-'+String(i+1).padStart(3,'0'),mode:'PICK-ON',item:iNames[i%iNames.length],serial:'SN-'+String(1000+i),itemId:'ITEM-'+String(i+1).padStart(3,'0'),sauveteur:dp[i%dp.length].name,sauveteurId:dp[i%dp.length].id,site:SITES[i%7].name,siteId:SITES[i%7].id,timestamp:h(hrs),status:null});
+  }
+  localStorage.setItem('volo_transactions',JSON.stringify(di));
+
+  var at=['PICK-ON','PICK-ON','PICK-ON','PICK-OFF','PICK-OFF','URGENCE','KM_LOG','CERT_UPDATE','PICK-ON','PICK-OFF','PICK-ON','PICK-ON','PICK-OFF-FORCE','PICK-ON','PICK-OFF','KM_LOG','PICK-ON','CERT_UPDATE','PICK-OFF','URGENCE'];
+  var da=[];
+  for(var j=0;j<20;j++){
+    da.push({id:'AUD-'+String(j+1).padStart(3,'0'),type:at[j],user:dp[j%dp.length].name,userId:dp[j%dp.length].id,
+      detail:at[j]==='PICK-ON'?'Harnais complet - SN-100'+j:at[j]==='PICK-OFF'?'Retour corde 60m - SN-200'+j:at[j]==='PICK-OFF-FORCE'?'Force retour SCBA - inspection requise':at[j]==='URGENCE'?'Alerte - '+SITES[j%7].name:at[j]==='KM_LOG'?'Windsor-Sherbrooke 85km':'Cert. Espace clos renouvele',
+      site:SITES[j%7].name,timestamp:h(j*3)});
+  }
+  localStorage.setItem('volo_audit_log',JSON.stringify(da));
+
+  var dpl=[
+    {id:'PLN-001',company:'Kruger Windsor',site:'KRUGER',date:new Date().toISOString().slice(0,10),type:'Espace clos',icon:'&#128679;',teamSize:6,equipe:['Alexandre Gendreau','Carl St-Pierre','Cedric Lapointe-Stewart','Jonathan Milone','Alexis Allain','Andre Boucher'],zones:['Zone 1 - Digesteur','Zone 2 - Presse'],risques:['H2S','Manque O2','Chaleur'],epi:['SCBA','Harnais','Detecteur 4-gaz'],permis:['Permis espace clos #KC-2026-042'],equipements:['Tripode','Treuil','Ventilateur'],meteo:'Ensoleille 8C',dangers:['Gaz toxiques','Chute'],communication:'Radio ch.4',status:'en_cours'},
+    {id:'PLN-002',company:'Domtar Windsor',site:'DOMTAR-W',date:new Date().toISOString().slice(0,10),type:'Travail en hauteur',icon:'&#127956;',teamSize:5,equipe:['Yann-Alexandre Belley','Frederic Massicotte','Mathieu Lapalme','Antoine Gagnon','David Laroche'],zones:['Toit batiment principal'],risques:['Chute >6m','Vent fort'],epi:['Harnais','Longe double','Casque'],permis:['Permis hauteur #DW-2026-018'],equipements:['Ancrage portatif','Corde 60m'],meteo:'Nuageux 5C',dangers:['Chute','Glace'],communication:'Radio ch.2',status:'en_cours'},
+    {id:'PLN-003',company:'Domtar La Tuque',site:'DOMTAR-LT',date:new Date(Date.now()-86400000).toISOString().slice(0,10),type:'Sauvetage minier',icon:'&#9935;',teamSize:4,equipe:['Denis Belanger','Gerard Morin','Gilles Gaudette','Robert Hamel'],zones:['Sous-sol usine'],risques:['Effondrement'],epi:['SCBA','Casque'],permis:['Permis confine #DLT-2026-009'],equipements:['Civiere panier','Trousse O2'],meteo:'Pluie 3C',dangers:['Eau','Debris'],communication:'Radio ch.6',status:'termine'},
+    {id:'PLN-004',company:'Quebec Valero',site:'QC-VALERO',date:new Date(Date.now()-2*86400000).toISOString().slice(0,10),type:'Intervention chimique',icon:'&#9763;',teamSize:4,equipe:['Philippe Monnier','Maxime Lavigne','Charles Poisson','Jean Parr'],zones:['Unite raffinage Est'],risques:['Produits chimiques'],epi:['Combinaison chimique','SCBA'],permis:['Permis chimique #QV-2026-031'],equipements:['Kit decontamination'],meteo:'Venteux 2C',dangers:['Toxicite','Feu'],communication:'Radio ch.8',status:'termine'},
+    {id:'PLN-005',company:'Lac-Megantic',site:'MEGANTIC',date:new Date(Date.now()-7*86400000).toISOString().slice(0,10),type:'Evacuation',icon:'&#128680;',teamSize:5,equipe:['Jean-Nicolas Maisonneuve','Olivier Lessard','Pierre Heroux','Marc Bergeron','Michel Trudeau'],zones:['Perimetre complet'],risques:['Contamination'],epi:['Tout EPI requis'],permis:['Permis urgence #LM-2026-003'],equipements:['Civiere','Planche dorsale','DEA'],meteo:'Froid -5C',dangers:['Hypothermie'],communication:'Radio ch.1',status:'termine'},
+    {id:'PLN-006',company:'Trois-Rivieres Hydro',site:'TR-HYDRO',date:new Date(Date.now()-14*86400000).toISOString().slice(0,10),type:'Travail electrique',icon:'&#9889;',teamSize:3,equipe:['Jean Parr','Michel Trudeau','Frederic Lalonde'],zones:['Poste de transformation'],risques:['Electrocution'],epi:['Combinaison arc-flash','Gants isolants'],permis:['Permis electrique #TRH-2026-055'],equipements:['Detecteur tension'],meteo:'Beau 10C',dangers:['Haute tension'],communication:'Radio ch.3',status:'termine'}
+  ];
+  localStorage.setItem('volo_plans_travail',JSON.stringify(dpl));
+}
+
+function renderAll(){renderKPIs();renderAlerts();renderMapMarkers();renderPersonnel();renderInventaire();renderAudit();renderDonut();renderMissions();renderPlans();renderRecent();renderPhotos();}
+
+function renderKPIs(){
+  var sauv=deployedPersonnel.filter(function(p){return p.role==='SAUVETEUR'||p.role==="CHEF D'EQUIPE";}).length;
+  var surv=deployedPersonnel.filter(function(p){return p.role==='SURVEILLANT';}).length;
+  var total=deployedPersonnel.length;
+  var sitesAct=new Set(deployedPersonnel.map(function(p){return p.site;})).size;
+  var att=SITES.filter(function(s){return s.status==='attention';}).length;
+  var ov24=deployedPersonnel.filter(function(p){return p.inTime&&(Date.now()-new Date(p.inTime).getTime())>86400000;}).length;
+  document.getElementById('kpiBar').innerHTML=
+    kpiCard(sauv,'SAUVETEURS','var(--rescue)','secPersonnel')+
+    kpiCard(surv,'SURVEILLANTS','var(--blue)','secPersonnel')+
+    kpiCard(total,'TOTAL','var(--green)','secPersonnel')+
+    kpiCard(sitesAct,'SITES','var(--gold)','secMap')+
+    kpiCard(att,'ATTENTION','var(--warning)','secAlerts')+
+    kpiCard(ov24,'+24H','var(--danger)','secAlerts');
+}
+function kpiCard(n,lbl,col,target){
+  return '<div class="kpi" onclick="scrollToSection(\''+target+'\')"><div class="num" style="color:'+col+'">'+n+'</div><div class="label">'+lbl+'</div><div class="bar" style="background:'+col+'"></div></div>';
+}
+function scrollToSection(id){document.getElementById(id).scrollIntoView({behavior:'smooth'});}
+
+function renderAlerts(){
+  var html='';
+  var closedAlerts=JSON.parse(localStorage.getItem('volo_closed_alerts')||'[]');
+  SITES.forEach(function(s){
+    if((s.status==='attention'||s.alerte)&&closedAlerts.indexOf(s.id)===-1){
+      var ppl=deployedPersonnel.filter(function(p){return p.site===s.id;});
+      html+='<div class="alert-card"><div class="dot"></div><div class="info"><div class="site">'+s.name+'</div><div class="dur">'+(s.alerte||'')+(s.since?' - '+s.since:'')+' - '+ppl.length+' personnes</div></div><div class="actions"><button class="btn-sm btn-contact" onclick="contactSite(\''+s.id+'\')">Contacter</button><button class="btn-sm btn-close" onclick="closeAlert(\''+s.id+'\')">Fermer</button></div></div>';
+    }
+  });
+  var ov=deployedPersonnel.filter(function(p){return p.inTime&&(Date.now()-new Date(p.inTime).getTime())>86400000;});
+  ov.forEach(function(p){
+    var hrs=Math.floor((Date.now()-new Date(p.inTime).getTime())/3600000);
+    var sn=(SITES.find(function(s){return s.id===p.site;})||{name:p.site||'?'}).name;
+    html+='<div class="alert-card"><div class="dot"></div><div class="info"><div class="site">'+p.name+' - '+hrs+'h sur site</div><div class="dur">Site: '+sn+'</div></div><div class="actions"><button class="btn-sm btn-contact" onclick="contactPerson(\''+p.id+'\')">Contacter</button></div></div>';
+  });
+  document.getElementById('alertList').innerHTML=html||'<p style="color:var(--muted);text-align:center">Aucune alerte active.</p>';
+  // Play alert sound only once per new alert (not every 2-min cycle)
+  if(ov.length>0&&!window._alertSoundPlayed){window._alertSoundPlayed=true;try{var snd=document.getElementById('eagle-snd');if(snd){snd.volume=0.3;snd.play().catch(function(){});}}catch(e){}}
+  if(ov.length===0) window._alertSoundPlayed=false;
+}
+function contactSite(sid){
+  var s=SITES.find(function(x){return x.id===sid;});
+  if(s&&s.tel){window.open('tel:'+s.tel);showToast('Appel site '+s.name,'ok');}
+  else{showToast('Aucun numéro disponible pour '+((s&&s.name)||sid),'info');}
+}
+function contactPerson(pid){
+  var p=(typeof PERSONNEL!=='undefined')?PERSONNEL.find(function(x){return x.id===pid;}):null;
+  if(!p) p=deployedPersonnel.find(function(x){return x.id===pid;});
+  if(p&&p.tel){window.open('tel:'+p.tel);showToast('Appel '+p.name,'ok');}
+  else{showToast('Aucun numéro disponible pour '+((p&&p.name)||pid),'info');}
+}
+function closeAlert(sid){
+  var s=SITES.find(function(x){return x.id===sid;});
+  if(s){s.status='actif';s.alerte=null;s.since=null;}
+  // Persist closed alerts so they don't reappear on refresh
+  var closed=JSON.parse(localStorage.getItem('volo_closed_alerts')||'[]');
+  if(closed.indexOf(sid)===-1) closed.push(sid);
+  localStorage.setItem('volo_closed_alerts',JSON.stringify(closed));
+  renderAlerts();renderKPIs();renderMapMarkers();showToast('Alerte fermee','ok');
+}
+
+function initMap(){
+  leafletMap=L.map('map',{zoomControl:true}).setView([47,-71.5],6);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'VOLO SST',maxZoom:18}).addTo(leafletMap);
+  renderMapMarkers();
+  setTimeout(function(){leafletMap.invalidateSize();},300);
+}
+function renderMapMarkers(){
+  if(!leafletMap) return;
+  mapMarkers.forEach(function(m){leafletMap.removeLayer(m);});
+  mapMarkers=[];
+  SITES.forEach(function(s){
+    var cls=s.alerte?'danger':s.status==='attention'?'attention':'actif';
+    var ppl=deployedPersonnel.filter(function(p){return p.site===s.id;});
+    var items=circulatingItems.filter(function(it){return it.siteId===s.id;});
+    var icon=L.divIcon({className:'',html:'<div class="map-marker '+cls+'"></div>',iconSize:[16,16],iconAnchor:[8,8]});
+    var marker=L.marker([s.lat,s.lng],{icon:icon}).addTo(leafletMap);
+    marker.bindPopup('<div style="min-width:160px"><strong style="color:var(--rescue)">'+s.name+'</strong><br><span style="font-size:12px;color:var(--muted)">'+s.ville+' - '+s.region+'</span><br><span style="font-size:13px">'+ppl.length+' pers. / '+items.length+' items</span></div>');
+    (function(siteId){marker.on('click',function(){openSitePanel(siteId);});})(s.id);
+    mapMarkers.push(marker);
+  });
+}
+function openSitePanel(siteId){
+  var s=SITES.find(function(x){return x.id===siteId;});
+  if(!s) return;
+  var ppl=deployedPersonnel.filter(function(p){return p.site===siteId;});
+  var items=circulatingItems.filter(function(it){return it.siteId===siteId;});
+  var html='<h3>'+s.name+'</h3><p style="color:var(--muted);margin-bottom:16px">'+s.ville+' - '+s.region+'</p>';
+  html+='<div style="font-family:Oswald,sans-serif;font-size:14px;letter-spacing:2px;color:var(--goldL);margin-bottom:8px">PERSONNEL ('+ppl.length+')</div>';
+  ppl.forEach(function(p){
+    var bc=p.role==='SURVEILLANT'?'blue':'gold';
+    html+='<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px">'+p.name+' <span class="badge badge-'+bc+'">'+p.role+'</span></div>';
+  });
+  html+='<div style="font-family:Oswald,sans-serif;font-size:14px;letter-spacing:2px;color:var(--goldL);margin:16px 0 8px">INVENTAIRE ('+items.length+')</div>';
+  items.forEach(function(it){
+    html+='<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px">'+it.item+' <span class="mono">'+it.serial+'</span></div>';
+  });
+  document.getElementById('panelContent').innerHTML=html;
+  openPanel();
+}
+
+function renderPersonnel(){
+  var search=(document.getElementById('filterPersonSearch').value||'').toLowerCase();
+  var region=document.getElementById('filterPersonRegion').value;
+  var role=document.getElementById('filterPersonRole').value;
+  var filtered=deployedPersonnel.filter(function(p){
+    if(search&&p.name.toLowerCase().indexOf(search)===-1) return false;
+    if(region&&p.region!==region) return false;
+    if(role==='CHEF'&&p.role!=="CHEF D'EQUIPE") return false;
+    if(role==='SAUVETEUR'&&p.role!=='SAUVETEUR'&&p.role!=="CHEF D'EQUIPE") return false;
+    if(role==='SURVEILLANT'&&p.role!=='SURVEILLANT') return false;
+    return true;
+  });
+  var html='';
+  filtered.forEach(function(p){
+    var diff=p.inTime?(Date.now()-new Date(p.inTime).getTime()):0;
+    var hrs=Math.floor(diff/3600000);
+    var mins=Math.floor((diff%3600000)/60000);
+    var over=hrs>=24;
+    var ac=p.role==='SURVEILLANT'?'surveillant':(p.role==="CHEF D'EQUIPE"?'chef':'sauveteur');
+    var anim=over?'urgence':'active';
+    var ini=p.name?p.name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase():'??';
+    var rc=p.role==='SURVEILLANT'?'var(--blue)':(p.role==="CHEF D'EQUIPE"?'var(--gold)':'var(--rescue)');
+    var sn=(SITES.find(function(s){return s.id===p.site;})||{name:p.site||'---'}).name;
+    html+='<div class="card person-card'+(over?' overdue':'')+'"><div class="avatar '+ac+' '+anim+'">'+ini+'</div><div class="person-info"><div class="pname">'+p.name+(p.role==="CHEF D'EQUIPE"?' &#11088;':'')+'</div><div class="prole" style="color:'+rc+'">'+p.role+'</div><div class="ptimer" data-in="'+(p.inTime||'')+'">'+hrs+'h'+String(mins).padStart(2,'0')+' - '+sn+'</div></div>'+(over?'<span class="badge badge-danger" style="position:absolute;top:8px;right:8px">+24H</span>':'')+'</div>';
+  });
+  document.getElementById('personnelGrid').innerHTML=html||'<p style="color:var(--muted)">Aucun personnel deploye.</p>';
+}
+function updateTimers(){
+  document.querySelectorAll('.ptimer[data-in]').forEach(function(el){
+    var t=el.getAttribute('data-in');
+    if(!t) return;
+    var diff=Date.now()-new Date(t).getTime();
+    var h2=Math.floor(diff/3600000);
+    var m2=Math.floor((diff%3600000)/60000);
+    var parts=el.textContent.split(' - ');
+    el.textContent=h2+'h'+String(m2).padStart(2,'0')+(parts.length>1?' - '+parts.slice(1).join(' - '):'');
+  });
+}
+
+function renderInventaire(){
+  var search=(document.getElementById('filterItemSearch').value||'').toLowerCase();
+  var cat=document.getElementById('filterItemCat').value;
+  var filtered=circulatingItems.filter(function(it){
+    if(search&&(it.item||'').toLowerCase().indexOf(search)===-1&&(it.serial||'').toLowerCase().indexOf(search)===-1) return false;
+    if(cat&&it.cat&&it.cat!==cat) return false;
+    return true;
+  });
+  var html='';
+  filtered.forEach(function(it){
+    var hrs=it.timestamp?Math.floor((Date.now()-new Date(it.timestamp).getTime())/3600000):0;
+    var sc=hrs>=48?'badge-red':hrs>=24?'badge-orange':'badge-green';
+    var st=hrs>=48?'+48H':hrs>=24?'+24H':'OK';
+    html+='<tr class="'+(hrs>=24?'overdue':'')+'"><td>'+it.item+'</td><td class="mono">'+(it.serial||'-')+'</td><td class="mono">'+(it.itemId||'-')+'</td><td>'+(it.sauveteur||'-')+'</td><td>'+(it.site||'-')+'</td><td class="mono">'+hrs+'h</td><td><span class="badge '+sc+'">'+st+'</span></td><td><button class="btn-force" onclick="forcePickOff(\''+it.txId+'\')">RETOUR</button></td></tr>';
+  });
+  document.getElementById('invBody').innerHTML=html||'<tr><td colspan="8" style="text-align:center;color:var(--muted)">Aucun item en circulation.</td></tr>';
+}
+function forcePickOff(txId){
+  showDsPrompt('📝 NOTE DE RETOUR FORCÉ','Ajoutez une note pour ce retour forcé:','CONFIRMER',function(note){
+    if(!note){showToast('Note obligatoire','err');return;}
+    closeDsModal();
+    var txs=JSON.parse(localStorage.getItem('volo_transactions')||'[]');
+    var tx=txs.find(function(t){return t.txId===txId;});
+    if(tx){tx.status='RETOURNE';tx.forceNote=note;tx.forceTime=new Date().toISOString();}
+    localStorage.setItem('volo_transactions',JSON.stringify(txs));
+    var log=JSON.parse(localStorage.getItem('volo_audit_log')||'[]');
+    log.unshift({id:'AUD-F-'+Date.now(),type:'PICK-OFF-FORCE',user:'Superviseur',detail:'Force retour: '+(tx?tx.item:txId)+' - '+escapeHtml(note),site:tx?tx.site:'',timestamp:new Date().toISOString()});
+    localStorage.setItem('volo_audit_log',JSON.stringify(log));
+    loadData();renderAll();showToast('Retour force enregistre','ok');
+    fetch(WEBHOOK_MAIN,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'PICK-OFF-FORCE',txId:txId,note:note,timestamp:new Date().toISOString()})}).catch(function(){});
+  });
+}
+
+function renderAudit(){
+  var search=(document.getElementById('filterAuditSearch').value||'').toLowerCase();
+  var filtered=auditLog.filter(function(a){
+    if(!search) return true;
+    return (a.type||'').toLowerCase().indexOf(search)!==-1||(a.user||'').toLowerCase().indexOf(search)!==-1||(a.detail||'').toLowerCase().indexOf(search)!==-1;
+  });
+  var html='';
+  filtered.slice(0,30).forEach(function(a){
+    var hot=a.timestamp&&(Date.now()-new Date(a.timestamp).getTime())<3600000;
+    var d=a.timestamp?new Date(a.timestamp):new Date();
+    var bc=a.type==='URGENCE'?'red':a.type.indexOf('FORCE')!==-1?'orange':a.type==='PICK-ON'?'gold':'green';
+    html+='<div class="tl-item'+(hot?' hot':'')+'"><div class="tl-time">'+d.toLocaleString('fr-CA')+'</div><div class="tl-type"><span class="badge badge-'+bc+'">'+a.type+'</span> '+a.user+'</div><div class="tl-detail">'+a.detail+(a.site?' - '+a.site:'')+'</div></div>';
+  });
+  document.getElementById('auditTimeline').innerHTML=html||'<p style="color:var(--muted);text-align:center">Aucune entree audit.</p>';
+}
+function exportAuditCSV(){
+  var csv='Type,Utilisateur,Detail,Site,Date\n';
+  auditLog.forEach(function(a){csv+='"'+sanitizeCSV(a.type)+'","'+sanitizeCSV(a.user)+'","'+sanitizeCSV((a.detail||'').replace(/"/g,"'"))+'","'+sanitizeCSV(a.site||'')+'","'+(a.timestamp||'')+'"\n';});
+  downloadCSV(csv,'volo-audit-'+new Date().toISOString().slice(0,10)+'.csv');
+}
+
+function renderDonut(){
+  var canvas=document.getElementById('donutCanvas');
+  var ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,200,200);
+  var totalItems=(typeof ITEMS!=='undefined')?ITEMS.length:26;
+  var inMission=circulatingItems.length;
+  var inspection=Math.floor(totalItems*0.1);
+  var horsService=Math.floor(totalItems*0.05);
+  var dispo=Math.max(0,totalItems-inMission-inspection-horsService);
+  var data=[{val:dispo,color:'#27AE60',label:'Disponible'},{val:inMission,color:'#E65100',label:'En mission'},{val:inspection,color:'#F59E0B',label:'Inspection'},{val:horsService,color:'#EF4444',label:'Hors-service'}];
+  var total=data.reduce(function(s,d){return s+d.val;},0)||1;
+  var start=-Math.PI/2,cx=100,cy=100,r=80,w=24;
+  data.forEach(function(d){
+    var angle=(d.val/total)*Math.PI*2;
+    ctx.beginPath();ctx.arc(cx,cy,r,start,start+angle);ctx.arc(cx,cy,r-w,start+angle,start,true);ctx.closePath();ctx.fillStyle=d.color;ctx.fill();
+    start+=angle;
+  });
+  document.getElementById('donutTotal').textContent=totalItems;
+  var lh='';
+  data.forEach(function(d){lh+='<div class="legend-item"><div class="legend-dot" style="background:'+d.color+'"></div>'+d.label+': '+d.val+'</div>';});
+  document.getElementById('donutLegend').innerHTML=lh;
+  document.getElementById('expiringList').innerHTML='<div style="font-family:Oswald,sans-serif;font-size:14px;color:var(--warning);margin-top:12px;letter-spacing:2px">ITEMS EXPIRANT SOUS 30 JOURS</div><p style="font-size:13px;color:var(--muted);margin-top:6px">3 harnais, 2 cordes, 1 detecteur (donnees demo)</p>';
+}
+
+function renderMissions(){
+  var sg={};
+  deployedPersonnel.forEach(function(p){if(!sg[p.site]) sg[p.site]={ppl:[],items:[]};sg[p.site].ppl.push(p);});
+  circulatingItems.forEach(function(it){if(!sg[it.siteId]) sg[it.siteId]={ppl:[],items:[]};sg[it.siteId].items.push(it);});
+  var html='';
+  Object.keys(sg).forEach(function(sid){
+    var s=SITES.find(function(x){return x.id===sid;})||{name:sid,status:'actif'};
+    var g=sg[sid];
+    var dc=s.status==='attention'?'attention':'actif';
+    var earliest=g.ppl.reduce(function(min,p){var t=new Date(p.inTime||0).getTime();return t<min?t:min;},Date.now());
+    var durH=Math.floor((Date.now()-earliest)/3600000);
+    html+='<div class="card mission-card" onclick="toggleMission(this)"><div class="mission-head"><div class="mission-dot '+dc+'"></div><div><strong>'+s.name+'</strong><br><span style="font-size:12px;color:var(--muted)">'+g.ppl.length+' pers. / '+g.items.length+' items / '+durH+'h</span></div><span class="arrow">&#9660;</span></div><div class="mission-body"><div style="margin-bottom:8px;font-weight:600">Equipe:</div>';
+    g.ppl.forEach(function(p){html+='<div style="font-size:13px;padding:2px 0">'+p.name+' <span style="color:var(--muted)">'+p.role+'</span></div>';});
+    html+='<div style="margin-top:10px;margin-bottom:8px;font-weight:600">Items:</div>';
+    g.items.slice(0,10).forEach(function(it){html+='<div style="font-size:13px;padding:2px 0">'+it.item+' <span class="mono">'+it.serial+'</span></div>';});
+    if(g.items.length>10) html+='<div style="font-size:12px;color:var(--muted)">+'+(g.items.length-10)+' autres...</div>';
+    html+='</div></div>';
+  });
+  document.getElementById('missionsList').innerHTML=html||'<p style="color:var(--muted);text-align:center">Aucune mission active.</p>';
+}
+function toggleMission(el){el.classList.toggle('open');}
+
+function setPlanTab(tab){
+  planTab=tab;
+  document.querySelectorAll('#plansTabs .btn-filter').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-tab')===tab);});
+  renderPlans();
+}
+function renderPlans(){
+  var search=(document.getElementById('filterPlanSearch').value||'').toLowerCase();
+  var today=new Date().toISOString().slice(0,10);
+  var filtered=plans.filter(function(p){
+    if(search&&(p.company||'').toLowerCase().indexOf(search)===-1) return false;
+    if(planTab==='current') return p.date===today||p.status==='en_cours';
+    if(planTab==='history') return p.date!==today&&p.status!=='en_cours';
+    return true;
+  });
+  var html='';
+  filtered.forEach(function(p){
+    var sc=p.status==='en_cours'?'badge-green':'badge-blue';
+    var sl=p.status==='en_cours'?'En cours':'Termine';
+    html+='<div class="card plan-card" onclick="openPlanPanel(\''+p.id+'\')"><div class="plan-top"><span class="plan-icon">'+p.icon+'</span><div><div class="plan-company">'+p.company+'</div><div class="plan-date">'+p.date+' - '+p.type+'</div></div></div><div class="plan-meta"><span class="badge badge-gold">'+p.teamSize+' pers.</span><span class="badge '+sc+'">'+sl+'</span></div></div>';
+  });
+  document.getElementById('plansGrid').innerHTML=html||'<p style="color:var(--muted);text-align:center">Aucun plan.</p>';
+}
+function openPlanPanel(planId){
+  var p=plans.find(function(x){return x.id===planId;});
+  if(!p) return;
+  var html='<h3>'+p.icon+' '+p.company+'</h3><p style="color:var(--muted);margin-bottom:16px">'+p.date+' - '+p.type+'</p>';
+  var sections=[['EQUIPE',p.equipe],['ZONES DE RISQUE',p.zones],['RISQUES',p.risques,'var(--danger)'],['EPI REQUIS',p.epi],['PERMIS',p.permis],['EQUIPEMENTS',p.equipements],['DANGERS',p.dangers,'var(--danger)']];
+  sections.forEach(function(sec){
+    html+='<div style="margin-bottom:14px"><div style="font-family:Oswald,sans-serif;font-size:14px;letter-spacing:2px;color:var(--goldL);margin-bottom:6px">'+sec[0]+'</div>';
+    (sec[1]||[]).forEach(function(item){html+='<div style="padding:3px 0;font-size:13px;'+(sec[2]?'color:'+sec[2]:'')+'">'+item+'</div>';});
+    html+='</div>';
+  });
+  html+='<div style="margin-bottom:14px"><div style="font-family:Oswald,sans-serif;font-size:14px;letter-spacing:2px;color:var(--goldL);margin-bottom:6px">METEO</div><div style="font-size:13px">'+(p.meteo||'-')+'</div></div>';
+  html+='<div style="margin-bottom:14px"><div style="font-family:Oswald,sans-serif;font-size:14px;letter-spacing:2px;color:var(--goldL);margin-bottom:6px">COMMUNICATION</div><div style="font-size:13px">'+(p.communication||'-')+'</div></div>';
+  html+='<button class="btn-head" style="width:100%;margin-top:16px;padding:12px" onclick="printPlan(\''+p.id+'\')">&#128424; GENERER PDF</button>';
+  document.getElementById('panelContent').innerHTML=html;
+  openPanel();
+}
+function printPlan(planId){
+  var p=plans.find(function(x){return x.id===planId;});
+  if(p) document.title='Plan-'+p.company+'-'+p.date;
+  window.print();
+}
+
+function loadWeather(){
+  var grid=document.getElementById('weatherGrid');
+  grid.innerHTML='';
+  SITES.forEach(function(s){
+    fetch('https://api.open-meteo.com/v1/forecast?latitude='+s.lat+'&longitude='+s.lng+'&current=temperature_2m,weather_code&timezone=America/Toronto')
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var temp=d.current?d.current.temperature_2m:'--';
+        var code=d.current?d.current.weather_code:0;
+        var emoji=code===0?'&#9728;&#65039;':code<4?'&#9925;':code<50?'&#127787;&#65039;':code<70?'&#127783;&#65039;':'&#127784;&#65039;';
+        var card=document.createElement('div');
+        card.className='card weather-card';
+        card.innerHTML='<div class="wemoji">'+emoji+'</div><div class="temp">'+temp+'&deg;C</div><div class="wsite">'+s.name+'</div>';
+        grid.appendChild(card);
+      })
+      .catch(function(){
+        var card=document.createElement('div');
+        card.className='card weather-card';
+        card.innerHTML='<div class="wemoji">&#9888;&#65039;</div><div class="temp">--</div><div class="wsite">'+s.name+'</div>';
+        grid.appendChild(card);
+      });
+  });
+}
+
+function renderPhotos(){
+  try{
+    var photos=JSON.parse(localStorage.getItem('volo_photos')||'[]');
+    var grid=document.getElementById('photoGallery');
+    if(!photos.length){grid.innerHTML='<p style="color:var(--muted);grid-column:1/-1;text-align:center;font-style:italic">Aucune photo pour le moment.</p>';return;}
+    var html='';
+    photos.slice(0,12).forEach(function(ph){
+      var src=ph.dataUrl||ph.url||'';
+      var cap=(ph.lieu||'')+(ph.date?' - '+ph.date:'');
+      if(src) html+='<img src="'+src+'" alt="'+cap+'" title="'+cap+'" onclick="openLightbox(\''+src.replace(/'/g,"\\'")+'\')">';
+    });
+    grid.innerHTML=html||'<p style="color:var(--muted);grid-column:1/-1;text-align:center;font-style:italic">Aucune photo pour le moment.</p>';
+  }catch(e){document.getElementById('photoGallery').innerHTML='<p style="color:var(--muted);grid-column:1/-1;text-align:center">Erreur chargement photos.</p>';}
+}
+
+function renderRecent(){
+  var all=auditLog.slice(0,20);
+  var html='';
+  all.forEach(function(a){
+    var hot=a.timestamp&&(Date.now()-new Date(a.timestamp).getTime())<3600000;
+    var d=a.timestamp?new Date(a.timestamp):new Date();
+    html+='<div class="tl-item'+(hot?' hot':'')+'"><div class="tl-time">'+d.toLocaleString('fr-CA')+'</div><div class="tl-type">'+a.type+' - '+a.user+'</div><div class="tl-detail">'+a.detail+'</div></div>';
+  });
+  document.getElementById('recentTimeline').innerHTML=html||'<p style="color:var(--muted);text-align:center">Aucune activite recente.</p>';
+}
+
+function renderContacts(){
+  var html='';
+  CHEFS.forEach(function(c){
+    var on=deployedPersonnel.some(function(p){return p.id===c.id;});
+    var ini=c.name.split(' ').map(function(w){return w[0];}).join('').substring(0,2);
+    html+='<div class="card contact-card"><div class="contact-avatar">'+ini+'</div><div class="contact-info"><div class="cname">'+c.name+' &#11088;</div><a class="cemail" href="mailto:'+c.email+'">'+c.email+'</a><div class="cstatus"><span class="badge '+(on?'badge-green':'badge-red')+'">'+(on?'En ligne':'Hors ligne')+'</span> '+c.ville+'</div></div></div>';
+  });
+  document.getElementById('contactsGrid').innerHTML=html;
+}
+
+function populateFilters(){
+  var regions=new Set();
+  if(typeof PERSONNEL!=='undefined') PERSONNEL.forEach(function(p){regions.add(p.region);});
+  SITES.forEach(function(s){regions.add(s.region);});
+  var sel=document.getElementById('filterPersonRegion');
+  regions.forEach(function(r){var o=document.createElement('option');o.value=r;o.textContent=r;sel.appendChild(o);});
+  if(typeof ITEMS!=='undefined'){
+    var cats=new Set();
+    ITEMS.forEach(function(it){if(it.cat) cats.add(it.cat);});
+    var csel=document.getElementById('filterItemCat');
+    cats.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;csel.appendChild(o);});
+  }
+}
+
+function openPanel(){document.getElementById('overlay').classList.add('show');document.getElementById('slidePanel').classList.add('open');}
+function closePanel(){document.getElementById('overlay').classList.remove('show');document.getElementById('slidePanel').classList.remove('open');}
+function openLightbox(src){document.getElementById('lbImg').src=src;document.getElementById('lightbox').classList.add('show');}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('show');}
+
+function renderRecipients(){
+  var html='<div style="padding:6px 0;font-weight:700;color:var(--gold)">&#128081; Manager: '+DESTINATAIRES.manager.nom+'</div>';
+  DESTINATAIRES.chefs.forEach(function(c){html+='<div style="padding:4px 0;font-size:13px">&#11088; '+c.nom+'</div>';});
+  document.getElementById('recipientsList').innerHTML=html;
+}
+function openReportModal(){document.getElementById('reportModal').classList.add('show');}
+function closeReportModal(){document.getElementById('reportModal').classList.remove('show');}
+function buildReportBody(){
+  var type=document.getElementById('reportType').value;
+  var d=new Date().toLocaleString('fr-CA');
+  var sauv=deployedPersonnel.filter(function(p){return p.role!=='SURVEILLANT';}).length;
+  var surv=deployedPersonnel.filter(function(p){return p.role==='SURVEILLANT';}).length;
+  var body='RAPPORT '+type.toUpperCase()+' - GOLDEN EAGLES\nDate: '+d+'\n\nPERSONNEL DEPLOYE: '+deployedPersonnel.length+' ('+sauv+' sauveteurs, '+surv+' surveillants)\nITEMS EN CIRCULATION: '+circulatingItems.length+'\nSITES ACTIFS: '+new Set(deployedPersonnel.map(function(p){return p.site;})).size+'\n\n';
+  var ov=deployedPersonnel.filter(function(p){return p.inTime&&(Date.now()-new Date(p.inTime).getTime())>86400000;});
+  if(ov.length){body+='ALERTES +24H:\n';ov.forEach(function(p){body+='- '+p.name+' ('+Math.floor((Date.now()-new Date(p.inTime).getTime())/3600000)+'h)\n';});}
+  body+='\n-- VOLO SST Golden Eagles --';
+  return body;
+}
+function sendGmail(){
+  var emails=DESTINATAIRES.chefs.map(function(c){return c.email;}).join(',');
+  var type=document.getElementById('reportType').value;
+  var subject='[VOLO SST] Rapport '+type+' - '+new Date().toLocaleDateString('fr-CA');
+  window.open('mailto:'+emails+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(buildReportBody()));
+  closeReportModal();showToast('Gmail ouvert','ok');
+}
+function sendWhatsApp(){
+  window.open('https://wa.me/?text='+encodeURIComponent(buildReportBody()));
+  closeReportModal();showToast('WhatsApp ouvert','ok');
+}
+function sendDrive(){
+  var type=document.getElementById('reportType').value;
+  document.title='VOLO-SST-Rapport-'+type+'-'+new Date().toISOString().slice(0,10);
+  window.print();closeReportModal();showToast('Impression PDF lancée','ok');
+}
+
+function openPrintModal(){document.getElementById('printModal').classList.add('show');}
+function closePrintModal(){document.getElementById('printModal').classList.remove('show');}
+function doPrint(type){
+  var user=checkAuth();
+  var now=new Date();
+  var dateStr=now.toLocaleDateString('fr-CA',{year:'numeric',month:'long',day:'numeric'});
+  var timeStr=now.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'});
+  var userName=user?user.name:'Superviseur';
+  var userRole=user?(user.role==="CHEF D'EQUIPE"?"CHEF D'EQUIPE":"COORDONNATEUR"):'SUPERVISEUR';
+  var userId=user?user.id:'---';
+  closePrintModal();
+  showToast('Genération du PDF...','ok');
+
+  var typeLabels={full:'RAPPORT OPÉRATIONNEL COMPLET',personnel:'RAPPORT HORAIRES PERSONNEL',inventory:'RAPPORT INVENTAIRE EN CIRCULATION'};
+  var typeLabel=typeLabels[type]||typeLabels.full;
+
+  /* Data */
+  var sauv=deployedPersonnel.filter(function(p){return p.role==='SAUVETEUR'||p.role==="CHEF D'EQUIPE";}).length;
+  var surv=deployedPersonnel.filter(function(p){return p.role==='SURVEILLANT';}).length;
+  var sitesAct=new Set(deployedPersonnel.map(function(p){return p.site;})).size;
+  var ov24=deployedPersonnel.filter(function(p){return p.inTime&&(Date.now()-new Date(p.inTime).getTime())>86400000;}).length;
+  var att=SITES.filter(function(s){return s.status==='attention';}).length;
+  var ovList=deployedPersonnel.filter(function(p){return p.inTime&&(Date.now()-new Date(p.inTime).getTime())>86400000;});
+  var siteAlerts=SITES.filter(function(s){return s.status==='attention'||s.alerte;});
+
+  /* Colors */
+  var V={bg:'#0A0F1A',panel:'#111827',orange:'#F97316',orangeD:'#EA580C',green:'#10B981',yellow:'#F59E0B',red:'#EF4444',gold:'#D4A017',muted:'#94A3B8',txt:'#E2E8F0',border:'rgba(249,115,22,.15)',borderL:'rgba(249,115,22,.25)',blue:'#3B82F6'};
+
+  /* Helpers */
+  function esc(s){return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function kpiBox(n,label,color){
+    return '<div style="flex:1;background:'+V.panel+';border:1px solid '+V.border+';border-radius:10px;padding:16px 10px;text-align:center">'+
+      '<div style="font-family:Oswald,sans-serif;font-size:32px;font-weight:700;color:'+color+';line-height:1">'+n+'</div>'+
+      '<div style="font-size:8px;font-weight:700;color:'+V.muted+';letter-spacing:2px;margin-top:6px;text-transform:uppercase">'+label+'</div></div>';
+  }
+  function secHead(icon,title){
+    return '<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px 0;padding-bottom:8px;border-bottom:2px solid '+V.orange+'">'+
+      '<span style="font-size:16px">'+icon+'</span>'+
+      '<span style="font-family:Oswald,sans-serif;font-size:14px;font-weight:700;color:'+V.orange+';letter-spacing:2.5px;text-transform:uppercase">'+title+'</span></div>';
+  }
+  function tableHead(cols){
+    return '<tr>'+cols.map(function(c){
+      return '<td style="padding:8px 10px;background:'+V.panel+';color:'+V.gold+';font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border-bottom:2px solid '+V.orange+'">'+c+'</td>';
+    }).join('')+'</tr>';
+  }
+  function tableRow(cells,i){
+    var bg=i%2===0?'rgba(17,24,39,.6)':'rgba(10,15,26,.8)';
+    return '<tr>'+cells.map(function(c){
+      return '<td style="padding:7px 10px;font-size:10px;color:'+V.txt+';border-bottom:1px solid rgba(148,163,184,.08);background:'+bg+'">'+c+'</td>';
+    }).join('')+'</tr>';
+  }
+
+  /* ═══ BUILD PDF HTML ═══ */
+  var html='<div style="font-family:Inter,Segoe UI,Arial,sans-serif;color:'+V.txt+';width:100%;font-size:10.5px;line-height:1.5;-webkit-print-color-adjust:exact;print-color-adjust:exact">';
+
+  /* ─── PAGE 1: COVER ─── */
+  html+='<div style="background:linear-gradient(160deg,'+V.bg+' 0%,#0F172A 40%,'+V.panel+' 100%);padding:50px 30px 40px 30px;border-radius:8px;position:relative;overflow:hidden;min-height:260mm">';
+  /* Top accent line */
+  html+='<div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,'+V.orange+','+V.gold+','+V.orange+')"></div>';
+  /* Watermark */
+  html+='<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-35deg);font-family:Oswald,sans-serif;font-size:100px;color:rgba(249,115,22,.03);letter-spacing:15px;white-space:nowrap;pointer-events:none">CONFIDENTIEL</div>';
+  /* Header */
+  html+='<div style="text-align:center;margin-bottom:40px">';
+  html+='<div style="text-align:center;margin-bottom:8px"><img src="'+(typeof VOLO_LOGO_B64!=="undefined"?VOLO_LOGO_B64:'eagle_tactic.png')+'" style="width:80px;height:80px;border-radius:50%;border:2px solid rgba(212,160,23,.4)" /></div>';
+  html+='<div style="font-size:14px;color:'+V.muted+';letter-spacing:4px;font-weight:600;margin-bottom:8px">VOLO CONSTRUCTION SST</div>';
+  html+='<div style="font-family:Oswald,sans-serif;font-size:48px;font-weight:700;color:'+V.orange+';letter-spacing:6px;line-height:1.1">GOLDEN EAGLES</div>';
+  html+='<div style="font-family:Oswald,sans-serif;font-size:16px;color:'+V.gold+';letter-spacing:4px;margin-top:4px">SAUVETAGE TECHNIQUE</div>';
+  html+='<div style="width:80px;height:3px;background:linear-gradient(90deg,transparent,'+V.orange+',transparent);margin:20px auto"></div>';
+  html+='<div style="font-family:Oswald,sans-serif;font-size:20px;color:'+V.txt+';letter-spacing:3px;margin-top:16px">'+esc(typeLabel)+'</div>';
+  html+='</div>';
+  /* Date / Supervisor */
+  html+='<div style="text-align:center;margin-bottom:36px">';
+  html+='<div style="font-family:JetBrains Mono,monospace;font-size:22px;font-weight:700;color:'+V.gold+'">'+esc(dateStr)+'</div>';
+  html+='<div style="font-size:11px;color:'+V.muted+';margin-top:4px">'+esc(timeStr)+'</div>';
+  html+='<div style="margin-top:16px;font-size:13px;color:'+V.txt+';font-weight:600">'+esc(userName)+'</div>';
+  html+='<div style="font-size:10px;color:'+V.muted+';letter-spacing:2px;margin-top:2px">'+esc(userRole)+' | '+esc(userId)+'</div>';
+  html+='</div>';
+  /* KPI Grid */
+  html+='<div style="display:flex;gap:10px;margin-bottom:30px">';
+  html+=kpiBox(sauv,'SAUVETEURS',V.orange);
+  html+=kpiBox(surv,'SURVEILLANTS',V.blue);
+  html+=kpiBox(deployedPersonnel.length,'TOTAL DÉPLOYÉS',V.green);
+  html+='</div>';
+  html+='<div style="display:flex;gap:10px;margin-bottom:30px">';
+  html+=kpiBox(sitesAct,'SITES ACTIFS',V.gold);
+  html+=kpiBox(att,'ATTENTION',V.yellow);
+  html+=kpiBox(ov24,'+24H CRITIQUE',V.red);
+  html+='</div>';
+  /* Alerts on cover */
+  if(ovList.length||siteAlerts.length){
+    html+='<div style="background:rgba(239,68,68,.08);border:1.5px solid rgba(239,68,68,.3);border-radius:10px;padding:14px 18px;margin-top:10px">';
+    html+='<div style="font-family:Oswald,sans-serif;font-size:12px;color:'+V.red+';letter-spacing:2px;margin-bottom:8px">ALERTES ACTIVES</div>';
+    siteAlerts.forEach(function(s){
+      var ppl=deployedPersonnel.filter(function(p){return p.site===s.id;});
+      html+='<div style="font-size:10px;color:'+V.txt+';padding:3px 0">&#128308; '+esc(s.name)+' '+(s.alerte?esc(s.alerte):'')+' — '+ppl.length+' personnes</div>';
+    });
+    ovList.forEach(function(p){
+      var hrs=Math.floor((Date.now()-new Date(p.inTime).getTime())/3600000);
+      html+='<div style="font-size:10px;color:'+V.yellow+';padding:3px 0">&#9888;&#65039; '+esc(p.name)+' — '+hrs+'h sur site sans OUT</div>';
+    });
+    html+='</div>';
+  }
+  /* Footer cover */
+  html+='<div style="position:absolute;bottom:20px;left:0;right:0;text-align:center">';
+  html+='<div style="width:50px;height:2px;background:'+V.orange+';margin:0 auto 8px auto"></div>';
+  html+='<img src="'+(typeof VOLO_LOGO_B64!=="undefined"?VOLO_LOGO_B64:'eagle_tactic.png')+'" style="width:28px;height:28px;border-radius:50%;opacity:0.4" />';
+  html+='<div style="font-size:7px;color:'+V.muted+';letter-spacing:2px">VOLO CONSTRUCTION SST — SAUVETAGE TECHNIQUE — CONFIDENTIEL</div>';
+  html+='</div>';
+  html+='</div>'; /* end cover */
+
+  /* ─── PAGE 2+: CONTENT ─── */
+  var showPersonnel=(type==='full'||type==='personnel');
+  var showInventory=(type==='full'||type==='inventory');
+  var showAudit=(type==='full'||type==='inventory');
+  var showMissions=(type==='full');
+
+  html+='<div style="background:'+V.bg+';padding:20px 24px;min-height:100px">';
+
+  /* ═══ PERSONNEL TABLE ═══ */
+  if(showPersonnel&&deployedPersonnel.length){
+    html+=secHead('&#128101;','Personnel déployé — '+deployedPersonnel.length+' membres');
+    html+='<table style="width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden">';
+    html+=tableHead(['NOM','RÔLE','RÉGION','SITE','DEPUIS','DURÉE']);
+    deployedPersonnel.forEach(function(p,i){
+      var sn=(SITES.find(function(s){return s.id===p.site;})||{name:p.site||'—'}).name;
+      var hrs=p.inTime?Math.floor((Date.now()-new Date(p.inTime).getTime())/3600000)+'h':'—';
+      var sinceStr=p.inTime?new Date(p.inTime).toLocaleDateString('fr-CA'):'—';
+      var roleColor=p.role==='SURVEILLANT'?V.blue:(p.role==="CHEF D'EQUIPE"?V.gold:V.orange);
+      var isOv=p.inTime&&(Date.now()-new Date(p.inTime).getTime())>86400000;
+      var hrsStyle=isOv?'font-weight:700;color:'+V.red:'color:'+V.muted;
+      html+=tableRow([
+        '<span style="font-weight:600">'+esc(p.name)+'</span>',
+        '<span style="color:'+roleColor+';font-weight:600;font-size:9px">'+esc(p.role)+'</span>',
+        '<span style="color:'+V.muted+';font-size:9px">'+esc(p.region||'—')+'</span>',
+        esc(sn),
+        '<span style="font-family:JetBrains Mono,monospace;font-size:9px;color:'+V.muted+'">'+sinceStr+'</span>',
+        '<span style="'+hrsStyle+'">'+hrs+'</span>'
+      ],i);
+    });
+    html+='</table>';
+  }
+
+  /* ═══ INVENTAIRE TABLE ═══ */
+  if(showInventory&&circulatingItems.length){
+    html+=secHead('&#128230;','Inventaire en circulation — '+circulatingItems.length+' items');
+    html+='<table style="width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden">';
+    html+=tableHead(['ITEM','SÉRIE','SAUVETEUR','SITE','DEPUIS']);
+    circulatingItems.forEach(function(it,i){
+      html+=tableRow([
+        '<span style="font-weight:600">'+esc(it.item)+'</span>',
+        '<span style="font-family:JetBrains Mono,monospace;font-size:9px;color:'+V.muted+'">'+esc(it.serial||'—')+'</span>',
+        esc(it.sauveteur||'—'),
+        esc(it.site||'—'),
+        '<span style="font-family:JetBrains Mono,monospace;font-size:9px;color:'+V.muted+'">'+(it.timestamp?new Date(it.timestamp).toLocaleDateString('fr-CA'):'—')+'</span>'
+      ],i);
+    });
+    html+='</table>';
+  }
+
+  /* ═══ AUDIT TABLE ═══ */
+  if(showAudit&&auditLog.length){
+    html+=secHead('&#128209;','Traçabilité audit — '+Math.min(auditLog.length,50)+' dernières entrées');
+    html+='<table style="width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden">';
+    html+=tableHead(['TYPE','UTILISATEUR','DÉTAIL','DATE']);
+    auditLog.slice(0,50).forEach(function(a,i){
+      var typeColor=a.type==='PICK-ON'?V.green:(a.type==='PICK-OFF'?V.blue:(a.type==='URGENCE'?V.red:V.muted));
+      html+=tableRow([
+        '<span style="color:'+typeColor+';font-weight:700;font-size:9px;letter-spacing:1px">'+esc(a.type)+'</span>',
+        '<span style="font-weight:600">'+esc(a.user||'—')+'</span>',
+        '<span style="font-size:9px">'+esc((a.detail||'').substring(0,60))+'</span>',
+        '<span style="font-family:JetBrains Mono,monospace;font-size:8.5px;color:'+V.muted+'">'+(a.timestamp?new Date(a.timestamp).toLocaleString('fr-CA'):'—')+'</span>'
+      ],i);
+    });
+    html+='</table>';
+  }
+
+  /* ═══ MISSIONS ═══ */
+  if(showMissions&&plans.length){
+    html+=secHead('&#128203;','Plans de travail actifs — '+plans.length);
+    plans.slice(0,10).forEach(function(p,i){
+      html+='<div style="background:'+V.panel+';border:1px solid '+V.border+';border-radius:8px;padding:12px 16px;margin-bottom:8px;border-left:3px solid '+V.orange+'">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:center">';
+      html+='<div style="font-weight:700;font-size:12px;color:'+V.txt+'">'+esc(p.company||p.cie||'—')+'</div>';
+      html+='<div style="font-family:JetBrains Mono,monospace;font-size:9px;color:'+V.gold+'">'+esc(p.date||'')+'</div>';
+      html+='</div>';
+      if(p.chef||p.responsable) html+='<div style="font-size:9px;color:'+V.muted+';margin-top:4px">Chef: '+esc(p.chef||p.responsable)+'</div>';
+      html+='</div>';
+    });
+  }
+
+  html+='</div>'; /* end content area */
+
+  /* ─── SIGNATURE ─── */
+  html+='<div style="background:linear-gradient(135deg,'+V.bg+','+V.panel+');padding:24px;border-top:3px solid '+V.orange+'">';
+  html+='<div style="display:flex;gap:40px;justify-content:center">';
+  ['Superviseur','Date','Signature'].forEach(function(lbl){
+    html+='<div style="text-align:center;flex:1">';
+    html+='<div style="font-size:9px;color:'+V.muted+';letter-spacing:2px;text-transform:uppercase;margin-bottom:30px">'+lbl+'</div>';
+    html+='<div style="width:100%;border-bottom:1px solid '+V.muted+';margin-bottom:6px"></div>';
+    if(lbl==='Superviseur') html+='<div style="font-size:9px;color:'+V.gold+'">'+esc(userName)+'</div>';
+    else if(lbl==='Date') html+='<div style="font-size:9px;color:'+V.gold+'">'+esc(dateStr)+'</div>';
+    html+='</div>';
+  });
+  html+='</div></div>';
+
+  /* ─── FOOTER ─── */
+  html+='<div style="background:'+V.bg+';text-align:center;padding:12px 0;border-top:1px solid '+V.border+'">';
+  html+='<img src="'+(typeof VOLO_LOGO_B64!=="undefined"?VOLO_LOGO_B64:'eagle_tactic.png')+'" style="width:28px;height:28px;border-radius:50%;opacity:0.4" />';
+  html+='<div style="font-size:7px;color:'+V.muted+';letter-spacing:2px">VOLO CONSTRUCTION — GOLDEN EAGLES SST — CONFIDENTIEL — '+esc(dateStr)+' '+esc(timeStr)+'</div>';
+  html+='</div>';
+
+  html+='</div>'; /* end wrapper */
+
+  /* ═══ GENERATE PDF ═══ */
+  var container=document.createElement('div');
+  container.innerHTML=html;
+  container.style.position='absolute';
+  container.style.left='-9999px';
+  container.style.top='0';
+  container.style.width='210mm';
+  container.style.background=V.bg;
+  document.body.appendChild(container);
+
+  var imgs=container.querySelectorAll('img');
+  Promise.all([].slice.call(imgs).map(function(img){return img.complete?Promise.resolve():new Promise(function(r){img.onload=r;img.onerror=r})})).then(function(){
+
+  var fname='VOLO-GoldenEagles-'+(type==='personnel'?'Personnel':type==='inventory'?'Inventaire':'Rapport')+'-'+now.toISOString().slice(0,10)+'.pdf';
+
+  html2pdf().set({
+    margin:[5,5,8,5],
+    filename:fname,
+    image:{type:'jpeg',quality:0.95},
+    html2canvas:{scale:2.5,useCORS:true,allowTaint:true,backgroundColor:V.bg,logging:false},
+    jsPDF:{unit:'mm',format:'letter',orientation:'portrait'},
+    pagebreak:{mode:['css','legacy']}
+  }).from(container.firstElementChild).save().then(function(){
+    document.body.removeChild(container);
+    showToast('PDF telecharge: '+fname,'ok');
+  }).catch(function(err){
+    document.body.removeChild(container);
+    showToast('Erreur PDF: '+err.message,'err');
+    console.error(err);
+  });
+  }); // end Promise.all images
+}
+
+function exportCSV(){
+  var csv='Nom,Role,Region,Site,Depuis\n';
+  deployedPersonnel.forEach(function(p){
+    var sn=(SITES.find(function(s){return s.id===p.site;})||{name:p.site||''}).name;
+    csv+='"'+sanitizeCSV(p.name)+'","'+sanitizeCSV(p.role)+'","'+sanitizeCSV(p.region||'')+'","'+sanitizeCSV(sn)+'","'+(p.inTime||'')+'"\n';
+  });
+  csv+='\nItem,Serie,ID,Sauveteur,Site,Depuis,Statut\n';
+  circulatingItems.forEach(function(it){var hrs=it.timestamp?Math.floor((Date.now()-new Date(it.timestamp).getTime())/3600000):0;var st=hrs>=48?'+48H':hrs>=24?'+24H':'OK';csv+='"'+sanitizeCSV(it.item)+'","'+sanitizeCSV(it.serial||'')+'","'+sanitizeCSV(it.itemId||'')+'","'+sanitizeCSV(it.sauveteur||'')+'","'+sanitizeCSV(it.site||'')+'","'+(it.timestamp||'')+'","'+st+'"\n';});
+  downloadCSV(csv,'volo-dashboard-'+new Date().toISOString().slice(0,10)+'.csv');
+}
+function downloadCSV(csv,filename){
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  var link=document.createElement('a');
+  var url=URL.createObjectURL(blob);
+  link.href=url;link.download=filename;link.click();
+  setTimeout(function(){URL.revokeObjectURL(url);},1000);
+}
+
+function sendUrgence(){
+  showDsConfirm('🚨 ALERTE URGENCE','Envoyer une ALERTE URGENCE à toute l\'équipe?','ENVOYER L\'ALERTE',function(){
+    closeDsModal();
+    var user=checkAuth();
+    fetch(WEBHOOK_URGENCE,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'URGENCE',user:user?user.name:'Superviseur',userId:user?user.id:'',timestamp:new Date().toISOString(),source:'dashboard'})}).catch(function(){});
+    showToast('ALERTE URGENCE ENVOYEE','err');
+    focusUrgence=true;
+    document.getElementById('appContainer').classList.add('focus-urgence');
+    // Ajouter bouton LEVER L'ALERTE
+    var liftBtn=document.createElement('button');
+    liftBtn.textContent='\u2705 LEVER L\u0027ALERTE';
+    liftBtn.id='liftUrgenceBtn';
+    liftBtn.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;padding:14px 28px;border-radius:14px;background:var(--green,#27AE60);color:#fff;border:none;font-family:Oswald,sans-serif;font-size:.85rem;letter-spacing:2px;cursor:pointer;box-shadow:0 4px 20px rgba(39,174,96,.4);animation:breathe 2s ease-in-out infinite';
+    liftBtn.onclick=function(){
+      focusUrgence=false;
+      document.getElementById('appContainer').classList.remove('focus-urgence');
+      liftBtn.remove();
+      showToast('Alerte levee','info');
+    };
+    document.body.appendChild(liftBtn);
+  });
+}
+
+function showToast(msg,type){
+  var t=document.createElement('div');
+  t.className='toast toast-'+(type||'info');
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(function(){t.remove();},300);},3000);
+}
+
+// ── MODALS (remplacement confirm/prompt natifs) ──
+function closeDsModal(){var el=document.getElementById('ds-modal-overlay');if(el)el.remove();}
+function showDsConfirm(title,msg,btnText,onConfirm){
+  closeDsModal();
+  var el=document.createElement('div');el.id='ds-modal-overlay';el.className='ds-modal-overlay';
+  el.innerHTML='<div class="ds-modal"><h3 style="color:var(--rescue)">'+title+'</h3><p>'+msg+'</p><div class="ds-modal-btns"><button onclick="closeDsModal()" style="background:var(--card);color:var(--muted)">ANNULER</button><button id="ds-confirm-btn" style="background:rgba(192,57,43,.15);color:var(--red);border-color:rgba(192,57,43,.3)">'+btnText+'</button></div></div>';
+  document.body.appendChild(el);
+  document.getElementById('ds-confirm-btn').onclick=onConfirm;
+}
+function showDsPrompt(title,msg,btnText,onConfirm){
+  closeDsModal();
+  var el=document.createElement('div');el.id='ds-modal-overlay';el.className='ds-modal-overlay';
+  el.innerHTML='<div class="ds-modal"><h3 style="color:var(--rescue)">'+title+'</h3><p>'+msg+'</p><textarea id="ds-prompt-input" rows="3" placeholder="Note..."></textarea><div class="ds-modal-btns"><button onclick="closeDsModal()" style="background:var(--card);color:var(--muted)">ANNULER</button><button id="ds-prompt-btn" style="background:rgba(39,174,96,.15);color:var(--green);border-color:rgba(39,174,96,.3)">'+btnText+'</button></div></div>';
+  document.body.appendChild(el);
+  document.getElementById('ds-prompt-btn').onclick=function(){var v=(document.getElementById('ds-prompt-input').value||'').trim();onConfirm(v);};
+  setTimeout(function(){document.getElementById('ds-prompt-input').focus();},100);
+}
+</script>
+</body>
+</html>

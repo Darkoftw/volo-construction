@@ -3,11 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>VOLO SST — QR Inventaire</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="error-monitor.js?v=19"></script>
+<script src="data-inventory.js?v=19"></script>
 <style>
 /* ── DESIGN SYSTEM: TACTICAL EAGLE ── */
 :root{
@@ -18,7 +23,7 @@
   --gold:#D4A017; --goldL:#E8C547;
   --rescue:#E65100; --rescueL:#FF6D00; --rescueD:#BF360C; --rescueGlow:rgba(230,81,0,.15);
   --red:#C0392B; --green:#27AE60; --orange:#E67E22;
-  --txt:#F5F0EB; --muted:#B8A99A;
+  --txt:#F5F0EB; --muted:#C9BAA9;
   --border:rgba(68,40,46,.55);
   --blue:#3B82F6;
   --glow:0 0 30px rgba(230,81,0,.08);
@@ -32,7 +37,8 @@ body.light{
 }
 
 *{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
+html{scroll-behavior:smooth;overflow-x:hidden;}
+body{overflow-x:hidden;}
 
 /* ── NOISE TEXTURE ── */
 body::before{
@@ -78,18 +84,22 @@ body.light .header{background:rgba(248,250,252,.97);box-shadow:0 1px 0 var(--bor
 }
 .logo-img{
   width:36px;height:36px;
+  max-width:60px;max-height:60px;
   border-radius:50%;
   border:1.5px solid var(--rescue);
   object-fit:cover;
   flex-shrink:0;
+  margin-right:8px;
   filter:drop-shadow(0 0 6px rgba(230,81,0,.4));
 }
 .logo-fallback{
   width:36px;height:36px;
+  max-width:60px;max-height:60px;
   border-radius:50%;
   background:linear-gradient(135deg,var(--rescue),var(--rescueD));
   display:flex;align-items:center;justify-content:center;
   font-size:18px;flex-shrink:0;
+  margin-right:8px;
   border:1.5px solid var(--rescue);
   box-shadow:0 0 10px rgba(230,81,0,.3);
 }
@@ -106,7 +116,7 @@ body.light .header{background:rgba(248,250,252,.97);box-shadow:0 1px 0 var(--bor
   letter-spacing:.5px;margin-top:1px;
 }
 .header-actions{
-  display:flex;gap:6px;align-items:center;
+  display:flex;gap:6px;align-items:center;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;
 }
 
 /* ── BUTTONS ── */
@@ -218,7 +228,42 @@ body.light .tab{color:var(--muted);}
 body.light .tab:hover{background:var(--card2);color:var(--txt);}
 
 /* ── MAIN ── */
-.main{max-width:1200px;margin:0 auto;padding:20px;position:relative;z-index:1;}
+.main{max-width:1200px;margin:0 auto;padding:20px;position:relative;z-index:1;overflow-x:hidden;}
+
+/* ── QR SIZE SELECTOR ── */
+.qr-size-bar,.print-format-bar{
+  padding:8px 20px;
+  background:rgba(12,6,8,.6);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(8px);
+  transition:background .3s;
+}
+body.light .qr-size-bar,body.light .print-format-bar{background:rgba(241,245,249,.98);}
+.qr-size-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:8px;}
+.qr-size-label{
+  font-family:'Oswald',sans-serif;font-size:11px;font-weight:600;
+  letter-spacing:1.5px;color:var(--muted);margin-right:4px;
+}
+.qr-size-btn{
+  padding:8px 16px;
+  border-radius:20px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--muted);
+  font-family:'Oswald',sans-serif;
+  font-size:12px;font-weight:600;letter-spacing:.8px;
+  cursor:pointer;transition:all .15s;
+  min-height:40px;
+  display:flex;align-items:center;justify-content:center;
+}
+.qr-size-btn:hover{background:var(--card2);color:var(--txt);border-color:rgba(230,81,0,.35);}
+.qr-size-btn.active{
+  background:rgba(230,81,0,.12);
+  border-color:rgba(230,81,0,.5);
+  color:var(--rescueL);
+}
+body.light .qr-size-btn{color:var(--muted);background:rgba(255,255,255,.9);}
+body.light .qr-size-btn.active{background:rgba(230,81,0,.1);color:var(--rescue);}
 
 /* ── SECTION HEADER ── */
 .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
@@ -244,8 +289,9 @@ body.light .tab:hover{background:var(--card2);color:var(--txt);}
 /* ── CAISSE GRID ── */
 .caisse-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-  gap:10px;margin-bottom:24px;
+  grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));
+  gap:14px;margin-bottom:24px;
+  max-width:100%;overflow:hidden;
 }
 
 /* ── CAISSE CARD ── */
@@ -253,8 +299,9 @@ body.light .tab:hover{background:var(--card2);color:var(--txt);}
   background:var(--card);
   border:1px solid var(--border);
   border-radius:var(--radius);
-  padding:14px;cursor:pointer;
+  padding:16px;cursor:pointer;
   transition:all .15s ease;position:relative;overflow:hidden;
+  min-width:0;max-width:100%;word-break:break-word;
 }
 .caisse-card::before{
   content:'';position:absolute;top:0;left:0;right:0;height:2px;
@@ -270,16 +317,17 @@ body.light .tab:hover{background:var(--card2);color:var(--txt);}
 .caisse-card.selected::before{transform:scaleX(1);}
 body.light .caisse-card{box-shadow:0 1px 4px rgba(0,0,0,.06);}
 
-.cc-top{display:flex;flex-direction:column;align-items:center;margin-bottom:10px;gap:8px;}
+.cc-top{display:flex;flex-direction:column;align-items:center;margin-bottom:12px;gap:10px;}
 .cc-id{
-  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;
-  color:var(--muted);letter-spacing:.5px;align-self:flex-start;
+  font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;
+  color:var(--muted);letter-spacing:.5px;text-align:center;
 }
 .cc-qr-wrap{
-  width:100%;aspect-ratio:1;max-width:180px;
+  width:calc(var(--qr-size,150px) + 40px);height:calc(var(--qr-size,150px) + 40px);
   border-radius:8px;background:#fff;cursor:pointer;
-  box-shadow:0 0 0 3px rgba(212,160,23,.3);
-  display:flex;align-items:center;justify-content:center;padding:6px;
+  box-shadow:0 0 0 2px rgba(212,160,23,.3);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  flex-shrink:0;overflow:hidden;
 }
 .cc-qr-wrap canvas,.cc-qr-wrap img{
   width:100%!important;height:100%!important;
@@ -288,11 +336,11 @@ body.light .caisse-card{box-shadow:0 1px 4px rgba(0,0,0,.06);}
 }
 
 .cc-name{
-  font-family:'Oswald',sans-serif;font-size:15px;font-weight:600;letter-spacing:.5px;
-  color:var(--txt);margin-bottom:6px;line-height:1.25;
+  font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;letter-spacing:.5px;
+  color:var(--txt);margin-bottom:6px;line-height:1.25;text-align:center;
 }
-.cc-icons{font-size:14px;margin-bottom:6px;letter-spacing:2px;}
-.cc-preview{font-size:12px;color:var(--muted);line-height:1.6;}
+.cc-icons{font-size:14px;margin-bottom:6px;letter-spacing:2px;text-align:center;}
+.cc-preview{font-size:13px;color:var(--muted);line-height:1.6;}
 .cc-preview span{
   display:inline-block;
   background:rgba(68,40,46,.45);border-radius:4px;
@@ -307,21 +355,23 @@ body.light .cc-preview span{background:rgba(100,116,139,.1);color:#475569;}
 .cc-drill{font-size:11px;color:var(--rescueL);font-weight:600;display:flex;align-items:center;gap:3px;}
 
 /* ── ITEMS (drill-down) ── */
-.items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;}
+.items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));gap:14px;max-width:100%;overflow:hidden;}
 .item-card{
   background:var(--card);border:1px solid var(--border);
-  border-radius:var(--radius);padding:12px;cursor:pointer;transition:all .15s;
+  border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .15s;
+  min-width:0;max-width:100%;word-break:break-word;overflow:hidden;
 }
 .item-card:hover{background:var(--card2);border-color:rgba(230,81,0,.3);}
 .item-card.selected{border-color:var(--rescue);background:rgba(230,81,0,.05);}
 body.light .item-card{box-shadow:0 1px 4px rgba(0,0,0,.06);}
-.ic-top{display:flex;flex-direction:column;align-items:center;margin-bottom:8px;gap:8px;}
+.ic-top{display:flex;flex-direction:column;align-items:center;margin-bottom:10px;gap:10px;}
 .ic-icon{font-size:22px;align-self:flex-start;}
 .ic-qr-wrap{
-  width:100%;aspect-ratio:1;max-width:180px;
+  width:calc(var(--qr-size,150px) + 40px);height:calc(var(--qr-size,150px) + 40px);
   border-radius:8px;background:#fff;cursor:pointer;
-  box-shadow:0 0 0 3px rgba(212,160,23,.3);
-  display:flex;align-items:center;justify-content:center;padding:6px;
+  box-shadow:0 0 0 2px rgba(212,160,23,.3);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  flex-shrink:0;overflow:hidden;
 }
 .ic-qr-wrap canvas,.ic-qr-wrap img{
   width:100%!important;height:100%!important;
@@ -345,14 +395,14 @@ body.light .item-card{box-shadow:0 1px 4px rgba(0,0,0,.06);}
   box-shadow:0 0 0 2px var(--rescue),0 4px 20px rgba(230,81,0,.15),inset 0 1px 0 rgba(255,255,255,.06);
 }
 .ic-id{
-  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;
-  color:var(--muted);letter-spacing:.5px;margin-bottom:4px;
+  font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;
+  color:var(--muted);letter-spacing:.5px;margin-bottom:4px;text-align:center;
 }
 .ic-name{
-  font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;letter-spacing:.3px;
-  color:var(--txt);margin-bottom:4px;line-height:1.3;
+  font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;letter-spacing:.3px;
+  color:var(--txt);margin-bottom:4px;line-height:1.3;text-align:center;
 }
-.ic-desc{font-size:11px;color:var(--muted);margin-bottom:6px;}
+.ic-desc{font-size:13px;color:var(--muted);margin-bottom:6px;text-align:center;}
 .ic-footer{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border);}
 .ic-etat{font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;font-family:'Oswald',sans-serif;letter-spacing:.5px;}
 .ic-etat.bon{color:var(--green);background:rgba(39,174,96,.12);}
@@ -384,6 +434,7 @@ body.light .back-row{background:#fff;}
   padding:12px 20px;
   transform:translateY(100%);
   transition:transform .2s ease;
+  overflow-x:hidden;
 }
 .sel-bar.visible{transform:translateY(0);}
 body.light .sel-bar{background:rgba(248,250,252,.98);}
@@ -509,13 +560,134 @@ body.light .toast{background:#fff;color:#0F172A;box-shadow:0 4px 20px rgba(0,0,0
 .theme-pill button.active{background:rgba(230,81,0,.15);color:var(--rescueL);}
 .theme-pill button:hover:not(.active){color:var(--txt);}
 
+/* ── SCANNER MODAL ── */
+.scan-overlay{
+  display:none;position:fixed;inset:0;z-index:9999;
+  background:rgba(12,6,8,.96);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  flex-direction:column;align-items:center;justify-content:center;
+  padding:20px;
+}
+.scan-overlay.open{display:flex;}
+.scan-header{
+  width:100%;max-width:500px;
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;
+}
+.scan-title{
+  font-family:'Oswald',sans-serif;font-size:20px;font-weight:600;
+  letter-spacing:.04em;color:var(--rescueL);
+}
+.scan-close{
+  background:rgba(192,57,43,.15);border:1px solid rgba(192,57,43,.4);
+  color:var(--red);border-radius:var(--radius-sm);
+  padding:8px 16px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;
+  cursor:pointer;transition:all .15s;
+}
+.scan-close:hover{background:rgba(192,57,43,.25);color:#fff;}
+#scan-reader{
+  width:100%;max-width:500px;
+  border-radius:var(--radius);overflow:hidden;
+  border:2px solid var(--border);
+  min-height:300px;
+}
+#scan-reader video{width:100%!important;height:auto!important;border-radius:var(--radius);}
+#scan-reader img[alt="Info icon"]{display:none!important;}
+#scan-reader #qr-shaded-region{border-color:rgba(230,81,0,.5)!important;}
+#scan-reader div[style*="border-width"]{border-color:var(--rescue)!important;}
+.scan-result{
+  width:100%;max-width:500px;margin-top:16px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;
+  display:none;
+}
+.scan-result.visible{display:block;}
+.scan-result-title{
+  font-family:'Oswald',sans-serif;font-size:18px;font-weight:600;
+  color:var(--txt);margin-bottom:6px;
+}
+.scan-result-meta{font-size:13px;color:var(--muted);line-height:1.6;}
+.scan-result-meta span{
+  display:inline-block;padding:2px 8px;border-radius:6px;
+  background:rgba(230,81,0,.12);color:var(--rescueL);
+  font-weight:600;margin-right:6px;
+}
+.scan-result-warn{
+  color:var(--gold);font-weight:600;font-size:14px;
+  text-align:center;margin-top:12px;display:none;
+}
+.scan-result-warn.visible{display:block;}
+.scan-again{
+  margin-top:12px;width:100%;max-width:500px;
+  background:linear-gradient(135deg,var(--rescue),var(--rescueD));
+  border:none;color:#fff;border-radius:var(--radius-sm);
+  padding:12px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;
+  cursor:pointer;display:none;transition:all .15s;
+}
+.scan-again.visible{display:block;}
+.scan-again:hover{filter:brightness(1.1);}
+
 /* ── PRINT ── */
 @media print{
-  .header,.search-bar,.tabs-wrap,.sel-bar,.modal-overlay,.lex-modal,.theme-pill,.btn,.back-row{display:none!important;}
-  .main{padding:0;}body{background:#fff!important;color:#000!important;}
-  .caisse-card,.item-card{background:#fff!important;border:1px solid #ccc!important;break-inside:avoid;}
-  .gold-bar{display:none!important;}
-  @page{margin:1cm;}
+  .header,.search-bar,.tabs-wrap,.qr-size-bar,.sel-bar,.modal-overlay,.lex-modal,.theme-pill,.btn,.back-row,.gold-bar,.theme-pill,.section-header,.print-format-bar,.scan-overlay{display:none!important;}
+  body{background:#fff!important;color:#000!important;overflow:visible!important;}
+  body::before{display:none!important;}
+  .main{padding:5px!important;max-width:100%!important;overflow:visible!important;}
+  .caisse-grid,.items-grid{
+    display:grid!important;
+    gap:8px!important;
+    max-width:100%!important;
+    overflow:visible!important;
+  }
+  /* Print format classes */
+  .print-2col .caisse-grid,.print-2col .items-grid{grid-template-columns:1fr 1fr!important;gap:12px!important;}
+  .print-3col .caisse-grid,.print-3col .items-grid{grid-template-columns:1fr 1fr 1fr!important;gap:6px!important;}
+  .print-4col .caisse-grid,.print-4col .items-grid{grid-template-columns:1fr 1fr 1fr 1fr!important;gap:4px!important;}
+  /* Default to 3 columns */
+  .caisse-grid,.items-grid{grid-template-columns:1fr 1fr 1fr!important;}
+  .caisse-card,.item-card{
+    background:#fff!important;border:1px solid #ccc!important;
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+    padding:8px!important;
+    overflow:visible!important;
+    min-height:0!important;
+  }
+  .item-card[data-sac-color]{
+    border-left:4px solid var(--sac-border)!important;
+  }
+  .cc-qr-wrap,.ic-qr-wrap{
+    background:#fff!important;
+    padding:6px!important;
+    box-shadow:none!important;
+    border:1px solid #ddd!important;
+    overflow:visible!important;
+    width:auto!important;height:auto!important;
+    max-width:80px!important;max-height:80px!important;
+  }
+  .cc-qr-wrap canvas,.cc-qr-wrap img,
+  .ic-qr-wrap canvas,.ic-qr-wrap img{
+    width:60px!important;height:60px!important;
+    max-width:60px!important;max-height:60px!important;
+  }
+  /* 2col = bigger QR */
+  .print-2col .cc-qr-wrap,.print-2col .ic-qr-wrap{max-width:100px!important;max-height:100px!important;padding:8px!important;}
+  .print-2col .cc-qr-wrap canvas,.print-2col .cc-qr-wrap img,
+  .print-2col .ic-qr-wrap canvas,.print-2col .ic-qr-wrap img{width:80px!important;height:80px!important;max-width:80px!important;max-height:80px!important;}
+  /* 4col = tiny QR */
+  .print-4col .cc-qr-wrap,.print-4col .ic-qr-wrap{max-width:50px!important;max-height:50px!important;padding:3px!important;}
+  .print-4col .cc-qr-wrap canvas,.print-4col .cc-qr-wrap img,
+  .print-4col .ic-qr-wrap canvas,.print-4col .ic-qr-wrap img{width:42px!important;height:42px!important;max-width:42px!important;max-height:42px!important;}
+  .print-4col .cc-name,.print-4col .ic-name{font-size:9px!important;}
+  .print-4col .cc-id,.print-4col .ic-id{font-size:8px!important;}
+  .print-4col .cc-icons,.print-4col .cc-preview,.print-4col .ic-desc,.print-4col .cc-footer,.print-4col .ic-footer{font-size:7px!important;}
+  .cc-name,.ic-name{font-size:13px!important;font-weight:700!important;color:#000!important;}
+  .cc-id,.ic-id{font-size:9px!important;color:#333!important;}
+  .cc-icons,.cc-preview,.ic-desc{font-size:9px!important;}
+  .cc-footer,.ic-footer{font-size:8px!important;}
+  .ic-top{gap:4px!important;margin-bottom:4px!important;}
+  .ic-icon{font-size:14px!important;}
+  @page{margin:1cm;size:letter portrait;}
 }
 
 /* ── EMPTY STATE ── */
@@ -535,6 +707,10 @@ body.light .toast{background:#fff;color:#0F172A;box-shadow:0 4px 20px rgba(0,0,0
 </style>
 </head>
 <body>
+<div id="pickOnActiveBanner"></div>
+<script>
+(function(){try{var h=JSON.parse(localStorage.getItem('volo_history')||'[]'),closed=new Set();h.forEach(function(tx){if(tx.statut==='ANNULÉ'||tx.statut==='RETOURNÉ')closed.add((tx.original_timestamp||tx.timestamp)+tx.sauveteur_id)});var active=h.filter(function(tx){return tx.statut==='ACTIF'&&tx.mode==='PICK-ON'&&!closed.has(tx.timestamp+tx.sauveteur_id)});if(active.length===0)return;var totalItems=active.reduce(function(n,tx){try{return n+JSON.parse(tx.items||'[]').length}catch(e){return n}},0);document.getElementById('pickOnActiveBanner').innerHTML='<div onclick="window.location.href=\'index.html\'" style="position:sticky;top:0;z-index:9999;padding:10px 16px;background:linear-gradient(135deg,rgba(230,81,0,.95),rgba(192,57,43,.9));color:#fff;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:2px solid #E65100"><span style="font-size:20px">⚠️</span><div style="flex:1"><div style="font-weight:800;font-size:13px;letter-spacing:1px;font-family:Oswald,sans-serif">PICK ON ACTIF — '+totalItems+' item'+(totalItems>1?'s':'')+' sorti'+(totalItems>1?'s':'')+'</div><div style="font-size:10px;opacity:.85">Toucher pour retourner au Pick-Off</div></div><span style="font-size:16px">→</span></div>';}catch(e){}})();
+</script>
 
 <!-- GOLD BAR -->
 <div class="gold-bar"></div>
@@ -552,9 +728,10 @@ body.light .toast{background:#fff;color:#0F172A;box-shadow:0 4px 20px rgba(0,0,0
     <div class="header-actions">
       <button class="btn" onclick="window.location.href='index.html'" title="Retour à l'accueil">← Accueil</button>
       <button class="btn btn-ghost-gold" id="btn-lexique">📋 Lexique</button>
+      <button class="btn btn-ghost-rescue" id="btn-scan" onclick="openScanModal()">📷 Scanner</button>
       <button class="btn btn-ghost-rescue" id="btn-print">🖨 Imprimer</button>
       <button class="btn btn-ghost-rescue" id="btn-export">↓ Exporter</button>
-      <button class="btn-round" id="btn-add" title="Ajouter un item">+</button>
+      <button class="btn-round" id="btn-add" title="Ajouter un item" aria-label="Ajouter un item">+</button>
     </div>
   </div>
 </div>
@@ -565,7 +742,7 @@ body.light .toast{background:#fff;color:#0F172A;box-shadow:0 4px 20px rgba(0,0,0
     <div class="search-input-wrap">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input type="text" class="search-input" id="search" placeholder="Rechercher — préfixe, nom, caisse, contenu...">
-      <button class="search-clear" id="search-clear">×</button>
+      <button class="search-clear" id="search-clear" aria-label="Effacer la recherche">×</button>
     </div>
   </div>
 </div>
@@ -574,6 +751,39 @@ body.light .toast{background:#fff;color:#0F172A;box-shadow:0 4px 20px rgba(0,0,0
 <div class="tabs-wrap">
   <div class="tabs" id="tabs">
     <button class="tab active" data-cat="">TOUT</button>
+  </div>
+</div>
+
+<!-- QR SIZE SELECTOR -->
+<div class="qr-size-bar">
+  <div class="qr-size-inner">
+    <span class="qr-size-label">TAILLE QR</span>
+    <button class="qr-size-btn active" data-qr-size="90" id="qr-s">PETIT</button>
+    <button class="qr-size-btn" data-qr-size="120" id="qr-m">MOYEN</button>
+    <button class="qr-size-btn" data-qr-size="150" id="qr-l">GRAND</button>
+  </div>
+</div>
+
+<!-- PRINT FORMAT SELECTOR -->
+<div class="print-format-bar">
+  <div class="qr-size-inner">
+    <span class="qr-size-label">FORMAT IMPRESSION</span>
+    <button class="qr-size-btn" data-print-fmt="print-2col">2 COL</button>
+    <button class="qr-size-btn active" data-print-fmt="print-3col">3 COL</button>
+    <button class="qr-size-btn" data-print-fmt="print-4col">4 COL</button>
+  </div>
+</div>
+
+<!-- ID FORMAT SELECTOR -->
+<div class="qr-size-bar">
+  <div class="qr-size-inner">
+    <span class="qr-size-label">IDENTIFICATION</span>
+    <label style="color:var(--muted);font-size:13px;display:flex;align-items:center;gap:6px;">
+      <select id="qrIdFormat" onchange="setQrIdFormat(this.value)" style="background:var(--card);color:var(--txt);border:1px solid var(--border);padding:6px 12px;border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;min-height:40px;cursor:pointer;">
+        <option value="volo_id">VOLO ID (V0205)</option>
+        <option value="sauv_id">SAUV ID (SAUV-JM-205)</option>
+      </select>
+    </label>
   </div>
 </div>
 
@@ -635,11 +845,11 @@ body.light .toast{background:#fff;color:#0F172A;box-shadow:0 4px 20px rgba(0,0,0
 
 <!-- THEME TOGGLE -->
 <div class="theme-pill">
-  <button id="th-dark" class="active" title="Mode sombre">🌙</button>
-  <button id="th-light" title="Mode clair">☀️</button>
+  <button id="th-dark" class="active" title="Mode sombre" aria-label="Mode sombre">🌙</button>
+  <button id="th-light" title="Mode clair" aria-label="Mode clair">☀️</button>
 </div>
 
-<audio id="snd" src="eagle.mp3" preload="auto"></audio>
+<audio id="snd" src="eagle.mp3" preload="none"></audio>
 
 <script>
 // ── DATA ──────────────────────────────────────────────────────────────────
@@ -708,22 +918,42 @@ function getCatIcon(cat){
   return '📦';
 }
 
+// V9.4: Filter destroyed items
+(function(){try{const d=JSON.parse(localStorage.getItem('volo_destroyed')||'[]');if(d.length&&typeof ITEMS!=='undefined'){const s=new Set(d);for(let i=ITEMS.length-1;i>=0;i--){if(s.has(ITEMS[i].id))ITEMS.splice(i,1);}if(typeof CAISSES!=='undefined')CAISSES.forEach(c=>{if(c.items_contenus){c.items_contenus=c.items_contenus.filter(id=>!s.has(id));c.count=c.items_contenus.length;}});}}catch(e){}})();
+
+// COULEUR_HEX déclaré dans data-inventory.js — ne pas re-déclarer ici
+const COULEUR_EMOJI = {Bleu:"🔵", Vert:"🟢", Rouge:"🔴", Jaune:"🟡"};
+
 // Build CAISSES depuis ITEMS data.js
 function buildCaisses(){
+  // Mapper nom catégorie → vrai ID CAISSES de data.js
+  const caisseIdByName = {};
+  if(typeof CAISSES!=='undefined'){
+    CAISSES.forEach(function(c){ caisseIdByName[(c.nom||c.name||'').toUpperCase()] = c.id; });
+  }
   const map = {};
   (typeof ITEMS!=='undefined'?ITEMS:[]).forEach(it=>{
     const cat = it.cat||'Autre';
-    if(!map[cat]) map[cat]={
-      id:'CAT-'+cat.replace(/[^A-Z0-9]/gi,'-').toUpperCase(),
-      nom:cat, cat:cat,
-      icons:getCatIcon(cat)+' '+getCatIcon(cat),
-      items:[]
-    };
+    if(!map[cat]){
+      const realId = caisseIdByName[cat.toUpperCase()] || ('CAT-'+cat.replace(/[^A-Z0-9]/gi,'-').toUpperCase());
+      map[cat]={
+        id:realId,
+        nom:cat, cat:cat,
+        icons:getCatIcon(cat)+' '+getCatIcon(cat),
+        items:[]
+      };
+    }
+    // Priority: item.couleur → SAC_COLORS by category → null
+    const itemHex = it.couleur ? COULEUR_HEX[it.couleur] : null;
+    const itemColorName = it.couleur || null;
+    const sc = (typeof SAC_COLORS!=='undefined') ? SAC_COLORS[cat] : null;
     map[cat].items.push({
       id:it.id, nom:it.name||it.nom||it.id,
       desc:it.desc||'', fab:it.fab||'',
       qty:1, etat:mapEtat(it.etat||'Bon'),
-      serial:it.serial||'', volo_id:it.volo_id||''
+      serial:it.serial||'', volo_id:it.volo_id||'',
+      sacColor: itemHex || (sc ? sc.hex : null),
+      sacColorName: itemColorName || (sc ? sc.name : null)
     });
   });
   return Object.values(map);
@@ -831,22 +1061,23 @@ const CAISSES_PLACEHOLDER = [ // fallback si data.js absent
 ];
 
 // ── QR URL BASE ──
-const QR_BASE = 'https://voloinv7.netlify.app/?id=';
+const QR_BASE = 'https://roaring-faloodeh-6fd590.netlify.app/?id=';
 
 // ── STATE ──
-let CAISSES = [];
+let QR_CAISSES = [];
 let currentView = 'caisses'; // 'caisses' | 'items'
 let currentCaisse = null;
 let selected = new Set();
 let searchQ = '';
 let activeTab = '';
 let allItems = [];
+let qrSize = 90; // PETIT default (reduced 40%)
 
 // Build CAISSES + allItems depuis data.js au load
 function initData(){
-  CAISSES = (typeof ITEMS!=='undefined'&&ITEMS.length) ? buildCaisses() : CAISSES_PLACEHOLDER;
+  QR_CAISSES = (typeof ITEMS!=='undefined'&&ITEMS.length) ? buildCaisses() : CAISSES_PLACEHOLDER;
   allItems = [];
-  CAISSES.forEach(c=>{
+  QR_CAISSES.forEach(c=>{
     c.items.forEach(it=>{
       allItems.push({...it, caisse:c.id, caisseName:c.nom, cat:c.cat});
     });
@@ -855,11 +1086,20 @@ function initData(){
 
 
 
+// ── QR ID FORMAT ──
+var qrIdFormat = 'volo_id';
+function setQrIdFormat(fmt){
+  qrIdFormat = fmt;
+  renderView();
+}
+
 // ── INIT ──
 function init(){
   initData();
   applyTheme();
+  document.documentElement.style.setProperty('--qr-size', qrSize + 'px');
   buildTabs();
+  document.body.classList.add('print-3col');
   renderView();
   buildLexique();
   bindEvents();
@@ -873,7 +1113,7 @@ function applyTheme(){
 }
 
 function buildTabs(){
-  const cats = ['', ...new Set(CAISSES.map(c=>c.cat))];
+  const cats = ['', ...new Set(QR_CAISSES.map(c=>c.cat))];
   const wrap = document.getElementById('tabs');
   wrap.innerHTML = cats.map(c=>`
     <button class="tab${c===activeTab?' active':''}" data-cat="${c}">
@@ -890,7 +1130,7 @@ function buildTabs(){
 }
 
 function getFilteredCaisses(){
-  let list = CAISSES;
+  let list = QR_CAISSES;
   if(activeTab) list = list.filter(c=>c.cat===activeTab);
   if(searchQ){
     const q = searchQ.toLowerCase();
@@ -927,6 +1167,9 @@ function renderCaisses(){
     el.className = 'caisse-card'+(selected.has(c.id)?' selected':'');
     el.dataset.id = c.id;
     const preview = c.items.slice(0,4).map(it=>`<span>${it.nom.split(' ').slice(0,3).join(' ')}</span>`).join('');
+    const cSac = (typeof SAC_COLORS!=='undefined') ? SAC_COLORS[c.cat] : null;
+    const cBadge = cSac ? `<span style="display:inline-block;background:${cSac.hex};color:#000;font-weight:700;font-size:11px;padding:2px 10px;border-radius:10px;margin-top:4px;">● Tape ${cSac.name}</span>` : '';
+    if(cSac) el.style.borderLeft = `4px solid ${cSac.hex}`;
     el.innerHTML=`
       <div class="cc-top">
         <div class="cc-qr-wrap" id="qr-${c.id}" onclick="event.stopPropagation();openQrZoom('${c.id}','${c.nom}')"></div>
@@ -934,6 +1177,7 @@ function renderCaisses(){
       </div>
       <div class="cc-icons">${c.icons}</div>
       <div class="cc-name">${c.nom}</div>
+      ${cBadge}
       <div class="cc-preview">${preview}</div>
       <div class="cc-footer">
         <span class="cc-count">${c.items.length} items</span>
@@ -947,7 +1191,7 @@ function renderCaisses(){
     });
     el.querySelector('.cc-drill').parentElement.querySelector('.cc-drill').addEventListener('click',()=>drillDown(c));
     grid.appendChild(el);
-    setTimeout(()=>genQR(`qr-${c.id}`, QR_BASE+c.id, 150), 50);
+    setTimeout(()=>genQR(`qr-${c.id}`, QR_BASE+c.id, qrSize), 50);
   });
 }
 
@@ -986,13 +1230,24 @@ function renderItems(caisse){
   items.forEach(it=>{
     const el = document.createElement('div');
     el.className='item-card'+(selected.has(it.id)?' selected':'');
+    const colorEmoji = it.sacColorName ? (COULEUR_EMOJI[it.sacColorName]||'●') : '●';
+    const colorBadge = it.sacColor
+      ? `<span style="display:inline-block;background:${it.sacColor}22;color:${it.sacColor};font-weight:700;font-size:11px;padding:2px 8px;border-radius:10px;margin-top:4px;border:1px solid ${it.sacColor}44;">${colorEmoji} ${it.sacColorName}</span>`
+      : '';
+    if(it.sacColor){
+      el.setAttribute('data-sac-color', it.sacColorName);
+      el.style.setProperty('--sac-border', it.sacColor);
+      el.style.borderLeft = '4px solid ' + it.sacColor;
+    }
+    var displayId = (qrIdFormat === 'volo_id' && it.volo_id) ? it.volo_id : it.id;
     el.innerHTML=`
       <div class="ic-top">
         <div class="ic-qr-wrap" id="qr-${it.id}" onclick="event.stopPropagation();openQrZoom('${it.id}','${it.nom}')"></div>
-        <div class="ic-id">${it.id}</div>
+        <div class="ic-id">${displayId}</div>
       </div>
       <div class="ic-name">${it.nom}</div>
       <div class="ic-desc">${it.desc}</div>
+      ${colorBadge}
       <div class="ic-footer">
         <span class="ic-etat ${it.etat}">${it.etat==='bon'?'✓ BON':it.etat==='warn'?'⚠ VÉRIF':'✗ DÉFAUT'}</span>
         <span class="ic-qty">×${it.qty}</span>
@@ -1003,7 +1258,7 @@ function renderItems(caisse){
       updateSelBar();
     });
     grid.appendChild(el);
-    setTimeout(()=>genQR(`qr-${it.id}`, QR_BASE+it.id, 150), 50);
+    setTimeout(()=>genQR(`qr-${it.id}`, QR_BASE+it.id, qrSize), 50);
   });
 }
 
@@ -1076,8 +1331,40 @@ function closeQrZoom(){
   document.body.style.overflow = '';
 }
 
+function applyQrSize(size){
+  qrSize = size;
+  document.documentElement.style.setProperty('--qr-size', size + 'px');
+  document.querySelectorAll('[data-qr-size]').forEach(b=>{
+    b.classList.toggle('active', parseInt(b.dataset.qrSize) === size);
+  });
+  // Adjust item name font size based on QR size
+  var nameFontSize = size <= 90 ? '16px' : size >= 150 ? '22px' : '20px';
+  document.documentElement.style.setProperty('--qr-name-size', nameFontSize);
+  renderView();
+}
+
+let currentPrintFmt = 'print-3col';
+function applyPrintFmt(fmt){
+  document.body.classList.remove('print-2col','print-3col','print-4col');
+  document.body.classList.add(fmt);
+  currentPrintFmt = fmt;
+  document.querySelectorAll('[data-print-fmt]').forEach(b=>{
+    b.classList.toggle('active', b.dataset.printFmt === fmt);
+  });
+}
+
 // ── BIND EVENTS ──
 function bindEvents(){
+  // QR Size selector
+  document.querySelectorAll('[data-qr-size]').forEach(btn=>{
+    btn.addEventListener('click',()=>applyQrSize(parseInt(btn.dataset.qrSize)));
+  });
+
+  // Print format selector
+  document.querySelectorAll('[data-print-fmt]').forEach(btn=>{
+    btn.addEventListener('click',()=>applyPrintFmt(btn.dataset.printFmt));
+  });
+
   // Search
   const inp = document.getElementById('search');
   const clr = document.getElementById('search-clear');
@@ -1100,7 +1387,7 @@ function bindEvents(){
 
   // Export
   document.getElementById('btn-export').addEventListener('click',()=>{
-    const exportData = (typeof ITEMS!=='undefined') ? ITEMS : CAISSES;
+    const exportData = (typeof ITEMS!=='undefined') ? ITEMS : QR_CAISSES;
     const blob = new Blob([JSON.stringify(exportData, null, 2)],{type:'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1113,7 +1400,7 @@ function bindEvents(){
   // Add modal
   document.getElementById('btn-add').addEventListener('click',()=>{
     const sel=document.getElementById('inp-cat');
-    sel.innerHTML=CAISSES.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
+    sel.innerHTML=QR_CAISSES.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
     document.getElementById('modal').classList.add('open');
   });
   document.getElementById('btn-cancel').addEventListener('click',()=>document.getElementById('modal').classList.remove('open'));
@@ -1125,7 +1412,7 @@ function bindEvents(){
     const desc=document.getElementById('inp-desc').value.trim();
     const fab=document.getElementById('inp-fab').value.trim();
     const qty=parseInt(document.getElementById('inp-qty').value)||1;
-    const caisse=CAISSES.find(c=>c.id===cat);
+    const caisse=QR_CAISSES.find(c=>c.id===cat);
     if(!caisse) return;
     const prefix=caisse.id.replace('CAISSE-','');
     const newId=`${prefix}-${String(caisse.items.length+1).padStart(3,'0')}`;
@@ -1154,7 +1441,195 @@ function setTheme(t){
   document.getElementById('th-light').classList.toggle('active',t==='light');
 }
 
+// ── QR SCANNER (getUserMedia + jsQR) ──
+let _scanStream = null;
+let _scanVideo = null;
+let _scanAnim = null;
+let _scanFound = false;
+
+function openScanModal(){
+  document.getElementById('scan-overlay').classList.add('open');
+  document.getElementById('scan-result').classList.remove('visible');
+  document.getElementById('scan-result-warn').classList.remove('visible');
+  document.getElementById('scan-again').classList.remove('visible');
+  _scanFound = false;
+  startScanner();
+}
+
+function closeScanModal(){
+  document.getElementById('scan-overlay').classList.remove('open');
+  stopScanner();
+}
+
+async function startScanner(){
+  stopScanner();
+  _scanFound = false;
+  var reader = document.getElementById('scan-reader');
+  reader.innerHTML =
+    '<div style="position:relative;width:100%;aspect-ratio:1;background:#000;border-radius:12px;overflow:hidden">' +
+      '<video id="scan-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:block"></video>' +
+      '<canvas id="scan-canvas" style="display:none"></canvas>' +
+      '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">' +
+        '<div id="scan-box" style="width:72%;max-width:260px;aspect-ratio:1;border:3px solid var(--gold);border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.4);position:relative">' +
+          '<div style="position:absolute;top:-3px;left:-3px;width:24px;height:24px;border-top:4px solid var(--rescue);border-left:4px solid var(--rescue);border-radius:4px 0 0 0"></div>' +
+          '<div style="position:absolute;top:-3px;right:-3px;width:24px;height:24px;border-top:4px solid var(--rescue);border-right:4px solid var(--rescue);border-radius:0 4px 0 0"></div>' +
+          '<div style="position:absolute;bottom:-3px;left:-3px;width:24px;height:24px;border-bottom:4px solid var(--rescue);border-left:4px solid var(--rescue);border-radius:0 0 0 4px"></div>' +
+          '<div style="position:absolute;bottom:-3px;right:-3px;width:24px;height:24px;border-bottom:4px solid var(--rescue);border-right:4px solid var(--rescue);border-radius:0 0 4px 0"></div>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div id="scan-status" style="font-size:12px;color:var(--muted);text-align:center;margin-top:8px">Activation caméra…</div>';
+
+  var video = document.getElementById('scan-video');
+  var status = document.getElementById('scan-status');
+  _scanVideo = video;
+
+  try {
+    var stream;
+    var constraints = [
+      {video:{facingMode:{exact:'environment'},width:{ideal:1280},height:{ideal:720}}},
+      {video:{facingMode:'environment'}},
+      {video:true}
+    ];
+    for(var i=0;i<constraints.length;i++){
+      try{ stream = await navigator.mediaDevices.getUserMedia(constraints[i]); break; }catch(e){}
+    }
+    if(!stream) throw new Error('no stream');
+    _scanStream = stream;
+    video.srcObject = stream;
+    await video.play();
+    var jsqrOk = typeof jsQR !== 'undefined';
+    if(status) status.textContent = jsqrOk ? '' : '❌ jsQR non chargé — vide le cache';
+
+    var canvas = document.getElementById('scan-canvas');
+    var ctx = canvas.getContext('2d',{willReadFrequently:true});
+    function scanLoop(){
+      if(_scanFound || !_scanStream || !video || video.readyState < 2){
+        if(!_scanFound) _scanAnim = requestAnimationFrame(scanLoop);
+        return;
+      }
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      ctx.drawImage(video, 0, 0);
+      if(typeof jsQR !== 'undefined'){
+        var img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        var code = jsQR(img.data, img.width, img.height, {inversionAttempts:'attemptBoth'});
+        if(code && code.data){
+          var box = document.getElementById('scan-box');
+          if(box) box.style.borderColor = 'var(--green)';
+          _scanFound = true;
+          onScanSuccess(code.data);
+          return;
+        }
+      }
+      _scanAnim = requestAnimationFrame(scanLoop);
+    }
+    _scanAnim = requestAnimationFrame(scanLoop);
+
+  } catch(err){
+    reader.innerHTML = '<div style="padding:30px;text-align:center"><div style="color:var(--red);font-size:15px;margin-bottom:10px">⚠️ Caméra non disponible</div><div style="color:var(--muted);font-size:13px">Autorise la caméra dans ton navigateur</div></div>';
+  }
+}
+
+function stopScanner(){
+  if(_scanAnim){ cancelAnimationFrame(_scanAnim); _scanAnim = null; }
+  if(_scanStream){ _scanStream.getTracks().forEach(function(t){t.stop();}); _scanStream = null; }
+  if(_scanVideo){ _scanVideo.srcObject = null; _scanVideo = null; }
+}
+
+var _lastScannedQr = '';
+var _scanCooldown = false;
+
+function onScanSuccess(decodedText){
+  // Scan rafale — ne PAS stopper le scanner, juste pause 1.5s pour éviter les doublons
+  if(_scanCooldown || decodedText === _lastScannedQr) return;
+  _scanCooldown = true;
+  _lastScannedQr = decodedText;
+  setTimeout(function(){ _scanCooldown = false; _lastScannedQr = ''; }, 1500);
+
+  // Extract ID from URL or raw text
+  let itemId = decodedText;
+  if(decodedText.includes('?id=')){
+    itemId = decodedText.split('?id=').pop();
+  }
+  itemId = decodeURIComponent(itemId).trim();
+
+  // Search in ITEMS
+  let found = null;
+  if(typeof ITEMS !== 'undefined'){
+    found = ITEMS.find(function(it){ return it.id === itemId; });
+  }
+  // Search in allItems (includes caisse info)
+  let caisseInfo = null;
+  if(found){
+    const ai = allItems.find(function(it){ return it.id === itemId; });
+    if(ai) caisseInfo = ai.caisseName;
+  }
+  // Search in CAISSES
+  let foundCaisse = null;
+  if(!found && typeof CAISSES !== 'undefined'){
+    foundCaisse = CAISSES.find(function(c){ return c.id === itemId; });
+  }
+  if(!foundCaisse){
+    foundCaisse = QR_CAISSES.find(function(c){ return c.id === itemId; });
+  }
+
+  const resultEl = document.getElementById('scan-result');
+  const titleEl = document.getElementById('scan-result-title');
+  const metaEl = document.getElementById('scan-result-meta');
+  const warnEl = document.getElementById('scan-result-warn');
+  const againBtn = document.getElementById('scan-again');
+
+  if(found){
+    titleEl.textContent = found.name || found.id;
+    let meta = '<span>' + found.id + '</span>';
+    if(found.cat) meta += '<span>' + found.cat + '</span>';
+    if(found.etat) meta += '<span>' + found.etat + '</span>';
+    if(caisseInfo) meta += '<br>Caisse : ' + caisseInfo;
+    if(found.fab) meta += '<br>Fabricant : ' + found.fab;
+    if(found.serial) meta += '<br>Serial : ' + found.serial;
+    metaEl.innerHTML = meta;
+    resultEl.classList.add('visible');
+    warnEl.classList.remove('visible');
+  } else if(foundCaisse){
+    titleEl.textContent = foundCaisse.nom || foundCaisse.name || foundCaisse.id;
+    let meta = '<span>' + foundCaisse.id + '</span>';
+    if(foundCaisse.cat) meta += '<span>' + foundCaisse.cat + '</span>';
+    meta += '<br>Items : ' + (foundCaisse.count || (foundCaisse.items_contenus ? foundCaisse.items_contenus.length : '?'));
+    metaEl.innerHTML = meta;
+    resultEl.classList.add('visible');
+    warnEl.classList.remove('visible');
+  } else {
+    resultEl.classList.remove('visible');
+    warnEl.textContent = '⚠️ QR non trouvé dans l\'inventaire — ID: ' + itemId;
+    warnEl.classList.add('visible');
+  }
+  againBtn.classList.remove('visible'); // Pas besoin de "scanner encore" en mode rafale
+}
+
+function scanAgain(){
+  document.getElementById('scan-result').classList.remove('visible');
+  document.getElementById('scan-result-warn').classList.remove('visible');
+  document.getElementById('scan-again').classList.remove('visible');
+  startScanner();
+}
+
 document.addEventListener('DOMContentLoaded', init);
 </script>
+<!-- SCANNER MODAL -->
+<div class="scan-overlay" id="scan-overlay">
+  <div class="scan-header">
+    <div class="scan-title">📷 SCANNER QR</div>
+    <button class="scan-close" onclick="closeScanModal()">✕ FERMER</button>
+  </div>
+  <div id="scan-reader"></div>
+  <div class="scan-result" id="scan-result">
+    <div class="scan-result-title" id="scan-result-title"></div>
+    <div class="scan-result-meta" id="scan-result-meta"></div>
+  </div>
+  <div class="scan-result-warn" id="scan-result-warn">⚠️ QR non trouvé dans l'inventaire</div>
+  <button class="scan-again" id="scan-again" onclick="scanAgain()">📷 SCANNER UN AUTRE</button>
+</div>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}</script>
 </body>
 </html>

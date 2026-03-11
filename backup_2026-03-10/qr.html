@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>VOLO SST — QR Inventaire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script src="error-monitor.js"></script>
+<script src="data.js"></script>
+<style>
+/* ── DESIGN SYSTEM: TACTICAL EAGLE ── */
+:root{
+  --bg:#0C0608;
+  --card:rgba(28,16,18,.90);
+  --card2:rgba(38,22,26,.94);
+  --cardSolid:#1C1012;
+  --gold:#D4A017; --goldL:#E8C547;
+  --rescue:#E65100; --rescueL:#FF6D00; --rescueD:#BF360C; --rescueGlow:rgba(230,81,0,.15);
+  --red:#C0392B; --green:#27AE60; --orange:#E67E22;
+  --txt:#F5F0EB; --muted:#C9BAA9;
+  --border:rgba(68,40,46,.55);
+  --blue:#3B82F6;
+  --glow:0 0 30px rgba(230,81,0,.08);
+  --radius:14px; --radius-sm:10px; --radius-lg:18px;
+}
+body.light{
+  --bg:#F8FAFC; --card:rgba(255,255,255,.96); --card2:rgba(241,245,249,.98); --cardSolid:#fff;
+  --gold:#C2410C; --goldL:#EA580C;
+  --rescue:#E65100; --rescueL:#EA580C; --rescueD:#BF360C; --rescueGlow:rgba(230,81,0,.09);
+  --txt:#0F172A; --muted:#64748B; --border:rgba(203,213,225,.9);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;overflow-x:hidden;}
+body{overflow-x:hidden;}
+
+/* ── NOISE TEXTURE ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  opacity:.028;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:256px 256px;
+}
+body{
+  background:var(--bg);
+  color:var(--txt);
+  font-family:'Inter',sans-serif;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  transition:background .3s,color .2s;
+}
+
+/* ── GOLD BAR ── */
+.gold-bar{
+  height:3px;
+  background:linear-gradient(90deg,transparent 0%,var(--rescue) 20%,var(--gold) 50%,var(--rescue) 80%,transparent 100%);
+  background-size:200% 100%;
+  animation:shimmer 3s linear infinite;
+  position:relative;z-index:200;
+}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── HEADER ── */
+.header{
+  background:rgba(12,6,8,.92);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  position:sticky;top:0;z-index:100;
+  padding:0 20px;
+  transition:background .3s,border-color .3s;
+}
+body.light .header{background:rgba(248,250,252,.97);box-shadow:0 1px 0 var(--border);}
+.header-inner{
+  max-width:1200px;margin:0 auto;
+  display:flex;align-items:center;gap:12px;
+  height:56px;
+}
+.logo-img{
+  width:36px;height:36px;
+  border-radius:50%;
+  border:1.5px solid var(--rescue);
+  object-fit:cover;
+  flex-shrink:0;
+  filter:drop-shadow(0 0 6px rgba(230,81,0,.4));
+}
+.logo-fallback{
+  width:36px;height:36px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--rescue),var(--rescueD));
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+  border:1.5px solid var(--rescue);
+  box-shadow:0 0 10px rgba(230,81,0,.3);
+}
+.header-titles{flex:1;min-width:0;}
+.header-title{
+  font-family:'Oswald',sans-serif;
+  font-size:15px;font-weight:600;
+  letter-spacing:1px;color:var(--txt);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.header-sub{
+  font-size:10px;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;
+  letter-spacing:.5px;margin-top:1px;
+}
+.header-actions{
+  display:flex;gap:6px;align-items:center;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;
+}
+
+/* ── BUTTONS ── */
+.btn{
+  height:34px;padding:0 14px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--muted);
+  font-family:'Inter',sans-serif;
+  font-size:11px;font-weight:600;letter-spacing:.4px;
+  cursor:pointer;
+  transition:all .15s ease;
+  display:flex;align-items:center;gap:5px;
+  white-space:nowrap;
+  position:relative;z-index:1;
+}
+.btn:hover{background:var(--card2);color:var(--txt);border-color:rgba(230,81,0,.35);}
+.btn:active{transform:scale(.97);}
+.btn-primary{
+  background:linear-gradient(135deg,var(--rescue),var(--rescueD));
+  border-color:var(--rescue);color:#fff;
+  box-shadow:0 2px 10px rgba(230,81,0,.25);
+}
+.btn-primary:hover{background:linear-gradient(135deg,var(--rescueL),var(--rescue));color:#fff;}
+.btn-ghost-gold{border-color:rgba(212,160,23,.35);color:var(--gold);}
+.btn-ghost-gold:hover{background:rgba(212,160,23,.08);border-color:var(--gold);}
+.btn-ghost-rescue{border-color:rgba(230,81,0,.35);color:var(--rescueL);}
+.btn-ghost-rescue:hover{background:var(--rescueGlow);border-color:var(--rescue);color:var(--rescue);}
+.btn-icon{width:34px;height:34px;padding:0;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.btn-round{
+  width:36px;height:36px;padding:0;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:700;line-height:1;
+  background:linear-gradient(135deg,var(--rescue),var(--rescueD));
+  border:none;color:#fff;cursor:pointer;
+  transition:all .15s;
+  box-shadow:0 2px 10px rgba(230,81,0,.3);
+}
+.btn-round:hover{transform:scale(1.08);box-shadow:0 4px 16px rgba(230,81,0,.4);}
+body.light .btn{background:rgba(255,255,255,.9);color:#64748B;border-color:var(--border);}
+body.light .btn:hover{background:#F1F5F9;color:#0F172A;}
+body.light .btn-primary{background:linear-gradient(135deg,var(--rescue),var(--rescueD));color:#fff;border-color:var(--rescue);}
+
+/* ── SEARCH BAR ── */
+.search-bar{
+  padding:12px 20px;
+  background:rgba(12,6,8,.6);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(8px);
+  transition:background .3s;
+}
+body.light .search-bar{background:rgba(241,245,249,.98);}
+.search-inner{max-width:1200px;margin:0 auto;}
+.search-input-wrap{position:relative;}
+.search-input-wrap svg{
+  position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  color:var(--muted);pointer-events:none;
+}
+.search-input{
+  width:100%;height:40px;padding:0 38px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  color:var(--txt);
+  font-family:'Inter',sans-serif;font-size:13px;
+  outline:none;transition:border-color .15s,background .3s;
+}
+.search-input:focus{border-color:var(--rescue);}
+.search-input::placeholder{color:var(--muted);}
+.search-clear{
+  position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:var(--muted);cursor:pointer;
+  font-size:16px;padding:4px;display:none;
+}
+.search-clear.visible{display:block;}
+body.light .search-input{background:#fff;color:#0F172A;}
+
+/* ── TABS ── */
+.tabs-wrap{
+  padding:0 20px;
+  background:var(--bg);
+  border-bottom:1px solid var(--border);
+  overflow-x:auto;scrollbar-width:none;
+  transition:background .3s;
+}
+.tabs-wrap::-webkit-scrollbar{display:none;}
+.tabs{
+  max-width:1200px;margin:0 auto;
+  display:flex;gap:4px;padding:8px 0;white-space:nowrap;
+}
+.tab{
+  padding:5px 14px;
+  border-radius:20px;
+  border:1px solid transparent;
+  background:transparent;
+  color:var(--muted);
+  font-family:'Oswald',sans-serif;
+  font-size:11px;font-weight:500;letter-spacing:.8px;
+  cursor:pointer;transition:all .15s;flex-shrink:0;
+}
+.tab:hover{background:var(--card2);color:var(--txt);}
+.tab.active{
+  background:rgba(230,81,0,.12);
+  border-color:rgba(230,81,0,.4);
+  color:var(--rescueL);
+}
+body.light .tab{color:var(--muted);}
+body.light .tab:hover{background:var(--card2);color:var(--txt);}
+
+/* ── MAIN ── */
+.main{max-width:1200px;margin:0 auto;padding:20px;position:relative;z-index:1;overflow-x:hidden;}
+
+/* ── QR SIZE SELECTOR ── */
+.qr-size-bar,.print-format-bar{
+  padding:8px 20px;
+  background:rgba(12,6,8,.6);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(8px);
+  transition:background .3s;
+}
+body.light .qr-size-bar,body.light .print-format-bar{background:rgba(241,245,249,.98);}
+.qr-size-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:8px;}
+.qr-size-label{
+  font-family:'Oswald',sans-serif;font-size:11px;font-weight:600;
+  letter-spacing:1.5px;color:var(--muted);margin-right:4px;
+}
+.qr-size-btn{
+  padding:5px 16px;
+  border-radius:20px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--muted);
+  font-family:'Oswald',sans-serif;
+  font-size:11px;font-weight:600;letter-spacing:.8px;
+  cursor:pointer;transition:all .15s;
+}
+.qr-size-btn:hover{background:var(--card2);color:var(--txt);border-color:rgba(230,81,0,.35);}
+.qr-size-btn.active{
+  background:rgba(230,81,0,.12);
+  border-color:rgba(230,81,0,.5);
+  color:var(--rescueL);
+}
+body.light .qr-size-btn{color:var(--muted);background:rgba(255,255,255,.9);}
+body.light .qr-size-btn.active{background:rgba(230,81,0,.1);color:var(--rescue);}
+
+/* ── SECTION HEADER ── */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.section-label{
+  font-family:'Oswald',sans-serif;
+  font-size:11px;font-weight:600;letter-spacing:2.5px;
+  color:var(--muted);text-transform:uppercase;
+  display:flex;align-items:center;gap:8px;
+}
+.section-label::before,.section-label::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,var(--rescue),transparent);
+}
+.section-label::before{max-width:30px;}
+.section-label::after{max-width:60px;background:linear-gradient(90deg,transparent,var(--rescue),transparent);flex:none;width:30px;}
+.count-pill{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--rescueL);
+  background:rgba(230,81,0,.1);border:1px solid rgba(230,81,0,.2);
+  border-radius:20px;padding:2px 10px;
+}
+
+/* ── CAISSE GRID ── */
+.caisse-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));
+  gap:14px;margin-bottom:24px;
+  max-width:100%;overflow:hidden;
+}
+
+/* ── CAISSE CARD ── */
+.caisse-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px;cursor:pointer;
+  transition:all .15s ease;position:relative;overflow:hidden;
+  min-width:0;max-width:100%;word-break:break-word;
+}
+.caisse-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--rescue),var(--gold));
+  transform:scaleX(0);transform-origin:left;transition:transform .2s ease;
+}
+.caisse-card:hover{
+  background:var(--card2);border-color:rgba(230,81,0,.35);
+  transform:translateY(-1px);box-shadow:0 4px 20px rgba(230,81,0,.1);
+}
+.caisse-card:hover::before{transform:scaleX(1);}
+.caisse-card.selected{border-color:var(--rescue);background:rgba(230,81,0,.06);}
+.caisse-card.selected::before{transform:scaleX(1);}
+body.light .caisse-card{box-shadow:0 1px 4px rgba(0,0,0,.06);}
+
+.cc-top{display:flex;flex-direction:column;align-items:center;margin-bottom:12px;gap:10px;}
+.cc-id{
+  font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;
+  color:var(--muted);letter-spacing:.5px;text-align:center;
+}
+.cc-qr-wrap{
+  width:calc(var(--qr-size,150px) + 40px);height:calc(var(--qr-size,150px) + 40px);
+  border-radius:8px;background:#fff;cursor:pointer;
+  box-shadow:0 0 0 2px rgba(212,160,23,.3);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  flex-shrink:0;overflow:hidden;
+}
+.cc-qr-wrap canvas,.cc-qr-wrap img{
+  width:100%!important;height:100%!important;
+  max-width:none!important;max-height:none!important;
+  display:block;object-fit:contain;
+}
+
+.cc-name{
+  font-family:'Oswald',sans-serif;font-size:17px;font-weight:600;letter-spacing:.5px;
+  color:var(--txt);margin-bottom:6px;line-height:1.25;text-align:center;
+}
+.cc-icons{font-size:14px;margin-bottom:6px;letter-spacing:2px;text-align:center;}
+.cc-preview{font-size:13px;color:var(--muted);line-height:1.6;}
+.cc-preview span{
+  display:inline-block;
+  background:rgba(68,40,46,.45);border-radius:4px;
+  padding:2px 7px;margin:2px 3px 2px 0;font-size:11px;color:var(--txt);
+}
+body.light .cc-preview span{background:rgba(100,116,139,.1);color:#475569;}
+.cc-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-top:10px;padding-top:8px;border-top:1px solid var(--border);
+}
+.cc-count{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:var(--muted);}
+.cc-drill{font-size:11px;color:var(--rescueL);font-weight:600;display:flex;align-items:center;gap:3px;}
+
+/* ── ITEMS (drill-down) ── */
+.items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));gap:14px;max-width:100%;overflow:hidden;}
+.item-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .15s;
+  min-width:0;max-width:100%;word-break:break-word;overflow:hidden;
+}
+.item-card:hover{background:var(--card2);border-color:rgba(230,81,0,.3);}
+.item-card.selected{border-color:var(--rescue);background:rgba(230,81,0,.05);}
+body.light .item-card{box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.ic-top{display:flex;flex-direction:column;align-items:center;margin-bottom:10px;gap:10px;}
+.ic-icon{font-size:22px;align-self:flex-start;}
+.ic-qr-wrap{
+  width:calc(var(--qr-size,150px) + 40px);height:calc(var(--qr-size,150px) + 40px);
+  border-radius:8px;background:#fff;cursor:pointer;
+  box-shadow:0 0 0 2px rgba(212,160,23,.3);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  flex-shrink:0;overflow:hidden;
+}
+.ic-qr-wrap canvas,.ic-qr-wrap img{
+  width:100%!important;height:100%!important;
+  max-width:none!important;max-height:none!important;
+  display:block;object-fit:contain;
+}
+
+/* ── GLASS EFFECT SÉLECTION ── */
+.caisse-card.selected{
+  border-color:var(--rescue);
+  background:rgba(230,81,0,.08);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  box-shadow:0 0 0 2px var(--rescue),0 8px 32px rgba(230,81,0,.2),inset 0 1px 0 rgba(255,255,255,.08);
+}
+.item-card.selected{
+  border-color:var(--rescue);
+  background:rgba(230,81,0,.07);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  box-shadow:0 0 0 2px var(--rescue),0 4px 20px rgba(230,81,0,.15),inset 0 1px 0 rgba(255,255,255,.06);
+}
+.ic-id{
+  font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;
+  color:var(--muted);letter-spacing:.5px;margin-bottom:4px;text-align:center;
+}
+.ic-name{
+  font-family:'Oswald',sans-serif;font-size:17px;font-weight:600;letter-spacing:.3px;
+  color:var(--txt);margin-bottom:4px;line-height:1.3;text-align:center;
+}
+.ic-desc{font-size:13px;color:var(--muted);margin-bottom:6px;text-align:center;}
+.ic-footer{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border);}
+.ic-etat{font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;font-family:'Oswald',sans-serif;letter-spacing:.5px;}
+.ic-etat.bon{color:var(--green);background:rgba(39,174,96,.12);}
+.ic-etat.warn{color:var(--orange);background:rgba(230,126,34,.12);}
+.ic-etat.bad{color:var(--red);background:rgba(192,57,43,.12);}
+body.light .ic-etat.bon{background:rgba(5,150,105,.08);}
+body.light .ic-etat.warn{background:rgba(217,119,6,.08);}
+body.light .ic-etat.bad{background:rgba(220,38,38,.08);}
+.ic-qty{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);}
+
+/* ── BACK ROW ── */
+.back-row{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px;margin-bottom:14px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);cursor:pointer;transition:all .15s;
+}
+.back-row:hover{border-color:rgba(230,81,0,.35);background:var(--card2);}
+body.light .back-row{background:#fff;}
+.back-row-title{font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;letter-spacing:.5px;color:var(--txt);}
+.back-row-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+
+/* ── SELECTION BAR ── */
+.sel-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:150;
+  background:rgba(28,16,18,.97);
+  border-top:1px solid rgba(230,81,0,.3);
+  backdrop-filter:blur(20px);
+  padding:12px 20px;
+  transform:translateY(100%);
+  transition:transform .2s ease;
+  overflow-x:hidden;
+}
+.sel-bar.visible{transform:translateY(0);}
+body.light .sel-bar{background:rgba(248,250,252,.98);}
+.sel-bar-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:12px;}
+.sel-count{
+  font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;letter-spacing:.5px;
+  color:var(--rescueL);flex:1;
+}
+.sel-actions{display:flex;gap:8px;}
+
+/* ── ADD MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(8px);
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:var(--card2);
+  border:1px solid rgba(230,81,0,.25);
+  border-radius:var(--radius-lg);
+  padding:24px;width:100%;max-width:400px;
+  box-shadow:0 20px 60px rgba(0,0,0,.4),0 0 40px rgba(230,81,0,.08);
+}
+body.light .modal{background:#fff;box-shadow:0 8px 32px rgba(0,0,0,.12);}
+.modal-title{
+  font-family:'Oswald',sans-serif;font-size:18px;font-weight:600;letter-spacing:.8px;
+  color:var(--txt);margin-bottom:18px;
+  padding-bottom:12px;border-bottom:1px solid var(--border);
+}
+.field{margin-bottom:14px;}
+.field label{
+  display:block;font-size:11px;font-weight:600;letter-spacing:1px;
+  color:var(--muted);font-family:'Oswald',sans-serif;margin-bottom:6px;text-transform:uppercase;
+}
+.field input,.field select{
+  width:100%;height:38px;padding:0 12px;
+  background:rgba(12,6,8,.6);border:1px solid var(--border);
+  border-radius:var(--radius-sm);color:var(--txt);
+  font-family:'Inter',sans-serif;font-size:13px;outline:none;
+  transition:border-color .15s;
+}
+.field input:focus,.field select:focus{border-color:var(--rescue);}
+body.light .field input,body.light .field select{background:#F8FAFC;color:#0F172A;}
+.modal-actions{display:flex;gap:10px;margin-top:20px;}
+
+/* ── LEXIQUE MODAL ── */
+.lex-modal{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(12,6,8,.99);
+  transform:translateX(100%);transition:transform .25s ease;
+  display:flex;flex-direction:column;
+}
+.lex-modal.open{transform:translateX(0);}
+body.light .lex-modal{background:rgba(248,250,252,.99);}
+.lex-inner{flex:1;overflow-y:auto;padding:0 20px 40px;max-width:900px;margin:0 auto;width:100%;}
+.lex-header{
+  position:sticky;top:0;z-index:10;
+  background:rgba(12,6,8,.97);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:14px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  max-width:100%;
+}
+body.light .lex-header{background:rgba(248,250,252,.97);}
+.lex-title{
+  font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;letter-spacing:1.5px;
+  color:var(--txt);
+}
+.lex-title span{color:var(--gold);}
+.lex-entries{display:grid;gap:8px;margin-top:16px;}
+.lex-entry{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:12px 16px;
+  display:flex;align-items:flex-start;gap:14px;
+  transition:border-color .15s;
+}
+.lex-entry:hover{border-color:rgba(230,81,0,.3);}
+.lex-prefix{
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+  color:var(--gold);
+  background:rgba(212,160,23,.08);border:1px solid rgba(212,160,23,.2);
+  border-radius:6px;padding:4px 10px;
+  white-space:nowrap;flex-shrink:0;min-width:90px;text-align:center;
+  letter-spacing:.5px;
+}
+body.light .lex-prefix{background:rgba(212,160,23,.06);border-color:rgba(212,160,23,.25);}
+.lex-info{flex:1;}
+.lex-name{font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;color:var(--txt);margin-bottom:3px;letter-spacing:.3px;}
+.lex-desc{font-size:12px;color:var(--muted);line-height:1.5;}
+.lex-cat{
+  font-size:10px;font-weight:600;letter-spacing:.8px;
+  color:var(--rescueL);font-family:'Oswald',sans-serif;
+  background:rgba(230,81,0,.08);border-radius:4px;padding:2px 7px;
+  margin-left:auto;flex-shrink:0;align-self:center;
+}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--card2);border:1px solid rgba(230,81,0,.3);
+  border-radius:var(--radius-sm);
+  padding:10px 20px;font-size:13px;font-weight:600;color:var(--txt);
+  box-shadow:0 8px 30px rgba(0,0,0,.3);z-index:300;
+  opacity:0;transition:all .2s ease;pointer-events:none;
+  font-family:'Inter',sans-serif;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+body.light .toast{background:#fff;color:#0F172A;box-shadow:0 4px 20px rgba(0,0,0,.12);}
+
+/* ── THEME TOGGLE ── */
+.theme-pill{
+  position:fixed;bottom:20px;right:20px;z-index:160;
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:30px;
+  display:flex;align-items:center;gap:0;overflow:hidden;
+  box-shadow:0 4px 20px rgba(0,0,0,.25);
+}
+.theme-pill button{
+  padding:8px 14px;background:none;border:none;cursor:pointer;
+  font-size:14px;color:var(--muted);transition:all .15s;
+}
+.theme-pill button.active{background:rgba(230,81,0,.15);color:var(--rescueL);}
+.theme-pill button:hover:not(.active){color:var(--txt);}
+
+/* ── SCANNER MODAL ── */
+.scan-overlay{
+  display:none;position:fixed;inset:0;z-index:9999;
+  background:rgba(12,6,8,.96);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  flex-direction:column;align-items:center;justify-content:center;
+  padding:20px;
+}
+.scan-overlay.open{display:flex;}
+.scan-header{
+  width:100%;max-width:500px;
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;
+}
+.scan-title{
+  font-family:'Oswald',sans-serif;font-size:20px;font-weight:600;
+  letter-spacing:.04em;color:var(--rescueL);
+}
+.scan-close{
+  background:rgba(192,57,43,.15);border:1px solid rgba(192,57,43,.4);
+  color:var(--red);border-radius:var(--radius-sm);
+  padding:8px 16px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;
+  cursor:pointer;transition:all .15s;
+}
+.scan-close:hover{background:rgba(192,57,43,.25);color:#fff;}
+#scan-reader{
+  width:100%;max-width:500px;
+  border-radius:var(--radius);overflow:hidden;
+  border:2px solid var(--border);
+  min-height:300px;
+}
+#scan-reader video{width:100%!important;height:auto!important;border-radius:var(--radius);}
+#scan-reader img[alt="Info icon"]{display:none!important;}
+#scan-reader #qr-shaded-region{border-color:rgba(230,81,0,.5)!important;}
+#scan-reader div[style*="border-width"]{border-color:var(--rescue)!important;}
+.scan-result{
+  width:100%;max-width:500px;margin-top:16px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;
+  display:none;
+}
+.scan-result.visible{display:block;}
+.scan-result-title{
+  font-family:'Oswald',sans-serif;font-size:18px;font-weight:600;
+  color:var(--txt);margin-bottom:6px;
+}
+.scan-result-meta{font-size:13px;color:var(--muted);line-height:1.6;}
+.scan-result-meta span{
+  display:inline-block;padding:2px 8px;border-radius:6px;
+  background:rgba(230,81,0,.12);color:var(--rescueL);
+  font-weight:600;margin-right:6px;
+}
+.scan-result-warn{
+  color:var(--gold);font-weight:600;font-size:14px;
+  text-align:center;margin-top:12px;display:none;
+}
+.scan-result-warn.visible{display:block;}
+.scan-again{
+  margin-top:12px;width:100%;max-width:500px;
+  background:linear-gradient(135deg,var(--rescue),var(--rescueD));
+  border:none;color:#fff;border-radius:var(--radius-sm);
+  padding:12px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;
+  cursor:pointer;display:none;transition:all .15s;
+}
+.scan-again.visible{display:block;}
+.scan-again:hover{filter:brightness(1.1);}
+
+/* ── PRINT ── */
+@media print{
+  .header,.search-bar,.tabs-wrap,.qr-size-bar,.sel-bar,.modal-overlay,.lex-modal,.theme-pill,.btn,.back-row,.gold-bar,.theme-pill,.section-header,.print-format-bar,.scan-overlay{display:none!important;}
+  body{background:#fff!important;color:#000!important;overflow:visible!important;}
+  body::before{display:none!important;}
+  .main{padding:5px!important;max-width:100%!important;overflow:visible!important;}
+  .caisse-grid,.items-grid{
+    display:grid!important;
+    gap:8px!important;
+    max-width:100%!important;
+    overflow:visible!important;
+  }
+  /* Print format classes */
+  .print-2col .caisse-grid,.print-2col .items-grid{grid-template-columns:1fr 1fr!important;gap:12px!important;}
+  .print-3col .caisse-grid,.print-3col .items-grid{grid-template-columns:1fr 1fr 1fr!important;gap:6px!important;}
+  .print-4col .caisse-grid,.print-4col .items-grid{grid-template-columns:1fr 1fr 1fr 1fr!important;gap:4px!important;}
+  /* Default to 3 columns */
+  .caisse-grid,.items-grid{grid-template-columns:1fr 1fr 1fr!important;}
+  .caisse-card,.item-card{
+    background:#fff!important;border:1px solid #ccc!important;
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+    padding:8px!important;
+    overflow:visible!important;
+    min-height:0!important;
+  }
+  .item-card[data-sac-color]{
+    border-left:4px solid var(--sac-border)!important;
+  }
+  .cc-qr-wrap,.ic-qr-wrap{
+    background:#fff!important;
+    padding:8px!important;
+    box-shadow:none!important;
+    border:1px solid #ddd!important;
+    overflow:visible!important;
+    width:auto!important;height:auto!important;
+    max-width:120px!important;max-height:120px!important;
+  }
+  .cc-qr-wrap canvas,.cc-qr-wrap img,
+  .ic-qr-wrap canvas,.ic-qr-wrap img{
+    width:100px!important;height:100px!important;
+    max-width:100px!important;max-height:100px!important;
+  }
+  /* 2col = bigger QR */
+  .print-2col .cc-qr-wrap,.print-2col .ic-qr-wrap{max-width:160px!important;max-height:160px!important;padding:12px!important;}
+  .print-2col .cc-qr-wrap canvas,.print-2col .cc-qr-wrap img,
+  .print-2col .ic-qr-wrap canvas,.print-2col .ic-qr-wrap img{width:130px!important;height:130px!important;max-width:130px!important;max-height:130px!important;}
+  /* 4col = tiny QR */
+  .print-4col .cc-qr-wrap,.print-4col .ic-qr-wrap{max-width:80px!important;max-height:80px!important;padding:4px!important;}
+  .print-4col .cc-qr-wrap canvas,.print-4col .cc-qr-wrap img,
+  .print-4col .ic-qr-wrap canvas,.print-4col .ic-qr-wrap img{width:70px!important;height:70px!important;max-width:70px!important;max-height:70px!important;}
+  .print-4col .cc-name,.print-4col .ic-name{font-size:9px!important;}
+  .print-4col .cc-id,.print-4col .ic-id{font-size:8px!important;}
+  .print-4col .cc-icons,.print-4col .cc-preview,.print-4col .ic-desc,.print-4col .cc-footer,.print-4col .ic-footer{font-size:7px!important;}
+  .cc-name,.ic-name{font-size:11px!important;color:#000!important;}
+  .cc-id,.ic-id{font-size:9px!important;color:#333!important;}
+  .cc-icons,.cc-preview,.ic-desc{font-size:9px!important;}
+  .cc-footer,.ic-footer{font-size:8px!important;}
+  .ic-top{gap:4px!important;margin-bottom:4px!important;}
+  .ic-icon{font-size:14px!important;}
+  @page{margin:1cm;size:letter portrait;}
+}
+
+/* ── EMPTY STATE ── */
+.empty{
+  text-align:center;padding:60px 20px;
+  color:var(--muted);font-family:'Oswald',sans-serif;letter-spacing:.5px;
+}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:.4;}
+.empty-title{font-size:16px;font-weight:600;margin-bottom:4px;color:var(--muted);}
+.empty-sub{font-size:12px;}
+
+/* ── SMOOTH TRANSITIONS ── */
+.header,.search-bar,.tabs-wrap,.search-input,.modal,.sel-bar,.lex-modal,.lex-entry,
+.caisse-card,.item-card,.back-row,.toast,.tab,.btn,.field input,.field select,.cc-preview span{
+  transition:background-color .22s ease,border-color .22s ease,color .15s ease,box-shadow .22s ease;
+}
+</style>
+</head>
+<body>
+
+<!-- GOLD BAR -->
+<div class="gold-bar"></div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <img src="eagle_tactic.png" class="logo-img" alt="Golden Eagles"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+    <div class="logo-fallback" style="display:none">🦅</div>
+    <div class="header-titles">
+      <div class="header-title">VOLO SST — QR INVENTAIRE</div>
+      <div class="header-sub">THE GOLDEN EAGLES · SAUVETAGE TECHNIQUE</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn" onclick="window.location.href='index.html'" title="Retour à l'accueil">← Accueil</button>
+      <button class="btn btn-ghost-gold" id="btn-lexique">📋 Lexique</button>
+      <button class="btn btn-ghost-rescue" id="btn-scan" onclick="openScanModal()">📷 Scanner</button>
+      <button class="btn btn-ghost-rescue" id="btn-print">🖨 Imprimer</button>
+      <button class="btn btn-ghost-rescue" id="btn-export">↓ Exporter</button>
+      <button class="btn-round" id="btn-add" title="Ajouter un item" aria-label="Ajouter un item">+</button>
+    </div>
+  </div>
+</div>
+
+<!-- SEARCH -->
+<div class="search-bar">
+  <div class="search-inner">
+    <div class="search-input-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" class="search-input" id="search" placeholder="Rechercher — préfixe, nom, caisse, contenu...">
+      <button class="search-clear" id="search-clear" aria-label="Effacer la recherche">×</button>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-wrap">
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-cat="">TOUT</button>
+  </div>
+</div>
+
+<!-- QR SIZE SELECTOR -->
+<div class="qr-size-bar">
+  <div class="qr-size-inner">
+    <span class="qr-size-label">TAILLE QR</span>
+    <button class="qr-size-btn active" data-qr-size="150" id="qr-s">PETIT</button>
+    <button class="qr-size-btn" data-qr-size="200" id="qr-m">MOYEN</button>
+    <button class="qr-size-btn" data-qr-size="250" id="qr-l">GRAND</button>
+  </div>
+</div>
+
+<!-- PRINT FORMAT SELECTOR -->
+<div class="print-format-bar">
+  <div class="qr-size-inner">
+    <span class="qr-size-label">FORMAT IMPRESSION</span>
+    <button class="qr-size-btn" data-print-fmt="print-2col">2 COL</button>
+    <button class="qr-size-btn active" data-print-fmt="print-3col">3 COL</button>
+    <button class="qr-size-btn" data-print-fmt="print-4col">4 COL</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="main"></div>
+
+<!-- SELECTION BAR -->
+<div class="sel-bar" id="sel-bar">
+  <div class="sel-bar-inner">
+    <div class="sel-count" id="sel-count">0 sélectionné</div>
+    <div class="sel-actions">
+      <button class="btn" id="btn-clear-sel">Désélectionner</button>
+      <button class="btn btn-primary" id="btn-print-sel">🖨 Imprimer sélection</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title">+ Nouvel item</div>
+    <div class="field"><label>Nom</label><input type="text" id="inp-name" placeholder="Ex: Mousqueton HMS"></div>
+    <div class="field"><label>Catégorie</label><select id="inp-cat"></select></div>
+    <div class="field"><label>Description</label><input type="text" id="inp-desc" placeholder="Optionnel"></div>
+    <div class="field"><label>Fabricant</label><input type="text" id="inp-fab" placeholder="Optionnel"></div>
+    <div class="field"><label>Quantité</label><input type="number" id="inp-qty" value="1" min="1" max="50"></div>
+    <div class="modal-actions">
+      <button class="btn" id="btn-cancel" style="flex:1">Annuler</button>
+      <button class="btn btn-primary" id="btn-save" style="flex:2">Créer</button>
+    </div>
+  </div>
+</div>
+
+<!-- QR ZOOM MODAL -->
+<div id="qr-zoom-modal" onclick="closeQrZoom()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.92);align-items:center;justify-content:center;flex-direction:column;gap:16px;">
+  <div style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;color:var(--gold);margin-bottom:4px" id="qr-zoom-label">—</div>
+  <div id="qr-zoom-box" style="background:#fff;border-radius:12px;padding:12px;box-shadow:0 0 60px rgba(230,81,0,.3)"></div>
+  <div id="qr-zoom-id" style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);margin-top:4px"></div>
+  <div style="font-size:12px;color:var(--muted);margin-top:8px;opacity:.6">Toucher n'importe où pour fermer</div>
+</div>
+
+<!-- LEXIQUE MODAL -->
+<div class="lex-modal" id="lex-modal">
+  <div class="lex-header">
+    <div>
+      <div class="lex-title">LEXIQUE <span>INVENTAIRE</span></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;font-family:'JetBrains Mono',monospace">40 préfixes · The Golden Eagles</div>
+    </div>
+    <button class="btn" onclick="document.getElementById('lex-modal').classList.remove('open')">✕ Fermer</button>
+  </div>
+  <div class="lex-inner">
+    <input type="text" id="lex-search" class="search-input" style="margin:16px 0 14px;display:block" placeholder="🔍 Rechercher préfixe, nom, description...">
+    <div class="lex-entries" id="lex-entries"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- THEME TOGGLE -->
+<div class="theme-pill">
+  <button id="th-dark" class="active" title="Mode sombre" aria-label="Mode sombre">🌙</button>
+  <button id="th-light" title="Mode clair" aria-label="Mode clair">☀️</button>
+</div>
+
+<audio id="snd" src="eagle.mp3" preload="none"></audio>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────
+const LEXIQUE = [
+  {prefix:'CORD-DYN',  nom:'Corde dynamique',         desc:'Corde à absorption d\'énergie, escalade/sauvetage vertical',  cat:'CORDES'},
+  {prefix:'CORD-STAT', nom:'Corde statique',           desc:'Corde à faible élongation, travail sur corde et évacuation',  cat:'CORDES'},
+  {prefix:'CORD-AUX',  nom:'Corde auxiliaire',         desc:'Cordelette 6–9mm, prussiks et ancrages secondaires',          cat:'CORDES'},
+  {prefix:'SANG-FLAT', nom:'Sangle plate',             desc:'Sangle textile 25–50mm, ancrage et triangulation',            cat:'CORDES'},
+  {prefix:'SANG-RONDE',nom:'Sangle ronde (anneau)',    desc:'Anneau de sangle cousu, polyvalent ATC et ancrage',           cat:'CORDES'},
+  {prefix:'MOUSK-HMS', nom:'Mousqueton HMS',           desc:'Mousqueton poire pour nœud de demi-cabestan',                 cat:'CONNECTEURS'},
+  {prefix:'MOUSK-DV',  nom:'Mousqueton D-Vis',         desc:'Mousqueton D à vis, ancrage principal',                       cat:'CONNECTEURS'},
+  {prefix:'MOUSK-OVAL',nom:'Mousqueton ovale',         desc:'Répartition de charge uniforme, poulies et déviation',       cat:'CONNECTEURS'},
+  {prefix:'CONN-MAILL',nom:'Maillon rapide',           desc:'Maillon Delta ou Omega, jonction permanente',                 cat:'CONNECTEURS'},
+  {prefix:'CONN-3B',   nom:'Connecteur 3 brins',       desc:'Plaque de répartition triple, systèmes complexes',           cat:'CONNECTEURS'},
+  {prefix:'HARN-COMP', nom:'Harnais complet',          desc:'Harnais corps entier EN 361, sauvetage et travail vertical',  cat:'HARNAIS'},
+  {prefix:'HARN-CUIS', nom:'Harnais cuissard',         desc:'Harnais torse EN 813, évacuation rapide',                    cat:'HARNAIS'},
+  {prefix:'HARN-CASQ', nom:'Casque sauvetage',         desc:'Casque EN 12492 ou 397, protection tête terrain difficile',  cat:'HARNAIS'},
+  {prefix:'DESC-HUIT', nom:'Descendeur 8',             desc:'Descente et rappel, 8 simple ou avec oreilles',               cat:'DESCENDEURS'},
+  {prefix:'DESC-RUPT', nom:'Descendeur Rupteur',       desc:'Dispositif anti-panique, travail sur corde',                  cat:'DESCENDEURS'},
+  {prefix:'DESC-RACK', nom:'Rack / Descender-rack',    desc:'Descente lourde charge, évacuation multi-victimes',           cat:'DESCENDEURS'},
+  {prefix:'ASCE-JUMAR',nom:'Ascendeur Jumar/Handled',  desc:'Progression sur corde fixe, main droite et main gauche',     cat:'ASCENDEURS'},
+  {prefix:'ASCE-POIGN',nom:'Poignée d\'ascension',     desc:'Ascendeur ventral ou poitrine, système de remontée',          cat:'ASCENDEURS'},
+  {prefix:'MAEST-L',   nom:'Maestro L (descendeur)',   desc:'Dispositif de descente assisté, contrôle tension double',    cat:'DESCENDEURS'},
+  {prefix:'POUL-SIMP', nom:'Poulie simple',            desc:'Déviation et mouflage, galet double roulement',               cat:'POULIES'},
+  {prefix:'POUL-DOUB', nom:'Poulie double',            desc:'Mouflage 4:1 ou 6:1, galet tandem',                          cat:'POULIES'},
+  {prefix:'POUL-PROG', nom:'Poulie progress (autoblo)', desc:'Poulie-bloqueur intégré, mouflage compact',                  cat:'POULIES'},
+  {prefix:'TREP-ALU',  nom:'Trépied aluminium',        desc:'Trépied 1.5–2.4m, travail en espace clos vertical',         cat:'TRÉPIED'},
+  {prefix:'TREP-BRAS', nom:'Bras de trépied',          desc:'Extension bras, positionnement déviation',                   cat:'TRÉPIED'},
+  {prefix:'APRIA',     nom:'Kit APRIA',                desc:'Ancrage provisoire rapide intervention: fixation bâtiment',  cat:'ANCRAGES'},
+  {prefix:'ANCH-TERR', nom:'Ancrage terrain',          desc:'Vis de glace, broches, piquets d\'ancrage sol',              cat:'ANCRAGES'},
+  {prefix:'SKED',      nom:'Civière SKED',             desc:'Civière flexible polyéthylène, évacuation espace exigu',     cat:'ÉVACUATION'},
+  {prefix:'CIV-RIGIDE',nom:'Civière rigide',           desc:'Civière Stokes/SKED rigide, immobilisation colonne',         cat:'ÉVACUATION'},
+  {prefix:'CIV-BASK',  nom:'Civière basket',           desc:'Civière panier aluminium, extraction verticale',             cat:'ÉVACUATION'},
+  {prefix:'RESP-DEMI', nom:'Demi-masque',              desc:'Demi-masque filtrant P100/OV, protection chimique/poussière',cat:'RESPIRATOIRE'},
+  {prefix:'RESP-FULL', nom:'Masque complet',           desc:'Masque facial complet, cartouches CBRN ou air',              cat:'RESPIRATOIRE'},
+  {prefix:'RESP-SCBA', nom:'SCBA / ARI',               desc:'Appareil respiratoire isolant, atmosphère IDLH',             cat:'RESPIRATOIRE'},
+  {prefix:'DETEC-4G',  nom:'Détecteur 4 gaz',          desc:'O₂/CO/H₂S/LIE, détection atmosphérique continue',          cat:'DÉTECTION'},
+  {prefix:'DETEC-CO',  nom:'Détecteur CO',             desc:'Alarme monoxyde de carbone, espace clos/feu',                cat:'DÉTECTION'},
+  {prefix:'VENT-POSI', nom:'Ventilateur pression positive',desc:'PPV, évacuation fumée et dilution gaz',                  cat:'VENTILATION'},
+  {prefix:'VENT-NEG',  nom:'Ventilateur pression négative',desc:'Extraction air vicié, espace clos',                     cat:'VENTILATION'},
+  {prefix:'EPI-COMBI', nom:'Combinaison EPI',          desc:'Combinaison protection Tyvek ou Nomex, CBRN niveau C',      cat:'EPI'},
+  {prefix:'EPI-GANTS', nom:'Gants protection',         desc:'Gants cuir renforcés ou nitrile, travail en hauteur',       cat:'EPI'},
+  {prefix:'MEDIC-KIT', nom:'Trousse médicale',         desc:'Premiers soins terrain, immobilisation, oxygen, pansements',cat:'MÉDICAL'},
+  {prefix:'MEDIC-SAM', nom:'SAM Splint',               desc:'Attelle malléable aluminium, immobilisation fractures',     cat:'MÉDICAL'},
+];
+
+// ── CAISSES générées depuis data.js (ITEMS) ──
+// Mappe etat data.js → format qr.html
+function mapEtat(e){ return e==='Bon'?'bon':e==='A surveiller'?'warn':'def'; }
+
+// Icônes par catégorie
+const CAT_ICONS = {
+  'Sac Premonter #1':'🎒','Sac Premonter #2':'🎒','Sac Premonter #3':'🎒',
+  'Corde':'🔴','Cordes':'🔴','Cordes & Sangles':'🟠',
+  'Harnais':'🦺','Casque':'🪖','EPI':'🧤',
+  'Mousqueton':'🔗','Connecteurs':'🔗',
+  'Poulie':'⚙️','Trépied':'🔼',
+  'Descendeur':'⬇️','Ascendeur':'⬆️',
+  'Détection':'🔍','Ventilation':'💨',
+  'Respiratoire':'😷','ARI':'😷',
+  'Médical':'🚑','Évacuation':'🚑','SKED':'🛏️',
+  'Combinaison':'🥼','Tyvek':'🥼',
+};
+function getCatIcon(cat){
+  for(const k of Object.keys(CAT_ICONS)) if(cat.toLowerCase().includes(k.toLowerCase())) return CAT_ICONS[k];
+  return '📦';
+}
+
+// V9.4: Filter destroyed items
+(function(){try{const d=JSON.parse(localStorage.getItem('volo_destroyed')||'[]');if(d.length&&typeof ITEMS!=='undefined'){const s=new Set(d);for(let i=ITEMS.length-1;i>=0;i--){if(s.has(ITEMS[i].id))ITEMS.splice(i,1);}if(typeof CAISSES!=='undefined')CAISSES.forEach(c=>{if(c.items_contenus){c.items_contenus=c.items_contenus.filter(id=>!s.has(id));c.count=c.items_contenus.length;}});}}catch(e){}})();
+
+// Couleur hex par nom de couleur (propriété couleur sur chaque item dans data.js)
+const COULEUR_HEX = {Bleu:"#3B82F6", Vert:"#22C55E", Rouge:"#EF4444", Jaune:"#EAB308"};
+const COULEUR_EMOJI = {Bleu:"🔵", Vert:"🟢", Rouge:"🔴", Jaune:"🟡"};
+
+// Build CAISSES depuis ITEMS data.js
+function buildCaisses(){
+  // Mapper nom catégorie → vrai ID CAISSES de data.js
+  const caisseIdByName = {};
+  if(typeof CAISSES!=='undefined'){
+    CAISSES.forEach(function(c){ caisseIdByName[(c.nom||c.name||'').toUpperCase()] = c.id; });
+  }
+  const map = {};
+  (typeof ITEMS!=='undefined'?ITEMS:[]).forEach(it=>{
+    const cat = it.cat||'Autre';
+    if(!map[cat]){
+      const realId = caisseIdByName[cat.toUpperCase()] || ('CAT-'+cat.replace(/[^A-Z0-9]/gi,'-').toUpperCase());
+      map[cat]={
+        id:realId,
+        nom:cat, cat:cat,
+        icons:getCatIcon(cat)+' '+getCatIcon(cat),
+        items:[]
+      };
+    }
+    // Priority: item.couleur → SAC_COLORS by category → null
+    const itemHex = it.couleur ? COULEUR_HEX[it.couleur] : null;
+    const itemColorName = it.couleur || null;
+    const sc = (typeof SAC_COLORS!=='undefined') ? SAC_COLORS[cat] : null;
+    map[cat].items.push({
+      id:it.id, nom:it.name||it.nom||it.id,
+      desc:it.desc||'', fab:it.fab||'',
+      qty:1, etat:mapEtat(it.etat||'Bon'),
+      serial:it.serial||'', volo_id:it.volo_id||'',
+      sacColor: itemHex || (sc ? sc.hex : null),
+      sacColorName: itemColorName || (sc ? sc.name : null)
+    });
+  });
+  return Object.values(map);
+}
+
+const CAISSES_PLACEHOLDER = [ // fallback si data.js absent
+  {
+    id:'CAISSE-A1', nom:'Cordes & Sangles', icons:'🟠🔴', cat:'CORDES',
+    items:[
+      {id:'CORD-STAT-001',nom:'Corde statique 11mm',desc:'Sterling Rope 11mm, 60m',fab:'Sterling',qty:2,etat:'bon'},
+      {id:'CORD-STAT-002',nom:'Corde statique 9mm',desc:'Bluewater 9mm, 30m',fab:'Bluewater',qty:1,etat:'bon'},
+      {id:'CORD-DYN-001',nom:'Corde dynamique 10.5mm',desc:'Mammut 10.5mm, 50m',fab:'Mammut',qty:1,etat:'bon'},
+      {id:'CORD-AUX-001',nom:'Cordelette 6mm',desc:'Dyneema 6mm, 10m × 5',fab:'Petzl',qty:5,etat:'bon'},
+      {id:'CORD-AUX-002',nom:'Cordelette 8mm',desc:'Nylon 8mm prussik, 2m × 4',fab:'Beal',qty:4,etat:'warn'},
+      {id:'SANG-FLAT-001',nom:'Sangle plate 25mm',desc:'Polyester 25mm, 120cm',fab:'Black Diamond',qty:6,etat:'bon'},
+      {id:'SANG-RONDE-001',nom:'Anneau sangle 60cm',desc:'Dyneema cousu 60cm',fab:'Petzl',qty:4,etat:'bon'},
+      {id:'SANG-RONDE-002',nom:'Anneau sangle 120cm',desc:'Polyester cousu 120cm',fab:'Petzl',qty:3,etat:'bon'},
+    ]
+  },
+  {
+    id:'CAISSE-A2', nom:'Connecteurs', icons:'🔗⚙️', cat:'CONNECTEURS',
+    items:[
+      {id:'MOUSK-HMS-001',nom:'Mousqueton HMS vis',desc:'Petzl Attache, vis à main',fab:'Petzl',qty:6,etat:'bon'},
+      {id:'MOUSK-HMS-002',nom:'Mousqueton HMS auto',desc:'Black Diamond Pearabiner auto',fab:'BD',qty:4,etat:'bon'},
+      {id:'MOUSK-DV-001',nom:'Mousqueton D auto',desc:'Petzl William auto-lock',fab:'Petzl',qty:8,etat:'bon'},
+      {id:'MOUSK-OVAL-001',nom:'Mousqueton ovale vis',desc:'Petzl Oval, 25kN',fab:'Petzl',qty:4,etat:'bon'},
+      {id:'CONN-MAILL-001',nom:'Maillon Delta 12mm',desc:'Acier galvanisé Delta',fab:'Camp',qty:6,etat:'bon'},
+      {id:'CONN-MAILL-002',nom:'Maillon Omega 10mm',desc:'Inox Omega, mouillage',fab:'Fixe',qty:4,etat:'warn'},
+      {id:'CONN-3B-001',nom:'Plaque 3 brins',desc:'Répartition triple Petzl',fab:'Petzl',qty:2,etat:'bon'},
+    ]
+  },
+  {
+    id:'CAISSE-B1', nom:'Harnais & Casques', icons:'🪖🦺', cat:'HARNAIS',
+    items:[
+      {id:'HARN-COMP-001',nom:'Harnais complet #1',desc:'Petzl Avao Bod, taille M',fab:'Petzl',qty:1,etat:'bon'},
+      {id:'HARN-COMP-002',nom:'Harnais complet #2',desc:'Petzl Avao Bod, taille L',fab:'Petzl',qty:1,etat:'bon'},
+      {id:'HARN-COMP-003',nom:'Harnais complet #3',desc:'Petzl Avao Bod, taille L',fab:'Petzl',qty:1,etat:'warn'},
+      {id:'HARN-COMP-004',nom:'Harnais complet #4',desc:'Petzl Newton, taille M',fab:'Petzl',qty:1,etat:'bon'},
+      {id:'HARN-CASQ-001',nom:'Casque Vertex Vent',desc:'Petzl Vertex Vent, rouge',fab:'Petzl',qty:3,etat:'bon'},
+      {id:'HARN-CASQ-002',nom:'Casque Strato',desc:'Petzl Strato, blanc',fab:'Petzl',qty:2,etat:'bon'},
+    ]
+  },
+  {
+    id:'CAISSE-B2', nom:'Descendeurs & Ascendeurs', icons:'⬇️⬆️', cat:'DESCENDEURS',
+    items:[
+      {id:'DESC-RUPT-001',nom:'Descendeur Rupteur',desc:'Petzl Rig, anti-panique',fab:'Petzl',qty:2,etat:'bon'},
+      {id:'DESC-HUIT-001',nom:'Descendeur 8',desc:'8 avec oreilles, acier',fab:'Petzl',qty:3,etat:'bon'},
+      {id:'MAEST-L-001',nom:'Maestro L',desc:'Kong Maestro L, double tension',fab:'Kong',qty:1,etat:'bon'},
+      {id:'DESC-RACK-001',nom:'Rack 6 barreaux',desc:'CMC Rescue Rack, inox',fab:'CMC',qty:1,etat:'bon'},
+      {id:'ASCE-JUMAR-001',nom:'Ascendeur gauche',desc:'Petzl Ascension gauche',fab:'Petzl',qty:1,etat:'bon'},
+      {id:'ASCE-JUMAR-002',nom:'Ascendeur droit',desc:'Petzl Ascension droit',fab:'Petzl',qty:1,etat:'bon'},
+      {id:'ASCE-POIGN-001',nom:'Poignée ventrale',desc:'Petzl Croll, torse',fab:'Petzl',qty:2,etat:'bon'},
+    ]
+  },
+  {
+    id:'CAISSE-C1', nom:'Poulies & Trépied', icons:'⚙️🔼', cat:'POULIES',
+    items:[
+      {id:'POUL-SIMP-001',nom:'Poulie simple P02',desc:'Petzl P02, ouverture latérale',fab:'Petzl',qty:4,etat:'bon'},
+      {id:'POUL-DOUB-001',nom:'Poulie double P05',desc:'Petzl P05, tandem',fab:'Petzl',qty:2,etat:'bon'},
+      {id:'POUL-PROG-001',nom:'Poulie Micro Traxion',desc:'Petzl Micro Traxion, compact',fab:'Petzl',qty:2,etat:'bon'},
+      {id:'TREP-ALU-001',nom:'Trépied 2.4m',desc:'CMC T2 Tripod aluminium',fab:'CMC',qty:1,etat:'bon'},
+      {id:'TREP-BRAS-001',nom:'Bras trépied',desc:'Extension déviation aluminium',fab:'CMC',qty:1,etat:'bon'},
+      {id:'APRIA-001',nom:'Kit APRIA complet',desc:'Ancrage provisoire rapide intervention',fab:'APRIA',qty:1,etat:'bon'},
+    ]
+  },
+  {
+    id:'CAISSE-D1', nom:'Protection Respiratoire', icons:'😷💨', cat:'RESPIRATOIRE',
+    items:[
+      {id:'RESP-DEMI-001',nom:'Demi-masque M',desc:'3M 7502, taille M + filtres P100',fab:'3M',qty:3,etat:'bon'},
+      {id:'RESP-DEMI-002',nom:'Demi-masque L',desc:'3M 7503, taille L + filtres P100',fab:'3M',qty:2,etat:'bon'},
+      {id:'RESP-FULL-001',nom:'Masque complet',desc:'MSA Millennium, gris',fab:'MSA',qty:2,etat:'bon'},
+      {id:'RESP-SCBA-001',nom:'ARI complet #1',desc:'Scott Air-Pak 75, 30 min',fab:'Scott',qty:1,etat:'bon'},
+      {id:'RESP-SCBA-002',nom:'ARI complet #2',desc:'Scott Air-Pak 75, 30 min',fab:'Scott',qty:1,etat:'warn'},
+    ]
+  },
+  {
+    id:'CAISSE-D2', nom:'Détection & Ventilation', icons:'🔍💨', cat:'DÉTECTION',
+    items:[
+      {id:'DETEC-4G-001',nom:'Détecteur 4 gaz #1',desc:'Industrial Scientific MX6, calibré',fab:'ISC',qty:1,etat:'bon'},
+      {id:'DETEC-4G-002',nom:'Détecteur 4 gaz #2',desc:'Drager X-am 5000',fab:'Drager',qty:1,etat:'bon'},
+      {id:'DETEC-CO-001',nom:'Alarme CO',desc:'BW Clip CO, alarme 35/200 ppm',fab:'BW',qty:2,etat:'bon'},
+      {id:'VENT-POSI-001',nom:'Ventilateur PPV',desc:'Allegro 9529, 8000 CFM',fab:'Allegro',qty:1,etat:'bon'},
+      {id:'VENT-NEG-001',nom:'Ventilateur extraction',desc:'Allegro 9500, gaine 10"',fab:'Allegro',qty:1,etat:'bon'},
+    ]
+  },
+  {
+    id:'CAISSE-E1', nom:'Évacuation (SKED/Civières)', icons:'🚑🛏️', cat:'ÉVACUATION',
+    items:[
+      {id:'SKED-001',nom:'Civière SKED',desc:'SKED polyéthylène rouge, 500 lbs',fab:'SKED Inc.',qty:1,etat:'bon'},
+      {id:'CIV-RIGIDE-001',nom:'Civière rigide Stokes',desc:'CMC Sked-Stokes hybride',fab:'CMC',qty:1,etat:'bon'},
+      {id:'CIV-BASK-001',nom:'Civière basket',desc:'Aluminium panier, extraction verticale',fab:'CMC',qty:1,etat:'bon'},
+      {id:'MEDIC-KIT-001',nom:'Trousse médicale S',desc:'premiers soins terrain complet',fab:'First Aid Only',qty:1,etat:'bon'},
+      {id:'MEDIC-SAM-001',nom:'SAM Splint × 6',desc:'Attelle malléable 36" et 18"',fab:'SAM Medical',qty:6,etat:'bon'},
+    ]
+  },
+  {
+    id:'CAISSE-F1', nom:'EPI & Combinaisons', icons:'🧤🦺', cat:'EPI',
+    items:[
+      {id:'EPI-COMBI-001',nom:'Combinaison Tyvek M',desc:'DuPont Tyvek, blanc, M',fab:'DuPont',qty:3,etat:'bon'},
+      {id:'EPI-COMBI-002',nom:'Combinaison Tyvek L',desc:'DuPont Tyvek, blanc, L',fab:'DuPont',qty:3,etat:'bon'},
+      {id:'EPI-GANTS-001',nom:'Gants cuir T10',desc:'Gants sauvetage cuir, taille 10',fab:'Honeywell',qty:4,etat:'bon'},
+      {id:'EPI-GANTS-002',nom:'Gants nitrile',desc:'Gants nitrile 8mil, boîte 50',fab:'Kimberly-Clark',qty:50,etat:'bon'},
+    ]
+  },
+];
+
+// ── QR URL BASE ──
+const QR_BASE = 'https://roaring-faloodeh-6fd590.netlify.app/?id=';
+
+// ── STATE ──
+let QR_CAISSES = [];
+let currentView = 'caisses'; // 'caisses' | 'items'
+let currentCaisse = null;
+let selected = new Set();
+let searchQ = '';
+let activeTab = '';
+let allItems = [];
+let qrSize = 150; // PETIT default
+
+// Build CAISSES + allItems depuis data.js au load
+function initData(){
+  QR_CAISSES = (typeof ITEMS!=='undefined'&&ITEMS.length) ? buildCaisses() : CAISSES_PLACEHOLDER;
+  allItems = [];
+  QR_CAISSES.forEach(c=>{
+    c.items.forEach(it=>{
+      allItems.push({...it, caisse:c.id, caisseName:c.nom, cat:c.cat});
+    });
+  });
+}
+
+
+
+// ── INIT ──
+function init(){
+  initData();
+  applyTheme();
+  document.documentElement.style.setProperty('--qr-size', qrSize + 'px');
+  buildTabs();
+  document.body.classList.add('print-3col');
+  renderView();
+  buildLexique();
+  bindEvents();
+}
+
+function applyTheme(){
+  const t = localStorage.getItem('volo_theme_main') || 'dark';
+  document.body.classList.toggle('light', t==='light');
+  document.getElementById('th-dark').classList.toggle('active', t!=='light');
+  document.getElementById('th-light').classList.toggle('active', t==='light');
+}
+
+function buildTabs(){
+  const cats = ['', ...new Set(QR_CAISSES.map(c=>c.cat))];
+  const wrap = document.getElementById('tabs');
+  wrap.innerHTML = cats.map(c=>`
+    <button class="tab${c===activeTab?' active':''}" data-cat="${c}">
+      ${c || 'TOUT'}
+    </button>`).join('');
+  wrap.querySelectorAll('.tab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      activeTab = btn.dataset.cat;
+      wrap.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      renderView();
+    });
+  });
+}
+
+function getFilteredCaisses(){
+  let list = QR_CAISSES;
+  if(activeTab) list = list.filter(c=>c.cat===activeTab);
+  if(searchQ){
+    const q = searchQ.toLowerCase();
+    list = list.filter(c=>{
+      const nameMatch = c.nom.toLowerCase().includes(q) || c.id.toLowerCase().includes(q) || c.cat.toLowerCase().includes(q);
+      const itemMatch = c.items.some(it=>it.nom.toLowerCase().includes(q)||it.id.toLowerCase().includes(q));
+      return nameMatch || itemMatch;
+    });
+  }
+  return list;
+}
+
+function renderView(){
+  if(currentView==='caisses') renderCaisses();
+  else renderItems(currentCaisse);
+}
+
+function renderCaisses(){
+  const list = getFilteredCaisses();
+  const main = document.getElementById('main');
+  if(!list.length){
+    main.innerHTML=`<div class="empty"><div class="empty-icon">📦</div><div class="empty-title">Aucune caisse trouvée</div><div class="empty-sub">Essayez un autre terme de recherche</div></div>`;
+    return;
+  }
+  main.innerHTML=`
+    <div class="section-header">
+      <span class="section-label">Caisses d'équipement</span>
+      <span class="count-pill">${list.length} caisse${list.length>1?'s':''}</span>
+    </div>
+    <div class="caisse-grid" id="caisse-grid"></div>`;
+  const grid = document.getElementById('caisse-grid');
+  list.forEach(c=>{
+    const el = document.createElement('div');
+    el.className = 'caisse-card'+(selected.has(c.id)?' selected':'');
+    el.dataset.id = c.id;
+    const preview = c.items.slice(0,4).map(it=>`<span>${it.nom.split(' ').slice(0,3).join(' ')}</span>`).join('');
+    const cSac = (typeof SAC_COLORS!=='undefined') ? SAC_COLORS[c.cat] : null;
+    const cBadge = cSac ? `<span style="display:inline-block;background:${cSac.hex};color:#000;font-weight:700;font-size:11px;padding:2px 10px;border-radius:10px;margin-top:4px;">● Tape ${cSac.name}</span>` : '';
+    if(cSac) el.style.borderLeft = `4px solid ${cSac.hex}`;
+    el.innerHTML=`
+      <div class="cc-top">
+        <div class="cc-qr-wrap" id="qr-${c.id}" onclick="event.stopPropagation();openQrZoom('${c.id}','${c.nom}')"></div>
+        <div class="cc-id">${c.id}</div>
+      </div>
+      <div class="cc-icons">${c.icons}</div>
+      <div class="cc-name">${c.nom}</div>
+      ${cBadge}
+      <div class="cc-preview">${preview}</div>
+      <div class="cc-footer">
+        <span class="cc-count">${c.items.length} items</span>
+        <span class="cc-drill">Voir ›</span>
+      </div>`;
+    el.addEventListener('click',e=>{
+      if(e.target.closest('.cc-drill')||e.target.textContent==='Voir ›') return drillDown(c);
+      toggleSelect(c.id);
+      el.classList.toggle('selected', selected.has(c.id));
+      updateSelBar();
+    });
+    el.querySelector('.cc-drill').parentElement.querySelector('.cc-drill').addEventListener('click',()=>drillDown(c));
+    grid.appendChild(el);
+    setTimeout(()=>genQR(`qr-${c.id}`, QR_BASE+c.id, qrSize), 50);
+  });
+}
+
+function drillDown(caisse){
+  currentView='items'; currentCaisse=caisse;
+  selected.clear(); updateSelBar();
+  renderItems(caisse);
+}
+
+function renderItems(caisse){
+  const main = document.getElementById('main');
+  let items = caisse.items;
+  if(searchQ){
+    const q=searchQ.toLowerCase();
+    items=items.filter(it=>it.nom.toLowerCase().includes(q)||it.id.toLowerCase().includes(q)||it.desc.toLowerCase().includes(q));
+  }
+  main.innerHTML=`
+    <div class="back-row" id="back-row">
+      <span style="font-size:18px">←</span>
+      <div>
+        <div class="back-row-title">← ${caisse.nom}</div>
+        <div class="back-row-sub">${caisse.id} · ${caisse.items.length} items</div>
+      </div>
+    </div>
+    <div class="section-header">
+      <span class="section-label">Items</span>
+      <span class="count-pill">${items.length} item${items.length>1?'s':''}</span>
+    </div>
+    <div class="items-grid" id="items-grid"></div>`;
+  document.getElementById('back-row').addEventListener('click',()=>{
+    currentView='caisses'; currentCaisse=null;
+    selected.clear(); updateSelBar();
+    renderCaisses();
+  });
+  const grid = document.getElementById('items-grid');
+  items.forEach(it=>{
+    const el = document.createElement('div');
+    el.className='item-card'+(selected.has(it.id)?' selected':'');
+    const colorEmoji = it.sacColorName ? (COULEUR_EMOJI[it.sacColorName]||'●') : '●';
+    const colorBadge = it.sacColor
+      ? `<span style="display:inline-block;background:${it.sacColor}22;color:${it.sacColor};font-weight:700;font-size:11px;padding:2px 8px;border-radius:10px;margin-top:4px;border:1px solid ${it.sacColor}44;">${colorEmoji} ${it.sacColorName}</span>`
+      : '';
+    if(it.sacColor){
+      el.setAttribute('data-sac-color', it.sacColorName);
+      el.style.setProperty('--sac-border', it.sacColor);
+      el.style.borderLeft = '4px solid ' + it.sacColor;
+    }
+    el.innerHTML=`
+      <div class="ic-top">
+        <div class="ic-qr-wrap" id="qr-${it.id}" onclick="event.stopPropagation();openQrZoom('${it.id}','${it.nom}')"></div>
+        <div class="ic-id">${it.id}</div>
+      </div>
+      <div class="ic-name">${it.nom}</div>
+      <div class="ic-desc">${it.desc}</div>
+      ${colorBadge}
+      <div class="ic-footer">
+        <span class="ic-etat ${it.etat}">${it.etat==='bon'?'✓ BON':it.etat==='warn'?'⚠ VÉRIF':'✗ DÉFAUT'}</span>
+        <span class="ic-qty">×${it.qty}</span>
+      </div>`;
+    el.addEventListener('click',()=>{
+      toggleSelect(it.id);
+      el.classList.toggle('selected', selected.has(it.id));
+      updateSelBar();
+    });
+    grid.appendChild(el);
+    setTimeout(()=>genQR(`qr-${it.id}`, QR_BASE+it.id, qrSize), 50);
+  });
+}
+
+function genQR(containerId, text, size){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  el.innerHTML='';
+  try{
+    new QRCode(el,{text, width:size, height:size, colorDark:'#000', colorLight:'#fff', correctLevel:QRCode.CorrectLevel.L});
+  }catch(e){console.warn('QR error',e);}
+}
+
+function toggleSelect(id){ if(selected.has(id)) selected.delete(id); else selected.add(id); }
+
+function updateSelBar(){
+  const bar = document.getElementById('sel-bar');
+  const n = selected.size;
+  document.getElementById('sel-count').textContent = `${n} sélectionné${n>1?'s':''}`;
+  bar.classList.toggle('visible', n>0);
+}
+
+function buildLexique(){
+  const entries = document.getElementById('lex-entries');
+  renderLexique(LEXIQUE);
+  document.getElementById('lex-search').addEventListener('input',e=>{
+    const q=e.target.value.toLowerCase();
+    renderLexique(LEXIQUE.filter(l=>l.prefix.toLowerCase().includes(q)||l.nom.toLowerCase().includes(q)||l.desc.toLowerCase().includes(q)||l.cat.toLowerCase().includes(q)));
+  });
+}
+
+function renderLexique(list){
+  const entries = document.getElementById('lex-entries');
+  if(!list.length){entries.innerHTML='<div class="empty"><div class="empty-title">Aucun préfixe trouvé</div></div>';return;}
+  entries.innerHTML = list.map(l=>`
+    <div class="lex-entry">
+      <span class="lex-prefix">${l.prefix}</span>
+      <div class="lex-info">
+        <div class="lex-name">${l.nom}</div>
+        <div class="lex-desc">${l.desc}</div>
+      </div>
+      <span class="lex-cat">${l.cat}</span>
+    </div>`).join('');
+}
+
+function toast(msg, dur=2200){
+  const t = document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), dur);
+}
+
+function playSound(){ try{document.getElementById('snd').cloneNode().play();}catch(e){} }
+
+function openQrZoom(id, label){
+  const modal = document.getElementById('qr-zoom-modal');
+  const box = document.getElementById('qr-zoom-box');
+  const lbl = document.getElementById('qr-zoom-label');
+  const idEl = document.getElementById('qr-zoom-id');
+  box.innerHTML = '';
+  lbl.textContent = label || id;
+  idEl.textContent = id;
+  const size = Math.min(window.innerWidth - 80, 280);
+  try{
+    new QRCode(box,{text:QR_BASE+id, width:size, height:size, colorDark:'#000', colorLight:'#fff', correctLevel:QRCode.CorrectLevel.L});
+  }catch(e){}
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeQrZoom(){
+  document.getElementById('qr-zoom-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function applyQrSize(size){
+  qrSize = size;
+  document.documentElement.style.setProperty('--qr-size', size + 'px');
+  document.querySelectorAll('[data-qr-size]').forEach(b=>{
+    b.classList.toggle('active', parseInt(b.dataset.qrSize) === size);
+  });
+  renderView();
+}
+
+let currentPrintFmt = 'print-3col';
+function applyPrintFmt(fmt){
+  document.body.classList.remove('print-2col','print-3col','print-4col');
+  document.body.classList.add(fmt);
+  currentPrintFmt = fmt;
+  document.querySelectorAll('[data-print-fmt]').forEach(b=>{
+    b.classList.toggle('active', b.dataset.printFmt === fmt);
+  });
+}
+
+// ── BIND EVENTS ──
+function bindEvents(){
+  // QR Size selector
+  document.querySelectorAll('[data-qr-size]').forEach(btn=>{
+    btn.addEventListener('click',()=>applyQrSize(parseInt(btn.dataset.qrSize)));
+  });
+
+  // Print format selector
+  document.querySelectorAll('[data-print-fmt]').forEach(btn=>{
+    btn.addEventListener('click',()=>applyPrintFmt(btn.dataset.printFmt));
+  });
+
+  // Search
+  const inp = document.getElementById('search');
+  const clr = document.getElementById('search-clear');
+  inp.addEventListener('input',e=>{
+    searchQ=e.target.value.trim();
+    clr.classList.toggle('visible', !!searchQ);
+    renderView();
+  });
+  clr.addEventListener('click',()=>{inp.value='';searchQ='';clr.classList.remove('visible');renderView();inp.focus();});
+
+  // Theme
+  document.getElementById('th-dark').addEventListener('click',()=>setTheme('dark'));
+  document.getElementById('th-light').addEventListener('click',()=>setTheme('light'));
+
+  // Lexique
+  document.getElementById('btn-lexique').addEventListener('click',()=>document.getElementById('lex-modal').classList.add('open'));
+
+  // Print
+  document.getElementById('btn-print').addEventListener('click',()=>window.print());
+
+  // Export
+  document.getElementById('btn-export').addEventListener('click',()=>{
+    const exportData = (typeof ITEMS!=='undefined') ? ITEMS : QR_CAISSES;
+    const blob = new Blob([JSON.stringify(exportData, null, 2)],{type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url; a.download=`inventaire_golden_eagles_${Date.now()}.json`;
+    a.click(); URL.revokeObjectURL(url);
+    toast('✓ Export JSON téléchargé');
+    playSound();
+  });
+
+  // Add modal
+  document.getElementById('btn-add').addEventListener('click',()=>{
+    const sel=document.getElementById('inp-cat');
+    sel.innerHTML=QR_CAISSES.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
+    document.getElementById('modal').classList.add('open');
+  });
+  document.getElementById('btn-cancel').addEventListener('click',()=>document.getElementById('modal').classList.remove('open'));
+  document.getElementById('modal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
+  document.getElementById('btn-save').addEventListener('click',()=>{
+    const name=document.getElementById('inp-name').value.trim();
+    if(!name){toast('⚠ Nom requis');return;}
+    const cat=document.getElementById('inp-cat').value;
+    const desc=document.getElementById('inp-desc').value.trim();
+    const fab=document.getElementById('inp-fab').value.trim();
+    const qty=parseInt(document.getElementById('inp-qty').value)||1;
+    const caisse=QR_CAISSES.find(c=>c.id===cat);
+    if(!caisse) return;
+    const prefix=caisse.id.replace('CAISSE-','');
+    const newId=`${prefix}-${String(caisse.items.length+1).padStart(3,'0')}`;
+    caisse.items.push({id:newId,nom:name,desc,fab,qty,etat:'bon'});
+    allItems.push({id:newId,nom:name,desc,fab,qty,etat:'bon',caisse:caisse.id,caisseName:caisse.nom,cat:caisse.cat});
+    document.getElementById('modal').classList.remove('open');
+    document.getElementById('inp-name').value='';
+    renderView();
+    toast(`✓ ${name} ajouté`);
+    playSound();
+  });
+
+  // Selection bar
+  document.getElementById('btn-clear-sel').addEventListener('click',()=>{selected.clear();updateSelBar();renderView();});
+  document.getElementById('btn-print-sel').addEventListener('click',()=>{
+    if(!selected.size) return;
+    toast(`🖨 Impression de ${selected.size} QR code${selected.size>1?'s':''}…`);
+    setTimeout(()=>window.print(), 500);
+  });
+}
+
+function setTheme(t){
+  localStorage.setItem('volo_theme_main',t);
+  document.body.classList.toggle('light',t==='light');
+  document.getElementById('th-dark').classList.toggle('active',t!=='light');
+  document.getElementById('th-light').classList.toggle('active',t==='light');
+}
+
+// ── QR SCANNER (getUserMedia + jsQR) ──
+let _scanStream = null;
+let _scanVideo = null;
+let _scanAnim = null;
+let _scanFound = false;
+
+function openScanModal(){
+  document.getElementById('scan-overlay').classList.add('open');
+  document.getElementById('scan-result').classList.remove('visible');
+  document.getElementById('scan-result-warn').classList.remove('visible');
+  document.getElementById('scan-again').classList.remove('visible');
+  _scanFound = false;
+  startScanner();
+}
+
+function closeScanModal(){
+  document.getElementById('scan-overlay').classList.remove('open');
+  stopScanner();
+}
+
+async function startScanner(){
+  stopScanner();
+  _scanFound = false;
+  var reader = document.getElementById('scan-reader');
+  reader.innerHTML =
+    '<div style="position:relative;width:100%;aspect-ratio:1;background:#000;border-radius:12px;overflow:hidden">' +
+      '<video id="scan-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:block"></video>' +
+      '<canvas id="scan-canvas" style="display:none"></canvas>' +
+      '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">' +
+        '<div id="scan-box" style="width:72%;max-width:260px;aspect-ratio:1;border:3px solid var(--gold);border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.4);position:relative">' +
+          '<div style="position:absolute;top:-3px;left:-3px;width:24px;height:24px;border-top:4px solid var(--rescue);border-left:4px solid var(--rescue);border-radius:4px 0 0 0"></div>' +
+          '<div style="position:absolute;top:-3px;right:-3px;width:24px;height:24px;border-top:4px solid var(--rescue);border-right:4px solid var(--rescue);border-radius:0 4px 0 0"></div>' +
+          '<div style="position:absolute;bottom:-3px;left:-3px;width:24px;height:24px;border-bottom:4px solid var(--rescue);border-left:4px solid var(--rescue);border-radius:0 0 0 4px"></div>' +
+          '<div style="position:absolute;bottom:-3px;right:-3px;width:24px;height:24px;border-bottom:4px solid var(--rescue);border-right:4px solid var(--rescue);border-radius:0 0 4px 0"></div>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div id="scan-status" style="font-size:12px;color:var(--muted);text-align:center;margin-top:8px">Activation caméra…</div>';
+
+  var video = document.getElementById('scan-video');
+  var status = document.getElementById('scan-status');
+  _scanVideo = video;
+
+  try {
+    var stream;
+    var constraints = [
+      {video:{facingMode:{exact:'environment'},width:{ideal:1280},height:{ideal:720}}},
+      {video:{facingMode:'environment'}},
+      {video:true}
+    ];
+    for(var i=0;i<constraints.length;i++){
+      try{ stream = await navigator.mediaDevices.getUserMedia(constraints[i]); break; }catch(e){}
+    }
+    if(!stream) throw new Error('no stream');
+    _scanStream = stream;
+    video.srcObject = stream;
+    await video.play();
+    var jsqrOk = typeof jsQR !== 'undefined';
+    if(status) status.textContent = jsqrOk ? '📐 Approche le QR code dans le cadre' : '❌ jsQR non chargé — vide le cache';
+
+    var canvas = document.getElementById('scan-canvas');
+    var ctx = canvas.getContext('2d',{willReadFrequently:true});
+    function scanLoop(){
+      if(_scanFound || !_scanStream || !video || video.readyState < 2){
+        if(!_scanFound) _scanAnim = requestAnimationFrame(scanLoop);
+        return;
+      }
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      ctx.drawImage(video, 0, 0);
+      if(typeof jsQR !== 'undefined'){
+        var img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        var code = jsQR(img.data, img.width, img.height, {inversionAttempts:'attemptBoth'});
+        if(code && code.data){
+          var box = document.getElementById('scan-box');
+          if(box) box.style.borderColor = 'var(--green)';
+          _scanFound = true;
+          onScanSuccess(code.data);
+          return;
+        }
+      }
+      _scanAnim = requestAnimationFrame(scanLoop);
+    }
+    _scanAnim = requestAnimationFrame(scanLoop);
+
+  } catch(err){
+    reader.innerHTML = '<div style="padding:30px;text-align:center"><div style="color:var(--red);font-size:15px;margin-bottom:10px">⚠️ Caméra non disponible</div><div style="color:var(--muted);font-size:13px">Autorise la caméra dans ton navigateur</div></div>';
+  }
+}
+
+function stopScanner(){
+  if(_scanAnim){ cancelAnimationFrame(_scanAnim); _scanAnim = null; }
+  if(_scanStream){ _scanStream.getTracks().forEach(function(t){t.stop();}); _scanStream = null; }
+  if(_scanVideo){ _scanVideo.srcObject = null; _scanVideo = null; }
+}
+
+function onScanSuccess(decodedText){
+  stopScanner();
+  // Extract ID from URL or raw text
+  let itemId = decodedText;
+  if(decodedText.includes('?id=')){
+    itemId = decodedText.split('?id=').pop();
+  }
+  itemId = decodeURIComponent(itemId).trim();
+
+  // Search in ITEMS
+  let found = null;
+  if(typeof ITEMS !== 'undefined'){
+    found = ITEMS.find(function(it){ return it.id === itemId; });
+  }
+  // Search in allItems (includes caisse info)
+  let caisseInfo = null;
+  if(found){
+    const ai = allItems.find(function(it){ return it.id === itemId; });
+    if(ai) caisseInfo = ai.caisseName;
+  }
+  // Search in CAISSES
+  let foundCaisse = null;
+  if(!found && typeof CAISSES !== 'undefined'){
+    foundCaisse = CAISSES.find(function(c){ return c.id === itemId; });
+  }
+  if(!foundCaisse){
+    foundCaisse = QR_CAISSES.find(function(c){ return c.id === itemId; });
+  }
+
+  const resultEl = document.getElementById('scan-result');
+  const titleEl = document.getElementById('scan-result-title');
+  const metaEl = document.getElementById('scan-result-meta');
+  const warnEl = document.getElementById('scan-result-warn');
+  const againBtn = document.getElementById('scan-again');
+
+  if(found){
+    titleEl.textContent = found.name || found.id;
+    let meta = '<span>' + found.id + '</span>';
+    if(found.cat) meta += '<span>' + found.cat + '</span>';
+    if(found.etat) meta += '<span>' + found.etat + '</span>';
+    if(caisseInfo) meta += '<br>Caisse : ' + caisseInfo;
+    if(found.fab) meta += '<br>Fabricant : ' + found.fab;
+    if(found.serial) meta += '<br>Serial : ' + found.serial;
+    metaEl.innerHTML = meta;
+    resultEl.classList.add('visible');
+    warnEl.classList.remove('visible');
+  } else if(foundCaisse){
+    titleEl.textContent = foundCaisse.nom || foundCaisse.name || foundCaisse.id;
+    let meta = '<span>' + foundCaisse.id + '</span>';
+    if(foundCaisse.cat) meta += '<span>' + foundCaisse.cat + '</span>';
+    meta += '<br>Items : ' + (foundCaisse.count || (foundCaisse.items_contenus ? foundCaisse.items_contenus.length : '?'));
+    metaEl.innerHTML = meta;
+    resultEl.classList.add('visible');
+    warnEl.classList.remove('visible');
+  } else {
+    resultEl.classList.remove('visible');
+    warnEl.textContent = '⚠️ QR non trouvé dans l\'inventaire — ID: ' + itemId;
+    warnEl.classList.add('visible');
+  }
+  againBtn.classList.add('visible');
+}
+
+function scanAgain(){
+  document.getElementById('scan-result').classList.remove('visible');
+  document.getElementById('scan-result-warn').classList.remove('visible');
+  document.getElementById('scan-again').classList.remove('visible');
+  startScanner();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+<!-- SCANNER MODAL -->
+<div class="scan-overlay" id="scan-overlay">
+  <div class="scan-header">
+    <div class="scan-title">📷 SCANNER QR</div>
+    <button class="scan-close" onclick="closeScanModal()">✕ FERMER</button>
+  </div>
+  <div id="scan-reader"></div>
+  <div class="scan-result" id="scan-result">
+    <div class="scan-result-title" id="scan-result-title"></div>
+    <div class="scan-result-meta" id="scan-result-meta"></div>
+  </div>
+  <div class="scan-result-warn" id="scan-result-warn">⚠️ QR non trouvé dans l'inventaire</div>
+  <button class="scan-again" id="scan-again" onclick="scanAgain()">📷 SCANNER UN AUTRE</button>
+</div>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}</script>
+</body>
+</html>

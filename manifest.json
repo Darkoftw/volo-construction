@@ -1,0 +1,13 @@
+{
+  "name": "VOLO SST — Golden Eagles",
+  "short_name": "VOLO SST",
+  "description": "Sauvetage technique — Golden Eagles",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0C0608",
+  "theme_color": "#E65100",
+  "icons": [
+    {"src": "eagle_tactic.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "eagle_tactic.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}
