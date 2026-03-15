@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panoptikon — Multi-Site Tracking Dashboard</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Sora:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --void: #020208;
+    --surface: #08081A;
+    --card: #0B0B22;
+    --card-hover: #0E0E2A;
+    --border: #141432;
+    --border-active: #1E1E50;
+    --emerald: #00FFB2;
+    --emerald-dim: #00805A;
+    --emerald-glow: rgba(0, 255, 178, 0.08);
+    --cyan: #00C8FF;
+    --cyan-glow: rgba(0, 200, 255, 0.08);
+    --amber: #FFB800;
+    --amber-glow: rgba(255, 184, 0, 0.08);
+    --magenta: #FF3D8E;
+    --magenta-glow: rgba(255, 61, 142, 0.08);
+    --violet: #8B5CF6;
+    --violet-glow: rgba(139, 92, 246, 0.08);
+    --red: #FF4757;
+    --text: #E4E2DD;
+    --text-muted: #5A587A;
+    --text-dim: #2E2C48;
+    --font-display: 'Outfit', sans-serif;
+    --font-body: 'Sora', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--void);
+    color: var(--text);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  /* ── NOISE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.02;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+  }
+
+  /* ════════════════════════════════════
+     LAYOUT — Sidebar + Main
+     ════════════════════════════════════ */
+  .app {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .brand-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--emerald), var(--cyan));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .brand-icon svg { width: 18px; height: 18px; stroke: var(--void); fill: none; stroke-width: 2; }
+
+  .brand-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .brand-name span { color: var(--emerald); }
+
+  .sidebar-section-label {
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .sidebar-section-label:first-of-type { margin-top: 0; }
+
+  /* Site items in sidebar */
+  .site-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 2px;
+    cursor: pointer;
+    transition: all 0.3s var(--ease);
+    position: relative;
+  }
+
+  .site-item:hover { background: var(--card); }
+  .site-item.active { background: var(--card-hover); }
+
+  .site-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .site-dot::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    opacity: 0.3;
+    animation: dotRing 3s infinite;
+  }
+
+  @keyframes dotRing {
+    0%, 100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.8); opacity: 0; }
+  }
+
+  .site-dot.emerald { background: var(--emerald); color: var(--emerald); box-shadow: 0 0 10px var(--emerald-glow); }
+  .site-dot.cyan { background: var(--cyan); color: var(--cyan); box-shadow: 0 0 10px var(--cyan-glow); }
+  .site-dot.amber { background: var(--amber); color: var(--amber); box-shadow: 0 0 10px var(--amber-glow); }
+  .site-dot.magenta { background: var(--magenta); color: var(--magenta); box-shadow: 0 0 10px var(--magenta-glow); }
+  .site-dot.violet { background: var(--violet); color: var(--violet); box-shadow: 0 0 10px var(--violet-glow); }
+
+  .site-info { flex: 1; min-width: 0; }
+
+  .site-name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .site-url {
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    color: var(--text-dim);
+    letter-spacing: 0.02em;
+  }
+
+  .site-live-count {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--emerald);
+    flex-shrink: 0;
+  }
+
+  /* Sidebar nav links */
+  .sidebar-nav {
+    margin-top: auto;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .sidebar-link:hover { background: var(--card); color: var(--text); }
+  .sidebar-link svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+
+  /* ════════════════════════════════════
+     MAIN CONTENT
+     ════════════════════════════════════ */
+  .main {
+    padding: 2rem;
+    overflow-y: auto;
+  }
+
+  /* Top bar */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.3s var(--ease) forwards;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .top-title {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: 1.6rem;
+    letter-spacing: -0.02em;
+  }
+
+  .top-title strong { font-weight: 700; }
+  .top-title em { font-style: normal; color: var(--emerald); }
+
+  .top-meta {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--emerald);
+    padding: 6px 14px;
+    border: 1px solid rgba(0, 255, 178, 0.15);
+    border-radius: 100px;
+    background: var(--emerald-glow);
+  }
+
+  .live-badge .pulse {
+    width: 6px; height: 6px;
+    background: var(--emerald);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,255,178,0.4); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 8px rgba(0,255,178,0); }
+  }
+
+  .top-time {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-dim);
+  }
+
+  /* ── GLOBAL KPI ROW ── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.5s var(--ease) forwards;
+  }
+
+  .kpi {
+    background: var(--surface);
+    padding: 1.5rem;
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .kpi:hover { background: var(--card); }
+
+  .kpi-label {
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+  }
+
+  .kpi-value {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 2rem;
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+
+  .kpi-change {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  .kpi-change.up { color: var(--emerald); background: var(--emerald-glow); }
+  .kpi-change.down { color: var(--red); background: rgba(255,71,87,0.1); }
+  .kpi-change.flat { color: var(--text-dim); background: rgba(46,44,72,0.3); }
+
+  /* ── SITE CARDS GRID ── */
+  .sites-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.7s var(--ease) forwards;
+  }
+
+  .sites-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .sites-filter {
+    display: flex;
+    gap: 4px;
+  }
+
+  .filter-btn {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.05em;
+    padding: 5px 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover, .filter-btn.active {
+    border-color: var(--emerald-dim);
+    color: var(--emerald);
+    background: var(--emerald-glow);
+  }
+
+  .sites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.9s var(--ease) forwards;
+  }
+
+  .site-card {
+    background: var(--surface);
+    padding: 1.5rem;
+    transition: all 0.4s var(--ease);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .site-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 2px;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  .site-card:hover { background: var(--card); }
+  .site-card:hover::before { opacity: 1; }
+
+  .site-card[data-color="emerald"]::before { background: linear-gradient(90deg, var(--emerald), transparent); }
+  .site-card[data-color="cyan"]::before { background: linear-gradient(90deg, var(--cyan), transparent); }
+  .site-card[data-color="amber"]::before { background: linear-gradient(90deg, var(--amber), transparent); }
+  .site-card[data-color="magenta"]::before { background: linear-gradient(90deg, var(--magenta), transparent); }
+  .site-card[data-color="violet"]::before { background: linear-gradient(90deg, var(--violet), transparent); }
+
+  .site-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.2rem;
+  }
+
+  .site-card-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .site-card-name .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  .site-card-name h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: -0.01em;
+  }
+
+  .site-card-status {
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 3px;
+  }
+
+  .site-card-status.online { color: var(--emerald); background: var(--emerald-glow); }
+  .site-card-status.slow { color: var(--amber); background: var(--amber-glow); }
+
+  /* Mini chart in card */
+  .mini-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 50px;
+    margin-bottom: 1.2rem;
+  }
+
+  .mini-bar {
+    flex: 1;
+    border-radius: 1px 1px 0 0;
+    min-width: 3px;
+    transition: opacity 0.2s;
+    opacity: 0.4;
+  }
+
+  .site-card:hover .mini-bar { opacity: 0.7; }
+  .site-card:hover .mini-bar:last-child { opacity: 1; }
+
+  /* Card metrics */
+  .card-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .card-metric-label {
+    font-family: var(--font-mono);
+    font-size: 0.5rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.3rem;
+  }
+
+  .card-metric-value {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.2rem;
+  }
+
+  .card-metric-value .unit {
+    font-size: 0.65rem;
+    font-weight: 300;
+    color: var(--text-muted);
+  }
+
+  /* ── LIVE VISITORS TABLE ── */
+  .table-section {
+    opacity: 0;
+    animation: fadeUp 0.8s 1.1s var(--ease) forwards;
+  }
+
+  .table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .table-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .table-count {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--text-dim);
+  }
+
+  .visitor-table {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .visitor-table thead th {
+    background: var(--surface);
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .visitor-table tbody tr {
+    transition: background 0.2s;
+  }
+
+  .visitor-table tbody tr:hover { background: var(--card); }
+
+  .visitor-table td {
+    padding: 10px 14px;
+    font-size: 0.78rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .visitor-table tr:last-child td { border-bottom: none; }
+
+  .visitor-site {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .visitor-site .vdot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .visitor-site-name {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 0.75rem;
+  }
+
+  .visitor-page {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .visitor-location {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .visitor-device {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    padding: 2px 8px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+  }
+
+  .visitor-duration {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+
+  .visitor-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .action-badge {
+    font-family: var(--font-mono);
+    font-size: 0.5rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 2px;
+  }
+
+  .action-badge.browse { color: var(--cyan); background: var(--cyan-glow); }
+  .action-badge.form { color: var(--amber); background: var(--amber-glow); }
+  .action-badge.scan { color: var(--emerald); background: var(--emerald-glow); }
+  .action-badge.read { color: var(--violet); background: var(--violet-glow); }
+  .action-badge.idle { color: var(--text-dim); background: rgba(46,44,72,0.3); }
+
+  /* ── RADAR / WORLD MAP SECTION ── */
+  .radar-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 1.3s var(--ease) forwards;
+  }
+
+  .radar-card {
+    background: var(--surface);
+    padding: 1.5rem;
+  }
+
+  .radar-card-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .radar-card-badge {
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  /* Sidebar group count badge */
+  .sidebar-group-count {
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    background: var(--card);
+    color: var(--emerald);
+    padding: 1px 6px;
+    border-radius: 8px;
+    margin-left: 6px;
+  }
+
+  /* World Map (Leaflet) */
+  .radar-container {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  #world-map {
+    width: 100%;
+    height: 100%;
+    background: var(--void);
+  }
+  /* Dark tiles overrides */
+  .leaflet-container { background: var(--void) !important; }
+  .leaflet-control-attribution { display: none !important; }
+  .leaflet-control-zoom { display: none !important; }
+
+  /* Map blip markers */
+  .map-blip {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    animation: blipPulse 2s infinite;
+    box-shadow: 0 0 8px currentColor;
+  }
+  .map-blip.idle { opacity: 0.35; }
+
+  @keyframes blipPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.4); }
+  }
+
+  /* Top pages list */
+  .top-pages { display: flex; flex-direction: column; gap: 0; }
+
+  .top-page-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .top-page-item:last-child { border-bottom: none; }
+
+  .top-page-rank {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    width: 20px;
+    text-align: center;
+  }
+
+  .top-page-bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .top-page-name {
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .top-page-views {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--text-muted);
+  }
+
+  .top-page-bar {
+    height: 3px;
+    border-radius: 2px;
+    background: var(--border);
+    overflow: hidden;
+  }
+
+  .top-page-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1s var(--ease);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1024px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar {
+      position: relative;
+      height: auto;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 1rem;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-brand { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+    .sidebar-section-label { display: none; }
+    .sidebar-nav { display: none; }
+    .kpi-row { grid-template-columns: repeat(3, 1fr); }
+    .radar-section { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 768px) {
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .sites-grid { grid-template-columns: 1fr; }
+    .visitor-table { font-size: 0.7rem; }
+    .top-meta { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ════════ SIDEBAR ════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10A15 15 0 0 1 12 2z"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+      </div>
+      <div class="brand-name">Panop<span>tikon</span></div>
+    </div>
+
+    <div class="sidebar-section-label">Nexia Digital <span class="sidebar-group-count" id="sidebar-nexia-total">0</span></div>
+    <div id="sidebar-sites">
+
+    <div class="site-item" data-site-id="nexia-hub">
+      <div class="site-dot" style="background:#C9A84C;box-shadow:0 0 6px rgba(201,168,76,0.5)"></div>
+      <div class="site-info">
+        <div class="site-name">Nexia Hub</div>
+        <div class="site-url">nexiadigital.ca</div>
+      </div>
+      <div class="site-live-count" id="sidebar-nexia-hub">0</div>
+    </div>
+
+    <div class="site-item" data-site-id="conformeqc">
+      <div class="site-dot emerald"></div>
+      <div class="site-info">
+        <div class="site-name">ConformeQC</div>
+        <div class="site-url">conformeqc.nexiadigital.ca</div>
+      </div>
+      <div class="site-live-count" id="sidebar-conformeqc">0</div>
+    </div>
+
+    <div class="site-item" data-site-id="excelpro">
+      <div class="site-dot cyan"></div>
+      <div class="site-info">
+        <div class="site-name">ExcelPro</div>
+        <div class="site-url">excelpro.nexiadigital.ca</div>
+      </div>
+      <div class="site-live-count" id="sidebar-excelpro">0</div>
+    </div>
+
+    <div class="site-item" data-site-id="notionpro">
+      <div class="site-dot amber"></div>
+      <div class="site-info">
+        <div class="site-name">NotionPro</div>
+        <div class="site-url">notionpro.nexiadigital.ca</div>
+      </div>
+      <div class="site-live-count" id="sidebar-notionpro">0</div>
+    </div>
+
+    <div class="site-item" data-site-id="formapro">
+      <div class="site-dot magenta"></div>
+      <div class="site-info">
+        <div class="site-name">FormaPro</div>
+        <div class="site-url">formapro.nexiadigital.ca</div>
+      </div>
+      <div class="site-live-count" id="sidebar-formapro">0</div>
+    </div>
+
+    <div class="site-item" data-site-id="legalkit">
+      <div class="site-dot violet"></div>
+      <div class="site-info">
+        <div class="site-name">LegalKit</div>
+        <div class="site-url">legalkit.nexiadigital.ca</div>
+      </div>
+      <div class="site-live-count" id="sidebar-legalkit">0</div>
+    </div>
+
+    <div class="site-item" data-site-id="chantierdocs">
+      <div class="site-dot emerald"></div>
+      <div class="site-info">
+        <div class="site-name">ChantierDocs</div>
+        <div class="site-url">chantierdocs.nexiadigital.ca</div>
+      </div>
+      <div class="site-live-count" id="sidebar-chantierdocs">0</div>
+    </div>
+
+    <div class="site-item" data-site-id="promptvault">
+      <div class="site-dot amber"></div>
+      <div class="site-info">
+        <div class="site-name">PromptVault</div>
+        <div class="site-url">promptvault.nexiadigital.ca</div>
+      </div>
+      <div class="site-live-count" id="sidebar-promptvault">0</div>
+    </div>
+
+    <div class="site-item" data-site-id="codesnap">
+      <div class="site-dot cyan"></div>
+      <div class="site-info">
+        <div class="site-name">CodeSnap</div>
+        <div class="site-url">codesnap.nexiadigital.ca</div>
+      </div>
+      <div class="site-live-count" id="sidebar-codesnap">0</div>
+    </div>
+
+    </div>
+
+    <div class="sidebar-section-label" style="margin-top:0.8rem;">VOLO SST <span class="sidebar-group-count" id="sidebar-volo-total">0</span></div>
+    <div>
+    <div class="site-item" data-site-id="volo-sst">
+      <div class="site-dot" style="background:#E65100;box-shadow:0 0 6px rgba(230,81,0,0.5)"></div>
+      <div class="site-info">
+        <div class="site-name">VOLO SST</div>
+        <div class="site-url">voloinv7.netlify.app</div>
+      </div>
+      <div class="site-live-count" id="sidebar-volo-sst">0</div>
+    </div>
+    </div>
+
+    <div class="sidebar-section-label">Navigation</div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Vue d'ensemble
+      </a>
+      <a href="#" class="sidebar-link">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Visiteurs
+      </a>
+      <a href="#" class="sidebar-link">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Analytics
+      </a>
+      <a href="#" class="sidebar-link">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Alertes
+      </a>
+      <a href="#" class="sidebar-link">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ════════ MAIN ════════ -->
+  <main class="main">
+
+    <!-- Top bar -->
+    <div class="top-bar">
+      <h1 class="top-title"><strong>Vue</strong> d'<em>ensemble</em></h1>
+      <div class="top-meta">
+        <div class="live-badge"><span class="pulse"></span> <span id="live-badge-count">0</span> en ligne</div>
+        <div class="top-time" id="clock">15 mars 2026 — 14:32:00</div>
+      </div>
+    </div>
+
+    <!-- KPI Row -->
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="kpi-label">Visiteurs live</div>
+        <div class="kpi-value" id="kpi-live" style="color:var(--emerald)">0</div>
+        <div class="kpi-change flat" id="kpi-live-change">En attente...</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Sites actifs</div>
+        <div class="kpi-value" id="kpi-sites">0</div>
+        <div class="kpi-change flat" id="kpi-sites-change">/ 10 sites</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Pages vues</div>
+        <div class="kpi-value" id="kpi-pages">0</div>
+        <div class="kpi-change flat" id="kpi-pages-change">uniques</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Duree moyenne</div>
+        <div class="kpi-value" id="kpi-duration">0:00</div>
+        <div class="kpi-change flat" id="kpi-duration-change">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Idle</div>
+        <div class="kpi-value" id="kpi-idle">0</div>
+        <div class="kpi-change flat" id="kpi-idle-change">visiteurs inactifs</div>
+      </div>
+    </div>
+
+    <!-- Sites Grid -->
+    <div class="sites-header">
+      <h2 class="sites-title">Performance par site</h2>
+      <div class="sites-filter">
+        <button class="filter-btn active">Tous</button>
+        <button class="filter-btn">24h</button>
+        <button class="filter-btn">7j</button>
+        <button class="filter-btn">30j</button>
+      </div>
+    </div>
+
+    <div class="sites-grid" id="sites-grid">
+      <div style="grid-column:1/-1;text-align:center;color:var(--text-muted);font-family:var(--font-mono);font-size:0.75rem;padding:2rem;">
+        En attente de donnees Firebase...
+      </div>
+    </div>
+
+    <!-- Visitors Table -->
+    <div class="table-section">
+      <div class="table-header">
+        <h2 class="table-title">Visiteurs en temps reel</h2>
+        <span class="table-count" id="table-count">0 actifs sur 0 sites</span>
+      </div>
+
+      <table class="visitor-table">
+        <thead>
+          <tr>
+            <th>Site</th>
+            <th>Page</th>
+            <th>Localisation</th>
+            <th>Device</th>
+            <th>Duree</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="visitors-tbody">
+          <tr><td colspan="6" style="text-align:center;color:var(--text-muted);font-family:var(--font-mono);font-size:0.75rem;padding:1.5rem;">En attente de donnees...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Radar + Top Pages -->
+    <div class="radar-section">
+      <div class="radar-card">
+        <div class="radar-card-title">
+          World Map live
+          <span class="radar-card-badge" id="map-visitor-count">0 visiteurs</span>
+        </div>
+        <div class="radar-container" id="radar-container">
+          <div id="world-map"></div>
+        </div>
+      </div>
+
+      <div class="radar-card">
+        <div class="radar-card-title">
+          Top pages
+          <span class="radar-card-badge">Tous les sites</span>
+        </div>
+        <div class="top-pages" id="top-pages">
+          <div style="text-align:center;color:var(--text-muted);font-family:var(--font-mono);font-size:0.7rem;padding:1.5rem;">En attente de donnees...</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Firebase SDK compat v9.23.0 -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+(function() {
+  'use strict';
+
+  // ══════════════════════════════════════
+  //  SITE CONFIG — 9 sites tracked
+  // ══════════════════════════════════════
+  const SITES = {
+    'nexia-hub':    { name: 'Nexia Hub',     color: '#C9A84C', cssVar: '--amber',   group: 'nexia' },
+    'conformeqc':   { name: 'ConformeQC',    color: '#00FFB2', cssVar: '--emerald', group: 'nexia' },
+    'excelpro':     { name: 'ExcelPro',      color: '#00C8FF', cssVar: '--cyan',    group: 'nexia' },
+    'notionpro':    { name: 'NotionPro',     color: '#FFB800', cssVar: '--amber',   group: 'nexia' },
+    'formapro':     { name: 'FormaPro',      color: '#FF3D8E', cssVar: '--magenta', group: 'nexia' },
+    'legalkit':     { name: 'LegalKit',      color: '#8B5CF6', cssVar: '--violet',  group: 'nexia' },
+    'chantierdocs': { name: 'ChantierDocs',  color: '#00FFB2', cssVar: '--emerald', group: 'nexia' },
+    'promptvault':  { name: 'PromptVault',   color: '#FFB800', cssVar: '--amber',   group: 'nexia' },
+    'codesnap':     { name: 'CodeSnap',      color: '#00C8FF', cssVar: '--cyan',    group: 'nexia' },
+    'volo-sst':     { name: 'VOLO SST',      color: '#E65100', cssVar: '--red',     group: 'volo' }
+  };
+
+  // Heartbeat threshold: visitor is "live" if last_heartbeat < 60s ago
+  const HEARTBEAT_THRESHOLD_MS = 60 * 1000;
+
+  // ══════════════════════════════════════
+  //  FIREBASE INIT
+  // ══════════════════════════════════════
+  const firebaseConfig = {
+    apiKey: "AIzaSyCL4KHdek_bTO9EX2YV0K4dQHCGbyspFGw",
+    authDomain: "volo-sst-prod.firebaseapp.com",
+    databaseURL: "https://volo-sst-prod-default-rtdb.firebaseio.com",
+    projectId: "volo-sst-prod",
+    storageBucket: "volo-sst-prod.firebasestorage.app",
+    messagingSenderId: "205153358536",
+    appId: "1:205153358536:web:3070869d38bc2bda870bfd"
+  };
+
+  let db = null;
+  let firebaseReady = false;
+
+  try {
+    if (firebase.apps && firebase.apps.length > 0) {
+      db = firebase.apps[0].database();
+    } else {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.database();
+    }
+    firebaseReady = true;
+    console.log('[Panoptikon] Firebase RTDB connecte');
+  } catch(e) {
+    console.error('[Panoptikon] Firebase init error:', e);
+  }
+
+  // ══════════════════════════════════════
+  //  LIVE CLOCK
+  // ══════════════════════════════════════
+  function updateClock() {
+    const now = new Date();
+    const months = ['jan','fev','mars','avr','mai','juin','juil','aout','sept','oct','nov','dec'];
+    const d = now.getDate();
+    const mo = months[now.getMonth()];
+    const y = now.getFullYear();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    document.getElementById('clock').textContent = d + ' ' + mo + ' ' + y + ' — ' + h + ':' + m + ':' + s;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // ══════════════════════════════════════
+  //  HELPERS
+  // ══════════════════════════════════════
+  function formatDuration(seconds) {
+    if (!seconds || seconds < 0) return '0:00';
+    var mins = Math.floor(seconds / 60);
+    var secs = Math.floor(seconds % 60);
+    return mins + ':' + String(secs).padStart(2, '0');
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function getSiteColor(siteId) {
+    var s = SITES[siteId];
+    return s ? s.color : '#5A587A';
+  }
+
+  function getSiteName(siteId, data) {
+    // Use site_name from data if available, otherwise from config
+    if (data && data.site_name) return data.site_name;
+    var s = SITES[siteId];
+    return s ? s.name : siteId || 'Inconnu';
+  }
+
+  // ══════════════════════════════════════
+  //  MAIN DATA HANDLER
+  // ══════════════════════════════════════
+  var lastSnapshot = null;
+
+  function processLiveData(snapshot) {
+    var now = Date.now();
+    var allVisitors = [];
+    var siteCounts = {};
+    var pages = {};
+
+    // Init site counts
+    Object.keys(SITES).forEach(function(sid) { siteCounts[sid] = 0; });
+
+    if (snapshot && snapshot.exists()) {
+      snapshot.forEach(function(child) {
+        var v = child.val();
+        if (!v || !v.site_id) return;
+
+        // Check if visitor is live (heartbeat < 60s ago)
+        var lastHB = v.last_heartbeat || 0;
+        var hbAge = now - lastHB;
+        if (hbAge > HEARTBEAT_THRESHOLD_MS) return; // stale, skip
+
+        allVisitors.push({
+          id: child.key,
+          site_id: v.site_id,
+          site_name: v.site_name || getSiteName(v.site_id, v),
+          site_color: v.site_color || getSiteColor(v.site_id),
+          page: v.page || '/',
+          device: v.device || {},
+          started_at: v.started_at || 0,
+          last_heartbeat: lastHB,
+          duration_seconds: v.duration_seconds || Math.floor((now - (v.started_at || now)) / 1000),
+          scroll_depth: v.scroll_depth || 0,
+          idle: v.idle || false,
+          geo: v.geo || null
+        });
+
+        // Count per site
+        if (siteCounts.hasOwnProperty(v.site_id)) {
+          siteCounts[v.site_id]++;
+        } else {
+          siteCounts[v.site_id] = 1;
+        }
+
+        // Track pages
+        var pageKey = (v.site_id || '') + '::' + (v.page || '/');
+        pages[pageKey] = (pages[pageKey] || 0) + 1;
+      });
+    }
+
+    // Sort visitors by duration descending
+    allVisitors.sort(function(a, b) { return b.duration_seconds - a.duration_seconds; });
+
+    var totalLive = allVisitors.length;
+    var activeSites = Object.keys(siteCounts).filter(function(k) { return siteCounts[k] > 0; }).length;
+    var idleCount = allVisitors.filter(function(v) { return v.idle; }).length;
+    var uniquePages = Object.keys(pages).length;
+
+    // Average duration
+    var avgDuration = 0;
+    if (totalLive > 0) {
+      var totalDur = allVisitors.reduce(function(sum, v) { return sum + v.duration_seconds; }, 0);
+      avgDuration = totalDur / totalLive;
+    }
+
+    // ── Update KPIs ──
+    updateKPI('kpi-live', totalLive);
+    updateKPI('kpi-sites', activeSites);
+    document.getElementById('kpi-sites-change').textContent = '/ 10 sites';
+    updateKPI('kpi-pages', uniquePages);
+    document.getElementById('kpi-pages-change').textContent = 'pages actives';
+    document.getElementById('kpi-duration').textContent = formatDuration(avgDuration);
+    document.getElementById('kpi-duration-change').textContent = totalLive > 0 ? 'moyenne' : '—';
+    updateKPI('kpi-idle', idleCount);
+    document.getElementById('kpi-idle-change').textContent = totalLive > 0 ? 'visiteurs inactifs' : '—';
+
+    // ── Update live badge ──
+    document.getElementById('live-badge-count').textContent = totalLive;
+
+    // ── Update sidebar counts ──
+    Object.keys(SITES).forEach(function(sid) {
+      var el = document.getElementById('sidebar-' + sid);
+      if (el) {
+        var count = siteCounts[sid] || 0;
+        if (parseInt(el.textContent) !== count) {
+          el.textContent = count;
+          el.style.transform = 'scale(1.3)';
+          el.style.transition = 'transform 0.3s';
+          setTimeout(function() { el.style.transform = 'scale(1)'; }, 300);
+        }
+      }
+    });
+
+    // ── Update table count ──
+    document.getElementById('table-count').textContent = totalLive + ' actifs sur ' + activeSites + ' sites';
+
+    // ── Update visitors table ──
+    renderVisitorTable(allVisitors);
+
+    // ── Update sites grid ──
+    renderSitesGrid(siteCounts, allVisitors);
+
+    // ── Update world map ──
+    renderMapBlips(allVisitors);
+
+    // ── Update group counts ──
+    updateGroupCounts(siteCounts);
+
+    // ── Update top pages ──
+    renderTopPages(pages);
+  }
+
+  function updateKPI(id, value) {
+    var el = document.getElementById(id);
+    if (el) {
+      var old = el.textContent;
+      if (old !== String(value)) {
+        el.textContent = value;
+        el.style.transition = 'transform 0.2s';
+        el.style.transform = 'scale(1.15)';
+        setTimeout(function() { el.style.transform = 'scale(1)'; }, 200);
+      }
+    }
+  }
+
+  // ══════════════════════════════════════
+  //  RENDER: Visitors Table
+  // ══════════════════════════════════════
+  function renderVisitorTable(visitors) {
+    var tbody = document.getElementById('visitors-tbody');
+    if (!tbody) return;
+
+    if (visitors.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);font-family:var(--font-mono);font-size:0.75rem;padding:1.5rem;">Aucun visiteur en ligne</td></tr>';
+      return;
+    }
+
+    var html = '';
+    // Show max 20 visitors
+    var shown = visitors.slice(0, 20);
+    shown.forEach(function(v) {
+      var color = v.site_color || getSiteColor(v.site_id);
+      var siteName = v.site_name || getSiteName(v.site_id, v);
+      var deviceStr = '';
+      if (v.device && v.device.type) {
+        deviceStr = v.device.type;
+        if (v.device.viewport) deviceStr += ' ' + v.device.viewport;
+      } else if (typeof v.device === 'string') {
+        deviceStr = v.device;
+      } else {
+        deviceStr = 'Inconnu';
+      }
+      var actionClass = v.idle ? 'idle' : 'browse';
+      var actionText = v.idle ? 'Idle' : 'Active';
+      if (v.scroll_depth > 75) { actionClass = 'read'; actionText = 'Deep Read'; }
+
+      html += '<tr>';
+      html += '<td><div class="visitor-site"><div class="vdot" style="background:' + color + '"></div><span class="visitor-site-name">' + escapeHtml(siteName) + '</span></div></td>';
+      html += '<td><span class="visitor-page">' + escapeHtml(v.page) + '</span></td>';
+      html += '<td class="visitor-location">—</td>';
+      html += '<td><span class="visitor-device">' + escapeHtml(deviceStr) + '</span></td>';
+      html += '<td class="visitor-duration">' + formatDuration(v.duration_seconds) + '</td>';
+      html += '<td><span class="action-badge ' + actionClass + '">' + actionText + '</span></td>';
+      html += '</tr>';
+    });
+
+    if (visitors.length > 20) {
+      html += '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);font-size:0.7rem;padding:0.5rem;">+ ' + (visitors.length - 20) + ' autres visiteurs</td></tr>';
+    }
+
+    tbody.innerHTML = html;
+  }
+
+  // ══════════════════════════════════════
+  //  RENDER: Sites Grid
+  // ══════════════════════════════════════
+  function renderSitesGrid(siteCounts, allVisitors) {
+    var grid = document.getElementById('sites-grid');
+    if (!grid) return;
+
+    // Get sites with activity, sorted by count desc
+    var siteList = Object.keys(SITES).map(function(sid) {
+      return { id: sid, config: SITES[sid], count: siteCounts[sid] || 0 };
+    }).sort(function(a, b) { return b.count - a.count; });
+
+    var html = '';
+    siteList.forEach(function(site) {
+      var colorVar = site.config.cssVar;
+      var colorName = colorVar.replace('--', '');
+      html += '<div class="site-card" data-color="' + colorName + '">';
+      html += '  <div class="site-card-header">';
+      html += '    <div class="site-card-name">';
+      html += '      <div class="dot" style="width:10px;height:10px;border-radius:50%;background:' + site.config.color + '"></div>';
+      html += '      <h3>' + escapeHtml(site.config.name) + '</h3>';
+      html += '    </div>';
+      html += '    <span class="site-card-status ' + (site.count > 0 ? 'online' : 'slow') + '">' + (site.count > 0 ? 'Live' : 'Aucun') + '</span>';
+      html += '  </div>';
+      html += '  <div class="card-metrics">';
+      html += '    <div>';
+      html += '      <div class="card-metric-label">Live</div>';
+      html += '      <div class="card-metric-value" style="color:' + site.config.color + '">' + site.count + '</div>';
+      html += '    </div>';
+      html += '    <div>';
+      html += '      <div class="card-metric-label">Pages</div>';
+
+      // Count unique pages for this site
+      var siteVisitors = allVisitors.filter(function(v) { return v.site_id === site.id; });
+      var uniquePages = {};
+      siteVisitors.forEach(function(v) { uniquePages[v.page] = true; });
+      html += '      <div class="card-metric-value">' + Object.keys(uniquePages).length + '</div>';
+      html += '    </div>';
+      html += '    <div>';
+      html += '      <div class="card-metric-label">Idle</div>';
+      var siteIdle = siteVisitors.filter(function(v) { return v.idle; }).length;
+      html += '      <div class="card-metric-value">' + siteIdle + '</div>';
+      html += '    </div>';
+      html += '  </div>';
+      html += '</div>';
+    });
+
+    grid.innerHTML = html;
+
+    // Re-attach cursor glow
+    attachCursorGlow();
+  }
+
+  // ══════════════════════════════════════
+  //  WORLD MAP (Leaflet)
+  // ══════════════════════════════════════
+  var worldMap = null;
+  var mapMarkers = [];
+
+  function initWorldMap() {
+    if (worldMap) return;
+    var mapEl = document.getElementById('world-map');
+    if (!mapEl) return;
+    worldMap = L.map('world-map', {
+      center: [30, 0],
+      zoom: 2,
+      minZoom: 2,
+      maxZoom: 8,
+      zoomControl: false,
+      attributionControl: false,
+      scrollWheelZoom: true,
+      dragging: true
+    });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+      subdomains: 'abcd',
+      maxZoom: 19
+    }).addTo(worldMap);
+  }
+
+  function renderMapBlips(visitors) {
+    if (!worldMap) initWorldMap();
+    if (!worldMap) return;
+
+    // Clear old markers
+    mapMarkers.forEach(function(m) { worldMap.removeLayer(m); });
+    mapMarkers = [];
+
+    var countBadge = document.getElementById('map-visitor-count');
+    var withGeo = visitors.filter(function(v) { return v.geo && v.geo.lat && v.geo.lng; });
+    if (countBadge) countBadge.textContent = withGeo.length + ' visiteur' + (withGeo.length !== 1 ? 's' : '');
+
+    withGeo.forEach(function(v) {
+      var color = v.site_color || getSiteColor(v.site_id);
+      var icon = L.divIcon({
+        className: '',
+        html: '<div class="map-blip' + (v.idle ? ' idle' : '') + '" style="background:' + color + ';color:' + color + '"></div>',
+        iconSize: [8, 8],
+        iconAnchor: [4, 4]
+      });
+      var marker = L.marker([v.geo.lat, v.geo.lng], { icon: icon }).addTo(worldMap);
+      var siteName = v.site_name || getSiteName(v.site_id, v);
+      marker.bindPopup(
+        '<div style="font-family:Sora,sans-serif;font-size:12px;color:#222;line-height:1.4">' +
+        '<strong>' + escapeHtml(siteName) + '</strong><br>' +
+        escapeHtml(v.geo.city) + ', ' + escapeHtml(v.geo.country) + '<br>' +
+        '<span style="color:#888">' + escapeHtml(v.page) + ' — ' + formatDuration(v.duration_seconds) + '</span>' +
+        '</div>',
+        { closeButton: false, className: 'map-popup' }
+      );
+      mapMarkers.push(marker);
+    });
+
+    // Also show visitors without geo as a fallback (hash-based position)
+    visitors.forEach(function(v) {
+      if (v.geo && v.geo.lat && v.geo.lng) return; // already plotted
+      var color = v.site_color || getSiteColor(v.site_id);
+      var hash = 0;
+      var vid = v.id || 'x';
+      for (var j = 0; j < vid.length; j++) { hash = ((hash << 5) - hash) + vid.charCodeAt(j); hash |= 0; }
+      // Place around Quebec area (lat 45-48, lng -70 to -73) with jitter
+      var lat = 45.5 + (Math.abs(hash % 30) / 10);
+      var lng = -71.5 + (Math.abs((hash * 3) % 30) / 10);
+      var icon = L.divIcon({
+        className: '',
+        html: '<div class="map-blip' + (v.idle ? ' idle' : '') + '" style="background:' + color + ';color:' + color + ';opacity:0.5"></div>',
+        iconSize: [6, 6],
+        iconAnchor: [3, 3]
+      });
+      var marker = L.marker([lat, lng], { icon: icon }).addTo(worldMap);
+      mapMarkers.push(marker);
+    });
+  }
+
+  // Init map on load
+  setTimeout(initWorldMap, 500);
+
+  // ══════════════════════════════════════
+  //  SIDEBAR GROUP COUNTS
+  // ══════════════════════════════════════
+  function updateGroupCounts(siteCounts) {
+    var nexiaTotal = 0;
+    var voloTotal = 0;
+    Object.keys(siteCounts).forEach(function(sid) {
+      var s = SITES[sid];
+      if (!s) return;
+      if (s.group === 'nexia') nexiaTotal += siteCounts[sid];
+      if (s.group === 'volo') voloTotal += siteCounts[sid];
+    });
+    var nexiaEl = document.getElementById('sidebar-nexia-total');
+    var voloEl = document.getElementById('sidebar-volo-total');
+    if (nexiaEl) nexiaEl.textContent = nexiaTotal;
+    if (voloEl) voloEl.textContent = voloTotal;
+  }
+
+  // ══════════════════════════════════════
+  //  RENDER: Top Pages
+  // ══════════════════════════════════════
+  function renderTopPages(pages) {
+    var container = document.getElementById('top-pages');
+    if (!container) return;
+
+    var pageArr = Object.keys(pages).map(function(key) {
+      var parts = key.split('::');
+      return { siteId: parts[0], page: parts[1] || '/', count: pages[key] };
+    }).sort(function(a, b) { return b.count - a.count; });
+
+    if (pageArr.length === 0) {
+      container.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-family:var(--font-mono);font-size:0.7rem;padding:1.5rem;">Aucune page active</div>';
+      return;
+    }
+
+    var maxCount = pageArr[0].count;
+    var top6 = pageArr.slice(0, 6);
+    var html = '';
+
+    top6.forEach(function(p, i) {
+      var siteName = getSiteName(p.siteId, null);
+      var color = getSiteColor(p.siteId);
+      var widthPct = Math.max(5, Math.round((p.count / maxCount) * 100));
+      var rank = String(i + 1).padStart(2, '0');
+
+      html += '<div class="top-page-item">';
+      html += '  <span class="top-page-rank">' + rank + '</span>';
+      html += '  <div class="top-page-bar-wrap">';
+      html += '    <div class="top-page-name">';
+      html += '      ' + escapeHtml(siteName) + ' — ' + escapeHtml(p.page);
+      html += '      <span class="top-page-views">' + p.count + ' live</span>';
+      html += '    </div>';
+      html += '    <div class="top-page-bar"><div class="top-page-fill" style="width:' + widthPct + '%;background:' + color + '"></div></div>';
+      html += '  </div>';
+      html += '</div>';
+    });
+
+    container.innerHTML = html;
+  }
+
+  // ══════════════════════════════════════
+  //  CURSOR GLOW (re-attach after render)
+  // ══════════════════════════════════════
+  function attachCursorGlow() {
+    document.querySelectorAll('.site-card').forEach(function(card) {
+      var colorName = card.dataset.color;
+      var colors = {
+        emerald: 'rgba(0,255,178,0.04)',
+        cyan: 'rgba(0,200,255,0.04)',
+        amber: 'rgba(255,184,0,0.04)',
+        magenta: 'rgba(255,61,142,0.04)',
+        violet: 'rgba(139,92,246,0.04)'
+      };
+      card.addEventListener('mousemove', function(e) {
+        var r = card.getBoundingClientRect();
+        var x = e.clientX - r.left;
+        var y = e.clientY - r.top;
+        card.style.background = 'radial-gradient(circle at ' + x + 'px ' + y + 'px, ' + (colors[colorName] || colors.emerald) + ', var(--surface) 50%)';
+      });
+      card.addEventListener('mouseleave', function() { card.style.background = ''; });
+    });
+  }
+
+  // ══════════════════════════════════════
+  //  FILTER BUTTONS
+  // ══════════════════════════════════════
+  document.querySelectorAll('.filter-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+    });
+  });
+
+  // ══════════════════════════════════════
+  //  SIDEBAR ACTIVE STATE
+  // ══════════════════════════════════════
+  document.querySelectorAll('.site-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+      document.querySelectorAll('.site-item').forEach(function(i) { i.classList.remove('active'); });
+      item.classList.add('active');
+    });
+  });
+
+  // ══════════════════════════════════════
+  //  FIREBASE LISTENER — /tracking/live
+  // ══════════════════════════════════════
+  if (firebaseReady && db) {
+    var liveRef = db.ref('/tracking/live');
+
+    liveRef.on('value', function(snapshot) {
+      lastSnapshot = snapshot;
+      processLiveData(snapshot);
+    }, function(error) {
+      console.error('[Panoptikon] Firebase read error:', error);
+      showFallbackMessage('Erreur de connexion Firebase: ' + error.message);
+    });
+
+    // Also refresh duration counters every 10s (since duration_seconds may be stale)
+    setInterval(function() {
+      if (lastSnapshot) processLiveData(lastSnapshot);
+    }, 10000);
+
+    console.log('[Panoptikon] Listener /tracking/live actif');
+  } else {
+    showFallbackMessage('Firebase non disponible — verifier la connexion');
+  }
+
+  function showFallbackMessage(msg) {
+    document.getElementById('kpi-live').textContent = '—';
+    document.getElementById('kpi-live-change').textContent = msg;
+    document.getElementById('kpi-live-change').className = 'kpi-change flat';
+  }
+
+})();
+</script>
+
+</body>
+</html>

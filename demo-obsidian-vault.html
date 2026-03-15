@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOLO SST — Obsidian Vault Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ═══════════════════════════════════════════
+     OBSIDIAN VAULT — Design System VOLO SST
+     Noir cinématique + Or bijoutier
+     ═══════════════════════════════════════════ */
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --noir: #04040A;
+    --noir-surface: #0A0A12;
+    --noir-card: #0E0E18;
+    --noir-border: #1A1A2E;
+    --gold: #C9A84C;
+    --gold-light: #E8D48B;
+    --gold-dim: #8B7633;
+    --blanc: #EBE6DF;
+    --blanc-muted: #9B978F;
+    --rescue: #D4650E;
+    --glass: rgba(201, 168, 76, 0.03);
+    --font-display: 'Oswald', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--noir);
+    color: var(--blanc);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+  }
+
+  /* ── AMBIENT LIGHT — top gold glow ── */
+  .ambient-glow {
+    position: fixed;
+    top: -40vh;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80vw;
+    height: 60vh;
+    background: radial-gradient(ellipse, rgba(201, 168, 76, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ════════════════════════════════════
+     HERO SECTION — Coffre-fort s'ouvre
+     ════════════════════════════════════ */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    z-index: 1;
+  }
+
+  /* Gold line — top accent */
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    animation: lineReveal 2s 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes lineReveal {
+    to { width: min(600px, 80vw); }
+  }
+
+  /* Badge */
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border: 1px solid var(--noir-border);
+    border-radius: 100px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: var(--glass);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 1s 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    margin-bottom: 2rem;
+  }
+
+  .hero-badge .dot {
+    width: 6px; height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(201, 168, 76, 0.4); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(201, 168, 76, 0); }
+  }
+
+  /* Title — staggered reveal */
+  .hero-title {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(3rem, 8vw, 7rem);
+    letter-spacing: -0.02em;
+    line-height: 0.95;
+    text-align: center;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-title .line {
+    display: block;
+    overflow: hidden;
+  }
+
+  .hero-title .line span {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(100%);
+    animation: textReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .hero-title .line:nth-child(1) span { animation-delay: 1s; }
+  .hero-title .line:nth-child(2) span { animation-delay: 1.15s; color: var(--gold); }
+
+  @keyframes textReveal {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Subtitle */
+  .hero-subtitle {
+    font-family: var(--font-body);
+    font-weight: 300;
+    font-size: clamp(0.95rem, 1.5vw, 1.15rem);
+    color: var(--blanc-muted);
+    text-align: center;
+    max-width: 500px;
+    line-height: 1.7;
+    letter-spacing: 0.01em;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 1s 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    margin-bottom: 3rem;
+  }
+
+  /* CTA Button */
+  .hero-cta {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 36px;
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 1s 1.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .hero-cta::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+    opacity: 0;
+    transition: opacity 0.5s;
+    z-index: -1;
+  }
+
+  .hero-cta:hover {
+    border-color: var(--gold);
+    color: var(--noir);
+    transform: translateY(-2px);
+    box-shadow: 0 20px 60px rgba(201, 168, 76, 0.15);
+  }
+
+  .hero-cta:hover::before { opacity: 1; }
+
+  .hero-cta svg {
+    width: 16px; height: 16px;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .hero-cta:hover svg { transform: translateX(4px); }
+
+  /* Scroll indicator */
+  .scroll-hint {
+    position: absolute;
+    bottom: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: fadeUp 1s 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .scroll-hint span {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--blanc-muted);
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    animation: scrollPulse 2s infinite;
+  }
+
+  @keyframes scrollPulse {
+    0% { opacity: 0; transform: scaleY(0); transform-origin: top; }
+    50% { opacity: 1; transform: scaleY(1); }
+    100% { opacity: 0; transform: scaleY(1); transform-origin: bottom; }
+  }
+
+  /* ════════════════════════════════════
+     DASHBOARD SECTION
+     ════════════════════════════════════ */
+  .dashboard-section {
+    position: relative;
+    padding: 6rem 2rem 8rem;
+    z-index: 1;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+
+  .section-title em {
+    font-style: normal;
+    color: var(--gold);
+  }
+
+  /* ── KPI CARDS ROW ── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1px;
+    max-width: 1100px;
+    margin: 0 auto 3rem;
+    background: var(--noir-border);
+    border: 1px solid var(--noir-border);
+  }
+
+  .kpi-card {
+    background: var(--noir-surface);
+    padding: 2rem 1.8rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .kpi-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+
+  .kpi-card:hover { background: var(--noir-card); }
+  .kpi-card:hover::after { opacity: 1; }
+
+  .kpi-label {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--blanc-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .kpi-value {
+    font-family: var(--font-display);
+    font-size: 2.6rem;
+    font-weight: 600;
+    color: var(--blanc);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .kpi-value .unit {
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: var(--gold-dim);
+    margin-left: 2px;
+  }
+
+  .kpi-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  .kpi-trend.up { color: var(--gold); background: rgba(201, 168, 76, 0.1); }
+  .kpi-trend.alert { color: var(--rescue); background: rgba(212, 101, 14, 0.1); }
+
+  /* ── MAIN DASHBOARD GRID ── */
+  .dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 1px;
+    max-width: 1100px;
+    margin: 0 auto;
+    background: var(--noir-border);
+    border: 1px solid var(--noir-border);
+  }
+
+  .dash-card {
+    background: var(--noir-surface);
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    min-height: 280px;
+  }
+
+  .dash-card.wide {
+    grid-column: 1 / -1;
+  }
+
+  .dash-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+
+  .dash-card-title {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--blanc);
+  }
+
+  .dash-card-badge {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    padding: 4px 10px;
+    border: 1px solid var(--noir-border);
+    color: var(--gold-dim);
+    text-transform: uppercase;
+  }
+
+  /* ── CHART — Fake bar chart ── */
+  .chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 160px;
+    padding-top: 1rem;
+  }
+
+  .chart-bar {
+    flex: 1;
+    background: linear-gradient(to top, var(--gold-dim), var(--gold));
+    border-radius: 2px 2px 0 0;
+    min-width: 8px;
+    position: relative;
+    opacity: 0.3;
+    transition: opacity 0.3s, box-shadow 0.3s;
+    animation: barGrow 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform-origin: bottom;
+  }
+
+  .chart-bar:hover {
+    opacity: 1 !important;
+    box-shadow: 0 -10px 30px rgba(201, 168, 76, 0.2);
+  }
+
+  @keyframes barGrow {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+  }
+
+  /* ── ACTIVITY LIST ── */
+  .activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--noir-border);
+    transition: all 0.3s;
+  }
+
+  .activity-item:last-child { border-bottom: none; }
+  .activity-item:hover { padding-left: 0.5rem; }
+
+  .activity-icon {
+    width: 32px; height: 32px;
+    border: 1px solid var(--noir-border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .activity-icon svg {
+    width: 14px; height: 14px;
+    stroke: var(--gold);
+    fill: none;
+    stroke-width: 1.5;
+  }
+
+  .activity-text {
+    flex: 1;
+    font-size: 0.82rem;
+    color: var(--blanc-muted);
+    line-height: 1.4;
+  }
+
+  .activity-text strong { color: var(--blanc); font-weight: 500; }
+
+  .activity-time {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--gold-dim);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  /* ── MAP PLACEHOLDER ── */
+  .map-container {
+    width: 100%;
+    height: 100%;
+    min-height: 200px;
+    background:
+      radial-gradient(ellipse at 30% 40%, rgba(201, 168, 76, 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 60%, rgba(201, 168, 76, 0.05) 0%, transparent 50%),
+      var(--noir-card);
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+  }
+
+  /* Fake map grid */
+  .map-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--noir-border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--noir-border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.3;
+  }
+
+  /* Map pins */
+  .map-pin {
+    position: absolute;
+    width: 10px; height: 10px;
+    background: var(--gold);
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(201, 168, 76, 0.4);
+    animation: pinPulse 3s infinite;
+  }
+
+  .map-pin::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: pinRing 3s infinite;
+  }
+
+  .map-pin.alert { background: var(--rescue); box-shadow: 0 0 20px rgba(212, 101, 14, 0.4); }
+  .map-pin.alert::after { border-color: var(--rescue); }
+
+  @keyframes pinPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+  }
+
+  @keyframes pinRing {
+    0% { transform: scale(1); opacity: 0.3; }
+    100% { transform: scale(2.5); opacity: 0; }
+  }
+
+  /* ── STATUS BAR (bottom wide card) ── */
+  .status-row {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .status-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 10px rgba(201, 168, 76, 0.5);
+  }
+
+  .status-dot.active { background: var(--gold); }
+  .status-dot.warning { background: var(--rescue); box-shadow: 0 0 10px rgba(212, 101, 14, 0.5); }
+  .status-dot.offline { background: var(--blanc-muted); box-shadow: none; opacity: 0.3; }
+
+  .status-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--blanc-muted);
+    text-transform: uppercase;
+  }
+
+  .status-value {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--blanc);
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .dash-grid { grid-template-columns: 1fr; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .hero-title { font-size: clamp(2.5rem, 10vw, 4rem); }
+  }
+
+  @media (max-width: 480px) {
+    .kpi-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Ambient light -->
+<div class="ambient-glow"></div>
+
+<!-- ════════════════════════
+     HERO — Coffre-fort s'ouvre
+     ════════════════════════ -->
+<section class="hero">
+  <div class="hero-badge">
+    <span class="dot"></span>
+    Systeme actif — 12 chantiers
+  </div>
+
+  <h1 class="hero-title">
+    <span class="line"><span>Command</span></span>
+    <span class="line"><span>Center</span></span>
+  </h1>
+
+  <p class="hero-subtitle">
+    Surveillance temps reel. Chaque chantier, chaque equipier, chaque alerte — un seul regard suffit.
+  </p>
+
+  <a href="#dashboard" class="hero-cta">
+    Ouvrir le tableau
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M3 8h10M9 4l4 4-4 4"/>
+    </svg>
+  </a>
+
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ════════════════════════
+     DASHBOARD
+     ════════════════════════ -->
+<section class="dashboard-section" id="dashboard">
+  <div class="section-header reveal">
+    <div class="section-label">Vue operationnelle</div>
+    <h2 class="section-title">Tableau de <em>Bord</em></h2>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="kpi-row reveal">
+    <div class="kpi-card">
+      <div class="kpi-label">Equipiers actifs</div>
+      <div class="kpi-value">47<span class="unit">/52</span></div>
+      <div class="kpi-trend up">+3 aujourd'hui</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Chantiers live</div>
+      <div class="kpi-value">12</div>
+      <div class="kpi-trend up">100% couvert</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Alertes SST</div>
+      <div class="kpi-value">2</div>
+      <div class="kpi-trend alert">Action requise</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Conformite</div>
+      <div class="kpi-value">94<span class="unit">%</span></div>
+      <div class="kpi-trend up">+2.1% cette semaine</div>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="dash-grid">
+
+    <!-- Chart Card -->
+    <div class="dash-card reveal">
+      <div class="dash-card-header">
+        <span class="dash-card-title">Inspections / Semaine</span>
+        <span class="dash-card-badge">7 derniers jours</span>
+      </div>
+      <div class="chart-bars">
+        <div class="chart-bar" style="height:45%; opacity:0.4; animation-delay:0.1s"></div>
+        <div class="chart-bar" style="height:62%; opacity:0.5; animation-delay:0.15s"></div>
+        <div class="chart-bar" style="height:38%; opacity:0.35; animation-delay:0.2s"></div>
+        <div class="chart-bar" style="height:85%; opacity:0.7; animation-delay:0.25s"></div>
+        <div class="chart-bar" style="height:71%; opacity:0.6; animation-delay:0.3s"></div>
+        <div class="chart-bar" style="height:55%; opacity:0.45; animation-delay:0.35s"></div>
+        <div class="chart-bar" style="height:93%; opacity:0.9; animation-delay:0.4s"></div>
+        <div class="chart-bar" style="height:48%; opacity:0.4; animation-delay:0.45s"></div>
+        <div class="chart-bar" style="height:76%; opacity:0.65; animation-delay:0.5s"></div>
+        <div class="chart-bar" style="height:60%; opacity:0.5; animation-delay:0.55s"></div>
+        <div class="chart-bar" style="height:88%; opacity:0.8; animation-delay:0.6s"></div>
+        <div class="chart-bar" style="height:100%; opacity:1; animation-delay:0.65s"></div>
+      </div>
+    </div>
+
+    <!-- Activity Feed -->
+    <div class="dash-card reveal">
+      <div class="dash-card-header">
+        <span class="dash-card-title">Activite recente</span>
+        <span class="dash-card-badge">Live</span>
+      </div>
+      <div class="activity-list">
+        <div class="activity-item">
+          <div class="activity-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div class="activity-text"><strong>Martin L.</strong> arrive chantier Sherbrooke-Est</div>
+          <div class="activity-time">il y a 2 min</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon">
+            <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="activity-text"><strong>Alerte SST</strong> — Casque manquant secteur B</div>
+          <div class="activity-time">il y a 8 min</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon">
+            <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </div>
+          <div class="activity-text"><strong>Inspection #847</strong> completee — conforme</div>
+          <div class="activity-time">il y a 15 min</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon">
+            <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8l5 3-5 3V8z"/></svg>
+          </div>
+          <div class="activity-text"><strong>Photo terrain</strong> ajoutee — Depot Magog</div>
+          <div class="activity-time">il y a 23 min</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map Card -->
+    <div class="dash-card reveal">
+      <div class="dash-card-header">
+        <span class="dash-card-title">Carte chantiers</span>
+        <span class="dash-card-badge">Estrie</span>
+      </div>
+      <div class="map-container">
+        <div class="map-grid"></div>
+        <div class="map-pin" style="top:25%; left:35%"></div>
+        <div class="map-pin" style="top:45%; left:55%"></div>
+        <div class="map-pin" style="top:60%; left:30%"></div>
+        <div class="map-pin" style="top:35%; left:70%"></div>
+        <div class="map-pin alert" style="top:70%; left:60%"></div>
+      </div>
+    </div>
+
+    <!-- Equipment Status -->
+    <div class="dash-card reveal">
+      <div class="dash-card-header">
+        <span class="dash-card-title">Equipement</span>
+        <span class="dash-card-badge">823 items</span>
+      </div>
+      <div class="activity-list">
+        <div class="activity-item">
+          <div class="activity-icon">
+            <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          </div>
+          <div class="activity-text">Outils manuels <strong>265 actifs</strong></div>
+          <div class="activity-time" style="color:var(--gold)">98%</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          </div>
+          <div class="activity-text">Caisses stockage <strong>80 suivies</strong></div>
+          <div class="activity-time" style="color:var(--gold)">100%</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          </div>
+          <div class="activity-text">EPI securite <strong>148 distribues</strong></div>
+          <div class="activity-time" style="color:var(--rescue)">92%</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon">
+            <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/></svg>
+          </div>
+          <div class="activity-text">Sacs a dos terrain <strong>52 assignes</strong></div>
+          <div class="activity-time" style="color:var(--gold)">100%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Bar — Wide -->
+    <div class="dash-card wide reveal">
+      <div class="dash-card-header">
+        <span class="dash-card-title">Statut systemes</span>
+        <span class="dash-card-badge">15 mars 2026 — 14:32</span>
+      </div>
+      <div class="status-row">
+        <div class="status-item">
+          <div class="status-dot active"></div>
+          <div>
+            <div class="status-label">Firebase</div>
+            <div class="status-value">Connecte</div>
+          </div>
+        </div>
+        <div class="status-item">
+          <div class="status-dot active"></div>
+          <div>
+            <div class="status-label">FCM Push</div>
+            <div class="status-value">47 tokens</div>
+          </div>
+        </div>
+        <div class="status-item">
+          <div class="status-dot active"></div>
+          <div>
+            <div class="status-label">Eagle SST M</div>
+            <div class="status-value">Operationnel</div>
+          </div>
+        </div>
+        <div class="status-item">
+          <div class="status-dot warning"></div>
+          <div>
+            <div class="status-label">Webhook Make</div>
+            <div class="status-value">Latence 1.2s</div>
+          </div>
+        </div>
+        <div class="status-item">
+          <div class="status-dot active"></div>
+          <div>
+            <div class="status-label">GPS Tracker</div>
+            <div class="status-value">12 actifs</div>
+          </div>
+        </div>
+        <div class="status-item">
+          <div class="status-dot offline"></div>
+          <div>
+            <div class="status-label">Backup</div>
+            <div class="status-value">Prochain: 18h00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  // ── Scroll Reveal ──
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 100);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  reveals.forEach(el => observer.observe(el));
+
+  // ── Chart bar stagger animation on scroll ──
+  const bars = document.querySelectorAll('.chart-bar');
+  bars.forEach((bar, i) => {
+    bar.style.animationDelay = `${i * 0.08}s`;
+  });
+
+  // ── Hover glow effect on KPI cards ──
+  document.querySelectorAll('.kpi-card').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      card.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(201,168,76,0.04), var(--noir-surface) 60%)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.background = '';
+    });
+  });
+</script>
+
+</body>
+</html>
