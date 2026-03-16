@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventaire Sac — VOLO SST</title>
+<script src="data.js"></script>
+<script src="logo.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+/* ── SCREEN: dark selector ── */
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#111;color:#ccc;min-height:100vh}
+body.printing{background:#fff!important;color:#111!important}
+.selector{max-width:600px;margin:40px auto;text-align:center;padding:0 16px}
+.selector h1{font-size:1.4rem;color:#C9A84C;margin-bottom:20px;letter-spacing:2px}
+.selector .btn{display:block;width:100%;padding:16px;margin:8px 0;background:#1a1a2e;border:1px solid #333;color:#eee;font-size:1rem;border-radius:8px;cursor:pointer;transition:.2s}
+.selector .btn:hover{border-color:#C9A84C;background:#222}
+.selector .btn .tape{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:middle}
+
+/* ── PRINT PAGE: always white — FIT 1 PAGE A4 ── */
+.print-page{display:none;background:#fff;color:#111;width:210mm;margin:0 auto;padding:2mm 4mm;font-size:6pt;line-height:1.1}
+
+/* ── HEADER ── */
+.print-header{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #111;padding-bottom:2px;margin-bottom:2px}
+.print-header h1{font-size:13pt;font-weight:900;letter-spacing:.5px}
+.print-header .sub{font-size:5.5pt;color:#555}
+.print-header .meta{text-align:right;font-size:6pt;color:#555}
+.tape-badge{display:inline-block;padding:2px 10px;border-radius:8px;font-weight:800;font-size:8pt;color:#fff}
+.tape-bleu{background:#2563EB}.tape-vert{background:#16A34A}.tape-rouge{background:#DC2626}.tape-jaune{background:#D97706;color:#111}.tape-gold{background:#C9A84C;color:#111}
+
+/* ── STATS ── */
+.stats-bar{display:flex;gap:8px;margin-bottom:1px;font-size:5.5pt;color:#555}
+.stats-bar b{color:#111}
+
+/* ── TABLE — compact for 1 page ── */
+.inv-table{width:100%;border-collapse:collapse;font-size:6pt}
+.inv-table th{background:#e8e8e8;border:0.5px solid #bbb;padding:1px 2px;text-align:left;font-weight:700;font-size:5.5pt;text-transform:uppercase}
+.inv-table td{border:0.5px solid #ddd;padding:1px 2px;vertical-align:middle}
+.inv-table tr:nth-child(even){background:#f8f8f8}
+.inv-table .photo-cell{width:20px;text-align:center;padding:0}
+.inv-table .photo-cell img{width:18px;height:18px;object-fit:contain}
+.inv-table .qty-cell{width:22px;text-align:center;font-weight:700;font-size:6.5pt;color:#111}
+.inv-table .name-cell{font-weight:600}
+.inv-table .ids-cell{font-family:Consolas,monospace;font-size:4.5pt;color:#666;word-break:break-all}
+.inv-table .notes-cell{font-size:4.5pt;color:#777}
+
+/* ── ASSEMBLY GROUP HEADER ── */
+.asm-hdr td{background:#e8e8e8!important;font-weight:700;font-size:7pt;padding:4px 6px!important;border-left:3px solid #DC2626;line-height:1.4;position:relative;z-index:2}
+.asm-hdr-jaune td{border-left-color:#D97706}
+.asm-hdr-vert td{border-left-color:#16A34A}
+.asm-hdr-bleu td{border-left-color:#2563EB}
+
+/* ── ENSEMBLE GROUP ── */
+.asm-ensemble td{background:#fff3cd!important;font-weight:800;font-size:7pt;padding:5px 8px!important;border-left:4px solid #C9A84C;color:#8B6914;letter-spacing:.3px;text-transform:uppercase}
+.asm-ensemble td::before{content:"⚙ ";font-size:8pt}
+.ensemble-item td{border-left:4px solid rgba(201,168,76,0.3)!important;background:#fffdf5!important}
+
+/* ── WATERMARK ── */
+.print-page{position:relative;overflow:hidden}
+.watermark-eagle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:55%;opacity:0.04;pointer-events:none;z-index:0}
+.inv-table{position:relative;z-index:1}
+
+/* ── FOOTER ── */
+.footer-brand{text-align:center;font-size:5.5pt;color:#aaa;margin-top:3px}
+
+/* ── SCREEN CONTROLS ── */
+.print-controls{text-align:center;margin:10px;padding:10px}
+.print-controls button{padding:12px 30px;font-size:1rem;background:#C9A84C;color:#111;border:none;border-radius:6px;cursor:pointer;font-weight:700;margin:0 5px}
+.print-controls button.back{background:#333;color:#eee}
+
+/* ── PRINT MEDIA ── */
+@media print{
+  body{background:#fff!important}
+  .selector,.print-controls{display:none!important}
+  .print-page{display:block!important;width:100%!important;padding:3mm 5mm!important;margin:0!important;page-break-after:always;box-shadow:none!important}
+  .print-page:last-child{page-break-after:avoid}
+  @page{size:A4 portrait;margin:3mm}
+}
+</style>
+</head>
+<body>
+
+<div class="selector" id="selector">
+  <h1>INVENTAIRE SAC — IMPRESSION</h1>
+  <p style="color:#888;margin-bottom:16px;font-size:.85rem">Fond blanc, photos, 1 page par sac</p>
+  <div id="sacButtons"></div>
+</div>
+
+<div id="printArea"></div>
+<div class="print-controls" id="printControls" style="display:none">
+  <button class="back" onclick="backToSelector()">Retour</button>
+  <button onclick="window.print()">IMPRIMER / PDF</button>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  PHOTO MAPPING — item name → photo file
+// ══════════════════════════════════════════
+const PHOTO_MAP = {
+  // ── Mousquetons ──
+  "Bm'D":"_Bm_D.jpeg",
+  "Bm'D T/A":"_Bm_D.jpeg",
+  "Bm'D noir":"_Bm_D.jpeg",
+  "William":"_WILLIAM.jpeg",
+  "William T/A noir":"_WILLIAM.jpeg",
+  "Vulcan":"Vulcan.jpeg",
+  "Vulcan T/A noir":"Vulcan.jpeg",
+  "Vulcan visse":"Vulcan_visse_.png",
+  "Vulcan à vis noir":"Vulcan_visse_.png",
+  "Express":"Express.jpeg",
+  "Rollclip":"Rollclip.png",
+  "Rollclip T/A":"Rollclip.png",
+  "Connecteur":"Connecteur.png",
+  // ── CMC ──
+  "CMC DNA TWIST":"CMC_DNA_TWIST.jpeg",
+  "CMC DNA Twist":"CMC_DNA_TWIST.jpeg",
+  "CMC Clutch":"CLUTCH.jpeg",
+  "CLUTCH":"CLUTCH.jpeg",
+  // ── Poulies ──
+  "Spin L1":"Spin_L1.jpeg",
+  "Spin L2":"Spin_L2.jpeg",
+  "Poulie Spin L1 OR":"Spin_L1.jpeg",
+  "Poulie Spin L2 OR":"Spin_L2.jpeg",
+  "Poulie Spin L2 noir":"Spin_L2.jpeg",
+  "Poulie Spin L2":"Spin_L2.jpeg",
+  "Poulie Spin L1 OR":"Spin_L1.jpeg",
+  // ── Ancrage ──
+  "Paw M":"Paw_M.jpeg",
+  "Paw L":"Paw_L.jpeg",
+  "Paw L noir":"Paw_L.jpeg",
+  "Plaque ancrage Petzl Paw M or":"Paw_M.jpeg",
+  // ── Prussiks ──
+  "Prussik 8mm":"Prussik_8mm.jpeg",
+  "Prussik":"Prussik.png",
+  "Prussik vert":"Prussik_8mm.jpeg",
+  "Prussik rouge":"Prussik_Rouge.jpeg",
+  // ── Sangles ──
+  "Sangle d'ancrage":"Sangle_d_ancrage.jpeg",
+  "Sangle SL Tech 3' noir et jaune":"Sangle_cousus_jaune_.png",
+  "Sangle SL Tech 6' noir et jaune":"Sangle_cousus_jaune_.png",
+  "Sangle cousus jaune":"Sangle_cousus_jaune_.png",
+  "Sangle anneau cousu 5'":"Sangle_cousus_jaune_.png",
+  "Sangle Texora XL 6'":"TEXORA_2m.jpeg",
+  "TEXORA 2m":"TEXORA_2m.jpeg",
+  "Texora MAMBA":"Texora_MAMBA.png",
+  "Sangle Rouge":"Sangle_Rouge.png",
+  // ── Descendeurs/Bloqueurs ──
+  "I'D L":"I_D_L.jpeg",
+  "I'D S":"I_D_S.jpeg",
+  "Rescue Sender":"Rescue_Sender.jpeg",
+  "Rescuesender":"Rescue_Sender.jpeg",
+  "Progress Adjust":"Progress_Adjust.png",
+  "Progress Adjust 2M":"Progress_Adjust.png",
+  // ── Longes ──
+  "Longe 10'":"Longe_10_.png",
+  "Longe 25'":"Longe_25_.png",
+  "Longe 30'":"Longe_30_.jpeg",
+  "Longe":"Longe_10_.png",
+  "Longe 8'":"Longe_10_.png",
+  // ── Protecteurs ──
+  "Protecteur de corde":"Protecteur_de_corde.jpeg",
+  "Protecteur SMC blanc Teflon":"Flex.jpeg",
+  "Flex":"Flex.jpeg",
+  // ── Sacs ──
+  "Sac #1":"Sac__1.jpeg",
+  "Sac #2":"Sac__1.jpeg",
+  "Sac Sauveteur #1":"Sac_Sauveteur__1.png",
+  "Sac Sauveteur #2":"Sac_Sauveteur__1.png",
+  // ── Divers ──
+  "Palan premonter harken wingman":"Palan_premonter_harken_wingman.jpeg",
+  "Maestro L":"Maestro_L.jpeg",
+  "Asap Lock":"Asap_Lock.jpeg",
+  "Asap":"Asap_Lock.jpeg",
+  "Asap'Sorber Axess":"Asap_Sorber_Axess.jpeg",
+  "Jane":"Jane.jpeg",
+  "Jane Ajustable":"Jane_Ajustable.jpeg",
+  "Grillion":"Grillion.png",
+  "Grillon":"Grillion.png",
+  "Poignée d'ascension":"Poigner_d_ascension.jpeg",
+  "Poigner d'ascension":"Poigner_d_ascension.jpeg",
+  "Progress Adjust":"Grillion.png",
+  "CLUTCH":"I_D_L.jpeg",
+  "Connecteur":"Connecteur.png",
+};
+
+// ── Display name overrides ──
+const DISPLAY_NAMES = {
+  "Express": "Dégaines (1 Petzl Link 17cm + 2 Petzl William T/A noir)",
+  "Bm'D T/A": "Bm'D Argent T/A",
+  "Poulie Spin L1 OR": "Poulie Spin L1 OR",
+  "Poulie Spin L2 OR": "Poulie Spin L2 OR",
+  "Poulie Spin L2": "Poulie Spin L2 noir",
+  "Vulcan T/A noir": "Vulcan acier noir T/A",
+  "Vulcan à vis noir": "Vulcan acier à vis noir",
+  "Protecteur de corde": "Protecteur de corde velcro noir",
+  "Palan premonter harken wingman": "Palan Wingman + 2× Bm'D noir",
+};
+
+// ── Sac display name overrides (Premonter → Manoeuvres) ──
+const SAC_DISPLAY_NAMES = {
+  "Sac Premonter #1": "Sac Manoeuvre #1",
+  "Sac Premonter #2": "Sac Manoeuvre #2",
+};
+
+// ── Display name override (toujours) + pas de pluriel sur les noms d'équipement ──
+function pluralize(name, qty){
+  const dn = DISPLAY_NAMES[name];
+  if(dn) return dn;
+  return name;
+}
+
+function getPhoto(n){return PHOTO_MAP[n]?'photos/'+PHOTO_MAP[n]:'';}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+const TAPE_COLORS = {
+  "Sac Premonter #1":{tape:"BLEU",cls:"tape-bleu"},
+  "Sac Premonter #2":{tape:"VERT",cls:"tape-vert"},
+  "Kit Sauveteur #1":{tape:"ROUGE",cls:"tape-rouge"},
+  "Kit Sauveteur #2":{tape:"JAUNE",cls:"tape-jaune"},
+  "Premier de corder":{tape:"GOLD",cls:"tape-gold"},
+  "Kit Montée en Tête":{tape:"GOLD",cls:"tape-gold"},
+};
+
+// ── Rangement Sac Premonter (VALIDÉ 14 mars 2026 — PDF v3 Jonathan) ──
+// Noms = EXACTEMENT les noms dans data.js ITEMS
+// 8 items en trop dans data.js vs PDF v3 (Asap Lock x2, Asap'Sorber x2, Bm'D x2 ASAP, Maestro L x2) → tombent dans "Autres"
+const PM_ASM = [
+  {label:"FILET 1 -- 3 items", items:["Longe 25'","Sangle anneau cousu 5'"], counts:[1,2]},
+  {label:"FILET 2 -- 1 item", items:["Longe 25'"], counts:[1]},
+  {label:"COMP 1 -- Prussiks -- 4 items", items:["Prussik vert","Prussik rouge"], counts:[2,2]},
+  {label:"COMP 2 -- Poulies Spin L1 -- 4 items", items:["Poulie Spin L1 OR"], counts:[4]},
+  {label:"COMP 3 -- I'D L -- 1 item", items:["I'D L"], counts:[1]},
+  {label:"COMP 4 -- Rescuesenders -- 3 items", items:["Rescuesender"], counts:[3]},
+  {label:"COMP 5 -- Poulies Spin L2 -- 3 items", items:["Poulie Spin L2 OR","Poulie Spin L2 noir","Poulie Spin L1 OR"], counts:[1,1,1]},
+  {label:"COMP 6 -- Plaques ancrage -- 2 items", items:["Plaque ancrage Petzl Paw M or"], counts:[2]},
+  {label:"COMPARTIMENT PRINCIPAL -- 41 items", items:["Vulcan T/A noir","Bm'D T/A","Vulcan à vis noir","Express","Palan premonter harken wingman"], counts:[10,10,4,3,1]},
+  {label:"ENSEMBLE 1 — Ancrage", ensemble:true, items:["Vulcan T/A noir","Paw L noir","CMC DNA Twist","CMC Clutch","Rollclip T/A"], counts:[2,1,2,2,1]},
+  {label:"ENSEMBLE 2 — Ajustement", ensemble:true, items:["William T/A noir","Progress Adjust 2M"], counts:[2,1]},
+  {label:"LATERAL 1 -- 2 items", items:["Sangle Texora XL 6'"], counts:[2]},
+  {label:"LATERAL 2 -- 4 items", items:["Sangle SL Tech 3' noir et jaune","Sangle SL Tech 6' noir et jaune"], counts:[2,2]},
+  {label:"ARRIERE POCHE 1 -- 3 items", items:["Protecteur de corde"], counts:[3]},
+  {label:"DORSAL -- 1 item", items:["Protecteur SMC blanc Teflon"], counts:[1]},
+];
+
+// ── Assemblages Kit Sauveteur (Boss Alexandre) ──
+const KIT_ASM = [
+  {label:"Petzl I'D L + Bm'D", items:["I'D L","Bm'D"], counts:[1,1]},
+  {label:"Progress Adjust + 2× Bm'D", items:["Progress Adjust","Bm'D"], counts:[1,2]},
+  {label:"Petzl Grillon + 2× William", items:["Grillion","William"], counts:[1,2]},
+  {label:"Longe 8' New England + Bm'D", items:["Longe 8'","Bm'D"], counts:[1,1]},
+  {label:"Protecteur de corde STREP Edgepro + Bm'D", items:["Protecteur de corde","Bm'D"], counts:[1,1]},
+  {label:"2× Texora Black Mamba + Bm'D", items:["Texora MAMBA","Bm'D"], counts:[2,1]},
+  {label:"2× ASAP Lock + Bm'D", items:["Asap","Asap'Sorber Axess","Bm'D"], counts:[2,2,1]},
+  {label:"2× Petzl Jane + 2× Bm'D", items:["Jane","Bm'D"], counts:[2,2]},
+  {label:"Poignée d'ascension Petzl + Jane + 2× Bm'D + Rollclip T/A", items:["Poignée d'ascension","Jane","Bm'D","Rollclip"], counts:[1,1,2,1]},
+  {label:"Prussik vert CMC + Bm'D", items:["Prussik","Bm'D"], counts:[1,1]},
+];
+
+// ── Helpers ──
+function getCaisse(nom){return CAISSES.find(c=>c.nom===nom);}
+function getItems(caisse){
+  if(!caisse)return[];
+  return caisse.items_contenus.map(id=>{
+    const it=typeof ITEMS_MAP!=='undefined'?ITEMS_MAP.get(id):ITEMS.find(i=>i.id===id);
+    return it||{id,name:'?',cat:''};
+  });
+}
+function groupByName(items){
+  const m=new Map(),g=[];
+  items.forEach(it=>{
+    if(!m.has(it.name)){m.set(it.name,{name:it.name,items:[],fab:it.fab||''});g.push(m.get(it.name));}
+    m.get(it.name).items.push(it);
+  });
+  g.sort((a,b)=>b.items.length-a.items.length);
+  return g;
+}
+
+function row(name,qty,ids,fab,isEnsembleItem){
+  const p=getPhoto(name);
+  const ph=p?`<img src="${p}" alt="" onerror="this.style.display='none'">`:'';
+  const idStr=ids.length<=4?ids.join(', '):ids[0]+' … '+ids[ids.length-1];
+  const displayName=pluralize(name,qty);
+  const cls=isEnsembleItem?' class="ensemble-item"':'';
+  return `<tr${cls}><td class="photo-cell">${ph}</td><td class="name-cell">${esc(displayName)}</td><td class="qty-cell">×${qty}</td><td class="ids-cell">${esc(idStr)}</td><td class="notes-cell">${esc(fab)}</td></tr>`;
+}
+
+function checklist(d){
+  return `<div class="footer-brand">VOLO CONSTRUCTION SST — Golden Eagles — ${d} — À placer et mettre dans le sac</div>`;
+}
+
+function header(nom,tc,caisseId,date,extra){
+  const displayNom = SAC_DISPLAY_NAMES[nom] || nom;
+  const logoSrc = typeof VOLO_LOGO_B64!=='undefined' ? VOLO_LOGO_B64 : 'photos/eagle-orange.jpeg';
+  return `<div class="print-header">
+    <div><h1 style="display:flex;align-items:center;gap:5px"><img src="${logoSrc}" style="height:18px;width:auto" alt="">${esc(displayNom)}</h1><div class="sub">VOLO CONSTRUCTION SST — Golden Eagles</div><div class="sub">${caisseId} | ${esc(displayNom)} | ${date}</div></div>
+    <div class="meta"><span class="tape-badge ${tc.cls}">TAPE ${tc.tape}</span></div>
+  </div>
+  <div class="stats-bar">${extra}</div>`;
+}
+
+// ── GENERATE: Sac Premonter (avec rangement physique) ──
+function genPremonter(nom){
+  const c=getCaisse(nom),items=getItems(c),tc=TAPE_COLORS[nom];
+  const d=new Date().toLocaleDateString('fr-CA');
+  const pool=[...items],used=new Set();
+  const isVert=tc.cls==='tape-vert';
+
+  function take(name,count){
+    if(count<=0)return[];
+    const t=[];
+    for(let i=0;i<pool.length&&t.length<count;i++){
+      if(pool[i].name===name&&!used.has(pool[i].id)){t.push(pool[i]);used.add(pool[i].id);}
+    }
+    if(t.length<count){
+      for(let i=0;i<pool.length&&t.length<count;i++){
+        if(!used.has(pool[i].id)&&(pool[i].name.includes(name)||name.includes(pool[i].name))){t.push(pool[i]);used.add(pool[i].id);}
+      }
+    }
+    return t;
+  }
+
+  let r='',n=1;
+  PM_ASM.forEach(asm=>{
+    let ai=[];
+    asm.items.forEach((name,idx)=>{take(name,asm.counts[idx]).forEach(t=>ai.push(t));});
+    if(!ai.length)return;
+    if(asm.ensemble){
+      r+=`<tr class="asm-ensemble"><td colspan="5">${esc(asm.label)}</td></tr>`;
+      const sg=new Map();
+      ai.forEach(a=>{if(!sg.has(a.name))sg.set(a.name,[]);sg.get(a.name).push(a);});
+      sg.forEach((arr,name)=>{r+=row(name,arr.length,arr.map(a=>a.id),arr[0].fab||'',true);});
+    } else {
+      if(asm.label) r+=`<tr class="asm-hdr${isVert?' asm-hdr-vert':' asm-hdr-bleu'}"><td colspan="5">${esc(asm.label)}</td></tr>`;
+      const sg=new Map();
+      ai.forEach(a=>{if(!sg.has(a.name))sg.set(a.name,[]);sg.get(a.name).push(a);});
+      sg.forEach((arr,name)=>{r+=row(name,arr.length,arr.map(a=>a.id),arr[0].fab||'');});
+    }
+    n++;
+  });
+
+  // Sac item itself (pas affiché — juste le contenant)
+
+  const wm = `<img class="watermark-eagle" src="photos/eagle-orange.jpeg" alt="">`;
+  return `<div class="print-page">${wm}${header(nom,tc,c?.id||'',d,`<span><b>79</b> items</span><span>Rangement par emplacement</span>`)}
+    <table class="inv-table"><thead><tr><th>Photo</th><th>Équipement</th><th>Qté</th><th>IDs</th><th>Fab.</th></tr></thead><tbody>${r}</tbody></table>${checklist(d)}</div>`;
+}
+
+// ── GENERATE: Kit Sauveteur ──
+function genSauveteur(nom){
+  const c=getCaisse(nom),items=getItems(c),tc=TAPE_COLORS[nom];
+  const d=new Date().toLocaleDateString('fr-CA');
+  const pool=[...items],used=new Set();
+
+  function take(name,count){
+    const t=[];
+    for(let i=0;i<pool.length&&t.length<count;i++){
+      if(pool[i].name===name&&!used.has(pool[i].id)){t.push(pool[i]);used.add(pool[i].id);}
+    }
+    if(t.length<count){
+      for(let i=0;i<pool.length&&t.length<count;i++){
+        if(!used.has(pool[i].id)&&(pool[i].name.includes(name)||name.includes(pool[i].name))){t.push(pool[i]);used.add(pool[i].id);}
+      }
+    }
+    return t;
+  }
+
+  let r='',n=1;
+  const isJaune=tc.cls==='tape-jaune';
+  KIT_ASM.forEach(asm=>{
+    let ai=[];
+    asm.items.forEach((name,idx)=>{
+      take(name,asm.counts[idx]).forEach(t=>ai.push(t));
+    });
+    if(!ai.length)return;
+    r+=`<tr class="asm-hdr${isJaune?' asm-hdr-jaune':''}"><td colspan="5">${n}. ${esc(asm.label)}</td></tr>`;
+    const sg=new Map();
+    ai.forEach(a=>{if(!sg.has(a.name))sg.set(a.name,[]);sg.get(a.name).push(a);});
+    sg.forEach((arr,name)=>{r+=row(name,arr.length,arr.map(a=>a.id),arr[0].fab||'');});
+    n++;
+  });
+
+  // Sac item
+  const sacItem=pool.find(p=>!used.has(p.id)&&p.name.startsWith('Sac'));
+  if(sacItem){used.add(sacItem.id);r+=row(sacItem.name,1,[sacItem.id],sacItem.fab||'');}
+
+  const rest=pool.filter(p=>!used.has(p.id));
+  if(rest.length){
+    r+=`<tr class="asm-hdr"><td colspan="5">Autres</td></tr>`;
+    groupByName(rest).forEach(g=>{r+=row(g.name,g.items.length,g.items.map(i=>i.id),g.fab);});
+  }
+
+  const wm = `<img class="watermark-eagle" src="photos/eagle-orange.jpeg" alt="">`;
+  return `<div class="print-page">${wm}${header(nom,tc,c?.id||'',d,`<span><b>${items.length}</b> items</span><span>Rangement par assemblage</span>`)}
+    <table class="inv-table"><thead><tr><th>Photo</th><th>Équipement</th><th>Qté</th><th>IDs</th><th>Fab.</th></tr></thead><tbody>${r}</tbody></table>${checklist(d)}</div>`;
+}
+
+// ── GENERATE: Generic (any sac/kit without special assembly logic) ──
+function genGeneric(nom){
+  const c=getCaisse(nom);
+  if(!c)return `<div class="print-page"><p>Caisse introuvable: ${esc(nom)}</p></div>`;
+  const items=getItems(c);
+  const tc=TAPE_COLORS[nom]||{tape:"GOLD",cls:"tape-gold"};
+  const d=new Date().toLocaleDateString('fr-CA');
+  const groups=groupByName(items);
+  let r='';
+  groups.forEach(g=>{
+    r+=row(g.name,g.items.length,g.items.map(i=>i.id),g.fab);
+  });
+  const wm = `<img class="watermark-eagle" src="photos/eagle-orange.jpeg" alt="">`;
+  return `<div class="print-page">${wm}${header(nom,tc,c.id||'',d,`<span><b>${items.length}</b> items</span><span>${groups.length} types</span>`)}
+    <table class="inv-table"><thead><tr><th>Photo</th><th>Équipement</th><th>Qté</th><th>IDs</th><th>Fab.</th></tr></thead><tbody>${r}</tbody></table>${checklist(d)}</div>`;
+}
+
+// ── Get all printable sacs/kits from CAISSES ──
+function getAllSacs(){
+  if(typeof CAISSES==='undefined')return[];
+  return CAISSES.filter(c=>c.type==='sac'||c.type==='kit');
+}
+
+// ── UI ──
+function buildSelector(){
+  const div=document.getElementById('sacButtons');
+  const allSacs=getAllSacs();
+  const CLS_COLORS={"tape-bleu":"#2563EB","tape-vert":"#16A34A","tape-rouge":"#DC2626","tape-jaune":"#D97706","tape-gold":"#C9A84C"};
+  let h='';
+  allSacs.forEach(c=>{
+    const nom=c.nom;
+    const tc=TAPE_COLORS[nom]||{tape:"GOLD",cls:"tape-gold"};
+    const color=CLS_COLORS[tc.cls]||"#C9A84C";
+    const displayNom = SAC_DISPLAY_NAMES[nom] || nom;
+    h+=`<button class="btn" onclick="gen('${nom.replace(/'/g,"\\'")}')"><span class="tape" style="background:${color}"></span>${esc(displayNom)} (${c.count}) — ${tc.tape}</button>`;
+  });
+  h+=`<button class="btn" onclick="genAll4()" style="border-color:#C9A84C;color:#C9A84C;margin-top:16px">IMPRIMER LES 4 SACS</button>`;
+  h+=`<button class="btn" onclick="genAllSacs()" style="border-color:#16A34A;color:#16A34A;margin-top:4px">IMPRIMER TOUS (${allSacs.length})</button>`;
+  div.innerHTML=h;
+}
+
+function gen(nom){
+  const tc=TAPE_COLORS[nom]||{tape:"GOLD",cls:"tape-gold"};
+  const displayNom = SAC_DISPLAY_NAMES[nom] || nom;
+  let html;
+  if(nom.startsWith('Sac Premonter')) html=genPremonter(nom);
+  else if(nom.startsWith('Kit Sauveteur')) html=genSauveteur(nom);
+  else html=genGeneric(nom);
+  show(html, displayNom+' — '+tc.tape);
+}
+function genAll4(){
+  show(genPremonter('Sac Premonter #1')+genPremonter('Sac Premonter #2')+genSauveteur('Kit Sauveteur #1')+genSauveteur('Kit Sauveteur #2'), 'Inventaire 4 Sacs — VOLO SST');
+}
+function genAllSacs(){
+  let html='';
+  getAllSacs().forEach(c=>{
+    const nom=c.nom;
+    if(nom.startsWith('Sac Premonter')) html+=genPremonter(nom);
+    else if(nom.startsWith('Kit Sauveteur')) html+=genSauveteur(nom);
+    else html+=genGeneric(nom);
+  });
+  show(html,'Inventaire Tous Sacs/Kits — VOLO SST');
+}
+function show(html,titre){
+  document.getElementById('printArea').innerHTML=html;
+  document.getElementById('selector').style.display='none';
+  document.getElementById('printControls').style.display='block';
+  document.body.classList.add('printing');
+  document.querySelectorAll('.print-page').forEach(p=>p.style.display='block');
+  if(titre) document.title=titre;
+}
+function backToSelector(){
+  document.getElementById('printArea').innerHTML='';
+  document.getElementById('selector').style.display='block';
+  document.getElementById('printControls').style.display='none';
+  document.body.classList.remove('printing');
+}
+
+buildSelector();
+
+// Auto-open if ?sac= parameter (exact or partial match against caisse.nom)
+const urlSac=new URLSearchParams(window.location.search).get('sac');
+if(urlSac){
+  // Try exact match first
+  const exactCaisse=CAISSES.find(c=>c.nom===urlSac&&(c.type==='sac'||c.type==='kit'));
+  if(exactCaisse){gen(exactCaisse.nom);}
+  else{
+    // Partial match
+    const partialCaisse=CAISSES.find(c=>(c.type==='sac'||c.type==='kit')&&c.nom.toLowerCase().includes(urlSac.toLowerCase()));
+    if(partialCaisse){gen(partialCaisse.nom);}
+  }
+}
+</script>
+</body>
+</html>

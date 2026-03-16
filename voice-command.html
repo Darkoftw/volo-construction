@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="view-transition" content="same-origin">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#04040A">
+<title>VOLO SST — Commande Vocale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#04040A;--card:rgba(10,10,16,.92);--card2:rgba(15,15,24,.95);
+  --gold:#C9A84C;--goldL:#E8C84A;--goldD:#8A7030;
+  --rescue:#D4650E;--rescueL:#FF6D00;
+  --txt:#EBE6DF;--muted:#8A8078;--muted2:#5A5660;
+  --border:rgba(201,168,76,.08);
+  --noir2:#0A0A10;--noir3:#0F0F18;
+  --radius:14px;--radius-sm:10px;--radius-lg:18px;
+  --glow:0 0 30px rgba(201,168,76,.06);
+}
+html,body{height:100%;overflow:hidden}
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:vt-fade-out .2s ease-out}
+::view-transition-new(root){animation:vt-fade-in .3s ease-in}
+@keyframes vt-fade-out{from{opacity:1}to{opacity:0}}
+@keyframes vt-fade-in{from{opacity:0}to{opacity:1}}
+body{
+  font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);
+  display:flex;flex-direction:column;
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* ── HEADER ── */
+.vc-header{
+  padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);background:rgba(4,4,10,.95);
+  flex-shrink:0;z-index:10;
+}
+.vc-header-left{display:flex;align-items:center;gap:12px}
+.vc-back{
+  width:40px;height:40px;border-radius:50%;border:1px solid rgba(201,168,76,.15);
+  background:transparent;color:var(--gold);cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.vc-back:active{background:rgba(201,168,76,.1)}
+.vc-back svg{width:20px;height:20px}
+.vc-title{font-family:'Oswald',sans-serif;font-size:20px;font-weight:600;letter-spacing:1px;
+  background:linear-gradient(135deg,var(--txt),var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.vc-subtitle{font-size:11px;color:var(--muted);letter-spacing:.5px;margin-top:2px}
+.vc-lang{
+  font-family:'JetBrains Mono',monospace;font-size:10px;padding:4px 10px;border-radius:20px;
+  border:1px solid rgba(201,168,76,.2);background:rgba(201,168,76,.06);color:var(--gold);
+}
+
+/* ── MAIN AREA ── */
+.vc-main{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;padding:20px;
+}
+
+/* ── WAVEFORM CANVAS ── */
+#waveCanvas{
+  position:absolute;top:0;left:0;width:100%;height:100%;opacity:.4;pointer-events:none;
+}
+
+/* ── MIC BUTTON ── */
+.vc-mic-wrap{position:relative;z-index:5;display:flex;flex-direction:column;align-items:center;gap:16px}
+.vc-mic{
+  width:120px;height:120px;border-radius:50%;border:2px solid var(--gold);
+  background:radial-gradient(circle at 40% 40%,rgba(201,168,76,.12),transparent 70%);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .3s ease;position:relative;
+}
+.vc-mic svg{width:48px;height:48px;color:var(--gold);transition:all .3s ease}
+.vc-mic:hover{border-color:var(--goldL);box-shadow:0 0 40px rgba(201,168,76,.15)}
+.vc-mic:active{transform:scale(.95)}
+
+/* Active state */
+.vc-mic.active{
+  border-color:var(--rescue);background:radial-gradient(circle at 40% 40%,rgba(212,101,14,.15),transparent 70%);
+  animation:micPulse 1.5s ease-in-out infinite;
+}
+.vc-mic.active svg{color:var(--rescue)}
+@keyframes micPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(212,101,14,.3)}
+  50%{box-shadow:0 0 0 20px rgba(212,101,14,0)}
+}
+
+/* Rings around mic when active */
+.vc-ring{
+  position:absolute;border-radius:50%;border:1px solid rgba(201,168,76,.1);
+  pointer-events:none;opacity:0;
+}
+.vc-ring-1{width:160px;height:160px;top:50%;left:50%;transform:translate(-50%,-50%)}
+.vc-ring-2{width:200px;height:200px;top:50%;left:50%;transform:translate(-50%,-50%)}
+.vc-ring-3{width:240px;height:240px;top:50%;left:50%;transform:translate(-50%,-50%)}
+.vc-mic.active ~ .vc-ring-1{animation:ringExpand 2s ease-out infinite;opacity:1}
+.vc-mic.active ~ .vc-ring-2{animation:ringExpand 2s ease-out .5s infinite;opacity:1}
+.vc-mic.active ~ .vc-ring-3{animation:ringExpand 2s ease-out 1s infinite;opacity:1}
+@keyframes ringExpand{
+  0%{transform:translate(-50%,-50%) scale(.8);opacity:.6;border-color:rgba(212,101,14,.3)}
+  100%{transform:translate(-50%,-50%) scale(1.3);opacity:0;border-color:rgba(212,101,14,0)}
+}
+
+.vc-mic-label{
+  font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;color:var(--muted);
+  text-transform:uppercase;transition:color .3s;
+}
+.vc-mic.active + .vc-mic-label + .vc-ring-1 ~ .vc-mic-label,
+.vc-mic-label.active{color:var(--rescue)}
+
+/* ── LIVE TRANSCRIPT ── */
+.vc-transcript{
+  position:relative;z-index:5;margin-top:24px;min-height:48px;max-width:500px;width:100%;
+  text-align:center;
+}
+.vc-transcript-text{
+  font-size:18px;font-weight:300;color:var(--txt);opacity:.8;
+  min-height:28px;transition:opacity .3s;
+}
+.vc-transcript-text.interim{color:var(--muted);font-style:italic}
+.vc-transcript-cmd{
+  margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:12px;
+  color:var(--gold);opacity:0;transition:opacity .3s;
+}
+.vc-transcript-cmd.show{opacity:1}
+
+/* ── COMMAND SUGGESTIONS ── */
+.vc-suggestions{
+  position:relative;z-index:5;display:flex;flex-wrap:wrap;gap:8px;
+  justify-content:center;margin-top:20px;max-width:480px;
+}
+.vc-sug{
+  padding:6px 14px;border-radius:20px;font-size:12px;
+  border:1px solid rgba(201,168,76,.12);background:rgba(201,168,76,.04);
+  color:var(--muted);cursor:pointer;transition:all .2s;
+  font-family:'Inter',sans-serif;
+}
+.vc-sug:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08)}
+.vc-sug svg{width:12px;height:12px;vertical-align:-1px;margin-right:4px}
+
+/* ── RESULT PANEL ── */
+.vc-result{
+  position:absolute;bottom:0;left:0;right:0;z-index:20;
+  background:linear-gradient(to top,var(--bg) 70%,transparent);
+  padding:24px 20px 20px;max-height:50vh;overflow-y:auto;
+  transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);
+  -webkit-overflow-scrolling:touch;
+}
+.vc-result.show{transform:translateY(0)}
+.vc-result-header{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;
+}
+.vc-result-title{
+  font-family:'Oswald',sans-serif;font-size:15px;letter-spacing:1px;color:var(--gold);
+}
+.vc-result-close{
+  width:32px;height:32px;border-radius:50%;border:1px solid rgba(201,168,76,.15);
+  background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.vc-result-close:active{background:rgba(201,168,76,.1)}
+.vc-result-close svg{width:16px;height:16px}
+.vc-result-body{font-size:14px;line-height:1.6;color:var(--txt)}
+.vc-result-body .vc-item{
+  padding:10px 14px;margin-bottom:6px;border-radius:var(--radius-sm);
+  background:var(--card);border:1px solid var(--border);
+}
+.vc-result-body .vc-item-name{font-weight:500}
+.vc-result-body .vc-item-id{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);margin-left:8px;
+}
+.vc-result-body .vc-item-cat{font-size:12px;color:var(--muted);margin-top:2px}
+.vc-result-body .vc-stat{
+  display:flex;align-items:center;gap:12px;padding:8px 0;
+  border-bottom:1px solid rgba(201,168,76,.05);
+}
+.vc-result-body .vc-stat-label{font-size:13px;color:var(--muted);flex:1}
+.vc-result-body .vc-stat-val{
+  font-family:'Oswald',sans-serif;font-size:18px;color:var(--gold);
+}
+.vc-result-body .vc-alert{
+  padding:12px 16px;border-radius:var(--radius-sm);margin-bottom:8px;
+  background:rgba(212,101,14,.08);border:1px solid rgba(212,101,14,.2);
+}
+.vc-result-body .vc-alert-title{font-weight:600;color:var(--rescue);font-size:15px}
+.vc-result-body .vc-alert-text{color:var(--txt);font-size:13px;margin-top:4px}
+.vc-result-body .vc-personnel{
+  display:flex;align-items:center;gap:10px;padding:8px 0;
+  border-bottom:1px solid rgba(201,168,76,.05);
+}
+.vc-result-body .vc-personnel-dot{
+  width:10px;height:10px;border-radius:50%;background:var(--gold);flex-shrink:0;
+}
+.vc-result-body .vc-personnel-name{font-size:14px;flex:1}
+.vc-result-body .vc-personnel-role{font-size:11px;color:var(--muted)}
+
+/* ── HISTORY PANEL ── */
+.vc-history-toggle{
+  position:absolute;top:72px;right:16px;z-index:15;
+  width:40px;height:40px;border-radius:50%;border:1px solid rgba(201,168,76,.12);
+  background:rgba(10,10,16,.8);cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.vc-history-toggle svg{width:18px;height:18px;color:var(--muted)}
+.vc-history-toggle:hover svg{color:var(--gold)}
+.vc-history-badge{
+  position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;
+  background:var(--rescue);color:#fff;font-size:10px;font-weight:600;
+  display:none;align-items:center;justify-content:center;
+}
+.vc-history-badge.show{display:flex}
+
+.vc-history{
+  position:absolute;top:0;right:0;bottom:0;width:320px;max-width:85vw;z-index:25;
+  background:var(--noir2);border-left:1px solid var(--border);
+  transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;
+}
+.vc-history.show{transform:translateX(0)}
+.vc-history-head{
+  padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;
+}
+.vc-history-title{font-family:'Oswald',sans-serif;font-size:15px;letter-spacing:1px;color:var(--gold)}
+.vc-history-clear{
+  font-size:11px;color:var(--muted);cursor:pointer;padding:4px 10px;border-radius:12px;
+  border:1px solid rgba(201,168,76,.1);background:transparent;
+}
+.vc-history-clear:hover{color:var(--rescue);border-color:rgba(212,101,14,.2)}
+.vc-history-list{flex:1;overflow-y:auto;padding:12px;-webkit-overflow-scrolling:touch}
+.vc-history-item{
+  padding:10px 12px;margin-bottom:8px;border-radius:var(--radius-sm);
+  background:var(--card);border:1px solid var(--border);
+}
+.vc-history-item-cmd{font-size:13px;font-weight:500;color:var(--txt)}
+.vc-history-item-res{font-size:12px;color:var(--muted);margin-top:4px}
+.vc-history-item-time{
+  font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted2);margin-top:4px;
+}
+.vc-history-empty{text-align:center;padding:40px 20px;color:var(--muted2);font-size:13px}
+.vc-history-overlay{
+  position:absolute;top:0;left:0;right:0;bottom:0;z-index:24;
+  background:rgba(4,4,10,.6);opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.vc-history-overlay.show{opacity:1;pointer-events:auto}
+
+/* ── TOAST ── */
+.vc-toast{
+  position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-60px);
+  padding:10px 20px;border-radius:12px;font-size:13px;z-index:100;
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  background:var(--card);border:1px solid var(--border);color:var(--txt);
+}
+.vc-toast.show{transform:translateX(-50%) translateY(0)}
+.vc-toast.ok{border-color:rgba(39,174,96,.3);background:rgba(39,174,96,.12)}
+.vc-toast.err{border-color:rgba(212,101,14,.3);background:rgba(212,101,14,.12)}
+
+/* ── SPEAKING INDICATOR ── */
+.vc-speaking{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:50;
+  display:none;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;
+  background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);
+}
+.vc-speaking.show{display:flex}
+.vc-speaking-dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}
+.vc-speaking-dot:nth-child(1){animation:speakDot .8s ease infinite}
+.vc-speaking-dot:nth-child(2){animation:speakDot .8s ease .15s infinite}
+.vc-speaking-dot:nth-child(3){animation:speakDot .8s ease .3s infinite}
+@keyframes speakDot{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+.vc-speaking-text{font-size:11px;color:var(--gold);letter-spacing:.5px}
+
+/* ── SETTINGS BUTTON ── */
+.vc-settings-btn{
+  position:absolute;top:72px;right:64px;z-index:15;
+  width:40px;height:40px;border-radius:50%;border:1px solid rgba(201,168,76,.12);
+  background:rgba(10,10,16,.8);cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.vc-settings-btn svg{width:18px;height:18px;color:var(--muted)}
+.vc-settings-btn:hover svg{color:var(--gold)}
+
+/* ── SETTINGS MODAL ── */
+.vc-modal-overlay{
+  position:fixed;top:0;left:0;right:0;bottom:0;z-index:50;
+  background:rgba(4,4,10,.8);display:none;align-items:center;justify-content:center;
+}
+.vc-modal-overlay.show{display:flex}
+.vc-modal{
+  width:90%;max-width:400px;border-radius:var(--radius-lg);
+  background:var(--noir2);border:1px solid var(--border);padding:24px;
+}
+.vc-modal h3{
+  font-family:'Oswald',sans-serif;font-size:17px;color:var(--gold);
+  letter-spacing:1px;margin-bottom:16px;
+}
+.vc-modal label{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(201,168,76,.05)}
+.vc-modal label span{font-size:13px;color:var(--txt)}
+.vc-toggle{
+  position:relative;width:44px;height:24px;border-radius:12px;
+  background:var(--muted2);cursor:pointer;transition:background .2s;
+}
+.vc-toggle.on{background:var(--gold)}
+.vc-toggle::after{
+  content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;
+  border-radius:50%;background:#fff;transition:transform .2s;
+}
+.vc-toggle.on::after{transform:translateX(20px)}
+.vc-modal-close{
+  margin-top:16px;width:100%;padding:10px;border-radius:var(--radius-sm);
+  border:1px solid rgba(201,168,76,.2);background:transparent;
+  color:var(--gold);font-family:'Oswald',sans-serif;font-size:14px;
+  letter-spacing:1px;cursor:pointer;
+}
+.vc-modal-close:active{background:rgba(201,168,76,.08)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:400px){
+  .vc-mic{width:100px;height:100px}
+  .vc-mic svg{width:40px;height:40px}
+  .vc-ring-1{width:140px;height:140px}
+  .vc-ring-2{width:180px;height:180px}
+  .vc-ring-3{width:220px;height:220px}
+  .vc-transcript-text{font-size:16px}
+  .vc-history{width:280px}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="vc-header">
+  <div class="vc-header-left">
+    <button class="vc-back" onclick="goBack()" title="Retour">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div>
+      <div class="vc-title">COMMANDE VOCALE</div>
+      <div class="vc-subtitle">VOLO SST — Eagle Voice Control</div>
+    </div>
+  </div>
+  <span class="vc-lang">FR-CA</span>
+</div>
+
+<!-- SETTINGS BUTTON -->
+<button class="vc-settings-btn" onclick="toggleSettings()" title="Reglages">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+  </svg>
+</button>
+
+<!-- HISTORY TOGGLE -->
+<button class="vc-history-toggle" onclick="toggleHistory()">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+  </svg>
+  <span class="vc-history-badge" id="histBadge">0</span>
+</button>
+
+<!-- MAIN -->
+<div class="vc-main">
+  <canvas id="waveCanvas"></canvas>
+
+  <div class="vc-mic-wrap">
+    <button class="vc-mic" id="micBtn" onclick="toggleListening()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <rect x="9" y="1" width="6" height="14" rx="3"/>
+        <path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/>
+        <line x1="8" y1="23" x2="16" y2="23"/>
+      </svg>
+    </button>
+    <div class="vc-mic-label" id="micLabel">APPUYER POUR PARLER</div>
+    <div class="vc-ring vc-ring-1"></div>
+    <div class="vc-ring vc-ring-2"></div>
+    <div class="vc-ring vc-ring-3"></div>
+  </div>
+
+  <div class="vc-transcript">
+    <div class="vc-transcript-text" id="transcript"></div>
+    <div class="vc-transcript-cmd" id="transcriptCmd"></div>
+  </div>
+
+  <div class="vc-suggestions" id="suggestions">
+    <button class="vc-sug" onclick="simulateCommand('Cherche harnais')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Cherche...
+    </button>
+    <button class="vc-sug" onclick="simulateCommand('Pointage arrivee')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Pointage
+    </button>
+    <button class="vc-sug" onclick="simulateCommand('Urgence')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Urgence
+    </button>
+    <button class="vc-sug" onclick="simulateCommand('Meteo')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+      Meteo
+    </button>
+    <button class="vc-sug" onclick="simulateCommand('Inventaire')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+      Inventaire
+    </button>
+    <button class="vc-sug" onclick="simulateCommand('Qui est la')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Qui est la
+    </button>
+    <button class="vc-sug" onclick="simulateCommand('Status')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+      Status
+    </button>
+    <button class="vc-sug" onclick="simulateCommand('Scan')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Scan QR
+    </button>
+  </div>
+</div>
+
+<!-- RESULT PANEL -->
+<div class="vc-result" id="resultPanel">
+  <div class="vc-result-header">
+    <div class="vc-result-title" id="resultTitle">RESULTAT</div>
+    <button class="vc-result-close" onclick="closeResult()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="vc-result-body" id="resultBody"></div>
+</div>
+
+<!-- HISTORY PANEL -->
+<div class="vc-history-overlay" id="histOverlay" onclick="toggleHistory()"></div>
+<div class="vc-history" id="histPanel">
+  <div class="vc-history-head">
+    <div class="vc-history-title">HISTORIQUE</div>
+    <button class="vc-history-clear" onclick="clearHistory()">Effacer</button>
+  </div>
+  <div class="vc-history-list" id="histList">
+    <div class="vc-history-empty">Aucune commande encore</div>
+  </div>
+</div>
+
+<!-- SPEAKING INDICATOR -->
+<div class="vc-speaking" id="speakingInd">
+  <span class="vc-speaking-dot"></span>
+  <span class="vc-speaking-dot"></span>
+  <span class="vc-speaking-dot"></span>
+  <span class="vc-speaking-text">Eagle parle...</span>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="vc-modal-overlay" id="settingsModal">
+  <div class="vc-modal">
+    <h3>REGLAGES VOCAUX</h3>
+    <label>
+      <span>Reponse vocale</span>
+      <div class="vc-toggle on" id="togVoice" onclick="toggleSetting('voice')"></div>
+    </label>
+    <label>
+      <span>Ecoute continue</span>
+      <div class="vc-toggle" id="togContinuous" onclick="toggleSetting('continuous')"></div>
+    </label>
+    <label>
+      <span>Sons interface</span>
+      <div class="vc-toggle on" id="togSounds" onclick="toggleSetting('sounds')"></div>
+    </label>
+    <label>
+      <span>Vibration (mobile)</span>
+      <div class="vc-toggle on" id="togVibrate" onclick="toggleSetting('vibrate')"></div>
+    </label>
+    <button class="vc-modal-close" onclick="toggleSettings()">FERMER</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="vc-toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script>
+/* ═══════════════════════════════════════════════
+   VOLO SST — MODULE COMMANDE VOCALE
+   Eagle Voice Control — FR-CA
+   ═══════════════════════════════════════════════ */
+
+// ── SETTINGS ──
+const SETTINGS_KEY = 'volo_voice_settings';
+let settings = loadSettings();
+
+function loadSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+    return s || { voice: true, continuous: false, sounds: true, vibrate: true };
+  } catch(e) {
+    return { voice: true, continuous: false, sounds: true, vibrate: true };
+  }
+}
+function saveSettings() {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+}
+function toggleSetting(key) {
+  settings[key] = !settings[key];
+  const el = document.getElementById('tog' + key.charAt(0).toUpperCase() + key.slice(1));
+  if (el) el.classList.toggle('on', settings[key]);
+  saveSettings();
+}
+function initSettingsUI() {
+  document.getElementById('togVoice').classList.toggle('on', settings.voice);
+  document.getElementById('togContinuous').classList.toggle('on', settings.continuous);
+  document.getElementById('togSounds').classList.toggle('on', settings.sounds);
+  document.getElementById('togVibrate').classList.toggle('on', settings.vibrate);
+}
+
+// ── SPEECH RECOGNITION ──
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let isListening = false;
+let finalTranscript = '';
+let interimTranscript = '';
+
+function initRecognition() {
+  if (!SpeechRecognition) {
+    showToast('Reconnaissance vocale non supportee par ce navigateur', 'err');
+    return false;
+  }
+  recognition = new SpeechRecognition();
+  recognition.lang = 'fr-CA';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = function() {
+    isListening = true;
+    document.getElementById('micBtn').classList.add('active');
+    document.getElementById('micLabel').textContent = 'ECOUTE EN COURS...';
+    document.getElementById('micLabel').classList.add('active');
+    startWaveAnimation();
+    if (settings.vibrate && navigator.vibrate) navigator.vibrate(50);
+  };
+
+  recognition.onresult = function(event) {
+    interimTranscript = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const t = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalTranscript = t;
+        processCommand(t.trim());
+      } else {
+        interimTranscript = t;
+      }
+    }
+    updateTranscript();
+  };
+
+  recognition.onerror = function(event) {
+    if (event.error === 'no-speech') return;
+    if (event.error === 'aborted') return;
+    console.warn('Speech error:', event.error);
+    if (event.error === 'not-allowed') {
+      showToast('Microphone refuse — verifier les permissions', 'err');
+    }
+  };
+
+  recognition.onend = function() {
+    if (isListening && settings.continuous) {
+      try { recognition.start(); } catch(e) {}
+      return;
+    }
+    isListening = false;
+    document.getElementById('micBtn').classList.remove('active');
+    document.getElementById('micLabel').textContent = 'APPUYER POUR PARLER';
+    document.getElementById('micLabel').classList.remove('active');
+    stopWaveAnimation();
+  };
+
+  return true;
+}
+
+function toggleListening() {
+  if (!recognition && !initRecognition()) return;
+  if (isListening) {
+    isListening = false;
+    recognition.stop();
+  } else {
+    finalTranscript = '';
+    interimTranscript = '';
+    document.getElementById('transcript').textContent = '';
+    document.getElementById('transcriptCmd').classList.remove('show');
+    try { recognition.start(); } catch(e) { console.warn(e); }
+  }
+}
+
+function updateTranscript() {
+  const el = document.getElementById('transcript');
+  if (interimTranscript) {
+    el.textContent = interimTranscript;
+    el.classList.add('interim');
+  } else if (finalTranscript) {
+    el.textContent = finalTranscript;
+    el.classList.remove('interim');
+  }
+}
+
+// ── SPEECH SYNTHESIS ──
+function speak(text, onEnd) {
+  if (!settings.voice || !window.speechSynthesis) {
+    if (onEnd) onEnd();
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'fr-CA';
+  utter.rate = 1.0;
+  utter.pitch = 0.95;
+
+  // Try to find a French voice
+  const voices = window.speechSynthesis.getVoices();
+  const frVoice = voices.find(v => v.lang.startsWith('fr'));
+  if (frVoice) utter.voice = frVoice;
+
+  const ind = document.getElementById('speakingInd');
+  utter.onstart = function() { ind.classList.add('show'); };
+  utter.onend = function() { ind.classList.remove('show'); if (onEnd) onEnd(); };
+  utter.onerror = function() { ind.classList.remove('show'); if (onEnd) onEnd(); };
+
+  window.speechSynthesis.speak(utter);
+}
+
+// Preload voices
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = function() { window.speechSynthesis.getVoices(); };
+  window.speechSynthesis.getVoices();
+}
+
+// ── WAVEFORM VISUALIZATION ──
+let waveCtx = null;
+let waveAnim = null;
+let waveActive = false;
+let audioCtx = null;
+let analyser = null;
+let micStream = null;
+
+function initCanvas() {
+  const c = document.getElementById('waveCanvas');
+  const dpr = window.devicePixelRatio || 1;
+  c.width = c.offsetWidth * dpr;
+  c.height = c.offsetHeight * dpr;
+  waveCtx = c.getContext('2d');
+  waveCtx.scale(dpr, dpr);
+}
+
+async function startWaveAnimation() {
+  waveActive = true;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const source = audioCtx.createMediaStreamSource(micStream);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    source.connect(analyser);
+  } catch(e) {
+    console.warn('Audio context not available, using simulated waveform');
+    analyser = null;
+  }
+  drawWave();
+}
+
+function stopWaveAnimation() {
+  waveActive = false;
+  if (waveAnim) cancelAnimationFrame(waveAnim);
+  if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+  if (audioCtx) { audioCtx.close().catch(()=>{}); audioCtx = null; }
+  analyser = null;
+  // Clear canvas
+  if (waveCtx) {
+    const c = document.getElementById('waveCanvas');
+    waveCtx.clearRect(0, 0, c.offsetWidth, c.offsetHeight);
+  }
+}
+
+function drawWave() {
+  if (!waveActive) return;
+  waveAnim = requestAnimationFrame(drawWave);
+  const c = document.getElementById('waveCanvas');
+  const w = c.offsetWidth;
+  const h = c.offsetHeight;
+  waveCtx.clearRect(0, 0, w, h);
+
+  let dataArray;
+  if (analyser) {
+    const bufLen = analyser.frequencyBinCount;
+    dataArray = new Uint8Array(bufLen);
+    analyser.getByteTimeDomainData(dataArray);
+  } else {
+    // Simulated waveform
+    dataArray = new Uint8Array(128);
+    const t = Date.now() / 1000;
+    for (let i = 0; i < 128; i++) {
+      dataArray[i] = 128 + Math.sin(t * 3 + i * 0.15) * 20 + Math.sin(t * 7 + i * 0.3) * 10;
+    }
+  }
+
+  const cx = w / 2;
+  const cy = h / 2 - 20;
+  const baseRadius = 80;
+  const points = dataArray.length;
+
+  // Circular waveform around center
+  waveCtx.beginPath();
+  for (let i = 0; i <= points; i++) {
+    const idx = i % points;
+    const val = (dataArray[idx] - 128) / 128;
+    const angle = (i / points) * Math.PI * 2 - Math.PI / 2;
+    const r = baseRadius + val * 40;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    if (i === 0) waveCtx.moveTo(x, y);
+    else waveCtx.lineTo(x, y);
+  }
+  waveCtx.closePath();
+  waveCtx.strokeStyle = 'rgba(201,168,76,0.3)';
+  waveCtx.lineWidth = 1.5;
+  waveCtx.stroke();
+
+  // Second ring
+  waveCtx.beginPath();
+  for (let i = 0; i <= points; i++) {
+    const idx = i % points;
+    const val = (dataArray[idx] - 128) / 128;
+    const angle = (i / points) * Math.PI * 2 - Math.PI / 2;
+    const r = baseRadius + 30 + val * 25;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    if (i === 0) waveCtx.moveTo(x, y);
+    else waveCtx.lineTo(x, y);
+  }
+  waveCtx.closePath();
+  waveCtx.strokeStyle = 'rgba(201,168,76,0.12)';
+  waveCtx.lineWidth = 1;
+  waveCtx.stroke();
+
+  // Radial lines
+  const t = Date.now() / 1000;
+  for (let i = 0; i < 36; i++) {
+    const angle = (i / 36) * Math.PI * 2 + t * 0.2;
+    const idx = Math.floor((i / 36) * points);
+    const val = Math.abs((dataArray[idx] - 128) / 128);
+    const r1 = baseRadius + 50;
+    const r2 = r1 + val * 30 + 5;
+    waveCtx.beginPath();
+    waveCtx.moveTo(cx + Math.cos(angle) * r1, cy + Math.sin(angle) * r1);
+    waveCtx.lineTo(cx + Math.cos(angle) * r2, cy + Math.sin(angle) * r2);
+    waveCtx.strokeStyle = `rgba(201,168,76,${0.05 + val * 0.15})`;
+    waveCtx.lineWidth = 1;
+    waveCtx.stroke();
+  }
+}
+
+// ── COMMAND PROCESSING ──
+const COMMANDS = [
+  { patterns: [/cherche\s+(.+)/i, /recherche\s+(.+)/i, /trouve\s+(.+)/i, /ou\s+est\s+(.+)/i], handler: cmdSearch },
+  { patterns: [/pointage\s*(arriv[eé]e?|d[eé]part|entr[eé]e?|sortie)?/i], handler: cmdPointage },
+  { patterns: [/urgence/i, /alerte/i, /emergency/i, /secours/i], handler: cmdUrgence },
+  { patterns: [/m[eé]t[eé]o/i, /temps?\s*(qu.*fait)?/i, /temp[eé]rature/i], handler: cmdMeteo },
+  { patterns: [/inventaire\s*(.*)/i, /liste\s*(.*)/i, /combien\s*(.*)/i], handler: cmdInventaire },
+  { patterns: [/scan/i, /scanner/i, /qr\s*code/i, /code\s*qr/i], handler: cmdScan },
+  { patterns: [/qui\s+est\s+l[aà]/i, /pr[eé]sent/i, /sur\s+site/i, /sur\s+place/i], handler: cmdQuiEstLa },
+  { patterns: [/status/i, /statut/i, /rapport/i, /r[eé]sum[eé]/i, /bilan/i], handler: cmdStatus },
+  { patterns: [/aide/i, /help/i, /commandes?/i], handler: cmdHelp },
+  { patterns: [/bonjour/i, /salut/i, /allo/i, /hey/i], handler: cmdGreet },
+  { patterns: [/ouvr[ei]\s+(.+)/i, /va\s+(?:[aà]\s+)?(.+)/i, /navigue?\s+(.+)/i], handler: cmdNavigate },
+  { patterns: [/heure/i, /quelle?\s+heure/i, /le\s+temps/i], handler: cmdTime },
+  { patterns: [/certif(?:ication)?s?\s+(.*)/i, /formation\s+(.*)/i], handler: cmdCerts },
+];
+
+function processCommand(text) {
+  if (!text || text.length < 2) return;
+  const normalized = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
+  for (const cmd of COMMANDS) {
+    for (const pat of cmd.patterns) {
+      const match = normalized.match(pat);
+      if (match) {
+        const cmdEl = document.getElementById('transcriptCmd');
+        cmdEl.textContent = 'Commande detectee';
+        cmdEl.classList.add('show');
+        if (settings.vibrate && navigator.vibrate) navigator.vibrate([30, 50, 30]);
+        cmd.handler(match, text);
+        return;
+      }
+    }
+  }
+
+  // No match
+  const cmdEl = document.getElementById('transcriptCmd');
+  cmdEl.textContent = 'Commande non reconnue';
+  cmdEl.classList.add('show');
+  speak('Je n\'ai pas compris. Dites aide pour la liste des commandes.');
+  addHistory(text, 'Non reconnu');
+}
+
+function simulateCommand(text) {
+  document.getElementById('transcript').textContent = text;
+  document.getElementById('transcript').classList.remove('interim');
+  processCommand(text);
+}
+
+// ── COMMAND HANDLERS ──
+
+function cmdSearch(match, raw) {
+  const query = (match[1] || '').trim();
+  if (!query) {
+    speak('Que voulez-vous chercher?');
+    return;
+  }
+
+  const items = getItems();
+  const q = query.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const results = items.filter(it => {
+    const name = (it.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const id = (it.id || '').toLowerCase();
+    const cat = (it.cat || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    return name.includes(q) || id.includes(q) || cat.includes(q);
+  }).slice(0, 20);
+
+  if (results.length === 0) {
+    showResult('RECHERCHE', `<p style="color:var(--muted);padding:20px 0;text-align:center">Aucun resultat pour "${escHtml(query)}"</p>`);
+    speak(`Aucun resultat pour ${query}.`);
+  } else {
+    let html = '';
+    results.forEach(it => {
+      html += `<div class="vc-item">
+        <span class="vc-item-name">${escHtml(it.name)}</span>
+        <span class="vc-item-id">${escHtml(it.id)}</span>
+        <div class="vc-item-cat">${escHtml(it.cat || '')} ${it.etat ? '— ' + escHtml(it.etat) : ''}</div>
+      </div>`;
+    });
+    showResult(`RECHERCHE — ${results.length} RESULTAT${results.length > 1 ? 'S' : ''}`, html);
+    speak(`${results.length} resultat${results.length > 1 ? 's' : ''} trouv${results.length > 1 ? 'es' : 'e'} pour ${query}.`);
+  }
+  addHistory(`Cherche ${query}`, `${results.length} resultats`);
+}
+
+function cmdPointage(match) {
+  const type = (match[1] || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const isDepart = type.includes('depart') || type.includes('sortie');
+  const label = isDepart ? 'DEPART' : 'ARRIVEE';
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
+  const user = localStorage.getItem('volo_last_name') || localStorage.getItem('volo_last_volo') || 'Utilisateur';
+
+  // Store pointage intent in localStorage for the main app to pick up
+  const pointageData = {
+    type: label,
+    user: user,
+    time: now.toISOString(),
+    source: 'VOICE_COMMAND'
+  };
+  localStorage.setItem('volo_voice_pointage', JSON.stringify(pointageData));
+
+  // Also broadcast via postMessage
+  broadcastAction('pointage', pointageData);
+
+  showResult('POINTAGE', `
+    <div class="vc-alert" style="background:${isDepart ? 'rgba(212,101,14,.08)' : 'rgba(39,174,96,.08)'};border-color:${isDepart ? 'rgba(212,101,14,.2)' : 'rgba(39,174,96,.2)'}">
+      <div class="vc-alert-title" style="color:${isDepart ? 'var(--rescue)' : '#27AE60'}">${label} ENREGISTRE</div>
+      <div class="vc-alert-text">${escHtml(user)} — ${timeStr}</div>
+    </div>
+    <p style="color:var(--muted);font-size:12px;margin-top:8px">Transmis au systeme principal.</p>
+  `);
+  speak(`Pointage ${label.toLowerCase()} enregistre a ${timeStr}.`);
+  addHistory(`Pointage ${label.toLowerCase()}`, `${user} — ${timeStr}`);
+}
+
+function cmdUrgence() {
+  // Broadcast urgence
+  const data = { type: 'URGENCE', time: new Date().toISOString(), source: 'VOICE_COMMAND' };
+  localStorage.setItem('volo_voice_urgence', JSON.stringify(data));
+  broadcastAction('urgence', data);
+
+  showResult('URGENCE', `
+    <div class="vc-alert">
+      <div class="vc-alert-title">ALERTE URGENCE DECLENCHEE</div>
+      <div class="vc-alert-text">Signal d'urgence transmis au systeme. L'equipe sera notifiee.</div>
+    </div>
+    <p style="color:var(--muted);font-size:12px;margin-top:8px">Ouvrir l'application principale pour gerer l'urgence.</p>
+  `);
+  speak('Alerte urgence declenchee. L\'equipe sera notifiee immediatement.');
+  addHistory('Urgence', 'Alerte declenchee');
+  if (settings.vibrate && navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
+}
+
+function cmdMeteo() {
+  showResult('METEO', '<p style="text-align:center;padding:20px;color:var(--muted)">Chargement...</p>');
+
+  // Check cache first
+  try {
+    const cached = JSON.parse(localStorage.getItem('volo_weather_cache'));
+    if (cached && Date.now() - cached.ts < 3600000) {
+      renderMeteo(cached.data);
+      return;
+    }
+  } catch(e) {}
+
+  fetch('https://api.open-meteo.com/v1/forecast?latitude=45.40&longitude=-71.89&current=temperature_2m,wind_speed_10m,weather_code&timezone=America/Toronto')
+    .then(r => r.json())
+    .then(data => {
+      localStorage.setItem('volo_weather_cache', JSON.stringify({ ts: Date.now(), data }));
+      renderMeteo(data);
+    })
+    .catch(() => {
+      showResult('METEO', '<p style="color:var(--rescue);text-align:center;padding:20px">Impossible de charger la meteo.</p>');
+      speak('Impossible de recuperer les donnees meteo.');
+      addHistory('Meteo', 'Erreur');
+    });
+}
+
+function renderMeteo(data) {
+  const c = data.current || {};
+  const temp = c.temperature_2m || '--';
+  const wind = c.wind_speed_10m || '--';
+  const code = c.weather_code || 0;
+  const label = getWmoLabel(code);
+
+  showResult('METEO — SHERBROOKE', `
+    <div style="text-align:center;padding:20px 0">
+      <div style="font-family:'Oswald',sans-serif;font-size:52px;color:var(--gold)">${temp}°C</div>
+      <div style="font-size:16px;color:var(--txt);margin-top:8px">${label}</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:12px">
+        <svg style="width:14px;height:14px;vertical-align:-2px;margin-right:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9.59 4.59A2 2 0 0111 4h6a2 2 0 010 4H5m4.59 8.59A2 2 0 0111 20H3m14-8H3"/></svg>
+        Vent ${wind} km/h
+      </div>
+    </div>
+  `);
+  speak(`Il fait ${temp} degres a Sherbrooke. ${label}. Vent de ${wind} kilometres heure.`);
+  addHistory('Meteo', `${temp} C — ${label}`);
+}
+
+const WMO_LABELS = {
+  0:'Ciel degage',1:'Peu nuageux',2:'Partiellement nuageux',3:'Couvert',
+  45:'Brouillard',48:'Brouillard givrant',51:'Bruine legere',53:'Bruine',55:'Bruine forte',
+  61:'Pluie legere',63:'Pluie',65:'Pluie forte',
+  71:'Neige legere',73:'Neige',75:'Neige forte',77:'Grains de neige',
+  80:'Averses legeres',81:'Averses',82:'Averses fortes',
+  85:'Averses de neige',86:'Fortes averses de neige',
+  95:'Orage',96:'Orage avec grele legere',99:'Orage avec forte grele'
+};
+function getWmoLabel(code) { return WMO_LABELS[code] || 'Conditions inconnues'; }
+
+function cmdInventaire(match) {
+  const cat = (match[1] || '').trim();
+  const items = getItems();
+
+  if (!cat) {
+    // General inventory summary
+    const cats = {};
+    items.forEach(it => {
+      const c = it.cat || 'Autre';
+      cats[c] = (cats[c] || 0) + 1;
+    });
+    let html = '';
+    const sorted = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+    sorted.forEach(([c, n]) => {
+      html += `<div class="vc-stat"><span class="vc-stat-label">${escHtml(c)}</span><span class="vc-stat-val">${n}</span></div>`;
+    });
+    showResult(`INVENTAIRE — ${items.length} ITEMS`, html);
+    speak(`L'inventaire contient ${items.length} items dans ${sorted.length} categories.`);
+    addHistory('Inventaire', `${items.length} items`);
+  } else {
+    // Filtered by category
+    const q = cat.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const filtered = items.filter(it => {
+      const c = (it.cat || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      return c.includes(q);
+    });
+    if (filtered.length === 0) {
+      showResult('INVENTAIRE', `<p style="color:var(--muted);padding:20px;text-align:center">Aucune categorie "${escHtml(cat)}"</p>`);
+      speak(`Aucun item trouve dans la categorie ${cat}.`);
+    } else {
+      let html = '';
+      filtered.slice(0, 30).forEach(it => {
+        html += `<div class="vc-item">
+          <span class="vc-item-name">${escHtml(it.name)}</span>
+          <span class="vc-item-id">${escHtml(it.id)}</span>
+          <div class="vc-item-cat">${escHtml(it.etat || 'Disponible')}</div>
+        </div>`;
+      });
+      if (filtered.length > 30) html += `<p style="color:var(--muted);font-size:12px;margin-top:8px">Et ${filtered.length - 30} autres...</p>`;
+      showResult(`INVENTAIRE ${cat.toUpperCase()} — ${filtered.length} ITEMS`, html);
+      speak(`${filtered.length} items dans la categorie ${cat}.`);
+    }
+    addHistory(`Inventaire ${cat}`, `${filtered.length} items`);
+  }
+}
+
+function cmdScan() {
+  // Open QR scanner on main app
+  broadcastAction('scan', { source: 'VOICE_COMMAND' });
+  localStorage.setItem('volo_voice_scan', JSON.stringify({ time: Date.now() }));
+
+  showResult('SCAN QR', `
+    <div style="text-align:center;padding:20px">
+      <svg style="width:64px;height:64px;color:var(--gold);margin-bottom:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+      </svg>
+      <p style="color:var(--txt);font-size:15px">Scanner QR demande</p>
+      <p style="color:var(--muted);font-size:12px;margin-top:8px">Le scanner s'ouvrira dans l'application principale.</p>
+    </div>
+  `);
+  speak('Ouverture du scanner Q R.');
+  addHistory('Scan QR', 'Demande transmise');
+}
+
+function cmdQuiEstLa() {
+  // Check localStorage for who's on site (from pointage system)
+  let onSite = [];
+  try {
+    const ptg = JSON.parse(localStorage.getItem('volo-ptg-onsite')) || {};
+    onSite = Object.entries(ptg).map(([id, data]) => ({
+      id: id,
+      name: data.name || id,
+      site: data.site || 'Inconnu',
+      since: data.since || ''
+    }));
+  } catch(e) {}
+
+  // Also check recent pointages
+  let recentPointages = [];
+  try {
+    const hist = JSON.parse(localStorage.getItem('volo-ptg-history')) || [];
+    const today = new Date().toISOString().split('T')[0];
+    recentPointages = hist.filter(p => p.date && p.date.startsWith(today) && p.type === 'ARRIVEE');
+  } catch(e) {}
+
+  if (onSite.length === 0 && recentPointages.length === 0) {
+    // Use personnel data as fallback demo
+    const personnel = getPersonnel();
+    const sample = personnel.slice(0, 8);
+    let html = '<p style="color:var(--muted);font-size:12px;margin-bottom:12px">Aucun pointage actif. Personnel enregistre :</p>';
+    sample.forEach(p => {
+      html += `<div class="vc-personnel">
+        <span class="vc-personnel-dot" style="background:${p.type === 'SURVEILLANT' ? '#3B82F6' : (p.role && p.role.includes('CHEF') ? 'var(--gold)' : 'var(--rescue)')}"></span>
+        <span class="vc-personnel-name">${escHtml(p.name)}</span>
+        <span class="vc-personnel-role">${escHtml(p.role || p.type || '')}</span>
+      </div>`;
+    });
+    if (personnel.length > 8) html += `<p style="color:var(--muted);font-size:12px;margin-top:8px">Et ${personnel.length - 8} autres membres...</p>`;
+    showResult(`EQUIPE — ${personnel.length} MEMBRES`, html);
+    speak(`${personnel.length} membres enregistres dans l'equipe. Aucun pointage actif aujourd'hui.`);
+    addHistory('Qui est la', `${personnel.length} membres`);
+  } else {
+    let html = '';
+    onSite.forEach(p => {
+      html += `<div class="vc-personnel">
+        <span class="vc-personnel-dot" style="background:#27AE60"></span>
+        <span class="vc-personnel-name">${escHtml(p.name)}</span>
+        <span class="vc-personnel-role">${escHtml(p.site)}</span>
+      </div>`;
+    });
+    showResult(`SUR SITE — ${onSite.length} PERSONNE${onSite.length > 1 ? 'S' : ''}`, html);
+    speak(`${onSite.length} personne${onSite.length > 1 ? 's' : ''} sur site actuellement.`);
+    addHistory('Qui est la', `${onSite.length} sur site`);
+  }
+}
+
+function cmdStatus() {
+  const items = getItems();
+  const personnel = getPersonnel();
+
+  // Count by état
+  const dispo = items.filter(i => !i.etat || i.etat === 'disponible' || i.etat === 'Disponible').length;
+  const sorti = items.filter(i => i.etat === 'sorti' || i.etat === 'Sorti').length;
+  const insp = items.filter(i => i.etat === 'inspection' || i.etat === 'A surveiller').length;
+  const maint = items.filter(i => i.etat === 'maintenance' || i.etat === 'Maintenance').length;
+
+  // Recent history count
+  let histCount = 0;
+  try {
+    const hist = JSON.parse(localStorage.getItem('volo_history')) || [];
+    const weekAgo = Date.now() - 7 * 86400000;
+    histCount = hist.filter(h => h.ts && new Date(h.ts).getTime() > weekAgo).length;
+  } catch(e) {}
+
+  // Cert alerts
+  let certAlerts = 0;
+  try {
+    personnel.forEach(p => {
+      const certs = JSON.parse(localStorage.getItem('volo_certs_' + p.volo)) || {};
+      Object.values(certs).forEach(d => {
+        if (d && new Date(d) < new Date()) certAlerts++;
+      });
+    });
+  } catch(e) {}
+
+  const html = `
+    <div class="vc-stat"><span class="vc-stat-label">Items totaux</span><span class="vc-stat-val">${items.length}</span></div>
+    <div class="vc-stat"><span class="vc-stat-label">Disponibles</span><span class="vc-stat-val" style="color:#27AE60">${dispo}</span></div>
+    <div class="vc-stat"><span class="vc-stat-label">Sortis</span><span class="vc-stat-val" style="color:var(--rescue)">${sorti}</span></div>
+    <div class="vc-stat"><span class="vc-stat-label">Inspection requise</span><span class="vc-stat-val" style="color:#E67E22">${insp}</span></div>
+    <div class="vc-stat"><span class="vc-stat-label">Maintenance</span><span class="vc-stat-val" style="color:#C0392B">${maint}</span></div>
+    <div class="vc-stat"><span class="vc-stat-label">Personnel</span><span class="vc-stat-val">${personnel.length}</span></div>
+    <div class="vc-stat"><span class="vc-stat-label">Transactions (7j)</span><span class="vc-stat-val">${histCount}</span></div>
+    ${certAlerts > 0 ? `<div class="vc-stat"><span class="vc-stat-label">Certifications expirees</span><span class="vc-stat-val" style="color:#C0392B">${certAlerts}</span></div>` : ''}
+  `;
+
+  showResult('STATUS GENERAL', html);
+  speak(`Status general. ${items.length} items, ${dispo} disponibles, ${sorti} sortis. ${personnel.length} membres. ${histCount} transactions cette semaine.`);
+  addHistory('Status', `${items.length} items, ${dispo} dispo`);
+}
+
+function cmdHelp() {
+  const html = `
+    <div style="padding:4px 0">
+      <div class="vc-stat"><span class="vc-stat-label" style="color:var(--txt)">"Cherche [item]"</span><span style="color:var(--muted);font-size:12px">Rechercher un item</span></div>
+      <div class="vc-stat"><span class="vc-stat-label" style="color:var(--txt)">"Pointage arrivee/depart"</span><span style="color:var(--muted);font-size:12px">Logger le temps</span></div>
+      <div class="vc-stat"><span class="vc-stat-label" style="color:var(--txt)">"Urgence"</span><span style="color:var(--muted);font-size:12px">Declencher alerte</span></div>
+      <div class="vc-stat"><span class="vc-stat-label" style="color:var(--txt)">"Meteo"</span><span style="color:var(--muted);font-size:12px">Conditions actuelles</span></div>
+      <div class="vc-stat"><span class="vc-stat-label" style="color:var(--txt)">"Inventaire [categorie]"</span><span style="color:var(--muted);font-size:12px">Liste des items</span></div>
+      <div class="vc-stat"><span class="vc-stat-label" style="color:var(--txt)">"Scan"</span><span style="color:var(--muted);font-size:12px">Ouvrir scanner QR</span></div>
+      <div class="vc-stat"><span class="vc-stat-label" style="color:var(--txt)">"Qui est la"</span><span style="color:var(--muted);font-size:12px">Personnel sur site</span></div>
+      <div class="vc-stat"><span class="vc-stat-label" style="color:var(--txt)">"Status"</span><span style="color:var(--muted);font-size:12px">Rapport general</span></div>
+      <div class="vc-stat"><span class="vc-stat-label" style="color:var(--txt)">"Ouvre [page]"</span><span style="color:var(--muted);font-size:12px">Naviguer vers une page</span></div>
+      <div class="vc-stat"><span class="vc-stat-label" style="color:var(--txt)">"Heure"</span><span style="color:var(--muted);font-size:12px">Afficher la date et l'heure</span></div>
+      <div class="vc-stat"><span class="vc-stat-label" style="color:var(--txt)">"Certifications [nom]"</span><span style="color:var(--muted);font-size:12px">Voir les certifs d'un membre</span></div>
+    </div>
+  `;
+  showResult('COMMANDES DISPONIBLES', html);
+  speak('Les commandes disponibles sont : Cherche, Pointage, Urgence, Meteo, Inventaire, Scan, Qui est la, Status, Ouvre, Heure, et Certifications.');
+  addHistory('Aide', '11 commandes');
+}
+
+function cmdGreet() {
+  const user = localStorage.getItem('volo_last_name') || 'Operateur';
+  const hour = new Date().getHours();
+  let greet = 'Bonne journee';
+  if (hour < 6) greet = 'Bonne nuit';
+  else if (hour < 12) greet = 'Bon matin';
+  else if (hour < 18) greet = 'Bon apres-midi';
+  else greet = 'Bonne soiree';
+
+  showResult('BONJOUR', `
+    <div style="text-align:center;padding:24px">
+      <div style="font-family:'Oswald',sans-serif;font-size:22px;color:var(--gold)">${greet}</div>
+      <div style="font-size:15px;color:var(--txt);margin-top:8px">${escHtml(user)}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:12px">Eagle Voice Control pret.</div>
+    </div>
+  `);
+  speak(`${greet}, ${user}. Eagle Voice Control est pret. Dites une commande ou aide pour la liste.`);
+  addHistory('Salutation', greet);
+}
+
+function cmdNavigate(match) {
+  const target = (match[1] || '').trim().toLowerCase();
+  const NAV_MAP = {
+    'agenda': 'agenda.html', 'disponibilites': 'agenda.html',
+    'inventaire': 'index.html', 'accueil': 'index.html',
+    'caisses': 'caisses-stock.html', 'stock': 'caisses-stock.html',
+    'centre de commande': 'command-center.html', 'command center': 'command-center.html', 'map': 'command-center.html',
+    'dashboard': 'dashboard-superviseur.html', 'superviseur': 'dashboard-superviseur.html',
+    'pointage': 'pointage.html',
+    'plan de travail': 'plan-travail.html', 'plan': 'plan-travail.html',
+    'qr': 'qr.html', 'codes': 'qr.html',
+    'rapport': 'rapport-cnesst.html', 'cnesst': 'rapport-cnesst.html',
+    'tracker': 'tracker-chantier.html', 'gps': 'tracker-chantier.html',
+    'war room': 'dashboard-rpg.html', 'rpg': 'dashboard-rpg.html',
+    'automatisation': 'volo-automation.html', 'automation': 'volo-automation.html',
+    'lexique': 'lexique.html',
+  };
+  for (const [key, url] of Object.entries(NAV_MAP)) {
+    if (target.includes(key)) {
+      speak('Navigation vers ' + key);
+      addHistory('Ouvre ' + key, url);
+      setTimeout(() => { window.location.href = url; }, 800);
+      return;
+    }
+  }
+  speak('Page non trouvee. Les pages disponibles sont: agenda, inventaire, caisses, centre de commande, dashboard, pointage, plan de travail, q r, rapport, tracker, war room.');
+  addHistory('Ouvre ' + target, 'Non trouve');
+}
+
+function cmdTime() {
+  const now = new Date();
+  const time = now.toLocaleTimeString('fr-CA', {hour:'2-digit',minute:'2-digit'});
+  const date = now.toLocaleDateString('fr-CA', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  showResult('HEURE', `
+    <div style="text-align:center;padding:24px">
+      <div style="font-family:'Oswald',sans-serif;font-size:48px;color:var(--gold)">${time}</div>
+      <div style="font-size:14px;color:var(--muted);margin-top:8px;text-transform:capitalize">${date}</div>
+    </div>
+  `);
+  speak('Il est ' + time);
+  addHistory('Heure', time);
+}
+
+function cmdCerts(match) {
+  const query = (match[1] || '').trim();
+  const personnel = getPersonnel();
+  if (!query || !personnel.length) {
+    speak('Precisez le nom de la personne. Par exemple, certifications Milone.');
+    return;
+  }
+  const normalized = query.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  const found = personnel.filter(p => p.name.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(normalized));
+  if (!found.length) {
+    speak('Aucune personne trouvee pour ' + query);
+    addHistory('Certifs ' + query, 'Non trouve');
+    return;
+  }
+  const p = found[0];
+  const certsRaw = localStorage.getItem('volo_certs_' + p.volo);
+  let html = '<div style="text-align:center;padding:8px"><div style="font-size:16px;color:var(--gold);margin-bottom:12px">' + escHtml(p.name) + ' (' + escHtml(p.volo) + ')</div>';
+  if (certsRaw) {
+    try {
+      const certs = JSON.parse(certsRaw);
+      const entries = Object.entries(certs).filter(([,v]) => v);
+      if (entries.length) {
+        html += entries.map(([k,v]) => '<div class="vc-stat"><span class="vc-stat-label">' + escHtml(k) + '</span><span style="color:var(--muted);font-size:12px">' + escHtml(v) + '</span></div>').join('');
+        speak(p.name + ' a ' + entries.length + ' certifications enregistrees.');
+      } else {
+        html += '<div style="color:var(--muted)">Aucune certification enregistree</div>';
+        speak('Aucune certification enregistree pour ' + p.name);
+      }
+    } catch(e) { html += '<div style="color:var(--muted)">Erreur de lecture</div>'; }
+  } else {
+    html += '<div style="color:var(--muted)">Aucune certification enregistree</div>';
+    speak('Aucune certification enregistree pour ' + p.name);
+  }
+  html += '</div>';
+  showResult('CERTIFICATIONS', html);
+  addHistory('Certifs ' + p.name, certsRaw ? 'Trouvees' : 'Aucune');
+}
+
+// ── DATA ACCESS ──
+function getItems() {
+  if (typeof ITEMS !== 'undefined') return ITEMS;
+  return [];
+}
+function getPersonnel() {
+  if (typeof PERSONNEL !== 'undefined') return PERSONNEL;
+  if (typeof SAUVETEURS !== 'undefined') return SAUVETEURS;
+  return [];
+}
+
+// ── UI HELPERS ──
+function showResult(title, html) {
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultBody').innerHTML = html;
+  document.getElementById('resultPanel').classList.add('show');
+}
+function closeResult() {
+  document.getElementById('resultPanel').classList.remove('show');
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'vc-toast ' + (type || '') + ' show';
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+// ── HISTORY ──
+const HISTORY_KEY = 'volo_voice_history';
+let history = [];
+
+function loadHistory() {
+  try { history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch(e) { history = []; }
+}
+function saveHistory() {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(-50)));
+}
+function addHistory(cmd, result) {
+  history.push({ cmd, result, time: new Date().toISOString() });
+  saveHistory();
+  renderHistory();
+}
+function clearHistory() {
+  history = [];
+  saveHistory();
+  renderHistory();
+}
+function renderHistory() {
+  const list = document.getElementById('histList');
+  const badge = document.getElementById('histBadge');
+  badge.textContent = history.length;
+  badge.classList.toggle('show', history.length > 0);
+
+  if (history.length === 0) {
+    list.innerHTML = '<div class="vc-history-empty">Aucune commande encore</div>';
+    return;
+  }
+  let html = '';
+  for (let i = history.length - 1; i >= 0; i--) {
+    const h = history[i];
+    const t = new Date(h.time);
+    const timeStr = t.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    html += `<div class="vc-history-item">
+      <div class="vc-history-item-cmd">${escHtml(h.cmd)}</div>
+      <div class="vc-history-item-res">${escHtml(h.result)}</div>
+      <div class="vc-history-item-time">${timeStr}</div>
+    </div>`;
+  }
+  list.innerHTML = html;
+}
+
+function toggleHistory() {
+  const panel = document.getElementById('histPanel');
+  const overlay = document.getElementById('histOverlay');
+  const show = !panel.classList.contains('show');
+  panel.classList.toggle('show', show);
+  overlay.classList.toggle('show', show);
+}
+
+function toggleSettings() {
+  const modal = document.getElementById('settingsModal');
+  modal.classList.toggle('show');
+}
+
+// ── INTEGRATION (postMessage / localStorage) ──
+function broadcastAction(action, data) {
+  // Try to communicate with parent/opener window
+  const msg = { source: 'volo-voice', action, data };
+  try {
+    if (window.opener) window.opener.postMessage(msg, '*');
+    if (window.parent !== window) window.parent.postMessage(msg, '*');
+  } catch(e) {}
+  // Also store for polling
+  localStorage.setItem('volo_voice_last_action', JSON.stringify({ action, data, ts: Date.now() }));
+}
+
+// Listen for responses from main app
+window.addEventListener('message', function(event) {
+  if (!event.data || event.data.source !== 'volo-main') return;
+  if (event.data.action === 'result') {
+    showResult(event.data.title || 'RESULTAT', event.data.html || '');
+    if (event.data.speak) speak(event.data.speak);
+  }
+});
+
+// ── NAVIGATION ──
+function goBack() {
+  if (isListening) toggleListening();
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  if (window.opener) window.close();
+  else window.location.href = 'index.html';
+}
+
+// ── RESIZE ──
+function onResize() {
+  initCanvas();
+}
+
+// ── INIT ──
+window.addEventListener('load', function() {
+  initCanvas();
+  initSettingsUI();
+  loadHistory();
+  renderHistory();
+  window.addEventListener('resize', onResize);
+
+  // Auto-init recognition (don't auto-start)
+  if (SpeechRecognition) {
+    initRecognition();
+  } else {
+    document.getElementById('micLabel').textContent = 'NON SUPPORTE';
+    document.getElementById('micBtn').style.opacity = '0.4';
+    document.getElementById('micBtn').style.cursor = 'not-allowed';
+  }
+});
+
+// Cleanup on unload
+window.addEventListener('beforeunload', function() {
+  if (isListening && recognition) recognition.stop();
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  stopWaveAnimation();
+});
+</script>
+</body>
+</html>

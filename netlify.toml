@@ -1,0 +1,22 @@
+[functions]
+  # Pro plan: up to 26s timeout
+  external_node_modules = ["node-fetch"]
+
+[functions."claude-proxy"]
+  # Extended timeout for Claude API (AI responses take 10-25s)
+  timeout = 26
+
+[[redirects]]
+  from = "/api/webhook-main"
+  to = "/.netlify/functions/webhook-main"
+  status = 200
+
+[[redirects]]
+  from = "/api/webhook-urgence"
+  to = "/.netlify/functions/webhook-urgence"
+  status = 200
+
+[[redirects]]
+  from = "/api/claude"
+  to = "/.netlify/functions/claude-proxy"
+  status = 200

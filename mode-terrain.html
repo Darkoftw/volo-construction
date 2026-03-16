@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="view-transition" content="same-origin">
+<meta name="mobile-web-app-capable" content="yes">
+<title>VOLO SST — Mode Terrain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#04040A;--gold:#C9A84C;--rescue:#E65100;--red:#C0392B;--green:#27AE60;--txt:#EBE6DF;--dim:#5A5660}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;min-height:100vh;min-height:100dvh;overflow:hidden;touch-action:manipulation}
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:vt-fade-out .2s ease-out}
+::view-transition-new(root){animation:vt-fade-in .3s ease-in}
+@keyframes vt-fade-out{from{opacity:1}to{opacity:0}}
+@keyframes vt-fade-in{from{opacity:0}to{opacity:1}}
+
+/* Background eagle watermark */
+.mt-bg-eagle{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:75vw;max-width:400px;opacity:.03;pointer-events:none;z-index:0;filter:sepia(1) saturate(2) hue-rotate(5deg) brightness(.8)}
+
+.mt-container{display:flex;flex-direction:column;height:100vh;height:100dvh;padding:12px;gap:10px;position:relative;z-index:1}
+
+/* Header */
+.mt-header{display:flex;align-items:center;gap:12px;padding:8px 4px;flex-shrink:0}
+.mt-back{width:44px;height:44px;border-radius:12px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.mt-back:active{background:rgba(201,168,76,.12)}
+.mt-title{font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;letter-spacing:3px;color:var(--txt)}
+.mt-user{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);margin-top:2px}
+
+/* Action buttons */
+.mt-actions{flex:1;display:flex;flex-direction:column;gap:10px;justify-content:center}
+
+.mt-btn{display:flex;align-items:center;gap:16px;padding:22px 24px;border-radius:18px;cursor:pointer;transition:all .15s;border:1px solid;min-height:76px;-webkit-user-select:none;user-select:none;position:relative;overflow:hidden}
+.mt-btn::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;opacity:.3}
+.mt-btn:active{transform:scale(.97)}
+.mt-btn svg{width:32px;height:32px;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;opacity:.85}
+.mt-btn-label{font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;letter-spacing:2px}
+.mt-btn-sub{font-size:11px;color:var(--dim);margin-top:2px;letter-spacing:.3px}
+
+/* Variants */
+.mt-btn-gold{background:rgba(201,168,76,.05);border-color:rgba(201,168,76,.15)}
+.mt-btn-gold::before{background:linear-gradient(90deg,var(--gold),transparent)}
+.mt-btn-gold svg{stroke:var(--gold)}
+.mt-btn-gold .mt-btn-label{color:var(--gold)}
+
+.mt-btn-rescue{background:rgba(230,81,0,.05);border-color:rgba(230,81,0,.2)}
+.mt-btn-rescue::before{background:linear-gradient(90deg,var(--rescue),transparent)}
+.mt-btn-rescue svg{stroke:var(--rescue)}
+.mt-btn-rescue .mt-btn-label{color:var(--rescue)}
+
+.mt-btn-green{background:rgba(39,174,96,.05);border-color:rgba(39,174,96,.2)}
+.mt-btn-green::before{background:linear-gradient(90deg,var(--green),transparent)}
+.mt-btn-green svg{stroke:var(--green)}
+.mt-btn-green .mt-btn-label{color:var(--green)}
+
+.mt-btn-blue{background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.2)}
+.mt-btn-blue::before{background:linear-gradient(90deg,#3B82F6,transparent)}
+.mt-btn-blue svg{stroke:#3B82F6}
+.mt-btn-blue .mt-btn-label{color:#3B82F6}
+
+.mt-btn-red{background:rgba(192,57,43,.06);border-color:rgba(192,57,43,.35)}
+.mt-btn-red::before{background:linear-gradient(90deg,var(--red),transparent)}
+.mt-btn-red svg{stroke:var(--red)}
+.mt-btn-red .mt-btn-label{color:var(--red)}
+
+/* Pulse on urgency */
+.mt-btn-red{animation:mt-pulse 2.5s ease infinite}
+@keyframes mt-pulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 20px rgba(192,57,43,.15)}}
+
+/* Status bar */
+.mt-status{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(201,168,76,.03);border:1px solid rgba(201,168,76,.06);border-radius:14px}
+.mt-status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.mt-status-dot.online{background:var(--green);box-shadow:0 0 8px rgba(39,174,96,.4)}
+.mt-status-dot.offline{background:var(--red);box-shadow:0 0 8px rgba(192,57,43,.4)}
+.mt-status-text{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);flex:1}
+.mt-status-time{font-family:'Oswald',sans-serif;font-size:16px;color:var(--gold);font-weight:700;letter-spacing:1px}
+
+/* Toast */
+.mt-toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);padding:12px 24px;border-radius:14px;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:1px;z-index:999;transition:transform .3s ease;pointer-events:none}
+.mt-toast.show{transform:translateX(-50%) translateY(0)}
+.mt-toast.ok{background:rgba(39,174,96,.9);color:#fff}
+.mt-toast.err{background:rgba(192,57,43,.9);color:#fff}
+</style>
+</head>
+<body>
+
+<!-- Eagle watermark background -->
+<img class="mt-bg-eagle" src="eagle_tactic.png" alt="" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none'}">
+
+<div class="mt-container" id="app">
+  <div class="mt-header">
+    <div class="mt-back" onclick="window.open('index.html','_self')">
+      <svg style="width:20px;height:20px;stroke:var(--gold);stroke-width:2;fill:none" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div>
+      <div class="mt-title">MODE TERRAIN</div>
+      <div class="mt-user" id="mtUser">---</div>
+    </div>
+  </div>
+
+  <div class="mt-actions">
+    <!-- 1. POINTAGE -->
+    <div class="mt-btn mt-btn-gold" onclick="mtPointage()">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <div>
+        <div class="mt-btn-label">POINTAGE</div>
+        <div class="mt-btn-sub" id="mtPtgStatus">Hors site</div>
+      </div>
+    </div>
+
+    <!-- 2. PICK-ON -->
+    <div class="mt-btn mt-btn-rescue" onclick="mtPickOn()">
+      <svg viewBox="0 0 24 24"><path d="M21 8l-2-3H5L3 8"/><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 12v4"/><path d="M9 14h6"/></svg>
+      <div>
+        <div class="mt-btn-label">PICK-ON</div>
+        <div class="mt-btn-sub">Sortie equipement</div>
+      </div>
+    </div>
+
+    <!-- 3. PICK-OFF -->
+    <div class="mt-btn mt-btn-green" onclick="mtPickOff()">
+      <svg viewBox="0 0 24 24"><path d="M21 8l-2-3H5L3 8"/><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 16v-4"/><path d="M9 14h6"/></svg>
+      <div>
+        <div class="mt-btn-label">PICK-OFF</div>
+        <div class="mt-btn-sub" id="mtPoStatus">Retour equipement</div>
+      </div>
+    </div>
+
+    <!-- 4. INVENTAIRE -->
+    <div class="mt-btn mt-btn-blue" onclick="window.open('caisses-stock.html','_self')">
+      <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      <div>
+        <div class="mt-btn-label">INVENTAIRE</div>
+        <div class="mt-btn-sub" id="mtInvStatus">Stock & caisses</div>
+      </div>
+    </div>
+
+    <!-- 5. URGENCE -->
+    <div class="mt-btn mt-btn-red" onclick="mtUrgence()">
+      <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
+      <div>
+        <div class="mt-btn-label">URGENCE</div>
+        <div class="mt-btn-sub">Alerte immediate</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div class="mt-status">
+    <div class="mt-status-dot" id="mtOnlineDot"></div>
+    <div class="mt-status-text" id="mtStatusText">---</div>
+    <div class="mt-status-time" id="mtClock">--:--</div>
+  </div>
+</div>
+
+<!-- QR Scanner modal -->
+<div id="mtScanModal" style="display:none;position:fixed;inset:0;z-index:900;background:var(--bg)">
+  <div style="padding:12px;display:flex;align-items:center;gap:10px">
+    <div class="mt-back" onclick="mtCloseScan()">
+      <svg style="width:20px;height:20px;stroke:var(--gold);stroke-width:2;fill:none" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="mt-title">SCAN QR</div>
+  </div>
+  <div style="position:relative;width:100%;height:calc(100vh - 160px)">
+    <video id="mtVideo" style="width:100%;height:100%;object-fit:cover" autoplay playsinline></video>
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
+      <div style="width:200px;height:200px;border:2px solid var(--gold);border-radius:16px;box-shadow:0 0 0 9999px rgba(4,4,10,.6)"></div>
+    </div>
+  </div>
+  <div id="mtScanResult" style="padding:12px;text-align:center;font-family:Oswald,sans-serif;font-size:14px;color:var(--gold);letter-spacing:1px"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script src="data.js"></script>
+<script>
+// ═══ MODE TERRAIN — Simplified field interface ═══
+
+let mtUser=null;
+let mtStream=null;
+let mtAnimFrame=null;
+
+function mtInit(){
+  const pin=localStorage.getItem('volo_pin')||'';
+  if(pin&&typeof PERSONNEL!=='undefined'){
+    mtUser=PERSONNEL.find(p=>p.volo==='V'+pin);
+  }
+  if(mtUser){
+    document.getElementById('mtUser').textContent=mtUser.name+' — '+(mtUser.region||'');
+  } else {
+    document.getElementById('mtUser').textContent='Non identifie';
+  }
+  mtUpdateStatus();
+  mtUpdateClock();
+  setInterval(mtUpdateClock,10000);
+  setInterval(mtUpdateStatus,30000);
+}
+
+function mtUpdateClock(){
+  document.getElementById('mtClock').textContent=new Date().toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'});
+}
+
+function mtUpdateStatus(){
+  const dot=document.getElementById('mtOnlineDot');
+  const txt=document.getElementById('mtStatusText');
+  dot.className='mt-status-dot '+(navigator.onLine?'online':'offline');
+  txt.textContent=navigator.onLine?'Connecte':'Hors ligne';
+
+  // Check pointage
+  try{
+    const onsite=JSON.parse(localStorage.getItem('volo-ptg-onsite')||'[]');
+    const pin=localStorage.getItem('volo_pin')||'';
+    const me=onsite.find(o=>o.sauveteur_id===pin);
+    document.getElementById('mtPtgStatus').textContent=me?'Sur site — '+me.lieu:'Hors site';
+  }catch(e){}
+
+  // Check pick-on
+  try{
+    const hist=JSON.parse(localStorage.getItem('volo_history')||'[]');
+    const active=hist.filter(tx=>tx.mode==='PICK-ON'&&tx.statut==='ACTIF');
+    const total=active.reduce((n,tx)=>{try{return n+JSON.parse(tx.items||'[]').length}catch(e){return n}},0);
+    document.getElementById('mtPoStatus').textContent=active.length>0?active.length+' actif — '+total+' items':'Retour equipement';
+  }catch(e){}
+
+  // Inventory count
+  try{
+    if(typeof ITEMS!=='undefined'){
+      document.getElementById('mtInvStatus').textContent=ITEMS.length+' items';
+    }
+  }catch(e){}
+}
+
+function mtToast(msg,type){
+  const t=document.createElement('div');
+  t.className='mt-toast '+(type||'ok');
+  t.textContent=msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(()=>{t.classList.add('show')});
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),400)},2500);
+}
+
+function mtPointage(){window.open('pointage.html','_self')}
+
+function mtPickOn(){
+  localStorage.setItem('volo_wizard_step','2');
+  localStorage.setItem('volo_wizard_mode','pickon');
+  window.open('index.html','_self');
+}
+
+function mtPickOff(){
+  localStorage.setItem('volo_wizard_step','2');
+  localStorage.setItem('volo_wizard_mode','pickoff');
+  window.open('index.html','_self');
+}
+
+function mtUrgence(){
+  if(!confirm('ENVOYER UNE ALERTE URGENCE ?'))return;
+  const payload={
+    type:'URGENCE',
+    timestamp:new Date().toISOString(),
+    sauveteur:mtUser?mtUser.name:'Inconnu',
+    sauveteur_id:mtUser?mtUser.id:'',
+    volo:mtUser?mtUser.volo:'',
+    source:'MODE_TERRAIN'
+  };
+  fetch('https://hook.us2.make.com/eha54bbek46jrg1yp88939167v7ngveh',{
+    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
+  }).then(()=>mtToast('URGENCE ENVOYEE','ok')).catch(()=>mtToast('ERREUR ENVOI','err'));
+}
+
+function mtScanQR(){
+  document.getElementById('mtScanModal').style.display='block';
+  document.getElementById('mtScanResult').textContent='Positionnez le QR dans le cadre...';
+  mtStartCamera();
+}
+
+function mtCloseScan(){
+  document.getElementById('mtScanModal').style.display='none';
+  mtStopCamera();
+}
+
+async function mtStartCamera(){
+  try{
+    const constraints={video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}};
+    mtStream=await navigator.mediaDevices.getUserMedia(constraints);
+    const video=document.getElementById('mtVideo');
+    video.srcObject=mtStream;
+    await video.play();
+    mtScanLoop(video);
+  }catch(e){
+    document.getElementById('mtScanResult').textContent='Erreur camera: '+e.message;
+  }
+}
+
+function mtScanLoop(video){
+  const canvas=document.createElement('canvas');
+  const ctx=canvas.getContext('2d',{willReadFrequently:true});
+  function tick(){
+    if(!mtStream)return;
+    if(video.readyState===video.HAVE_ENOUGH_DATA){
+      canvas.width=video.videoWidth;
+      canvas.height=video.videoHeight;
+      ctx.drawImage(video,0,0);
+      const imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
+      const code=jsQR(imgData.data,canvas.width,canvas.height,{inversionAttempts:'dontInvert'});
+      if(code&&code.data){
+        mtOnScan(code.data);
+        return;
+      }
+    }
+    mtAnimFrame=requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+function mtStopCamera(){
+  if(mtAnimFrame)cancelAnimationFrame(mtAnimFrame);
+  if(mtStream){mtStream.getTracks().forEach(t=>t.stop());mtStream=null;}
+}
+
+function mtOnScan(data){
+  mtStopCamera();
+  let item=null;
+  if(typeof ITEMS!=='undefined'){
+    item=ITEMS.find(i=>i.id===data||i.volo_id===data);
+  }
+  const res=document.getElementById('mtScanResult');
+  if(item){
+    res.innerHTML='<div style="color:var(--green);font-size:18px;margin-bottom:4px">TROUVE</div>'+
+      '<div style="color:var(--txt);font-size:16px">'+item.name+'</div>'+
+      '<div style="color:var(--dim);font-size:12px;margin-top:4px">'+item.id+(item.serial?' — '+item.serial:'')+'</div>'+
+      '<div style="color:var(--dim);font-size:11px;margin-top:2px">'+item.cat+(item.etat?' — '+item.etat:'')+'</div>'+
+      '<div onclick="mtScanQR()" style="margin-top:12px;padding:12px 24px;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);border-radius:12px;color:var(--gold);font-family:Oswald,sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;display:inline-block">SCANNER UN AUTRE</div>';
+    mtToast(item.name+' — '+item.id,'ok');
+  } else {
+    res.innerHTML='<div style="color:var(--red);font-size:18px;margin-bottom:4px">NON TROUVE</div>'+
+      '<div style="color:var(--dim);font-size:12px">Code: '+data+'</div>'+
+      '<div onclick="mtScanQR()" style="margin-top:12px;padding:12px 24px;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);border-radius:12px;color:var(--gold);font-family:Oswald,sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;display:inline-block">REESSAYER</div>';
+    mtToast('QR non reconnu','err');
+  }
+}
+
+document.addEventListener('DOMContentLoaded',mtInit);
+</script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ══════════════════════════════════════════
+    //  VOLO SST — Firebase Storage Rules
+    //  Photos chantier, documents, avatars
+    // ══════════════════════════════════════════
+
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function isChefOrAdmin() {
+      return isAuth() && (request.auth.token.role == 'admin' || request.auth.token.role == 'chef');
+    }
+
+    // Max 10MB par fichier
+    function isValidSize() {
+      return request.resource.size < 10 * 1024 * 1024;
+    }
+
+    // Images uniquement
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    // ── Photos chantier ──
+    match /photos/{allPaths=**} {
+      allow read: if isAuth();
+      allow create: if isAuth() && isValidSize() && isImage();
+      allow update, delete: if isChefOrAdmin();
+    }
+
+    // ── Documents (rapports, exports) ──
+    match /documents/{allPaths=**} {
+      allow read: if isAuth();
+      allow create: if isChefOrAdmin() && isValidSize();
+      allow update, delete: if isChefOrAdmin();
+    }
+
+    // ── Avatars ──
+    match /avatars/{userId} {
+      allow read: if isAuth();
+      allow write: if isAuth() && request.auth.uid == userId && isValidSize() && isImage();
+    }
+
+    // ── Deny everything else ──
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -291,6 +291,106 @@ var VoloData = (function() {
   //  ITEMS / INVENTAIRE
   // ══════════════════════════════════════════
 
+  var _itemsFromFirestore = null; // cache pour éviter re-fetch
+
+  function getItemsFromFirestore() {
+    if (!_enabled()) return Promise.resolve(null);
+    if (_itemsFromFirestore) return Promise.resolve(_itemsFromFirestore);
+    return _ensureAuth().then(function() {
+      return _fs().collection('items').get()
+        .then(function(snap) {
+          if (snap.empty) return null;
+          var result = [];
+          snap.forEach(function(doc) {
+            var d = doc.data();
+            result.push({
+              id: d.id || doc.id,
+              name: d.name || '',
+              cat: d.cat || '',
+              icon: d.icon || '',
+              etat: d.etat || null,
+              desc: d.desc || '',
+              fab: d.fab || '',
+              serial: d.serial || '',
+              volo_id: d.volo_id || '',
+              expiry: d.expiry || null,
+              inspBy: d.inspBy || '',
+              inspDate: d.inspDate || '',
+              notes: d.notes || '',
+              couleur: d.couleur || undefined,
+              qty: d.qty || undefined
+            });
+          });
+          console.log('[VoloData] getItemsFromFirestore — ' + result.length + ' items chargés');
+          _itemsFromFirestore = result;
+          return result;
+        })
+        .catch(function(e) {
+          console.warn('[VoloData] getItemsFromFirestore ERREUR:', e.code || '', e.message);
+          return null;
+        });
+    });
+  }
+
+  function getCaissesFromFirestore() {
+    if (!_enabled()) return Promise.resolve(null);
+    return _ensureAuth().then(function() {
+      return _fs().collection('caisses').get()
+        .then(function(snap) {
+          if (snap.empty) return null;
+          var result = [];
+          snap.forEach(function(doc) {
+            var d = doc.data();
+            result.push({
+              id: d.id || doc.id,
+              nom: d.nom || d.name || '',
+              count: d.count || 0,
+              icon: d.icon || '',
+              type: d.type || 'autre',
+              items_contenus: d.items_contenus || [],
+              depot_assigne: d.depot_assigne || null,
+              poids_total: d.poids_total || null,
+              derniere_verification: d.derniere_verification || null,
+              responsable: d.responsable || null,
+              statut: d.statut || 'disponible',
+              parent_groupe: d.parent_groupe || undefined
+            });
+          });
+          console.log('[VoloData] getCaissesFromFirestore — ' + result.length + ' caisses chargées');
+          return result;
+        })
+        .catch(function(e) {
+          console.warn('[VoloData] getCaissesFromFirestore ERREUR:', e.code || '', e.message);
+          return null;
+        });
+    });
+  }
+
+  function initItems() {
+    var localCount = (typeof ITEMS !== 'undefined') ? ITEMS.length : 0;
+    console.log('[VoloData] initItems — _enabled=' + _enabled() + ', ITEMS local=' + localCount);
+    if (!_enabled()) return Promise.resolve(false);
+    return getItemsFromFirestore().then(function(list) {
+      var fsCount = list ? list.length : 0;
+      console.log('[VoloData] initItems — Firestore retourné ' + fsCount + ' items (local: ' + localCount + ')');
+      if (list && fsCount >= 100) {
+        window.ITEMS = list;
+        // Rebuild ITEMS_MAP
+        if (typeof Map !== 'undefined') {
+          window.ITEMS_MAP = new Map();
+          list.forEach(function(it) { window.ITEMS_MAP.set(it.id, it); });
+        }
+        console.log('[VoloData] → branche FIRESTORE (' + fsCount + ' items remplacent le local)');
+        return true;
+      }
+      console.log('[VoloData] → branche FALLBACK (Firestore ' + fsCount + ' < 100, data.js conservé)');
+      return false;
+    }).catch(function(e) {
+      console.warn('[VoloData] initItems ERREUR → branche FALLBACK:', e.code || '', e.message);
+      return false;
+    });
+  }
+
   function getItems() {
     if (typeof ITEMS !== 'undefined') return Promise.resolve(ITEMS);
     return Promise.resolve([]);
@@ -325,19 +425,18 @@ var VoloData = (function() {
 
     // 2. Écrire dans Firestore (avec circuit breaker + auth)
     if (_enabled() && _canWrite()) {
-      _ensureAuth().then(function() {
-        try {
-          var docRef = _fs().collection('transactions').doc();
-          enriched._firestoreId = docRef.id;
-          _incrementWrite();
-          docRef.set(enriched).catch(function(e) {
-            console.warn('[VoloData] Firestore write failed, queuing:', e.message);
-            _queuePush({ collection: 'transactions', data: enriched });
-          });
-        } catch(e) {
+      var writePromise = _ensureAuth().then(function() {
+        var docRef = _fs().collection('transactions').doc();
+        enriched._firestoreId = docRef.id;
+        _incrementWrite();
+        return docRef.set(enriched).catch(function(e) {
+          console.warn('[VoloData] Firestore write failed, queuing:', e.message);
           _queuePush({ collection: 'transactions', data: enriched });
-        }
+          return enriched;
+        });
       });
+      // Primary mode: await Firestore write before returning
+      if (_primary()) return writePromise.then(function() { return enriched; });
     } else {
       _queuePush({ collection: 'transactions', data: enriched });
     }
@@ -421,15 +520,16 @@ var VoloData = (function() {
 
     // Firestore (avec circuit breaker + auth)
     if (_enabled() && _canWrite()) {
-      _ensureAuth().then(function() {
+      var certWrite = _ensureAuth().then(function() {
         _incrementWrite();
-        _fs().collection('certifications').doc(voloId).set(
+        return _fs().collection('certifications').doc(voloId).set(
           { voloId: voloId, name: userName || '', certs: certs, org: ORG, updatedAt: _tsNow() },
           { merge: true }
         ).catch(function(e) {
           _queuePush({ collection: 'certifications', docId: voloId, data: { certs: certs, org: ORG, updatedAt: _tsNow() } });
         });
       });
+      if (_primary()) return certWrite.then(function() { return certs; });
     }
 
     return certs;
@@ -447,12 +547,14 @@ var VoloData = (function() {
     });
 
     if (_enabled() && _canWrite()) {
-      _ensureAuth().then(function() {
+      var ptWrite = _ensureAuth().then(function() {
         _incrementWrite();
-        _fs().collection('pointages').add(enriched).catch(function(e) {
+        return _fs().collection('pointages').add(enriched).catch(function(e) {
           _queuePush({ collection: 'pointages', data: enriched });
+          return enriched;
         });
       });
+      if (_primary()) return ptWrite.then(function() { return enriched; });
     } else {
       _queuePush({ collection: 'pointages', data: enriched });
     }
@@ -539,6 +641,111 @@ var VoloData = (function() {
   }
 
   // ══════════════════════════════════════════
+  //  PUSH NOTIFICATIONS (FCM)
+  // ══════════════════════════════════════════
+
+  function _getMessaging() { return window.firebaseMessaging; }
+
+  function requestNotificationPermission(voloId, userName, role) {
+    if (!_getMessaging() || !window.VOLO_VAPID_KEY) {
+      console.warn('[VoloData] FCM non disponible');
+      return Promise.resolve(null);
+    }
+    if (!('Notification' in window)) {
+      console.warn('[VoloData] Notifications non supportées');
+      return Promise.resolve(null);
+    }
+    return Notification.requestPermission().then(function(permission) {
+      if (permission !== 'granted') {
+        console.log('[VoloData] Notification permission refusée');
+        return null;
+      }
+      // Enregistrer le SW FCM
+      return navigator.serviceWorker.register('/firebase-messaging-sw.js')
+        .then(function(registration) {
+          return _getMessaging().getToken({
+            vapidKey: window.VOLO_VAPID_KEY,
+            serviceWorkerRegistration: registration
+          });
+        })
+        .then(function(token) {
+          if (!token) return null;
+          console.log('[VoloData] FCM token obtenu:', token.substring(0, 20) + '...');
+          // Sauvegarder le token dans Firestore /fcm_tokens/{voloId}
+          if (_enabled() && voloId) {
+            _ensureAuth().then(function() {
+              _incrementWrite();
+              _fs().collection('fcm_tokens').doc(voloId).set({
+                token: token,
+                voloId: voloId,
+                userName: userName || '',
+                role: (role || '').toUpperCase(),
+                updatedAt: _tsNow(),
+                platform: navigator.userAgent.substring(0, 80),
+                org: ORG
+              }, { merge: true }).catch(function(e) {
+                console.warn('[VoloData] FCM token save failed:', e.message);
+              });
+            });
+          }
+          return token;
+        });
+    }).catch(function(e) {
+      console.warn('[VoloData] FCM permission error:', e.message);
+      return null;
+    });
+  }
+
+  function onForegroundMessage(callback) {
+    if (!_getMessaging()) return function() {};
+    return _getMessaging().onMessage(function(payload) {
+      console.log('[VoloData] FCM foreground message:', payload);
+      if (callback) callback(payload);
+    });
+  }
+
+  function notifyUrgence(urgencePayload) {
+    // Écrit dans Firestore /notifications pour déclencher la Cloud Function
+    // qui enverra les push notifications à tous les tokens FCM des chefs
+    if (!_enabled() || !_canWrite()) return;
+    _ensureAuth().then(function() {
+      _incrementWrite();
+      _fs().collection('notifications').add({
+        type: 'URGENCE',
+        title: 'URGENCE TERRAIN',
+        body: (urgencePayload.type || 'Alerte') + ' — ' + (urgencePayload.sauveteur || 'Inconnu'),
+        data: urgencePayload,
+        targetRole: 'chef',
+        sent: false,
+        createdAt: _tsNow(),
+        org: ORG
+      }).catch(function(e) {
+        console.warn('[VoloData] Notification write failed:', e.message);
+      });
+    });
+  }
+
+  function notifyUrgencyAlert(alertPayload) {
+    // Notification broadcast quand un chef déclenche l'alerte urgence générale
+    if (!_enabled() || !_canWrite()) return;
+    _ensureAuth().then(function() {
+      _incrementWrite();
+      _fs().collection('notifications').add({
+        type: 'URGENCY_ALERT',
+        title: 'ALERTE URGENCE GENERALE',
+        body: 'Contactez votre chef immédiatement — ' + (alertPayload.author || ''),
+        data: alertPayload,
+        targetRole: 'all',
+        sent: false,
+        createdAt: _tsNow(),
+        org: ORG
+      }).catch(function(e) {
+        console.warn('[VoloData] Urgency alert notification failed:', e.message);
+      });
+    });
+  }
+
+  // ══════════════════════════════════════════
   //  PHOTOS (Storage — Phase 3)
   // ══════════════════════════════════════════
 
@@ -547,9 +754,61 @@ var VoloData = (function() {
       console.warn('[VoloData] Firebase Storage non activé');
       return Promise.resolve(null);
     }
-    var ref = window.firebaseStorage.ref(path + '/' + Date.now() + '_' + file.name);
-    return ref.put(file).then(function(snap) {
-      return snap.ref.getDownloadURL();
+    return _ensureAuth().then(function() {
+      var ref = window.firebaseStorage.ref(path + '/' + Date.now() + '_' + file.name);
+      return ref.put(file).then(function(snap) {
+        return snap.ref.getDownloadURL();
+      });
+    });
+  }
+
+  function uploadPhotoBase64(base64Data, storagePath, metadata) {
+    // Upload une image base64 compressée vers Firebase Storage
+    if (!window.firebaseStorage) {
+      console.warn('[VoloData] Firebase Storage non activé');
+      return Promise.resolve(null);
+    }
+    return _ensureAuth().then(function() {
+      var fileName = Date.now() + '_photo.jpg';
+      var ref = window.firebaseStorage.ref(storagePath + '/' + fileName);
+      // Convertir base64 en blob
+      var byteString = atob(base64Data.split(',')[1] || base64Data);
+      var mimeString = base64Data.split(',')[0].split(':')[1].split(';')[0] || 'image/jpeg';
+      var ab = new ArrayBuffer(byteString.length);
+      var ia = new Uint8Array(ab);
+      for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      var blob = new Blob([ab], { type: mimeString });
+      var uploadMeta = { contentType: mimeString };
+      if (metadata) {
+        uploadMeta.customMetadata = metadata;
+      }
+      return ref.put(blob, uploadMeta).then(function(snap) {
+        return snap.ref.getDownloadURL().then(function(url) {
+          return { url: url, path: snap.ref.fullPath, size: snap.totalBytes };
+        });
+      });
+    }).catch(function(e) {
+      console.warn('[VoloData] Photo upload failed:', e.message);
+      return null;
+    });
+  }
+
+  function savePhotoMetadata(photoDoc) {
+    // Sauvegarde les métadonnées de la photo dans Firestore /photos
+    if (!_enabled() || !_canWrite()) return Promise.resolve(null);
+    return _ensureAuth().then(function() {
+      _incrementWrite();
+      return _fs().collection('photos').add(Object.assign({}, photoDoc, {
+        org: ORG,
+        createdAt: _tsNow()
+      })).then(function(ref) {
+        return ref.id;
+      });
+    }).catch(function(e) {
+      console.warn('[VoloData] Photo metadata save failed:', e.message);
+      return null;
     });
   }
 
@@ -557,22 +816,83 @@ var VoloData = (function() {
   //  REAL-TIME LISTENERS
   // ══════════════════════════════════════════
 
+  // Helper: subscribe after auth is ensured
+  function _authThenListen(setupFn) {
+    var unsub = function() {};
+    _ensureAuth().then(function() {
+      unsub = setupFn() || function() {};
+    });
+    return function() { unsub(); };
+  }
+
   function onConfigChange(callback) {
-    if (!_enabled()) return function() {}; // noop unsubscribe
-    return _fs().collection('config').doc('app').onSnapshot(function(doc) {
-      if (doc.exists) callback(doc.data());
-    }, function(e) { console.warn('[VoloData] Config listener error:', e); });
+    if (!_enabled()) return function() {};
+    return _authThenListen(function() {
+      return _fs().collection('config').doc('app').onSnapshot(function(doc) {
+        if (doc.exists) callback(doc.data());
+      }, function(e) { console.warn('[VoloData] Config listener error:', e); });
+    });
   }
 
   function onTransactionsChange(callback, filters) {
     if (!_enabled()) return function() {};
-    var query = _fs().collection('transactions').where('org', '==', ORG);
-    if (filters && filters.type) query = query.where('type', '==', filters.type);
-    query = query.orderBy('savedAt', 'desc').limit(20);
-    return query.onSnapshot(function(snap) {
-      var results = snap.docs.map(function(d) { var data = d.data(); data._id = d.id; return data; });
-      callback(results);
-    }, function(e) { console.warn('[VoloData] Transactions listener error:', e); });
+    return _authThenListen(function() {
+      var query = _fs().collection('transactions').where('org', '==', ORG);
+      if (filters && filters.type) query = query.where('type', '==', filters.type);
+      query = query.orderBy('savedAt', 'desc').limit(20);
+      return query.onSnapshot(function(snap) {
+        var results = snap.docs.map(function(d) { var data = d.data(); data._id = d.id; return data; });
+        callback(results);
+      }, function(e) { console.warn('[VoloData] Transactions listener error:', e); });
+    });
+  }
+
+  function onUrgencesChange(callback) {
+    if (!_enabled()) return function() {};
+    return _authThenListen(function() {
+      var since = new Date(Date.now() - 24 * 3600000).toISOString();
+      return _fs().collection('urgences')
+        .where('org', '==', ORG)
+        .where('createdAt', '>=', since)
+        .orderBy('createdAt', 'desc')
+        .limit(10)
+        .onSnapshot(function(snap) {
+          var results = snap.docs.map(function(d) { var data = d.data(); data._id = d.id; return data; });
+          callback(results);
+        }, function(e) { console.warn('[VoloData] Urgences listener error:', e); });
+    });
+  }
+
+  function onPointagesChange(callback) {
+    if (!_enabled()) return function() {};
+    return _authThenListen(function() {
+      var today = new Date().toISOString().slice(0, 10);
+      return _fs().collection('pointages')
+        .where('org', '==', ORG)
+        .where('savedAt', '>=', today)
+        .orderBy('savedAt', 'desc')
+        .limit(50)
+        .onSnapshot(function(snap) {
+          var results = snap.docs.map(function(d) { var data = d.data(); data._id = d.id; return data; });
+          callback(results);
+        }, function(e) { console.warn('[VoloData] Pointages listener error:', e); });
+    });
+  }
+
+  function onPhotosChange(callback) {
+    if (!_enabled()) return function() {};
+    return _authThenListen(function() {
+      var since = new Date(Date.now() - 7 * 24 * 3600000).toISOString();
+      return _fs().collection('photos')
+        .where('org', '==', ORG)
+        .where('createdAt', '>=', since)
+        .orderBy('createdAt', 'desc')
+        .limit(20)
+        .onSnapshot(function(snap) {
+          var results = snap.docs.map(function(d) { var data = d.data(); data._id = d.id; return data; });
+          callback(results);
+        }, function(e) { console.warn('[VoloData] Photos listener error:', e); });
+    });
   }
 
   // ══════════════════════════════════════════
@@ -615,6 +935,9 @@ var VoloData = (function() {
     getItems: getItems,
     getItemById: getItemById,
     getCaisses: getCaisses,
+    getItemsFromFirestore: getItemsFromFirestore,
+    getCaissesFromFirestore: getCaissesFromFirestore,
+    initItems: initItems,
 
     // Transactions
     saveTransaction: saveTransaction,
@@ -638,10 +961,21 @@ var VoloData = (function() {
 
     // Photos
     uploadPhoto: uploadPhoto,
+    uploadPhotoBase64: uploadPhotoBase64,
+    savePhotoMetadata: savePhotoMetadata,
+
+    // Push Notifications (FCM)
+    requestNotificationPermission: requestNotificationPermission,
+    onForegroundMessage: onForegroundMessage,
+    notifyUrgence: notifyUrgence,
+    notifyUrgencyAlert: notifyUrgencyAlert,
 
     // Listeners
     onConfigChange: onConfigChange,
     onTransactionsChange: onTransactionsChange,
+    onUrgencesChange: onUrgencesChange,
+    onPointagesChange: onPointagesChange,
+    onPhotosChange: onPhotosChange,
 
     // Status
     getStatus: getStatus,

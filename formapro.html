@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FormaPro — Kits de formation pour employeurs | Jonathan Milone</title>
+    <meta name="description" content="Kits de formation prêts à l'emploi pour employeurs québécois. Onboarding, évaluations, registres SIMDUT/TMD, fiches de poste et grilles de compétences.">
+    <meta property="og:title" content="FormaPro — Kits de formation SST">
+    <meta property="og:description" content="Kits de formation SST clés en main pour PME. Conformité CNESST simplifiée. À partir de 19,97$.">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="fr_CA">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": "FormaPro — Kits de formation pour employeurs",
+      "description": "Kits de formation prets a l'emploi pour employeurs quebecois. Onboarding, evaluations, registres SIMDUT/TMD, fiches de poste et grilles de competences.",
+      "brand": {"@type": "Brand", "name": "FormaPro"},
+      "author": {"@type": "Person", "name": "Jonathan Milone"},
+      "offers": {
+        "@type": "AggregateOffer",
+        "lowPrice": "19.97",
+        "highPrice": "59.97",
+        "priceCurrency": "CAD",
+        "offerCount": "3",
+        "availability": "https://schema.org/InStock"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "127"
+      },
+      "additionalType": "https://schema.org/SoftwareApplication",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web"
+    }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --noir: #0A0A12;
+            --noir-card: #12121E;
+            --noir-border: #1E1E2E;
+            --gold: #C9A84C;
+            --gold-light: #E2C97E;
+            --gold-dark: #A8893A;
+            --blanc: #EBE6DF;
+            --blanc-muted: #9A968F;
+            --rescue: #D4650E;
+            --font-heading: 'Oswald', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --radius: 12px;
+            --radius-lg: 20px;
+            --shadow: 0 4px 24px rgba(0,0,0,0.4);
+            --shadow-gold: 0 4px 30px rgba(201,168,76,0.15);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--noir);
+            color: var(--blanc);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===== UTILITY ===== */
+        .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+        .section { padding: 100px 0; }
+        .text-center { text-align: center; }
+        .text-gold { color: var(--gold); }
+        .text-muted { color: var(--blanc-muted); }
+
+        .section-label {
+            font-family: var(--font-heading);
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 20px;
+            color: var(--blanc);
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--blanc-muted);
+            max-width: 640px;
+            margin: 0 auto 48px;
+        }
+
+        /* ===== NAVIGATION ===== */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            padding: 16px 0;
+            background: rgba(10,10,18,0.92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--noir-border);
+            transition: padding 0.3s;
+        }
+
+        nav .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-brand {
+            font-family: var(--font-heading);
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--blanc);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-brand svg { flex-shrink: 0; }
+
+        .nav-links { display: flex; gap: 32px; list-style: none; }
+
+        .nav-links a {
+            color: var(--blanc-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover { color: var(--gold); }
+
+        .nav-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 24px;
+            background: var(--gold);
+            color: var(--noir);
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .nav-cta:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+        .nav-mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--blanc);
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            padding: 160px 0 120px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -200px; right: -200px;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: rgba(201,168,76,0.1);
+            border: 1px solid rgba(201,168,76,0.25);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--gold);
+            margin-bottom: 24px;
+            letter-spacing: 0.5px;
+        }
+
+        .hero-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2.5rem, 6vw, 3.8rem);
+            font-weight: 700;
+            line-height: 1.08;
+            margin-bottom: 24px;
+        }
+
+        .hero-text {
+            font-size: 1.15rem;
+            color: var(--blanc-muted);
+            margin-bottom: 40px;
+            max-width: 520px;
+            line-height: 1.7;
+        }
+
+        .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 36px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--noir);
+            font-family: var(--font-heading);
+            font-size: 1.05rem;
+            font-weight: 700;
+            text-decoration: none;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px rgba(201,168,76,0.25);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(201,168,76,0.35);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 36px;
+            background: transparent;
+            color: var(--blanc);
+            font-family: var(--font-heading);
+            font-size: 1.05rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 10px;
+            border: 1px solid var(--noir-border);
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+        .hero-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-card-stack {
+            position: relative;
+            width: 380px;
+            height: 420px;
+        }
+
+        .hero-card {
+            position: absolute;
+            width: 320px;
+            background: var(--noir-card);
+            border: 1px solid var(--noir-border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card:nth-child(1) { top: 0; left: 0; z-index: 3; }
+        .hero-card:nth-child(2) { top: 30px; left: 40px; z-index: 2; opacity: 0.7; }
+        .hero-card:nth-child(3) { top: 60px; left: 80px; z-index: 1; opacity: 0.4; }
+
+        .hero-card-icon {
+            width: 48px; height: 48px;
+            background: rgba(201,168,76,0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .hero-card h3 {
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .hero-card p {
+            font-size: 0.85rem;
+            color: var(--blanc-muted);
+            line-height: 1.5;
+        }
+
+        .hero-card-tag {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 4px 12px;
+            background: rgba(201,168,76,0.12);
+            color: var(--gold);
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 6px;
+        }
+
+        /* ===== STATS ===== */
+        .stats { background: var(--noir-card); border-top: 1px solid var(--noir-border); border-bottom: 1px solid var(--noir-border); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            text-align: center;
+        }
+
+        .stat-item {}
+
+        .stat-number {
+            font-family: var(--font-heading);
+            font-size: clamp(2.2rem, 4vw, 3rem);
+            font-weight: 700;
+            color: var(--gold);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--blanc-muted);
+            line-height: 1.4;
+        }
+
+        /* ===== PRODUCTS ===== */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .product-card {
+            background: var(--noir-card);
+            border: 1px solid var(--noir-border);
+            border-radius: var(--radius-lg);
+            padding: 36px;
+            transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gold), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(201,168,76,0.3);
+            box-shadow: var(--shadow-gold);
+        }
+
+        .product-card:hover::before { opacity: 1; }
+
+        .product-icon {
+            width: 56px; height: 56px;
+            background: rgba(201,168,76,0.08);
+            border: 1px solid rgba(201,168,76,0.15);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .product-card h3 {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .product-card p {
+            font-size: 0.95rem;
+            color: var(--blanc-muted);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .product-features {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .product-features li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.88rem;
+            color: var(--blanc-muted);
+        }
+
+        .product-features li svg { flex-shrink: 0; margin-top: 2px; }
+
+        /* ===== HOW IT WORKS ===== */
+        .how-it-works { background: var(--noir-card); border-top: 1px solid var(--noir-border); border-bottom: 1px solid var(--noir-border); }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            position: relative;
+        }
+
+        .steps-grid::before {
+            content: '';
+            position: absolute;
+            top: 44px;
+            left: 16.67%;
+            right: 16.67%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--gold), var(--gold-dark), var(--gold));
+            opacity: 0.3;
+        }
+
+        .step {
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 64px; height: 64px;
+            background: var(--noir);
+            border: 2px solid var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-family: var(--font-heading);
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--gold);
+            position: relative;
+            z-index: 2;
+        }
+
+        .step h3 {
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .step p {
+            font-size: 0.92rem;
+            color: var(--blanc-muted);
+            line-height: 1.6;
+            max-width: 280px;
+            margin: 0 auto;
+        }
+
+        /* ===== PRICING ===== */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            align-items: start;
+        }
+
+        .pricing-card {
+            background: var(--noir-card);
+            border: 1px solid var(--noir-border);
+            border-radius: var(--radius-lg);
+            padding: 40px 32px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .pricing-card.featured {
+            border-color: var(--gold);
+            box-shadow: var(--shadow-gold);
+            transform: scale(1.04);
+        }
+
+        .pricing-card.featured:hover {
+            transform: scale(1.04) translateY(-4px);
+        }
+
+        .pricing-badge {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 6px 20px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--noir);
+            font-family: var(--font-heading);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border-radius: 100px;
+            white-space: nowrap;
+        }
+
+        .pricing-tier {
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--blanc-muted);
+            margin-bottom: 16px;
+        }
+
+        .pricing-price {
+            font-family: var(--font-heading);
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: var(--blanc);
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .pricing-price span {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--blanc-muted);
+        }
+
+        .pricing-desc {
+            font-size: 0.88rem;
+            color: var(--blanc-muted);
+            margin-bottom: 28px;
+            padding-bottom: 28px;
+            border-bottom: 1px solid var(--noir-border);
+        }
+
+        .pricing-features {
+            list-style: none;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 32px;
+        }
+
+        .pricing-features li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: var(--blanc);
+        }
+
+        .pricing-features li svg { flex-shrink: 0; margin-top: 2px; }
+
+        .pricing-features li.disabled { color: var(--blanc-muted); opacity: 0.4; }
+        .pricing-features li.disabled svg path { stroke: var(--blanc-muted); }
+
+        .btn-pricing {
+            display: block;
+            width: 100%;
+            padding: 14px 24px;
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-pricing-outline {
+            background: transparent;
+            color: var(--blanc);
+            border: 1px solid var(--noir-border);
+        }
+
+        .btn-pricing-outline:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+            transform: translateY(-2px);
+        }
+
+        .btn-pricing-gold {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--noir);
+            box-shadow: 0 4px 20px rgba(201,168,76,0.25);
+        }
+
+        .btn-pricing-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(201,168,76,0.35);
+        }
+
+        /* ===== GUARANTEE ===== */
+        .guarantee-box {
+            max-width: 700px;
+            margin: 60px auto 0;
+            padding: 32px 40px;
+            background: rgba(201,168,76,0.05);
+            border: 1px solid rgba(201,168,76,0.2);
+            border-radius: var(--radius-lg);
+            text-align: center;
+        }
+
+        .guarantee-box h3 {
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+
+        .guarantee-box p {
+            font-size: 0.92rem;
+            color: var(--blanc-muted);
+            line-height: 1.6;
+        }
+
+        /* ===== FAQ ===== */
+        .faq-list {
+            max-width: 740px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .faq-item {
+            background: var(--noir-card);
+            border: 1px solid var(--noir-border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+
+        .faq-item.active { border-color: rgba(201,168,76,0.3); }
+
+        .faq-question {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 20px 24px;
+            background: none;
+            border: none;
+            color: var(--blanc);
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: left;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .faq-question:hover { color: var(--gold); }
+
+        .faq-question svg {
+            flex-shrink: 0;
+            transition: transform 0.3s;
+        }
+
+        .faq-item.active .faq-question svg { transform: rotate(180deg); }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease, padding 0.35s ease;
+        }
+
+        .faq-item.active .faq-answer { max-height: 300px; }
+
+        .faq-answer-inner {
+            padding: 0 24px 20px;
+            font-size: 0.92rem;
+            color: var(--blanc-muted);
+            line-height: 1.7;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            padding: 60px 0 40px;
+            border-top: 1px solid var(--noir-border);
+        }
+
+        .footer-grid {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-brand {
+            max-width: 320px;
+        }
+
+        .footer-brand h3 {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .footer-brand p {
+            font-size: 0.88rem;
+            color: var(--blanc-muted);
+            line-height: 1.6;
+        }
+
+        .footer-links { display: flex; gap: 48px; }
+
+        .footer-col h4 {
+            font-family: var(--font-heading);
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 16px;
+        }
+
+        .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+        .footer-col a {
+            color: var(--blanc-muted);
+            text-decoration: none;
+            font-size: 0.88rem;
+            transition: color 0.2s;
+        }
+
+        .footer-col a:hover { color: var(--gold); }
+
+        .footer-bottom {
+            padding-top: 24px;
+            border-top: 1px solid var(--noir-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.82rem;
+            color: var(--blanc-muted);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .hero .container { grid-template-columns: 1fr; text-align: center; }
+            .hero-text { margin: 0 auto 40px; }
+            .hero-actions { justify-content: center; }
+            .hero-visual { display: none; }
+            .products-grid { grid-template-columns: 1fr; max-width: 540px; margin: 0 auto; }
+        }
+
+        /* MOBILE NAV */
+        .nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px}
+        .nav-toggle svg{width:28px;height:28px;stroke:var(--gold);fill:none;stroke-width:2;stroke-linecap:round}
+        @media (max-width: 768px) {
+            .section { padding: 72px 0; }
+            .nav-toggle{display:block}
+            .nav-links{
+                display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;
+                flex-direction:column;align-items:center;justify-content:center;gap:32px;
+                background:rgba(10,10,18,.97);backdrop-filter:blur(16px);
+            }
+            .nav-links.open{display:flex}
+            .nav-links a{font-size:1.2rem}
+            .nav-links .nav-cta{margin:0}
+            .nav-close{position:absolute;top:20px;right:24px;background:none;border:none;cursor:pointer}
+            .nav-close svg{width:32px;height:32px;stroke:var(--gold);fill:none;stroke-width:2;stroke-linecap:round}
+            .nav-mobile-toggle { display: none; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 32px; }
+            .steps-grid { grid-template-columns: 1fr; gap: 48px; }
+            .steps-grid::before { display: none; }
+            .pricing-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
+            .pricing-card.featured { transform: none; }
+            .pricing-card.featured:hover { transform: translateY(-4px); }
+            .footer-grid { flex-direction: column; }
+            .footer-links { gap: 32px; }
+            .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+            .hero { padding: 130px 0 80px; }
+            .hero-actions { flex-direction: column; align-items: center; }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; gap: 24px; }
+            .footer-links { flex-direction: column; gap: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== NAV ===== -->
+<nav>
+    <div class="container">
+        <a href="#" class="nav-brand">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                <path d="M14 2L4 8v12l10 6 10-6V8L14 2z" stroke="#C9A84C" stroke-width="1.5" fill="none"/>
+                <path d="M14 8l-5 3v6l5 3 5-3v-6l-5-3z" stroke="#C9A84C" stroke-width="1.5" fill="rgba(201,168,76,0.1)"/>
+                <path d="M14 8v9" stroke="#C9A84C" stroke-width="1.5"/>
+            </svg>
+            FormaPro
+        </a>
+    <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.add('open')" aria-label="Menu">
+      <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+        <ul class="nav-links">
+      <button class="nav-close" onclick="this.parentElement.classList.remove('open')" aria-label="Fermer">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+            <li><a href="#produits">Produits</a></li>
+            <li><a href="#fonctionnement">Comment ca marche</a></li>
+            <li><a href="#tarifs">Tarifs</a></li>
+            <li><a href="#faq">FAQ</a></li>
+        </ul>
+        <a href="#tarifs" class="nav-cta">Voir les kits</a>
+        <button class="nav-mobile-toggle" onclick="document.querySelector('.nav-links').classList.toggle('mobile-open')" aria-label="Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+    </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.76 3.57L13 5.31l-3 2.93.71 4.14L7 10.5l-3.71 1.88L4 8.24 1 5.31l4.24-.74L7 1z" stroke="#C9A84C" stroke-width="1" fill="rgba(201,168,76,0.2)"/></svg>
+                Nouveau — Kits 2026
+            </div>
+            <h1 class="hero-title">Formez vos employes.<br><span class="text-gold">Restez conforme.</span></h1>
+            <p class="hero-text">Kits de formation professionnels, prets a l'emploi. Onboarding, evaluations, registres obligatoires — tout ce dont un employeur quebecois a besoin pour etre en regle.</p>
+            <div class="hero-actions">
+                <a href="#tarifs" class="btn-primary">
+                    Voir les kits
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9h10M10 5l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+                <a href="#produits" class="btn-secondary">Decouvrir le contenu</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-card-stack">
+                <div class="hero-card">
+                    <div class="hero-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 3L1 9l11 6 9-4.91V17M5 13.18V17.18l7 4 7-4V13.18" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <h3>Kit Onboarding</h3>
+                    <p>Accueil nouvel employe complet — checklist, formulaires, guides.</p>
+                    <span class="hero-card-tag">12 documents</span>
+                </div>
+                <div class="hero-card">
+                    <div class="hero-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </div>
+                    <h3>Registre SIMDUT</h3>
+                    <p>Conformite matieres dangereuses.</p>
+                    <span class="hero-card-tag">Obligatoire</span>
+                </div>
+                <div class="hero-card">
+                    <div class="hero-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M8.5 11a4 4 0 100-8 4 4 0 000 8zM20 8v6M23 11h-6" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <h3>Fiches de poste</h3>
+                    <p>Descriptions standardisees.</p>
+                    <span class="hero-card-tag">Personnalisable</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== STATISTICS ===== -->
+<section class="stats section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">80%</div>
+                <div class="stat-label">Des employeurs ne sont<br>pas conformes en formation</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">47%</div>
+                <div class="stat-label">Des accidents lies a un<br>manque de formation</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">15k$</div>
+                <div class="stat-label">Amende moyenne<br>CNESST par infraction</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">30 min</div>
+                <div class="stat-label">Pour mettre en place<br>un kit complet</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== PRODUCTS ===== -->
+<section id="produits" class="section">
+    <div class="container">
+        <div class="text-center">
+            <div class="section-label">Nos kits</div>
+            <h2 class="section-title">Tout pour former et documenter</h2>
+            <p class="section-subtitle">Des templates professionnels adaptes a la legislation quebecoise. Prets a utiliser, faciles a personnaliser.</p>
+        </div>
+        <div class="products-grid">
+            <!-- Kit 1 -->
+            <div class="product-card">
+                <div class="product-icon">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M14 4L3 10l11 6.5L25 10 14 4z" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10v8.5l11 6.5 11-6.5V10" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 16.5V25" stroke="#C9A84C" stroke-width="1.5"/></svg>
+                </div>
+                <h3>Kit Onboarding Nouvel Employe</h3>
+                <p>Accueillez chaque nouvel employe avec un processus structure et professionnel. Checklist d'accueil, formulaires, guide du premier jour.</p>
+                <ul class="product-features">
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Checklist d'accueil jour 1 a semaine 4
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Formulaires d'integration signes
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Guide de bienvenue personnalisable
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Grille d'evaluation periode d'essai
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Kit 2 -->
+            <div class="product-card">
+                <div class="product-icon">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M12 5H9a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-3" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/><path d="M12 5a2 2 0 012-2h0a2 2 0 012 2v1h-4V5z" stroke="#C9A84C" stroke-width="1.5"/><path d="M10 14h8M10 18h5" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </div>
+                <h3>Templates Evaluation de Performance</h3>
+                <p>Evaluez vos employes avec des grilles structurees et objectives. Entrevues annuelles, plans d'amelioration, suivi des objectifs.</p>
+                <ul class="product-features">
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Grille d'evaluation par competences
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Formulaire d'entrevue annuelle
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Plan d'amelioration individuel (PAI)
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Suivi d'objectifs SMART
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Kit 3 -->
+            <div class="product-card">
+                <div class="product-icon">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M5 4h18a1 1 0 011 1v18a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1z" stroke="#C9A84C" stroke-width="1.5"/><path d="M4 9h20" stroke="#C9A84C" stroke-width="1.5"/><path d="M10 4v5M18 4v5" stroke="#C9A84C" stroke-width="1.5"/><path d="M9 14h3M9 18h6M16 14h3" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </div>
+                <h3>Registres de Formation Obligatoire</h3>
+                <p>SIMDUT, TMD, espaces clos, travail en hauteur — tous les registres exiges par la CNESST, prets a remplir et a archiver.</p>
+                <ul class="product-features">
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Registre SIMDUT 2015 conforme
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Registre TMD (transport matieres dangereuses)
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Fiche espaces clos + travail en hauteur
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Suivi des dates de renouvellement
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Kit 4 -->
+            <div class="product-card">
+                <div class="product-icon">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M20 21v-2a4 4 0 00-4-4H12a4 4 0 00-4 4v2" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="14" cy="9" r="4" stroke="#C9A84C" stroke-width="1.5"/><path d="M22 11v4M24 13h-4" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </div>
+                <h3>Fiches de Poste + Grilles de Competences</h3>
+                <p>Definissez clairement chaque role avec des fiches standardisees et evaluez les competences de votre equipe objectivement.</p>
+                <ul class="product-features">
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Templates fiches de poste (10 modeles)
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Grille de competences par departement
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Matrice de polyvalence equipe
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Plan de developpement individuel
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== HOW IT WORKS ===== -->
+<section id="fonctionnement" class="how-it-works section">
+    <div class="container">
+        <div class="text-center">
+            <div class="section-label">Comment ca marche</div>
+            <h2 class="section-title">Operationnel en 30 minutes</h2>
+            <p class="section-subtitle">Pas besoin de consultant. Telechargez, personnalisez, imprimez. C'est aussi simple que ca.</p>
+        </div>
+        <div class="steps-grid">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Choisissez votre kit</h3>
+                <p>Selectionnez le ou les kits adaptes a vos besoins. Starter, Pro ou Entreprise — chaque formule est complete et autonome.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Personnalisez</h3>
+                <p>Ajoutez le nom de votre entreprise, votre logo et vos informations specifiques. Tous les documents sont en format editable (Word/Excel).</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Deployez et formez</h3>
+                <p>Imprimez ou partagez numeriquement. Vos employes sont formes, vos registres sont en regle, votre conformite est assuree.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== PRICING ===== -->
+<section id="tarifs" class="section">
+    <div class="container">
+        <div class="text-center">
+            <div class="section-label">Tarifs</div>
+            <h2 class="section-title">Investissez dans la conformite</h2>
+            <p class="section-subtitle">Moins cher qu'une seule heure de consultant. Utilisable a vie, mise a jour incluse selon la formule.</p>
+        </div>
+        <div class="pricing-grid">
+            <!-- Starter -->
+            <div class="pricing-card">
+                <div class="pricing-tier">Starter</div>
+                <div class="pricing-price">19<span>.97$</span></div>
+                <div class="pricing-desc">1 kit au choix — parfait pour debuter</div>
+                <ul class="pricing-features">
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        1 kit complet au choix
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Formats Word + Excel editables
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Guide d'utilisation inclus
+                    </li>
+                    <li class="disabled">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        Personnalisation avancee
+                    </li>
+                    <li class="disabled">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        Mises a jour gratuites
+                    </li>
+                </ul>
+                <a href="#" class="btn-pricing btn-pricing-outline">Choisir Starter</a>
+            </div>
+
+            <!-- Pro -->
+            <div class="pricing-card featured">
+                <div class="pricing-badge">Populaire</div>
+                <div class="pricing-tier">Pro</div>
+                <div class="pricing-price">39<span>.97$</span></div>
+                <div class="pricing-desc">3 kits — le meilleur rapport qualite-prix</div>
+                <ul class="pricing-features">
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        3 kits au choix
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Formats Word + Excel editables
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Guide d'utilisation inclus
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Bonus: checklist audit interne
+                    </li>
+                    <li class="disabled">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        Mises a jour gratuites
+                    </li>
+                </ul>
+                <a href="#" class="btn-pricing btn-pricing-gold">Choisir Pro</a>
+            </div>
+
+            <!-- Entreprise -->
+            <div class="pricing-card">
+                <div class="pricing-tier">Entreprise</div>
+                <div class="pricing-price">59<span>.97$</span></div>
+                <div class="pricing-desc">Tout inclus + personnalisation + mises a jour</div>
+                <ul class="pricing-features">
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Les 4 kits complets
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Formats Word + Excel editables
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Personnalisation avancee (logo, couleurs)
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Mises a jour gratuites a vie
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Support prioritaire par courriel
+                    </li>
+                </ul>
+                <a href="#" class="btn-pricing btn-pricing-outline">Choisir Entreprise</a>
+            </div>
+        </div>
+
+        <div class="guarantee-box">
+            <h3>Garantie satisfaction 30 jours</h3>
+            <p>Si les kits ne correspondent pas a vos attentes, on vous rembourse integralement. Aucune question posee. Votre conformite est notre priorite.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section id="faq" class="section">
+    <div class="container">
+        <div class="text-center">
+            <div class="section-label">FAQ</div>
+            <h2 class="section-title">Questions frequentes</h2>
+            <p class="section-subtitle">Tout ce que vous devez savoir avant de commander vos kits de formation.</p>
+        </div>
+        <div class="faq-list">
+            <div class="faq-item active">
+                <button class="faq-question">
+                    Les kits sont-ils conformes a la legislation quebecoise?
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 7l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">Oui. Tous nos templates sont conçus selon les exigences de la CNESST, de la Loi sur la sante et la securite du travail (LSST) et du Reglement sur la sante et la securite du travail (RSST). Ils sont revises regulierement pour refleter les changements legislatifs.</div>
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">
+                    Dans quels formats sont livres les documents?
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 7l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">Les documents sont livres en format Microsoft Word (.docx) et Excel (.xlsx), entierement editables. Vous pouvez les personnaliser avec votre logo, vos couleurs et vos informations d'entreprise. Des versions PDF sont aussi incluses pour l'impression directe.</div>
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">
+                    Est-ce adapte a mon secteur d'activite?
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 7l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">FormaPro est concu pour tous les secteurs d'activite au Quebec: construction, manufacturier, services, commerce, restauration, et plus. Les templates sont generiques par conception pour etre adaptables a votre realite specifique. La formule Entreprise inclut une personnalisation plus poussee.</div>
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">
+                    Combien de temps faut-il pour mettre en place les kits?
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 7l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">En moyenne, 30 minutes suffisent pour personnaliser et deployer un kit complet. Le guide d'utilisation inclus vous accompagne etape par etape. Aucune expertise RH n'est requise — les documents sont prets a remplir avec des instructions claires.</div>
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">
+                    Puis-je obtenir un remboursement?
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 7l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">Absolument. Nous offrons une garantie satisfaction de 30 jours. Si les kits ne repondent pas a vos attentes, contactez-nous et nous vous remboursons integralement, sans poser de questions. Votre satisfaction est notre priorite.</div>
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">
+                    Les mises a jour legislatives sont-elles incluses?
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 7l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <div class="faq-answer-inner">Pour la formule Entreprise (59.97$), les mises a jour legislatives sont incluses a vie. Pour les formules Starter et Pro, vous recevrez une notification des changements importants et pourrez acheter la mise a jour a prix reduit.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== CTA FINAL ===== -->
+<section class="section" style="padding-bottom: 40px;">
+    <div class="container text-center">
+        <div class="section-label">Pret a agir?</div>
+        <h2 class="section-title">Ne risquez plus l'amende.<br><span class="text-gold">Formez. Documentez. Protegez.</span></h2>
+        <p class="section-subtitle">Rejoignez les employeurs quebecois qui prennent la conformite au serieux.</p>
+        <a href="#tarifs" class="btn-primary" style="margin-top: 8px;">
+            Voir les kits maintenant
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9h10M10 5l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+    </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <h3>FormaPro</h3>
+                <p>Kits de formation professionnels pour employeurs quebecois. Conformite, onboarding, evaluations — tout ce qu'il faut pour etre en regle.</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-col">
+                    <h4>Produits</h4>
+                    <ul>
+                        <li><a href="#produits">Kit Onboarding</a></li>
+                        <li><a href="#produits">Evaluations</a></li>
+                        <li><a href="#produits">Registres SIMDUT/TMD</a></li>
+                        <li><a href="#produits">Fiches de poste</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#faq">FAQ</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Politique de remboursement</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>&copy; 2026 Jonathan Milone. Tous droits reserves.</span>
+            <span>Concu au Quebec avec rigueur.</span>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // FAQ Accordion
+    document.querySelectorAll('.faq-question').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const item = btn.parentElement;
+            const wasActive = item.classList.contains('active');
+            // Close all
+            document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+            // Toggle clicked
+            if (!wasActive) item.classList.add('active');
+        });
+    });
+
+    // Nav shrink on scroll
+    let lastScroll = 0;
+    window.addEventListener('scroll', () => {
+        const nav = document.querySelector('nav');
+        if (window.scrollY > 80) {
+            nav.style.padding = '10px 0';
+        } else {
+            nav.style.padding = '16px 0';
+        }
+    }, { passive: true });
+
+    // Smooth reveal on scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, { threshold: 0.1 });
+
+    // Close mobile nav on link click
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', () => {
+            var nl = document.querySelector('.nav-links'); if(nl) nl.classList.remove('open');
+        });
+    });
+
+    document.querySelectorAll('.product-card, .pricing-card, .step, .stat-item, .faq-item').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(24px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+    });
+</script>
+
+</body>
+</html>

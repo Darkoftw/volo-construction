@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="view-transition" content="same-origin">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0C0608">
 <title>VOLO SST — Plan de Travail en Sauvetage</title>
@@ -13,57 +14,81 @@
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
 --bg:#0C0608;--card:rgba(28,16,18,.90);--card2:rgba(38,22,26,.94);--cardSolid:#1C1012;
---gold:#D4A017;--goldL:#E8C547;
---rescue:#E65100;--rescueL:#FF6D00;--rescueD:#BF360C;--rescueGlow:rgba(230,81,0,.15);
+--gold:#C9A84C;--goldL:#E8C84A;
+--rescue:#D4650E;--rescueL:#E8873A;--rescueD:#A84E0B;--rescueGlow:rgba(201,168,76,.12);
 --red:#C0392B;--green:#27AE60;--orange:#E67E22;
 --txt:#F5F0EB;--muted:#C9BAA9;--border:rgba(68,40,46,.55);--blue:#3B82F6;
---glow:0 0 30px rgba(230,81,0,.08);
+--glow:0 0 30px rgba(201,168,76,.08);
 --radius:14px;--radius-sm:10px;--radius-lg:18px;
 }
 body.light{
 --bg:#F8FAFC;--card:rgba(255,255,255,.96);--card2:rgba(241,245,249,.98);--cardSolid:#fff;
---gold:#C2410C;--goldL:#EA580C;
---rescue:#E65100;--rescueL:#EA580C;--rescueD:#BF360C;--rescueGlow:rgba(230,81,0,.09);
+--gold:#C9A84C;--goldL:#E8C84A;
+--rescue:#D4650E;--rescueL:#E8873A;--rescueD:#A84E0B;--rescueGlow:rgba(201,168,76,.09);
 --txt:#0F172A;--muted:#64748B;--border:rgba(203,213,225,.9);
 }
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;transition:background .22s,color .15s}
+@view-transition{navigation:auto}
+/* -- View Transitions -- */
+@keyframes vt-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes vt-fade-out{from{opacity:1}to{opacity:0}}
+@keyframes vt-slide-from-right{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes vt-slide-to-left{from{transform:translateX(0);opacity:1}to{transform:translateX(-30px);opacity:0}}
+@keyframes vt-slide-from-left{from{transform:translateX(-30px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes vt-slide-to-right{from{transform:translateX(0);opacity:1}to{transform:translateX(30px);opacity:0}}
+
+::view-transition-old(root){animation:.25s ease-out both vt-fade-out}
+::view-transition-new(root){animation:.25s ease-out both vt-fade-in}
+
+::view-transition-old(page-content){animation:.3s ease-out both vt-slide-to-left}
+::view-transition-new(page-content){animation:.3s ease-in both vt-slide-from-right}
+
+.header{view-transition-name:main-header}
+::view-transition-old(main-header){animation:.2s ease-out both vt-fade-out}
+::view-transition-new(main-header){animation:.2s ease-in both vt-fade-in}
+
+@media(prefers-reduced-motion:reduce){
+  ::view-transition-old(root),::view-transition-new(root),
+  ::view-transition-old(page-content),::view-transition-new(page-content),
+  ::view-transition-old(main-header),::view-transition-new(main-header){animation-duration:.01s}
+}
 body::before{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.025'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.6}
 .app{max-width:480px;margin:0 auto;min-height:100vh;position:relative;z-index:1}
-.gold-bar{height:4px;background:linear-gradient(90deg,var(--rescueD),var(--rescue),var(--rescueL),var(--rescue),var(--rescueD));background-size:300% 100%;animation:shimmer 4s ease infinite}
+.gold-bar{height:4px;background:linear-gradient(90deg,#8A7530,var(--gold),var(--goldL),var(--gold),#8A7530);background-size:300% 100%;animation:shimmer 4s ease infinite}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 @keyframes fadeSlide{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(230,81,0,.4)}50%{box-shadow:0 0 20px 10px rgba(230,81,0,.1)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.4)}50%{box-shadow:0 0 20px 10px rgba(201,168,76,.1)}}
 @keyframes recording{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(192,57,43,.6)}50%{transform:scale(1.08);box-shadow:0 0 20px 8px rgba(192,57,43,.2)}}
 .header{display:flex;align-items:center;justify-content:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);backdrop-filter:blur(16px);position:sticky;top:0;z-index:50;background:rgba(12,6,8,.94)}
-.header .title{font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:3px;color:var(--rescue)}
+.header .title{font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:3px;color:var(--gold)}
 .header .step-label{font-size:12px;color:var(--muted);letter-spacing:1px}
 .screen{padding:20px;min-height:calc(100vh - 76px);animation:fadeSlide .4s cubic-bezier(.22,1,.36,1)}
-h2{font-family:'Oswald',sans-serif;font-size:22px;letter-spacing:3px;color:var(--rescue);margin-bottom:14px;text-align:center}
+h2{font-family:'Oswald',sans-serif;font-size:22px;letter-spacing:3px;color:var(--gold);margin-bottom:14px;text-align:center}
 h3{font-family:'Oswald',sans-serif;font-size:15px;letter-spacing:2px;color:var(--goldL);margin-bottom:10px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;transition:all .3s,background .22s,border .22s;backdrop-filter:blur(12px)}
 .theme-pill{position:fixed;bottom:20px;right:16px;z-index:999;display:flex;gap:4px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:4px;backdrop-filter:blur(16px);box-shadow:0 4px 16px rgba(0,0,0,.3)}
 .theme-pill button{padding:6px 10px;border:none;border-radius:16px;cursor:pointer;font-size:14px;background:transparent;transition:background .2s}
-.theme-pill button.active{background:var(--rescueGlow);}
+.theme-pill button.active{background:rgba(201,168,76,.12);}
 .card.selected{border-color:var(--green);background:var(--card2)}
 .btn{width:100%;padding:14px;border:none;border-radius:var(--radius);font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;transition:all .25s;font-weight:600}
-.btn-gold{background:linear-gradient(135deg,var(--rescue),var(--rescueD));color:#fff;box-shadow:0 4px 16px rgba(230,81,0,.2)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#8A7530);color:#fff;box-shadow:0 4px 16px rgba(201,168,76,.25)}
 .btn-green{background:linear-gradient(135deg,#2ecc71,#1a8a47);color:#fff}
 .btn-blue{background:linear-gradient(135deg,#3B82F6,#2563EB);color:#fff}
-.btn-outline{background:transparent;border:1px dashed var(--rescue);color:var(--rescue);padding:12px;font-size:14px}
-.btn-outline:hover{background:var(--rescueGlow);border-style:solid}
+.btn-outline{background:transparent;border:1px dashed var(--gold);color:var(--gold);padding:12px;font-size:14px}
+.btn-outline:hover{background:rgba(201,168,76,.1);border-style:solid}
 .btn:active{transform:scale(.97);transition-duration:.1s}
 .btn-nav{display:flex;gap:10px;margin-top:16px}
 .btn-nav .btn{flex:1}
 .form-group{margin-bottom:14px}
 .form-label{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;color:var(--gold);margin-bottom:6px;display:block}
 .form-input{width:100%;padding:12px 14px;background:var(--cardSolid);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--txt);font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border .2s}
-.form-input:focus{border-color:var(--rescue)}
+.form-input:focus{border-color:var(--gold)}
 .form-input::placeholder{color:rgba(184,169,154,.5)}
-select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23D4A017' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23C9A84C' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
 textarea.form-input{resize:vertical;min-height:80px;font-size:13px;line-height:1.5}
 .toggle-row{display:flex;gap:10px;margin-bottom:12px}
 .toggle-btn{flex:1;padding:12px;border-radius:var(--radius-sm);text-align:center;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;border:2px solid var(--border);background:var(--card);color:var(--muted);transition:all .25s}
-.toggle-btn.active{border-color:var(--rescue);color:var(--rescue);background:var(--rescueGlow)}
+.toggle-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.1)}
 .check-grid{display:grid;grid-template-columns:1fr;gap:6px}
 .check-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .2s;font-size:13px}
 .check-item.checked{border-color:var(--green);background:rgba(39,174,96,.08)}
@@ -72,7 +97,7 @@ textarea.form-input{resize:vertical;min-height:80px;font-size:13px;line-height:1
 .progress-bar{display:flex;gap:4px;padding:0 20px 12px}
 .progress-dot{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .3s}
 .progress-dot.done{background:var(--green)}
-.progress-dot.current{background:var(--rescue)}
+.progress-dot.current{background:var(--gold)}
 .section-sep{border:none;border-top:1px dashed var(--border);margin:16px 0}
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100%);padding:12px 24px;border-radius:14px;font-size:14px;font-weight:600;z-index:9999;pointer-events:none;max-width:90%;text-align:center;animation:toastIn .4s forwards}
 @keyframes toastIn{from{transform:translateX(-50%) translateY(-100%)}to{transform:translateX(-50%) translateY(0)}}
@@ -88,9 +113,9 @@ textarea.form-input{resize:vertical;min-height:80px;font-size:13px;line-height:1
 .badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;letter-spacing:1px}
 .badge-green{background:rgba(39,174,96,.15);color:var(--green)}
 .badge-red{background:rgba(192,57,43,.15);color:var(--red)}
-.badge-gold{background:rgba(212,160,23,.15);color:var(--gold)}
+.badge-gold{background:rgba(201,168,76,.15);color:var(--gold)}
 .recap-section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px}
-.recap-section h4{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;color:var(--rescue);margin-bottom:8px}
+.recap-section h4{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;color:var(--gold);margin-bottom:8px}
 .recap-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid rgba(68,40,46,.3)}
 .recap-row:last-child{border:none}
 .recap-row .label{color:var(--muted)}
@@ -98,17 +123,17 @@ textarea.form-input{resize:vertical;min-height:80px;font-size:13px;line-height:1
 .na-toggle{display:flex;gap:8px;margin-bottom:8px}
 .na-toggle button{padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1px;cursor:pointer;transition:all .2s}
 .na-toggle button.active-na{border-color:var(--muted);background:rgba(184,169,154,.1);color:var(--txt)}
-.na-toggle button.active-oui{border-color:var(--rescue);background:var(--rescueGlow);color:var(--rescue)}
+.na-toggle button.active-oui{border-color:var(--gold);background:rgba(201,168,76,.1);color:var(--gold)}
 .zone-card{background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px}
 .pin-overlay{position:fixed;inset:0;background:rgba(12,6,8,.95);z-index:100;display:flex;align-items:center;justify-content:center}
 .pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:240px;margin:0 auto}
 .pin-key{padding:16px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-family:'Oswald',sans-serif;font-size:22px;text-align:center;cursor:pointer;transition:all .2s}
-.pin-key:active{background:var(--rescueGlow);border-color:var(--rescue)}
+.pin-key:active{background:rgba(201,168,76,.1);border-color:var(--gold)}
 .weather-chips{display:flex;flex-wrap:wrap;gap:6px}
 .weather-chip{padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:12px;cursor:pointer;transition:all .2s}
 .weather-chip.active{border-color:var(--blue);background:rgba(59,130,246,.1);color:var(--blue)}
 .equipe-slot{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px}
-.equipe-slot .poste{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:2px;color:var(--rescue);margin-bottom:6px}
+.equipe-slot .poste{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:2px;color:var(--gold);margin-bottom:6px}
 
 /* ===== DICTATION OVERLAY ===== */
 .dictee-overlay{position:fixed;inset:0;background:rgba(12,6,8,.97);z-index:200;display:flex;flex-direction:column;overflow-y:auto}
@@ -133,45 +158,119 @@ textarea.form-input{resize:vertical;min-height:80px;font-size:13px;line-height:1
 .dictee-actions button{flex:1;padding:14px;border-radius:var(--radius);font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:1px;cursor:pointer;border:none;transition:all .2s}
 .dictee-nav-prev{background:var(--card);color:var(--muted);border:1px solid var(--border)!important}
 .dictee-nav-next{background:var(--blue);color:#fff}
-.dictee-nav-next.finish{background:var(--rescue)}
+.dictee-nav-next.finish{background:var(--gold)}
 .dictee-loading{text-align:center;padding:40px 20px}
 .dictee-loading .spinner{width:50px;height:50px;border:4px solid var(--border);border-top:4px solid var(--blue);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .dictee-review{padding:16px}
 .dictee-review-section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px}
-.dictee-review-section h4{font-family:'Oswald',sans-serif;font-size:13px;color:var(--rescue);letter-spacing:1px;margin-bottom:8px}
+.dictee-review-section h4{font-family:'Oswald',sans-serif;font-size:13px;color:var(--gold);letter-spacing:1px;margin-bottom:8px}
 .dictee-review-field{display:flex;justify-content:space-between;align-items:flex-start;padding:4px 0;font-size:12px;border-bottom:1px solid rgba(68,40,46,.3)}
 .dictee-review-field:last-child{border-bottom:none}
 .dictee-review-field .label{color:var(--muted);width:35%;flex-shrink:0}
 .dictee-review-field .value{color:var(--txt);text-align:right}
 .pt-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
 .pt-modal{background:#1C1012;border:1px solid var(--border);border-radius:14px;padding:24px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-.pt-modal h3{font-family:'Oswald',sans-serif;letter-spacing:2px;margin-bottom:12px;color:var(--rescue);font-size:16px}
+.pt-modal h3{font-family:'Oswald',sans-serif;letter-spacing:2px;margin-bottom:12px;color:var(--gold);font-size:16px}
 .pt-modal textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:rgba(12,6,8,.6);color:var(--txt);font-family:'Inter',sans-serif;font-size:13px;resize:vertical;margin-bottom:14px}
 .pt-modal .pt-modal-btns{display:flex;gap:10px}
 .pt-modal .pt-modal-btns button{flex:1;padding:12px;border-radius:10px;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:1px;cursor:pointer;border:1px solid var(--border);transition:all .2s}
+/* === MOBILE 480px FINE-TUNING === */
+@media(max-width:480px){
+  .app{overflow-x:hidden;}
+  .screen{padding:14px 12px calc(20px + env(safe-area-inset-bottom,0px));}
+  .theme-pill{bottom:calc(20px + env(safe-area-inset-bottom,0px));right:10px;}
+  .toast{max-width:92vw;font-size:13px;padding:10px 16px;}
+  .header{padding:10px 14px;gap:8px;}
+  .header .title{font-size:14px;letter-spacing:2px;}
+  .header .step-label{font-size:11px;}
+  h2{font-size:18px;letter-spacing:2px;margin-bottom:10px;}
+  h3{font-size:13px;margin-bottom:8px;}
+  .card{padding:12px;margin-bottom:8px;}
+  .btn{padding:12px;font-size:14px;}
+  .btn-nav{gap:8px;margin-top:12px;}
+  .btn-nav .btn{font-size:13px;padding:11px 6px;}
+  .form-input{padding:10px 12px;font-size:13px;}
+  select.form-input{padding-right:28px;}
+  textarea.form-input{min-height:70px;font-size:12px;}
+  .form-label{font-size:11px;margin-bottom:4px;}
+  .toggle-row{gap:6px;margin-bottom:10px;}
+  .toggle-btn{padding:10px 6px;font-size:12px;letter-spacing:1px;}
+  .check-item{padding:8px 10px;font-size:12px;gap:8px;}
+  .check-item .box{width:18px;height:18px;}
+  .progress-bar{padding:0 14px 10px;}
+  .recap-section{padding:12px;}
+  .recap-section h4{font-size:12px;}
+  .recap-row{font-size:11px;}
+  .recap-row .value{max-width:55%;}
+  .na-toggle button{padding:6px 12px;font-size:11px;}
+  .zone-card{padding:10px;}
+  .pin-pad{max-width:220px;gap:8px;}
+  .pin-key{padding:14px;font-size:20px;}
+  .equipe-slot{padding:10px;}
+  .equipe-slot .poste{font-size:10px;}
+  .weather-chips{gap:4px;}
+  .weather-chip{padding:5px 10px;font-size:11px;}
+  .mic-btn{padding:6px 12px;font-size:11px;}
+  .dictee-mic-btn{width:70px;height:70px;font-size:28px;}
+  .dictee-prompt .dp-title{font-size:16px;}
+  .dictee-prompt .dp-hint{font-size:11px;}
+  .dictee-prompt .dp-example{font-size:10px;}
+  .dictee-transcript{padding:12px;font-size:12px;max-height:160px;}
+  .dictee-actions button{padding:12px;font-size:13px;}
+  .dictee-header{padding:12px 14px;}
+  .dictee-review-section{padding:12px;}
+  .dictee-review-field{font-size:11px;}
+  .dictee-review-field .label{width:40%;}
+  .pt-modal{padding:20px;max-width:calc(100vw - 32px);}
+  .pt-modal .pt-modal-btns button{padding:10px;font-size:13px;}
+  .badge{font-size:9px;padding:2px 6px;}
+  body{padding-bottom:env(safe-area-inset-bottom,0px);}
+}
+@supports(padding-bottom:env(safe-area-inset-bottom)){
+  .theme-pill{padding-bottom:env(safe-area-inset-bottom,0px);}
+  .screen{padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));}
+}
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="error-monitor.js"></script>
-<script src="data-inventory.js?v=19"></script>
-<script src="data-personnel-stub.js?v=19"></script>
+<script src="data.js?v=20"></script>
 <script src="firebase-config.js"></script>
 <script src="firebase-service.js"></script>
 <script src="volo-network.js"></script>
 <script src="logo.js"></script>
+<script src="king-logo.js"></script>
 </head>
 <body>
 <div id="pickOnActiveBanner"></div>
 <script>
-(function(){try{var h=JSON.parse(localStorage.getItem('volo_history')||'[]'),closed=new Set();h.forEach(function(tx){if(tx.statut==='ANNULÉ'||tx.statut==='RETOURNÉ')closed.add((tx.original_timestamp||tx.timestamp)+tx.sauveteur_id)});var active=h.filter(function(tx){return tx.statut==='ACTIF'&&tx.mode==='PICK-ON'&&!closed.has(tx.timestamp+tx.sauveteur_id)});if(active.length===0)return;var totalItems=active.reduce(function(n,tx){try{return n+JSON.parse(tx.items||'[]').length}catch(e){return n}},0);document.getElementById('pickOnActiveBanner').innerHTML='<div onclick="window.location.href=\'index.html\'" style="position:sticky;top:0;z-index:9999;padding:10px 16px;background:linear-gradient(135deg,rgba(230,81,0,.95),rgba(192,57,43,.9));color:#fff;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:2px solid #E65100"><span style="font-size:20px">⚠️</span><div style="flex:1"><div style="font-weight:800;font-size:13px;letter-spacing:1px;font-family:Oswald,sans-serif">PICK ON ACTIF — '+totalItems+' item'+(totalItems>1?'s':'')+' sorti'+(totalItems>1?'s':'')+'</div><div style="font-size:10px;opacity:.85">Toucher pour retourner au Pick-Off</div></div><span style="font-size:16px">→</span></div>';}catch(e){}})();
+(function(){try{var h=JSON.parse(localStorage.getItem('volo_history')||'[]'),closed=new Set();h.forEach(function(tx){if(tx.statut==='ANNULÉ'||tx.statut==='RETOURNÉ')closed.add((tx.original_timestamp||tx.timestamp)+tx.sauveteur_id)});var active=h.filter(function(tx){return tx.statut==='ACTIF'&&tx.mode==='PICK-ON'&&!closed.has(tx.timestamp+tx.sauveteur_id)});if(active.length===0)return;var totalItems=active.reduce(function(n,tx){try{return n+JSON.parse(tx.items||'[]').length}catch(e){return n}},0);document.getElementById('pickOnActiveBanner').innerHTML='<div onclick="window.location.href=\'index.html\'" style="position:sticky;top:0;z-index:9999;padding:10px 16px;background:linear-gradient(135deg,rgba(201,168,76,.95),rgba(138,117,48,.9));color:#fff;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:2px solid #C9A84C"><span style="font-size:20px;font-weight:bold">!</span><div style="flex:1"><div style="font-weight:800;font-size:13px;letter-spacing:1px;font-family:Oswald,sans-serif">PICK ON ACTIF — '+totalItems+' item'+(totalItems>1?'s':'')+' sorti'+(totalItems>1?'s':'')+'</div><div style="font-size:10px;opacity:.85">Toucher pour retourner au Pick-Off</div></div><span style="font-size:16px">→</span></div>';}catch(e){}})();
+
+// -- View Transitions -- smooth navigation --
+(function(){
+  var mainContent = document.querySelector("#app") || document.querySelector(".screen") || document.querySelector("main") || document.body.firstElementChild;
+  if(mainContent) mainContent.style.viewTransitionName = "page-content";
+
+  document.addEventListener("click", function(e){
+    var link = e.target.closest("a[href]");
+    if(!link) return;
+    var href = link.getAttribute("href");
+    if(!href || href.startsWith("#") || href.startsWith("http") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
+    if(!document.startViewTransition) return;
+    e.preventDefault();
+    document.startViewTransition(function(){
+      window.location.href = href;
+    });
+  });
+})();
 </script>
 <div class="app">
 <div class="gold-bar"></div>
 <div class="header">
-  <img src="eagle_tactic.png" alt="🦅" style="width:36px;height:36px;border-radius:50%;border:2px solid rgba(212,160,23,.4);flex-shrink:0" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span style="font-size:28px;display:none">🦅</span>
+  <img src="eagle_tactic.png" alt="GE" style="width:36px;height:36px;border-radius:50%;border:2px solid rgba(201,168,76,.35);flex-shrink:0" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none';this.nextElementSibling.style.display='block'}"><span style="font-size:28px;display:none">GE</span>
   <div style="text-align:center">
-    <div class="title">📋 PLAN DE TRAVAIL</div>
+    <div class="title">PLAN DE TRAVAIL</div>
     <div class="step-label" id="stepLabel">SAUVETAGE TECHNIQUE</div>
   </div>
 </div>
@@ -182,8 +281,8 @@ textarea.form-input{resize:vertical;min-height:80px;font-size:13px;line-height:1
 <!-- PIN OVERLAY FOR CONFIRMATION -->
 <div id="pinOverlay" class="pin-overlay" style="display:none">
 <div style="max-width:340px;width:100%;padding:20px;text-align:center">
-  <img src="eagle_tactic.png" alt="Golden Eagles" style="width:80px;height:80px;margin:0 auto 12px;display:block;border-radius:50%;box-shadow:0 0 20px rgba(212,160,23,.3)">
-  <div style="font-family:Oswald;font-size:18px;letter-spacing:3px;color:var(--rescue);margin-bottom:4px">SIGNATURE DU CHEF</div>
+  <img src="eagle_tactic.png" alt="Golden Eagles" style="width:80px;height:80px;margin:0 auto 12px;display:block;border-radius:50%;border:2px solid rgba(201,168,76,.35);box-shadow:0 0 20px rgba(201,168,76,.3)" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none'}">
+  <div style="font-family:Oswald;font-size:18px;letter-spacing:3px;color:var(--gold);margin-bottom:4px">SIGNATURE DU CHEF</div>
   <div style="font-size:12px;color:var(--muted);margin-bottom:20px">Entrez le PIN du chef d'équipe pour confirmer</div>
   <div id="pinDots" style="display:flex;gap:10px;justify-content:center;margin-bottom:16px"></div>
   <div class="pin-pad" id="pinPad"></div>
@@ -196,18 +295,18 @@ textarea.form-input{resize:vertical;min-height:80px;font-size:13px;line-height:1
 
 <!-- THEME PILL -->
 <div class="theme-pill">
-  <button id="btn-dark" onclick="setTheme('dark')" title="Mode sombre">🌙</button>
-  <button id="btn-light" onclick="setTheme('light')" title="Mode clair">☀️</button>
+  <button id="btn-dark" onclick="setTheme('dark')" title="Mode sombre"></button>
+  <button id="btn-light" onclick="setTheme('light')" title="Mode clair"></button>
 </div>
 
 <!-- DICTEE OVERLAY -->
 <div id="dicteeOverlay" class="dictee-overlay" style="display:none">
   <div class="dictee-header">
     <div>
-      <div style="font-family:Oswald;font-size:14px;letter-spacing:2px;color:var(--blue)">🎙️ MODE DICTÉE</div>
+      <div style="font-family:Oswald;font-size:14px;letter-spacing:2px;color:var(--blue)">MODE DICTÉE</div>
       <div style="font-size:10px;color:var(--muted)" id="dicteeStepLabel">ÉTAPE 1/8</div>
     </div>
-    <button onclick="closeDicteeMode()" style="padding:6px 14px;border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:8px;cursor:pointer;font-size:12px">✕ Quitter</button>
+    <button onclick="closeDicteeMode()" style="padding:6px 14px;border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:8px;cursor:pointer;font-size:12px">X Quitter</button>
   </div>
   <div class="dictee-progress" id="dicteeProgress"></div>
   <div class="dictee-body" id="dicteeBody"></div>
@@ -822,13 +921,13 @@ function renderHome(){
   const todayPlans = plans.filter(p=>p.date===new Date().toISOString().slice(0,10));
   return `
     <div style="text-align:center;padding-top:20px">
-      <img src="eagle_tactic.png" alt="Golden Eagles" style="width:100px;height:100px;margin:0 auto 16px;display:block;border-radius:50%;box-shadow:0 0 20px rgba(212,160,23,.2)">
+      <img src="eagle_tactic.png" alt="Golden Eagles" style="width:100px;height:100px;margin:0 auto 16px;display:block;border-radius:50%;border:2px solid rgba(201,168,76,.35);box-shadow:0 0 20px rgba(201,168,76,.25)" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none'}">
       <h2 style="font-size:26px">PLAN DE TRAVAIL</h2>
       <p style="font-size:13px;color:var(--muted);letter-spacing:2px;margin-bottom:24px">SAUVETAGE TECHNIQUE — VOLO RESCUE</p>
-      ${currentUser?`<div style="font-size:12px;color:var(--blue);margin-bottom:20px">👤 ${currentUser.name} — ${currentUser.role}</div>`:''}
+      ${currentUser?`<div style="font-size:12px;color:var(--blue);margin-bottom:20px">UTILISATEUR: ${currentUser.name} — ${currentUser.role}</div>`:''}
       <div style="display:flex;gap:12px;margin-bottom:12px">
         <div style="flex:1;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center">
-          <div style="font-size:28px;font-weight:700;color:var(--rescue);font-family:Oswald">${todayPlans.length}</div>
+          <div style="font-size:28px;font-weight:700;color:var(--gold);font-family:Oswald">${todayPlans.length}</div>
           <div style="font-size:10px;color:var(--muted);letter-spacing:2px">AUJOURD'HUI</div>
         </div>
         <div style="flex:1;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center">
@@ -840,31 +939,31 @@ function renderHome(){
         ＋ NOUVEAU PLAN
       </button>
       <button class="btn btn-outline" onclick="startDicteeMode()" style="margin-top:10px;font-size:16px;padding:14px;border-color:var(--blue);color:var(--blue)">
-        🎙️ MODE DICTÉE GUIDÉE
+        MODE DICTÉE GUIDÉE
       </button>
       <div style="font-size:10px;color:var(--muted);margin-top:4px">VOLOSST FORMATION</div>
       ${todayPlans.length?`
         <div style="margin-top:20px;text-align:left">
-          <h3 style="text-align:center">📅 PLANS DU JOUR</h3>
+          <h3 style="text-align:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> PLANS DU JOUR</h3>
           ${todayPlans.map((p,i)=>`
             <div class="card" onclick="viewPlan(${plans.indexOf(p)})" style="cursor:pointer">
               <div style="display:flex;justify-content:space-between;align-items:center">
                 <div>
                   <div style="font-weight:700;font-size:14px">${p.cie||'—'}</div>
-                  <div style="font-size:12px;color:var(--muted)">${p.responsable} • ${Array.isArray(p.installationType)?p.installationType.join(' + '):p.installationType}</div>
+                  <div style="font-size:12px;color:var(--muted)">${p.responsable||''} • ${Array.isArray(p.installationType)?p.installationType.join(' + '):(p.installationType||'')}</div>
                 </div>
                 <div style="text-align:right">
-                  <div class="badge badge-green">✅ CONFIRMÉ</div>
+                  <div class="badge badge-green">CONFIRMÉ</div>
                   <div style="font-size:10px;color:var(--muted);margin-top:2px">${p.timestamp?p.timestamp.split(' ')[1]:''}</div>
                 </div>
               </div>
-              ${p.revisions.length?`<div style="font-size:10px;color:var(--orange);margin-top:4px">🔄 ${p.revisions.length} révision${p.revisions.length>1?'s':''}</div>`:''}
+              ${p.revisions&&p.revisions.length?`<div style="font-size:10px;color:var(--orange);margin-top:4px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> ${p.revisions.length} révision${p.revisions.length>1?'s':''}</div>`:''}
             </div>
           `).join('')}
         </div>
       `:''}
-      <button class="btn btn-outline" onclick="plan.step=8;render()" style="margin-top:16px">📜 HISTORIQUE (${plans.length})</button>
-      <button onclick="loadFullTestScenario()" style="margin-top:10px;padding:10px 20px;background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(124,58,237,.05));border:1px solid rgba(124,58,237,.4);border-radius:10px;color:rgba(180,130,255,1);font-size:12px;cursor:pointer;letter-spacing:1.5px;font-family:Oswald,sans-serif;display:block;width:100%">🧪 SITUATION TEST — PDF COMPLET</button>
+      <button class="btn btn-outline" onclick="plan.step=8;render()" style="margin-top:16px">HISTORIQUE (${plans.length})</button>
+      <button onclick="loadFullTestScenario()" style="margin-top:10px;padding:10px 20px;background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(124,58,237,.05));border:1px solid rgba(124,58,237,.4);border-radius:10px;color:rgba(180,130,255,1);font-size:12px;cursor:pointer;letter-spacing:1.5px;font-family:Oswald,sans-serif;display:block;width:100%"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v6l5 8a3 3 0 01-2.6 4.5H6.6A3 3 0 014 17l5-8V3z"/><line x1="9" y1="3" x2="15" y2="3"/></svg> SITUATION TEST — PDF COMPLET</button>
       <div style="margin-top:16px">
         <a href="#" onclick="event.preventDefault();if(currentUser)sessionStorage.setItem('volo_transfer_volo',currentUser.volo);window.open('index.html','_self')" style="color:var(--muted);font-size:12px;text-decoration:none">← Retour à l'inventaire</a>
       </div>
@@ -879,7 +978,7 @@ function renderStep1(){
     if(aChef&&!bChef)return -1; if(!aChef&&bChef)return 1; return a.name.localeCompare(b.name);
   });
   return `
-    <h2>📍 INFO MISSION</h2>
+    <h2>INFO MISSION</h2>
     <div class="form-group">
       <label class="form-label">DATE</label>
       <input type="date" class="form-input" value="${plan.date}" onchange="plan.date=this.value">
@@ -904,12 +1003,12 @@ function renderStep1(){
       <label class="form-label">RESPONSABLE ÉQUIPE DE SAUVETAGE</label>
       <select class="form-input" onchange="setResponsable(this.value)">
         <option value="">— Sélectionner —</option>
-        ${chefsFirst.map(p=>`<option value="${p.id}" ${plan.responsableId===p.id?'selected':''}>${p.name} ${p.role.includes('CHEF')?' ⭐':''}</option>`).join('')}
+        ${chefsFirst.map(p=>`<option value="${p.id}" ${plan.responsableId===p.id?'selected':''}>${p.name} ${p.role.includes('CHEF')?' <span style="color:#C9A84C;font-weight:700">CHEF</span>':''}</option>`).join('')}
       </select>
     </div>
     <div class="btn-nav">
-      <button class="btn btn-outline" onclick="plan.step=0;render()">◀ ACCUEIL</button>
-      <button class="btn btn-gold" onclick="validateStep1()">SUIVANT ▶</button>
+      <button class="btn btn-outline" onclick="plan.step=0;render()">&larr; ACCUEIL</button>
+      <button class="btn btn-gold" onclick="validateStep1()">SUIVANT &rarr;</button>
     </div>`;
 }
 
@@ -928,8 +1027,8 @@ function setResponsable(id){
 }
 
 function validateStep1(){
-  if(!plan.cie){ showToast('❌ Sélectionnez un site','err'); return; }
-  if(!plan.responsableId){ showToast('❌ Sélectionnez un responsable','err'); return; }
+  if(!plan.cie){ showToast(' Sélectionnez un site','err'); return; }
+  if(!plan.responsableId){ showToast(' Sélectionnez un responsable','err'); return; }
   plan.step=2; render();
 }
 
@@ -937,7 +1036,7 @@ function validateStep1(){
 function renderStep2(){
   const sauveteurs = PERSONNEL.filter(p=>p.type==='SAUVETEUR').sort((a,b)=>a.name.localeCompare(b.name));
   return `
-    <h2>👥 ÉQUIPE & RÔLES</h2>
+    <h2>ÉQUIPE ET RÔLES</h2>
     <p style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:14px">Assignez les sauveteurs à chaque poste</p>
     ${POSTES.map((poste,i)=>`
       <div class="equipe-slot">
@@ -950,8 +1049,8 @@ function renderStep2(){
       </div>
     `).join('')}
     <div class="btn-nav">
-      <button class="btn btn-outline" onclick="plan.step=1;render()">◀ RETOUR</button>
-      <button class="btn btn-gold" onclick="validateStep2()">SUIVANT ▶</button>
+      <button class="btn btn-outline" onclick="plan.step=1;render()">&larr; RETOUR</button>
+      <button class="btn btn-gold" onclick="validateStep2()">SUIVANT &rarr;</button>
     </div>`;
 }
 
@@ -967,20 +1066,20 @@ function getCertBadge(id){
 
 function validateStep2(){
   const assigned = plan.equipe.filter(e=>e.id).length;
-  if(assigned<2){ showToast('❌ Minimum 2 membres requis','err'); return; }
+  if(assigned<2){ showToast(' Minimum 2 membres requis','err'); return; }
   plan.step=3; render();
 }
 
 // ===== STEP 3 — ZONES À RISQUES =====
 function renderStep3(){
   return `
-    <h2>⚠️ ZONES À RISQUES</h2>
-    <h3>🟡 ZONE(S) À RISQUE (TRAVAIL)</h3>
+    <h2>ZONES A RISQUES</h2>
+    <h3>ZONE(S) À RISQUE (TRAVAIL)</h3>
     ${plan.zonesRisque.map((z,i)=>renderZoneCard(z,i,'risque')).join('')}
     <button class="btn btn-outline" style="margin-bottom:16px;font-size:12px;padding:10px" onclick="plan.zonesRisque.push({lieu:'',type:'',preventif:[],customPrev:[],autre:''});render()">＋ Ajouter une zone à risque</button>
     
     <hr class="section-sep">
-    <h3>🔴 ZONE(S) DE CHUTE / ROUGE</h3>
+    <h3>ZONE(S) DE CHUTE / ROUGE</h3>
     ${plan.zonesChute.map((z,i)=>renderZoneCard(z,i,'chute')).join('')}
     <button class="btn btn-outline" style="margin-bottom:16px;font-size:12px;padding:10px" onclick="plan.zonesChute.push({lieu:'',type:'',preventif:[],customPrev:[],autre:''});render()">＋ Ajouter une zone de chute</button>
     
@@ -989,8 +1088,8 @@ function renderStep3(){
     ${renderEagleAssistBtn(3)}
     <div id="eagleAssist3" style="margin-bottom:10px"></div>
     <div class="btn-nav">
-      <button class="btn btn-outline" onclick="plan.step=2;render()">◀ RETOUR</button>
-      <button class="btn btn-gold" onclick="plan.step=4;render()">SUIVANT ▶</button>
+      <button class="btn btn-outline" onclick="plan.step=2;render()">&larr; RETOUR</button>
+      <button class="btn btn-gold" onclick="plan.step=4;render()">SUIVANT &rarr;</button>
     </div>`;
 }
 
@@ -1001,7 +1100,7 @@ function renderZoneCard(zone, idx, type){
     <div class="zone-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <div style="font-size:11px;color:var(--muted);letter-spacing:1px">ZONE ${idx+1}</div>
-        ${idx>0?`<button onclick="plan.${prefix}.splice(${idx},1);render()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px">✕ Supprimer</button>`:''}
+        ${idx>0?`<button onclick="plan.${prefix}.splice(${idx},1);render()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px">X Supprimer</button>`:''}
       </div>
       <div class="form-group" style="margin-bottom:8px">
         <input type="text" class="form-input" placeholder="Lieu (ex: Silo 3)" value="${zone.lieu}" oninput="plan.${prefix}[${idx}].lieu=this.value" style="font-size:13px">
@@ -1016,21 +1115,21 @@ function renderZoneCard(zone, idx, type){
       <div class="check-grid">
         ${preventifOptions.map(opt=>`
           <div class="check-item ${zone.preventif.includes(opt)?'checked':''}" onclick="toggleZonePrev('${prefix}',${idx},'${opt}')">
-            <div class="box">${zone.preventif.includes(opt)?'✓':''}</div>
+            <div class="box">${zone.preventif.includes(opt)?'<span style="color:#22C55E;font-weight:700">V</span>':''}</div>
             <span>${opt}</span>
           </div>
         `).join('')}
         ${(zone.customPrev||[]).map(opt=>`
           <div class="check-item checked" style="border-color:var(--gold)">
-            <div class="box" style="border-color:var(--gold);background:var(--gold);color:#000">✓</div>
+            <div class="box" style="border-color:var(--gold);background:var(--gold);color:#000">&check;</div>
             <span>${opt}</span>
-            <button onclick="removeCustomPrev('${prefix}',${idx},'${escQuote(opt)}')" style="margin-left:auto;background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px">✕</button>
+            <button onclick="removeCustomPrev('${prefix}',${idx},'${escQuote(opt)}')" style="margin-left:auto;background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px">X</button>
           </div>
         `).join('')}
       </div>
       <div style="display:flex;gap:6px;margin-top:6px">
         <input type="text" class="form-input" id="autre_${prefix}_${idx}" style="font-size:12px;flex:1" placeholder="Autre moyen préventif..." onkeydown="if(event.key==='Enter'){addCustomPrev('${prefix}',${idx});event.preventDefault()}">
-        <button onclick="addCustomPrev('${prefix}',${idx})" style="padding:8px 14px;background:var(--rescue);border:none;border-radius:8px;color:#fff;font-family:Oswald;font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap">＋ AJOUTER</button>
+        <button onclick="addCustomPrev('${prefix}',${idx})" style="padding:8px 14px;background:var(--gold);border:none;border-radius:8px;color:#fff;font-family:Oswald;font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap">＋ AJOUTER</button>
       </div>
     </div>`;
 }
@@ -1045,14 +1144,14 @@ function toggleZonePrev(prefix, idx, opt){
 function addCustomPrev(prefix, idx){
   const input = document.getElementById('autre_'+prefix+'_'+idx);
   const val = (input?.value||'').trim();
-  if(!val){ showToast('❌ Entrez un moyen préventif','err'); return; }
+  if(!val){ showToast(' Entrez un moyen préventif','err'); return; }
   if(!plan[prefix][idx].customPrev) plan[prefix][idx].customPrev = [];
   if(plan[prefix][idx].customPrev.includes(val)||plan[prefix][idx].preventif.includes(val)){
-    showToast('⚠️ Déjà ajouté','err'); return;
+    showToast(' Déjà ajouté','err'); return;
   }
   plan[prefix][idx].customPrev.push(val);
   render(true);
-  showToast('✅ Moyen ajouté: '+val,'ok');
+  showToast(' Moyen ajouté: '+val,'ok');
 }
 
 function removeCustomPrev(prefix, idx, opt){
@@ -1071,14 +1170,14 @@ function toggleAncrageRisque(val){
 function addAncrageCustom(){
   const input = document.getElementById('ancrage_custom');
   const val = (input?.value||'').trim();
-  if(!val){ showToast('❌ Entrez un risque','err'); return; }
+  if(!val){ showToast(' Entrez un risque','err'); return; }
   if(!plan.securiteAncrages.customRisques) plan.securiteAncrages.customRisques = [];
   if(plan.securiteAncrages.customRisques.includes(val)||plan.securiteAncrages.risques.includes(val)){
-    showToast('⚠️ Déjà ajouté','err'); return;
+    showToast(' Déjà ajouté','err'); return;
   }
   plan.securiteAncrages.customRisques.push(val);
   render(true);
-  showToast('✅ Risque ajouté','ok');
+  showToast(' Risque ajouté','ok');
 }
 function removeAncrageCustom(val){
   if(!plan.securiteAncrages.customRisques) return;
@@ -1089,78 +1188,78 @@ function removeAncrageCustom(val){
 // ===== STEP 4 — EPI, PERMIS, ÉQUIPEMENTS =====
 function renderStep4(){
   return `
-    <h2>🦺 EPI & ÉQUIPEMENTS</h2>
+    <h2><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> EPI & ÉQUIPEMENTS</h2>
     
-    <h3>🛡️ ÉQUIPEMENTS DE PROTECTION (EPI)</h3>
+    <h3>ÉQUIPEMENTS DE PROTECTION (EPI)</h3>
     <div class="check-grid" style="margin-bottom:8px">
       ${EPI_LIST.map(item=>`
         <div class="check-item ${plan.epi.includes(item)?'checked':''}" onclick="toggleArr('epi','${escQuote(item)}')">
-          <div class="box">${plan.epi.includes(item)?'✓':''}</div>
+          <div class="box">${plan.epi.includes(item)?'<span style="color:#22C55E;font-weight:700">V</span>':''}</div>
           <span>${item}</span>
         </div>
       `).join('')}
       ${(plan.epiCustom||[]).map(item=>`
         <div class="check-item checked" style="border-color:var(--gold)">
-          <div class="box" style="border-color:var(--gold);background:var(--gold);color:#000">✓</div>
+          <div class="box" style="border-color:var(--gold);background:var(--gold);color:#000">&check;</div>
           <span>${item}</span>
-          <button onclick="removeCustomItem('epiCustom','${escQuote(item)}')" style="margin-left:auto;background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px">✕</button>
+          <button onclick="removeCustomItem('epiCustom','${escQuote(item)}')" style="margin-left:auto;background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px">X</button>
         </div>
       `).join('')}
     </div>
     <div style="display:flex;gap:6px;margin-bottom:16px">
       <input type="text" class="form-input" id="custom_epi" style="font-size:12px;flex:1" placeholder="Autre EPI..." onkeydown="if(event.key==='Enter'){addCustomItem('epiCustom','custom_epi');event.preventDefault()}">
-      <button onclick="addCustomItem('epiCustom','custom_epi')" style="padding:8px 14px;background:var(--rescue);border:none;border-radius:8px;color:#fff;font-family:Oswald;font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap">＋ AJOUTER</button>
+      <button onclick="addCustomItem('epiCustom','custom_epi')" style="padding:8px 14px;background:var(--gold);border:none;border-radius:8px;color:#fff;font-family:Oswald;font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap">＋ AJOUTER</button>
     </div>
     
     <hr class="section-sep">
-    <h3>📜 PERMIS REQUIS</h3>
+    <h3>PERMIS REQUIS</h3>
     <div class="check-grid" style="margin-bottom:8px">
       ${PERMIS_LIST.map(item=>`
         <div class="check-item ${plan.permis.includes(item)?'checked':''}" onclick="toggleArr('permis','${escQuote(item)}')">
-          <div class="box">${plan.permis.includes(item)?'✓':''}</div>
+          <div class="box">${plan.permis.includes(item)?'<span style="color:#22C55E;font-weight:700">V</span>':''}</div>
           <span>${item}</span>
         </div>
       `).join('')}
       ${(plan.permisCustom||[]).map(item=>`
         <div class="check-item checked" style="border-color:var(--gold)">
-          <div class="box" style="border-color:var(--gold);background:var(--gold);color:#000">✓</div>
+          <div class="box" style="border-color:var(--gold);background:var(--gold);color:#000">&check;</div>
           <span>${item}</span>
-          <button onclick="removeCustomItem('permisCustom','${escQuote(item)}')" style="margin-left:auto;background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px">✕</button>
+          <button onclick="removeCustomItem('permisCustom','${escQuote(item)}')" style="margin-left:auto;background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px">X</button>
         </div>
       `).join('')}
     </div>
     <div style="display:flex;gap:6px;margin-bottom:16px">
       <input type="text" class="form-input" id="custom_permis" style="font-size:12px;flex:1" placeholder="Autre permis..." onkeydown="if(event.key==='Enter'){addCustomItem('permisCustom','custom_permis');event.preventDefault()}">
-      <button onclick="addCustomItem('permisCustom','custom_permis')" style="padding:8px 14px;background:var(--rescue);border:none;border-radius:8px;color:#fff;font-family:Oswald;font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap">＋ AJOUTER</button>
+      <button onclick="addCustomItem('permisCustom','custom_permis')" style="padding:8px 14px;background:var(--gold);border:none;border-radius:8px;color:#fff;font-family:Oswald;font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap">＋ AJOUTER</button>
     </div>
     
     <hr class="section-sep">
-    <h3>🔧 ÉQUIPEMENTS TECHNIQUES</h3>
+    <h3>ÉQUIPEMENTS TECHNIQUES</h3>
     <div class="check-grid" style="margin-bottom:8px">
       ${EQUIP_LIST.map(item=>`
         <div class="check-item ${plan.equipements.includes(item)?'checked':''}" onclick="toggleArr('equipements','${escQuote(item)}')">
-          <div class="box">${plan.equipements.includes(item)?'✓':''}</div>
+          <div class="box">${plan.equipements.includes(item)?'<span style="color:#22C55E;font-weight:700">V</span>':''}</div>
           <span>${item}</span>
         </div>
       `).join('')}
       ${(plan.equipementsCustom||[]).map(item=>`
         <div class="check-item checked" style="border-color:var(--gold)">
-          <div class="box" style="border-color:var(--gold);background:var(--gold);color:#000">✓</div>
+          <div class="box" style="border-color:var(--gold);background:var(--gold);color:#000">&check;</div>
           <span>${item}</span>
-          <button onclick="removeCustomItem('equipementsCustom','${escQuote(item)}')" style="margin-left:auto;background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px">✕</button>
+          <button onclick="removeCustomItem('equipementsCustom','${escQuote(item)}')" style="margin-left:auto;background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px">X</button>
         </div>
       `).join('')}
     </div>
     <div style="display:flex;gap:6px;margin-bottom:12px">
       <input type="text" class="form-input" id="custom_equip" style="font-size:12px;flex:1" placeholder="Autre équipement..." onkeydown="if(event.key==='Enter'){addCustomItem('equipementsCustom','custom_equip');event.preventDefault()}">
-      <button onclick="addCustomItem('equipementsCustom','custom_equip')" style="padding:8px 14px;background:var(--rescue);border:none;border-radius:8px;color:#fff;font-family:Oswald;font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap">＋ AJOUTER</button>
+      <button onclick="addCustomItem('equipementsCustom','custom_equip')" style="padding:8px 14px;background:var(--gold);border:none;border-radius:8px;color:#fff;font-family:Oswald;font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap">＋ AJOUTER</button>
     </div>
     
     ${renderEagleAssistBtn(4)}
     <div id="eagleAssist4" style="margin-bottom:10px"></div>
     <div class="btn-nav">
-      <button class="btn btn-outline" onclick="plan.step=3;render()">◀ RETOUR</button>
-      <button class="btn btn-gold" onclick="validateStep4()">SUIVANT ▶</button>
+      <button class="btn btn-outline" onclick="plan.step=3;render()">&larr; RETOUR</button>
+      <button class="btn btn-gold" onclick="validateStep4()">SUIVANT &rarr;</button>
     </div>`;
 }
 
@@ -1173,16 +1272,16 @@ function toggleArr(key, val){
 function addCustomItem(customKey, inputId){
   const input = document.getElementById(inputId);
   const val = (input?.value||'').trim();
-  if(!val){ showToast('❌ Entrez une valeur','err'); return; }
+  if(!val){ showToast(' Entrez une valeur','err'); return; }
   if(!plan[customKey]) plan[customKey] = [];
   // Check against both predefined and custom
   const baseKey = customKey.replace('Custom','');
   if(plan[customKey].includes(val)||(plan[baseKey]&&plan[baseKey].includes(val))){
-    showToast('⚠️ Déjà ajouté','err'); return;
+    showToast(' Déjà ajouté','err'); return;
   }
   plan[customKey].push(val);
   render(true);
-  showToast('✅ Ajouté: '+val,'ok');
+  showToast(' Ajouté: '+val,'ok');
 }
 
 function removeCustomItem(customKey, val){
@@ -1192,16 +1291,16 @@ function removeCustomItem(customKey, val){
 }
 
 function validateStep4(){
-  if(plan.epi.length===0){ showToast('❌ Sélectionnez au moins 1 EPI','err'); return; }
+  if(plan.epi.length===0){ showToast(' Sélectionnez au moins 1 EPI','err'); return; }
   plan.step=5; render();
 }
 
 // ===== STEP 5 — ANALYSE DE RISQUE =====
 function renderStep5(){
   return `
-    <h2>🔍 ANALYSE DE RISQUE</h2>
+    <h2>ANALYSE DE RISQUE</h2>
     
-    <h3>🌤️ MÉTÉO</h3>
+    <h3>MÉTÉO</h3>
     <div class="weather-chips" style="margin-bottom:10px">
       ${METEO_OPTIONS.map(opt=>`
         <div class="weather-chip ${plan.meteo.conditions.includes(opt)?'active':''}" onclick="toggleMeteo('${escQuote(opt)}')">${opt}</div>
@@ -1211,56 +1310,56 @@ function renderStep5(){
       <input type="number" class="form-input" placeholder="°C" value="${plan.meteo.temperature}" oninput="plan.meteo.temperature=this.value" style="width:80px;text-align:center">
       <input type="text" class="form-input" placeholder="Moyens de contrôle météo..." value="${plan.meteo.controle}" oninput="plan.meteo.controle=this.value" style="flex:1">
     </div>
-    ${plan.meteo.conditions.includes("Vent(s) fort")?`<div style="padding:8px 12px;background:rgba(230,126,34,.1);border:1px solid rgba(230,126,34,.3);border-radius:8px;font-size:11px;color:var(--orange);margin-bottom:12px">⚠️ VENT — Prévoir effet sur système, positionnement et environnement</div>`:''}
+    ${plan.meteo.conditions.includes("Vent(s) fort")?`<div style="padding:8px 12px;background:rgba(230,126,34,.1);border:1px solid rgba(230,126,34,.3);border-radius:8px;font-size:11px;color:var(--orange);margin-bottom:12px">VENT — Prévoir effet sur système, positionnement et environnement</div>`:''}
     
     <hr class="section-sep">
-    <h3>⚡ DANGERS PRÉVISIBLES</h3>
+    <h3>DANGERS PRÉVISIBLES</h3>
     <div style="position:relative">
       <textarea class="form-input" id="field_dangers" placeholder="Décrivez les dangers prévisibles..." oninput="plan.dangers=this.value">${plan.dangers}</textarea>
       ${renderDicteeButton('dangers','Dangers prévisibles')}
     </div>
     
-    <h3 style="margin-top:14px">🛡️ MESURES POUR ÉLIMINER/DIMINUER LES RISQUES</h3>
+    <h3 style="margin-top:14px">MESURES POUR ÉLIMINER/DIMINUER LES RISQUES</h3>
     <div style="position:relative">
       <textarea class="form-input" id="field_mesuresRisques" placeholder="Mesures préventives..." oninput="plan.mesuresRisques=this.value">${plan.mesuresRisques}</textarea>
       ${renderDicteeButton('mesuresRisques','Mesures de risques')}
     </div>
     
     <hr class="section-sep">
-    <h3>🏗️ TRAVAUX ADJACENTS</h3>
+    <h3>TRAVAUX ADJACENTS</h3>
     ${renderNAToggle('travauxAdj')}
     ${plan.travauxAdj.active?`
       <input type="text" class="form-input" placeholder="Quoi?" value="${plan.travauxAdj.quoi}" oninput="plan.travauxAdj.quoi=this.value" style="margin-bottom:6px">
       <input type="text" class="form-input" placeholder="Moyens de contrôle" value="${plan.travauxAdj.controle}" oninput="plan.travauxAdj.controle=this.value">
     `:''}
     
-    <h3 style="margin-top:14px">⚓ SÉCURITÉ AU SITE D'ANCRAGES</h3>
+    <h3 style="margin-top:14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0020 0h-3"/></svg> SÉCURITÉ AU SITE D'ANCRAGES</h3>
     ${renderNAToggle('securiteAncrages')}
     ${plan.securiteAncrages.active?`
       <div style="font-size:11px;color:var(--gold);letter-spacing:1px;margin-bottom:6px">RISQUES IDENTIFIÉS</div>
       <div class="check-grid" style="margin-bottom:8px">
         ${RISQUES_ANCRAGES.map(r=>`
           <div class="check-item ${plan.securiteAncrages.risques.includes(r)?'checked':''}" onclick="toggleAncrageRisque('${escQuote(r)}')">
-            <div class="box">${plan.securiteAncrages.risques.includes(r)?'✓':''}</div>
+            <div class="box">${plan.securiteAncrages.risques.includes(r)?'<span style="color:#22C55E;font-weight:700">V</span>':''}</div>
             <span>${r}</span>
           </div>
         `).join('')}
         ${(plan.securiteAncrages.customRisques||[]).map(r=>`
           <div class="check-item checked" style="border-color:var(--gold)">
-            <div class="box" style="border-color:var(--gold);background:var(--gold);color:#000">✓</div>
+            <div class="box" style="border-color:var(--gold);background:var(--gold);color:#000">&check;</div>
             <span>${r}</span>
-            <button onclick="removeAncrageCustom('${escQuote(r)}')" style="margin-left:auto;background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px">✕</button>
+            <button onclick="removeAncrageCustom('${escQuote(r)}')" style="margin-left:auto;background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px">X</button>
           </div>
         `).join('')}
       </div>
       <div style="display:flex;gap:6px;margin-bottom:8px">
         <input type="text" class="form-input" id="ancrage_custom" style="font-size:12px;flex:1" placeholder="Autre risque..." onkeydown="if(event.key==='Enter'){addAncrageCustom();event.preventDefault()}">
-        <button onclick="addAncrageCustom()" style="padding:8px 14px;background:var(--rescue);border:none;border-radius:8px;color:#fff;font-family:Oswald;font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap">＋ AJOUTER</button>
+        <button onclick="addAncrageCustom()" style="padding:8px 14px;background:var(--gold);border:none;border-radius:8px;color:#fff;font-family:Oswald;font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap">＋ AJOUTER</button>
       </div>
       <input type="text" class="form-input" placeholder="Moyens de contrôle / mesures..." value="${plan.securiteAncrages.comment||''}" oninput="plan.securiteAncrages.comment=this.value" style="font-size:12px">
     `:''}
     
-    <h3 style="margin-top:14px">👥 MESURES DE SÉCURITÉ POUR LE PUBLIC</h3>
+    <h3 style="margin-top:14px">MESURES DE SÉCURITÉ POUR LE PUBLIC</h3>
     ${renderNAToggle('securitePublic')}
     ${plan.securitePublic.active?`
       <input type="text" class="form-input" placeholder="Quoi?" value="${plan.securitePublic.quoi}" oninput="plan.securitePublic.quoi=this.value" style="margin-bottom:6px">
@@ -1268,11 +1367,11 @@ function renderStep5(){
     `:''}
     
     <hr class="section-sep">
-    <h3>🔒 CADENASSAGE</h3>
+    <h3>CADENASSAGE</h3>
     <textarea class="form-input" placeholder="Cadenas identifiés: NOM / CIE / TÉLÉPHONE" oninput="plan.cadenassage=this.value" style="min-height:60px">${plan.cadenassage}</textarea>
     <div style="font-size:10px;color:var(--muted);margin-top:4px;margin-bottom:12px">Se rapporter au responsable de la cie pour savoir où se cadenasser avant toute entrée en espace-clos</div>
     
-    <h3>🪨 MATIÈRES/SURFACES INSTABLES</h3>
+    <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-8 3 4 5-10 4 14z"/><path d="M2 20h20"/></svg> MATIÈRES/SURFACES INSTABLES</h3>
     ${renderNAToggle('matieresInstables')}
     ${plan.matieresInstables.active?`
       <input type="text" class="form-input" placeholder="Quoi?" value="${plan.matieresInstables.quoi}" oninput="plan.matieresInstables.quoi=this.value" style="margin-bottom:6px">
@@ -1280,7 +1379,7 @@ function renderStep5(){
     `:''}
     
     <hr class="section-sep">
-    <h3>⏱️ TEMPS ESTIMÉ</h3>
+    <h3>TEMPS ESTIMÉ</h3>
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <div style="flex:1;text-align:center">
         <input type="number" class="form-input" value="${plan.tempsEstime.jours}" min="0" oninput="plan.tempsEstime.jours=+this.value" style="text-align:center">
@@ -1299,8 +1398,8 @@ function renderStep5(){
     ${renderEagleAssistBtn(5)}
     <div id="eagleAssist5" style="margin-bottom:10px"></div>
     <div class="btn-nav">
-      <button class="btn btn-outline" onclick="plan.step=4;render()">◀ RETOUR</button>
-      <button class="btn btn-gold" onclick="validateStep5()">SUIVANT ▶</button>
+      <button class="btn btn-outline" onclick="plan.step=4;render()">&larr; RETOUR</button>
+      <button class="btn btn-gold" onclick="validateStep5()">SUIVANT &rarr;</button>
     </div>`;
 }
 
@@ -1323,14 +1422,14 @@ function renderNAToggle(key){
 }
 
 function validateStep5(){
-  if(!plan.dangers.trim()){ showToast('❌ Minimum 1 danger requis','err'); return; }
+  if(!plan.dangers.trim()){ showToast(' Minimum 1 danger requis','err'); return; }
   plan.step=6; render();
 }
 
 // ===== STEP 6 — PLAN DE SAUVETAGE + CONFIRMATION =====
 function renderStep6(){
   return `
-    <h2>🚨 PLAN DE SAUVETAGE</h2>
+    <h2>PLAN DE SAUVETAGE</h2>
     
     <div class="form-group">
       <label class="form-label">ENDROIT(S) OÙ UN SAUVETAGE POURRAIT ÊTRE REQUIS</label>
@@ -1352,11 +1451,11 @@ function renderStep6(){
     </div>
     
     <hr class="section-sep">
-    <h3>📡 COMMUNICATION</h3>
+    <h3>COMMUNICATION</h3>
     <div class="check-grid" style="margin-bottom:12px">
       ${COMM_OPTIONS.map(opt=>`
         <div class="check-item ${plan.communication.includes(opt)?'checked':''}" onclick="toggleArr('communication','${escQuote(opt)}')">
-          <div class="box">${plan.communication.includes(opt)?'✓':''}</div>
+          <div class="box">${plan.communication.includes(opt)?'<span style="color:#22C55E;font-weight:700">V</span>':''}</div>
           <span>${opt}</span>
         </div>
       `).join('')}
@@ -1364,26 +1463,26 @@ function renderStep6(){
     <div style="font-size:11px;color:var(--muted);margin-bottom:16px">Selon le/les plan(s) de sauvetage rattaché(s)</div>
     
     <hr class="section-sep">
-    <h3 style="text-align:center;color:var(--rescue);font-size:18px;margin-bottom:16px">📝 RÉCAPITULATIF COMPLET</h3>
+    <h3 style="text-align:center;color:var(--gold);font-size:18px;margin-bottom:16px">RÉCAPITULATIF COMPLET</h3>
     ${renderRecap()}
     
     <!-- ANALYSE EAGLE SST -->
     <div id="recapAnalysis" style="margin-top:16px">
       ${(PT_CONFIG.CLAUDE_PROXY || PT_CONFIG.CLAUDE_API_KEY) ? `
         <button class="btn btn-outline" onclick="launchRecapAnalysis()" id="btnAnalyse" style="width:100%;border-color:var(--blue);color:var(--blue);font-size:13px;padding:12px">
-          🦅 ANALYSE EAGLE SST — Vérification sécurité
+          ANALYSE EAGLE SST — Vérification sécurité
         </button>
       ` : ''}
     </div>
     
     <div style="margin-top:20px">
       <button class="btn btn-green" onclick="openConfirmation()" style="font-size:18px;padding:18px">
-        🦅 CONFIRMER — SIGNATURE DU CHEF
+        CONFIRMER — SIGNATURE DU CHEF
       </button>
     </div>
     
     <div class="btn-nav">
-      <button class="btn btn-outline" onclick="plan.step=5;render()">◀ RETOUR</button>
+      <button class="btn btn-outline" onclick="plan.step=5;render()">&larr; RETOUR</button>
     </div>`;
 }
 
@@ -1391,37 +1490,37 @@ function renderRecap(){
   const equipeTxt = plan.equipe.filter(e=>e.nom).map(e=>`<div class="recap-row"><span class="label">${esc(e.poste.split('→')[0]?.trim()||'Poste')}</span><span class="value">${esc(e.nom)}</span></div>`).join('');
   return `
     <div class="recap-section">
-      <h4>📍 MISSION</h4>
+      <h4>MISSION</h4>
       <div class="recap-row"><span class="label">Date</span><span class="value">${esc(plan.date)}</span></div>
       <div class="recap-row"><span class="label">Site</span><span class="value">${esc(plan.cie)}</span></div>
       <div class="recap-row"><span class="label">Installation</span><span class="value">${esc(plan.installationType.join(" + "))}</span></div>
       <div class="recap-row"><span class="label">Responsable</span><span class="value">${esc(plan.responsable)}</span></div>
     </div>
     <div class="recap-section">
-      <h4>👥 ÉQUIPE</h4>
+      <h4>ÉQUIPE</h4>
       ${equipeTxt||'<div style="color:var(--muted);font-size:12px">Aucun membre assigné</div>'}
     </div>
     <div class="recap-section">
-      <h4>⚠️ ZONES À RISQUES</h4>
-      ${plan.zonesRisque.filter(z=>z.lieu).map(z=>`<div class="recap-row"><span class="label">🟡 ${esc(z.lieu)}</span><span class="value">${esc(z.type)} — ${[...z.preventif,...(z.customPrev||[]),z.autre].filter(Boolean).map(v=>esc(v)).join(', ')||'—'}</span></div>`).join('')||'<div style="color:var(--muted);font-size:12px">—</div>'}
-      ${plan.zonesChute.filter(z=>z.lieu).map(z=>`<div class="recap-row"><span class="label">🔴 ${esc(z.lieu)}</span><span class="value">${esc(z.type)} — ${[...z.preventif,...(z.customPrev||[]),z.autre].filter(Boolean).map(v=>esc(v)).join(', ')||'—'}</span></div>`).join('')}
+      <h4>ZONES A RISQUES</h4>
+      ${plan.zonesRisque.filter(z=>z.lieu).map(z=>`<div class="recap-row"><span class="label"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#EAB308;margin-right:4px"></span>${esc(z.lieu)}</span><span class="value">${esc(z.type)} — ${[...z.preventif,...(z.customPrev||[]),z.autre].filter(Boolean).map(v=>esc(v)).join(', ')||'—'}</span></div>`).join('')||'<div style="color:var(--muted);font-size:12px">—</div>'}
+      ${plan.zonesChute.filter(z=>z.lieu).map(z=>`<div class="recap-row"><span class="label"> ${esc(z.lieu)}</span><span class="value">${esc(z.type)} — ${[...z.preventif,...(z.customPrev||[]),z.autre].filter(Boolean).map(v=>esc(v)).join(', ')||'—'}</span></div>`).join('')}
     </div>
     <div class="recap-section">
-      <h4>🦺 EPI & ÉQUIPEMENTS</h4>
+      <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> EPI & ÉQUIPEMENTS</h4>
       <div style="font-size:12px;color:var(--txt);margin-bottom:4px">${[...plan.epi,...(plan.epiCustom||[])].filter(Boolean).map(v=>esc(v)).join(' • ')||'—'}</div>
       <div style="font-size:11px;color:var(--muted)">Permis: ${[...plan.permis,...(plan.permisCustom||[])].filter(Boolean).map(v=>esc(v)).join(', ')||'—'}</div>
       <div style="font-size:11px;color:var(--muted)">Équip: ${[...plan.equipements,...(plan.equipementsCustom||[])].filter(Boolean).map(v=>esc(v)).join(', ')||'—'}</div>
     </div>
     <div class="recap-section">
-      <h4>🔍 ANALYSE DE RISQUE</h4>
+      <h4>ANALYSE DE RISQUE</h4>
       <div class="recap-row"><span class="label">Météo</span><span class="value">${esc(plan.meteo.conditions.join(', '))||'—'} ${plan.meteo.temperature?esc(plan.meteo.temperature)+'°C':''}</span></div>
       <div class="recap-row"><span class="label">Dangers</span><span class="value" style="max-width:70%;font-size:11px">${esc(plan.dangers)||'—'}</span></div>
       <div class="recap-row"><span class="label">Mesures</span><span class="value" style="max-width:70%;font-size:11px">${esc(plan.mesuresRisques)||'—'}</span></div>
       <div class="recap-row"><span class="label">Temps estimé</span><span class="value">${plan.tempsEstime.jours?esc(plan.tempsEstime.jours)+'j ':''}${esc(plan.tempsEstime.heures)}h${plan.tempsEstime.minutes?String(plan.tempsEstime.minutes).padStart(2,'0'):''}</span></div>
-      ${plan.securiteAncrages.active?`<div class="recap-row"><span class="label">⚓ Ancrages</span><span class="value" style="max-width:70%;font-size:11px">${[...plan.securiteAncrages.risques,...(plan.securiteAncrages.customRisques||[])].map(v=>esc(v)).join(', ')||'—'}${plan.securiteAncrages.comment?' — '+esc(plan.securiteAncrages.comment):''}</span></div>`:''}
+      ${plan.securiteAncrages.active?`<div class="recap-row"><span class="label"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0020 0h-3"/></svg> Ancrages</span><span class="value" style="max-width:70%;font-size:11px">${[...plan.securiteAncrages.risques,...(plan.securiteAncrages.customRisques||[])].map(v=>esc(v)).join(', ')||'—'}${plan.securiteAncrages.comment?' — '+esc(plan.securiteAncrages.comment):''}</span></div>`:''}
     </div>
     <div class="recap-section">
-      <h4>🚨 PLAN DE SAUVETAGE</h4>
+      <h4>PLAN DE SAUVETAGE</h4>
       <div class="recap-row"><span class="label">Endroits</span><span class="value" style="font-size:11px">${esc(plan.endroitsSauvetage)||'—'}</span></div>
       <div class="recap-row"><span class="label">Débrayable</span><span class="value">${plan.debrayable?'OUI':'NON'}</span></div>
       <div class="recap-row"><span class="label">Communication</span><span class="value">${esc(plan.communication.join(', '))||'—'}</span></div>
@@ -1463,7 +1562,7 @@ async function launchRecapAnalysis(){
   // Show loading in the container
   container.innerHTML = `
     <div style="border:1px solid rgba(59,130,246,.3);background:rgba(59,130,246,.04);border-radius:var(--radius);padding:14px">
-      <h4 style="font-family:Oswald;font-size:13px;color:var(--blue);letter-spacing:1px;margin-bottom:8px">🦅 RECOMMANDATIONS EAGLE SST</h4>
+      <h4 style="font-family:Oswald;font-size:13px;color:var(--blue);letter-spacing:1px;margin-bottom:8px">RECOMMANDATIONS EAGLE SST</h4>
       <div style="text-align:center;padding:12px;color:var(--muted);font-size:11px">
         <div class="spinner" style="width:24px;height:24px;border:3px solid var(--border);border-top:3px solid var(--blue);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 8px"></div>
         Analyse de sécurité en cours...
@@ -1489,8 +1588,8 @@ async function launchRecapAnalysis(){
     window._eagleRecapAnalysis = analysis;
     renderRecapAnalysisUI(container, analysis, scoreColor, verdictColor);
   } catch(e){
-    container.innerHTML = `<div style="border:1px solid rgba(230,81,0,.3);background:rgba(230,81,0,.04);border-radius:var(--radius);padding:14px;text-align:center">
-      <div style="font-size:24px;margin-bottom:6px">🦅</div>
+    container.innerHTML = `<div style="border:1px solid rgba(201,168,76,.3);background:rgba(201,168,76,.04);border-radius:var(--radius);padding:14px;text-align:center">
+      <div style="font-size:24px;margin-bottom:6px">GE</div>
       <div style="font-family:Oswald;font-size:12px;color:var(--orange);letter-spacing:1px;margin-bottom:6px">ANALYSE EAGLE SST NON DISPONIBLE</div>
       <div style="color:var(--muted);font-size:11px">${esc(e.message)}</div>
     </div>`;
@@ -1499,8 +1598,8 @@ async function launchRecapAnalysis(){
 
 function openConfirmation(){
   const assignedCount = plan.equipe.filter(e=>e.id).length;
-  if(assignedCount<1){ showToast('❌ Minimum 1 sauveteur requis dans l\'équipe','err'); return; }
-  if(!plan.endroitsSauvetage.trim()){ showToast('❌ Remplissez les endroits de sauvetage','err'); return; }
+  if(assignedCount<1){ showToast(' Minimum 1 sauveteur requis dans l\'équipe','err'); return; }
+  if(!plan.endroitsSauvetage.trim()){ showToast(' Remplissez les endroits de sauvetage','err'); return; }
   confirmPin='';
   document.getElementById('pinOverlay').style.display='flex';
   renderPinPad();
@@ -1513,9 +1612,9 @@ function closePinOverlay(){
 
 function renderPinPad(){
   const dots = document.getElementById('pinDots');
-  dots.innerHTML = [0,1,2,3].map(i=>`<div style="width:16px;height:16px;border-radius:50%;border:2px solid ${i<confirmPin.length?'var(--rescue)':'var(--border)'};background:${i<confirmPin.length?'var(--rescue)':'transparent'};transition:all .2s"></div>`).join('');
+  dots.innerHTML = [0,1,2,3].map(i=>`<div style="width:16px;height:16px;border-radius:50%;border:2px solid ${i<confirmPin.length?'var(--gold)':'var(--border)'};background:${i<confirmPin.length?'var(--gold)':'transparent'};transition:all .2s"></div>`).join('');
   const pad = document.getElementById('pinPad');
-  pad.innerHTML = [1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(k=>{
+  pad.innerHTML = [1,2,3,4,5,6,7,8,9,'',0,'&larr;'].map(k=>{
     if(k==='') return '<div></div>';
     return `<div class="pin-key" onclick="handleConfirmPin('${k}')">${k}</div>`;
   }).join('');
@@ -1523,7 +1622,7 @@ function renderPinPad(){
 }
 
 function handleConfirmPin(key){
-  if(key==='⌫'){ confirmPin=confirmPin.slice(0,-1); renderPinPad(); return; }
+  if(key==='&larr;'){ confirmPin=confirmPin.slice(0,-1); renderPinPad(); return; }
   if(confirmPin.length>=4) return;
   confirmPin += key;
   renderPinPad();
@@ -1542,7 +1641,7 @@ function handleConfirmPin(key){
       playEagle();
       plan.step=7; render();
     } else {
-      document.getElementById('pinMsg').innerHTML = '<span style="color:var(--red)">❌ PIN invalide — Chef d\'équipe ou Coordonnateur requis</span>';
+      document.getElementById('pinMsg').innerHTML = '<span style="color:var(--red)">PIN invalide — Chef d\'équipe ou Coordonnateur requis</span>';
       confirmPin='';
       setTimeout(renderPinPad, 1500);
     }
@@ -1553,7 +1652,7 @@ function handleConfirmPin(key){
 function renderConfirmed(){
   return `
     <div style="text-align:center;padding-top:20px">
-      <img src="eagle_tactic.png" alt="Golden Eagles" style="width:140px;height:140px;margin:0 auto 16px;display:block;border-radius:50%;box-shadow:0 0 30px rgba(212,160,23,.3);animation:pulse 2s infinite">
+      <img src="eagle_tactic.png" alt="Golden Eagles" style="width:140px;height:140px;margin:0 auto 16px;display:block;border-radius:50%;border:2px solid rgba(201,168,76,.35);box-shadow:0 0 30px rgba(201,168,76,.3);animation:pulse 2s infinite" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none'}">
       <h2 style="font-size:28px;color:var(--green);margin-bottom:4px">PLAN CONFIRMÉ!</h2>
       <div style="font-size:13px;color:var(--muted);margin-bottom:20px">${plan.timestamp}</div>
       <div class="card" style="text-align:left">
@@ -1564,12 +1663,12 @@ function renderConfirmed(){
         <div class="recap-row"><span class="label">Équipe</span><span class="value">${plan.equipe.filter(e=>e.nom).length} membres</span></div>
       </div>
       <div style="margin-top:16px;padding:12px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:12px;font-size:12px;color:var(--blue)">
-        📤 Envoyé au webhook Make.com
+        Envoyé au webhook Make.com
       </div>
-      <button class="btn btn-gold" onclick="generatePDF()" style="margin-top:16px;font-size:14px;padding:14px 24px">📄 TÉLÉCHARGER LE PDF</button>
-      <button class="btn btn-outline" onclick="revisePlan()" style="margin-top:10px">🔄 RÉVISER LE PLAN</button>
+      <button class="btn btn-gold" onclick="generatePDF()" style="margin-top:16px;font-size:14px;padding:14px 24px">TÉLÉCHARGER LE PDF</button>
+      <button class="btn btn-outline" onclick="revisePlan()" style="margin-top:10px">RÉVISER LE PLAN</button>
       <button class="btn btn-gold" onclick="startNewPlan()" style="margin-top:10px">＋ NOUVEAU PLAN</button>
-      <button class="btn btn-outline" onclick="plan.step=0;render()" style="margin-top:10px">◀ ACCUEIL</button>
+      <button class="btn btn-outline" onclick="plan.step=0;render()" style="margin-top:10px">&larr; ACCUEIL</button>
     </div>`;
 }
 
@@ -1579,7 +1678,7 @@ function renderConfirmed(){
 const EAGLE_LOGO_B64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAChQElEQVR42uz9d3Cc2XklDp/OOQcADaCRcwYBgnGYw0TOaDQjjaxgSZZkl+21LdVqy+sNrl+51q5ae7Xakre8XpdtJas0mpzJGYYZZpBIRI6NRqMBdM45fX9o7/M1QJAEySaHsuetQg0GBLrfvu997pPOcw4nl8vl8Nn12fXZtenF/WwJPrs+u2598T9bgod75TvsrThvDodz2///7PrMQH7jDIB9bdzY7Ot+Nnsul0M2m930tT8zoMJfnM9ykMIZA5fLveMGzWQyiMfjiEajSCQSiMfjSCaTSKfT9Do8Hg8CgQBisRgikQgSiQQSiQRCofCO95TJZJDL5dYZ5GdG85mBPDSDYKc3h8MBl3tzChePx7G2tgabzYbFxUVYrVbYbDasrq7C7XbD7/cjHA4jFoshlUohlUohm82u8zjstZmhCIVCyGQyKJVK6HQ6FBUVoaysDGazGRUVFTCbzSgtLYVWq72l0dzKi312fWYgBfEQmxlEMBjE7OwsRkZGMDw8jImJCVgsFjidTkSjUQCAUCiEVCqFTCaDXC6HTCaDRCKBWCyGUCgEn88Hj8cDj8ej181ms8hms0in00ilUkgkEojFYohGo4hEIgiHw4hEIojH48hkMuDz+dBoNCgrK0NDQwPa29vR3d2N5uZmlJWV3dJgtuLxPjOQzwzklkaRv2kBwOPxYGhoCBcuXMClS5cwPj4Ol8uFTCYDmUwGvV6PoqIi6PV6KJVKSCQSCAQCAKDNnkwmkUwmkUgkkEqlkE6nkU6n13kRDocDHo8HPp8PPp8PoVC47ksgEIDL5SKbzSKRSCASicDn88HpdMLpdMLn8yGVSkGpVKK6uhq9vb3Ys2cPdu7cibq6us+M5TMDufuLbdCNRjE6OorTp0/j1KlTGBgYgMvlglAoRFFREcxmM0pKSqBSqcDn85FOpxGJRBAIBOD3+xEIBBAKhRCNRimkYsZwLxeXywWfz6e8RCaTQaFQQKVSQa1Wk1FyuVxEo1G43W4sLy9jeXkZfr8fYrEYDQ0N2L9/P44fP46dO3dCpVJ9ZiyfGcjtc4qNG+LatWt488038d5772F8fBzpdBolJSWoqalBeXk5FAoFstksgsEg3G43nE4n3G43gsEgotHoTQbAwig+nw8ul0tft8sJ2GNh3oyFXZlMBplMBul0mjZ0vgHJZDKo1WoYDAYUFRVBp9NBKpUinU7D6XTCYrHAYrEgGo2ipKQE+/fvx3PPPYdDhw6ty2Eymcwt86zPDOTfoLeYmprCq6++ildeeQWjo6Pg8Xiorq5GfX09ioqKwOPxEAgEsLq6ipWVFTidTgSDwXVJOwuBmEFstvk3W+7NfnarE3yz12PGw0K4VCq1riKmUqlQXFyM0tJSFBcXQyqVIhwOY3FxEZOTk/B6vTAajTh27BheeuklHDp0iCpmt/KsnxnIvwHDiEQieOedd/DP//zP+Pjjj5FMJlFbW4uWlhYYjUZkMhk4nU5YrVbY7XZ4vV46tVkZViAQkDFsPPm30vy70/LfzrvcqhfCfiedTlO+k06nyZsZDAaUl5fDbDZDp9MhFothYWEBo6OjCAQCqKurw0svvYTf+q3fQn19/Tqv8m8t/Po3YSDslGfhwuLiIv75n/8ZP/3pT7GwsICSkhJ0dHTAbDYDANbW1rCwsACbzYZAIEAnsUQigUgkok2yFWPYLPnP/ztWzr3V729M3vOT+DsZW77R5HI56sHE43FaE51Oh8rKSlRXV0Or1SIUCmFsbAzj4+MQCoV4/PHH8bu/+7s4cuTIv0lD+VdtIBsNY3h4GD/60Y/wq1/9CtFoFK2trWhtbYVSqYTH48H8/DwWFhbg9XrJS0ilUqoa5W/c/E2Yv5HZ5t24rCzBZn0N1tvw+/1wuVzrjITL5aK7uxsCgWBdQ5E1FROJBKLRKOUj+b2TjcZ7K4NhFTD2OgBQVFSEuro6VFdXQywWw2q14vr16/B4PNi+fTv+8A//EC+++CKFX/8WDOVfpYFsDKX6+/vxN3/zN3jjjTcgFAqxbds2NDQ0IJfLYWlpCdPT07DZbNRTkEqlEIlEtNFutUQcDgepVAo8Ho8MKZlMIhKJkKGkUinU1NSgtrYWPB4PYrGYNpVQKMTk5CQGBgYgFArpvQQCAfr6+qBUKsHj8cg4WSjn9/vx0Ucfobq6Gmq1Gh6PB+FwmIyJ3dOdEmxmMPnl4mw2C6FQiMrKSjQ3N6OoqAherxfXrl3D4uIimpqa8Cd/8if4yle+ArFYTIbyrzVH+VdlIOwkZw9raGgIf/VXf4XXX38dMpkMO3bsQFVVFWKxGGZnZylBBUANPC6Xe1ujyN9c6XQaxcXFqK+vh0ajIYNYWVnB2NgYlXXr6+vR1dUFr9cLt9uNZDJJ3iAUCiEcDt90CjMj0ul06OnpoTxBIpEgnU5jenoae/bsQUlJCd0vM85wOIy5uTl4vV7w+fx1B8fGsGujsaTTacRiMcRiMfIqra2tqK6uRiwWw7Vr1zA9PY3GxkZ8//vfx1e/+lXymCxk/MxAHsEr/xSzWCz4y7/8S/zkJz+BWCzGrl27UFVVhVAohImJCUxPTyMcDoPH40GhUKyr2Gw0Albu3AgyTKVSKCsrw/bt25HNZrG8vIxoNIqioiKUlJTAbrfj0qVLSCaTKCsrw+7duzE7O4uLFy9CIBBQOCYQCNZt4vwrmUyipKQEe/bsgcPhwCeffEL3IhKJsG/fPggEAkxOTkIikUClUlFv5PLly1hdXYVQKKSqFvNSqVQKHA4HfD7/lnlLLpdDIpFAKBRCLpeDWq1Ga2srGhoakEqlcPXqVUxPT6Orqwv/9b/+V5w4ceJfZdjF/9eSZ/B4PEQiEfzgBz/A3/zN3yCRSGDv3r2oq6tDOBzGlStXMDk5iVgsBqFQCK1WSxvkVo27VCoFhUKBdDqNRCJBJ2U2m4VIJEJzczOy2Sz6+/ths9nA4XCwuLiIuro6CrM4HA6BEVUqFRoaGiiEUygUWF5ehtVqJaPZiMdiXi2RSFBnPZ1OQyKRQCqVwu/3Y2ZmhsJDoVAIiUSCZDIJPp9PHXXm5QDA5/NhcXERbrf7ptAo33uKRCKIxWLydBcuXMDIyAja29uxd+9e9Pb24sKFC3j22Wfx+OOP4y/+4i/Q3d39ryrs4v9r8RpvvPEG/uN//I+YmprC9u3b0dnZiWQyiYGBAYyNjSEajUIkEkGn063b6PmJ9sYQp7u7G6WlpfB6vbhy5Qqd+ul0Gnq9HgqFAg6HAysrKxCLxchms4hEIhgZGYFMJoNIJKK+RDKZhFKpxI4dO6iixOFw4PP5bhnO5XI5qpolEgkygmw2C7lcDi6XC7FYjN7eXgSDQQrXYrEYeT+NRoMdO3ZAJpMhFAohlUrBbDajrKwMIyMjWFhYIOPMRyXnV9wEAgF0Oh1SqRTC4TAuXryI0dFRdHd34+jRo/B6vThz5gx27tyJP/iDP8B/+k//CRqN5qaQ7jMDeYhegyXBVqsV3//+9/Hyyy+jtrYWX/3qVyEWizE9PY2hoSEEAgEIhcJbGgZrsOU39nK5HPh8PkpKSsDlclFcXIyWlhaMjIxAJBKt27jJZBJcLheZTAZ6vR51dXUETLRarbh27do6xG5/fz+i0SghedPp9E3eI9+LiEQiAEAikVhnOAqFgn6noqICQqGQAI6XLl2iylhLSwtkMhksFgtGR0eRSqVQVFSEbdu2obm5mYCVHA4HYrEYuVwOsVhs3enPDIWBIlOpFEKhEM6dO4fx8XFs374dL774ImZmZvA//+f/xGuvvYb//t//Oz7/+c//xnsT/m+y1/iHf/gH/Omf/ilisRieeeYZlJeXY3l5GdevX4fdbgefz980lMo3DJFIBLPZjPLycoyMjCAUCq0r3UYiEQBAXV0dQqEQLBYLuFwubXpWlWIbXafTwev1QiQSQS6XQyAQkDGIRCKsrKwgEoms62MwCMqtDIRVmfJ/LpfLwePxMDExAZfLBY1GA7lcDqVSiVgshkwmA4PBAL1ej1AohPHxcQq7lpeXUVZWhrq6Ouj1eiwuLoLD4aCxsREmkwnXrl3D2traOsPNr+ixdU0mk3C73Xj33XdRU1OD7du34xvf+AbOnz+PF154AS+99BL++q//GiaT6Tc2N+H/JlaobDYb/vAP/xBvvvkmOjs7sX37diQSCXzyyScYHx9HNpuFSqWi0z4/x2B4JqlUiurqalRUVNDDlslkCAaD9BB5PB5CoRBmZ2exa9cutLW1IRQKwel0EtxcpVJBKpUiEAjQZhEKhTh06BDlGrFYDIlEAlKpFCaTib5nRuRyuWC1WtclzawixEK3RCKxzrvJ5XIkk0m4XC74/X6EQiG6Zz6fDw6HA61WC6FQiMXFRcq9WBl3cnISfr8fkUgEuVwOSqUSxcXF5BU368qzYkJ+6KXX6xGPxzE/P4+lpSV0d3dj3759aGpqwuuvv45z587hhz/8IV544YXfSG/C/00JqVjH+dVXX8Xv//7vIxKJ4HOf+xyKi4sxPz+Pq1evwu/3QyaTQSqVblqVAgCpVAqz2YzKykpIJBKkUimMjY3BarUiHo+Dz+dTfgD8ep7Dbrfjxo0b6OjoQFdXFy5evEgNvsrKSjQ1NeHGjRv0962trbQZlUolQqEQMpkMRCIRenp6aIMwg89kMrBYLNgMvcv+nW3abDYLqVQKhUKBXC6HhoYG+Hw+RCIR6oOwE18ikQD49dxKflmXy+UiFothZmaGNr3JZIJMJsP8/Dy8Xi+EQiGSySSKiorQ3NyM2dlZrKys0L3n5yxs8jEUCuHq1auwWCzYs2cPvvrVr+LChQt48cUX8e1vfxt/8zd/A7lc/htlJPzflJAqkUjgP/yH/4Af/vCHaG5uxokTJ5BIJHDu3DlMTEyAx+NROJUfSuUbikQiwb59+6BQKGiOQyKRwOl0IhQKkcfZCOFQqVTUZ1AoFGQkExMT0Gg05IXC4TBBzkdHR1FeXk6v6XK5kE6nEQ6HqQ+SSCSoM75ZHpLL5XD9+nUIhUIKy5hRBYNBSCQSVFdX089Zs29gYABer3fdOmQyGTJa9sU8jVgsRnl5OfVwWE4GgCD9brcbNpsNPB4PyWRyXSOSFS9UKhVSqRScTifeeOMNdHd3Y+/evaiursY//MM/4NKlS/jnf/5nbNu27Tcm5Hqk+yDMOObm5vC1r30Nly5dwrFjx1BbW4vFxUVcunQJPp8PcrmcTsv8Dc7ms6VSKVV2WlpaEIlEMD8/j6amJrS1tcFms+Hq1avrknhmTOwhspIqAMjlcszNzWF4eBhKpRINDQ3Q6/VUap6fn8fy8jKEQiHBONim3Kw5d7uNwv4m/3c2lmEVCgWUSiWFlVeuXEEoFILZbMbOnTvhdrtx9epVhMNhiEQitLe3QygUYnp6Gi6XC7W1tejs7EQul0M8Hsfy8jIsFgv4fD4ee+wxZDIZnD9/HuFwGAKBAFVVVbDb7YhGozflTiwMjEQiiMViKC4uxr59+yCTyfD+++/D5/PhRz/6Eb75zW+uiw4+M5B7mOrjcrl4//338bWvfQ2ZTAaPP/44ZDIZhoaGMDAwAABQq9XrsE/sAaVSKUilUjQ2NqK0tBQXLlwg4CE78WQyGR577DEIBAJcvHgRHo+HQixmIHw+Hy6XCysrK1hbW4NaraZS7ZUrV+BwOMDlciEUCqnnkc1mIRAIqNp2Jwj7Vrr2t4LJM8PLx3vl5zE9PT2orKykHEmhUMBoNCIQCOD8+fOIRqPYu3cvJesKhQLFxcWIxWIIhULQarVYXFzE4OAgcrkcqqqq0NvbC7/fj0uXLiEajd5U8WL3kkwm4ff7IRQKsXv3bjQ2NuL69eu4du0afv/3fx8/+MEPIBAIHumQi/+olnC5XC5+8IMf4Hvf+x7q6+uxb98+RCIRnDp1CouLi5BIJJDL5TdtsHQ6DQ6HQ7mBUqmEw+Gg0zr/QYRCISwvL6OxsREVFRVwu903ne7RaBT9/f1IpVIQCARwOp24cuUK4vE4IpEIBAIB9Uby8wZmhHdjCFvh0tpoOBu78BuNcnBwEKFQCOXl5SgvL0c6ncbi4iLGx8cRCARgMpmg0+kQDocxOjqKTCYDo9GI6upqGI1GpFIp2Gw2ZLNZyGQy1NfXIx6PQyQSrQsLWXc+P79iSXwwGMTZs2extraGvXv3oqioCH/7t3+LiYkJ/OIXv0BRUdEjayT8RzEZz2az+MM//EP87d/+LXbv3o2Ojg4sLy/j448/RiAQgFqtpnh640ZSq9Vobm5GaWkpwuEwBgYGYLFYaIPnexoul4ulpSVUVFSgpKQEarV6XRWLJar58x58Ph9Op5MqRvkeaavzGpv97u2Gpm71+7fi38r/PpvNYnx8HHNzc+uamQwsWVVVBaFQiKmpKaRSKQiFQthsNgiFQpSWlmJlZQUejwccDge1tbWQyWSIx+P02uxeamtr4fF41q0fuzeVSoVYLEbYt8OHD+PLX/4yXnvtNezevRuvvfYa2tvb11XKPjOQW+Qb4XAYv/Vbv4W33noLTz75JCoqKjA+Po5Lly4hk8lAp9OREeVviHQ6DZ1Oh127doHP52N+fh5TU1Pw+/0QiURoaWlBMplc1znm8/nw+/1YWVlBTU0NzGYzbty4QR5gcnISDodjXVWL/d2dDCG/QMB6LmxMNpPJrAuNtsquyEKofEIHBnG/ldEwQ8hkMtTjYWEYe71IJAK73U4ddJb853I52Gw2JBIJ8irBYBBerxfl5eX03EpKStDd3Q2Hw4ELFy6su2d2P4zAwuFw4PXXX8ehQ4fw5S9/GW+//TYee+wxvPLKKzh8+PAjZyT8R8k4HA4HnnvuOVy7dg0vvvgitFotrl69ioGBAYhEIqjV6ps2Jqu48Hg8+P1+eL1eFBcXIxwOw+fzoaysjPIQu92OpaWlmzbf4uIiKisrUVFRgYWFBSqXTk5ObjrQtBksheUJbIovnwyO5SgMPyWVSon6RyQSQSgUUlUov0nJyrtsHoRR/zASiHA4TCFVPvsJq05tnFNhhsHuP5PJ4OrVq5DJZJRLpFIpmEwmaLVa+Hw+OBwOCAQCNDQ0QCQSYWhoCEKhkNADfD4fDQ0NyGQymJ+fp2oZA0jmHyZ8Ph86nQ5+vx/vvvsu9u7di2effRanT5/G8ePH8bOf/Qxf/OIXHykj4T8qxmG1WvHEE09gaWkJX/ziFyEWi3Hu3DlMTU1BJpNBJpPddOJmMhlUVlYikUhgbW0NADAxMQGdTofa2looFAqYzWbkcjnCHeUbFQuT/H4/pqamEAqFkEgk6ERmKN/b0Yim02lEo1HiqOLxeJDJZDCZTNDr9dBqtVCr1ZBKpetQw6y7vpH6hxkcG+UVCAQ0ZMU8Bis5R6NR+P1+eDweIqULBoN0H8wA80PBzTxTKBRaV0kqLi6GSCSC3W5HMBhEbW0tSktL4XQ6sbi4iNbWVlrHqqoqGI1GGktmYWlpaSl4PB6Wl5fXeTgulwutVotgMIiPP/4YkUgEhw8fhkwmw0svvYRAIIDvfOc7j0xOwn9UyrjHjh2Dz+cj/M5HH32ExcVFKJVKgltshJuXlJSgr68P8/PzWFlZgUgkgsfjwcLCAurq6lBeXo61tTVMTk4SKJDP56O6uhoulwuRSIRO7fHxcfr3zeYl8j1FKpVCLBajWFyhUKC6uhomkwlFRUVQKpXgcDiIxWIIBoNYW1sjRkU2H87yrXwPlY8FYyd/ft8in5JULpdDrVZDq9XCZDJBLBYjk8kgGAwSgNLhcMDv9xMkRiKR0Mmcv5758xx8Pp/Wy+FwUBk7m81iamoK6XSaoDZyuRx1dXWIx+OYnp6m0rpMJkN7ezukUikSiQR5oXzvpVQqEYlEcP36dcRiMTz22GMQi8X43d/9XcTjcfzRH/3RI2Ek/E/bOGZnZ3H48GFEo1F87nOfQzKZxOnTp7GysnJTMp5f7uRyuYhEIohEItDr9ZBKpYQ1mpmZoY1qs9ngcDggFouh1WrR1NSE8vJyjI2NYWRkhDYHI3jb7JRl4QSr7bNBpubmZlRUVECn0wEA5TPDw8N0kjM4CYNyKJVKKBQKiMViCg3zKUbzw7hMJkM0Qqy34PP5EAqFEIlE4HA4MDMzQ8m1Wq2meZTGxkZkMhm43W4sLS3BZrPB4/FQJ14ikVCDceNnTiaTsFgsyOVyKCsrg1arhcViIXwWu7+6ujooFApKvkUiEVKpFNra2iCXy+k9mVFunONneLLx8XEkEgkcPnwYfD4ff/zHf4xMJoPvfve7n7qR8D9N47BYLDhy5AhisRieffZZxONxfPjhh3A4HNBoNOu64vkQcVZNYjQ8NTU10Ol0sNlsEIlEiMfjmJqaQl9fH5qamhAOh1FaWor6+npwOBxMTExgYWHhpp7BZoaRTCYRDofXzXPU1NRAq9UikUjAbrdjYmICPp+PusnFxcXo7OyERqOBTCajWXQOh0M0ogy8yN6b8ffm817xeDzs2LGDmo8mkwnNzc3IZDLweDzEgxUOh+F2u+FwOGC1Wom2yGAwoKKiAp2dnejt7YXb7cbCwgIsFgttXJlMtm7cl312Zghra2v4+OOPEYvF6KBgw1dFRUUIBAKYm5uDQCBAIpFAXV0dSktLifyBeb78fGxjQ5bD4WBubg6ZTAZHjx4Fl8vF9773PfB4PPzRH/3Rp5qT8D+NUi6Px4PdbsexY8cQDofx7LPPIhaL4cMPP4TT6YRWq72J+IDL5aK+vh5arRY3btyguNlut6OqqgolJSVYXl6mh2e322G321FSUoLdu3dDKpXC6XRifHwcTqfzljPb7GfxeJymDsvKytDU1ITS0lKk02ksLS1hYGAAoVAIcrkcZWVl2LZtG4xGI1QqFbGHZDIZ6g9MTEyQZ2ENy9LSUhw9ehSlpaWYmZnB9evX192LXC7Hrl27sLa2hrNnz0IikeDrX/86hEIhfvrTn0Imk+HrX/86lEolNBoNeY10Oo3V1VUsLCxgaGgIiUQCer0eNTU16OnpQU9PD2w2G6ampijPkMvlNGO+kUmFNUPZsBYLQzkcDmZmZhCPxym3aGxspNJyOBymiiM78KLRKK0r+zexWAwOhwOLxYKTJ0/i2LFjyGaz+OM//mNIpVJ861vf+tSMhP9p9Dm8Xi+eeuopOBwOfP7zn0cymcRHH320qXGwuFapVKKyspJgFaOjo7DZbHC73fD5fDAajZBKpYjH4+SSJycnYTQakcvlMDQ0hIWFBaqy3CrxZtUhsViMlpYWtLS0QK1Ww+Fw4OLFi3C5XJDL5aiqqiJPwrwAA+splUq0trYSzITP5yMWi8Fms9GMeSQSweTkJD744AN84xvfoMnBp59+GtXV1Ugmk5QfsLg/FothdHQUfX19yGQyBLVneQ07oScmJqDX63Hw4EFwuVysra1henoaIyMjuH79OnnTxx9/HB6PBxMTE5ifn6fPJpFI1nmU/PyBkUZwOBx4PB4sLS3Rxm1ra4NEIsHc3ByWl5fXhaLMQBKJBJaWljA5OUmfiyGMVSoVFhcXcerUKRw7dgypVArf/va3oVar8cILL3wqRsJ/2MpKiUQCL7zwAiYnJ/GFL3wBmUwGp0+fhsPh2NRzMFCb3+/Hxx9/jMbGRlRWVmL79u3Q6XQYHh7G4uIienp6oNfrYbVaqU8QDAYxNDSEcDgMj8dDxM+bjbbG43GEQiGIxWJ0d3ejtbUVIpEIc3NzOH/+PLLZLMEsTCYThEIh8e4yBpRwOIxLly7BZDKhra1tXbNOp9OBw+GgoaEBR48epU780tISnE4nFSKuXr2K4eFhRKNRlJWV4amnnkIsFqNO9uDgIBoaGqjKlt9zEQgECAaDOHXqFIBfgzPr6+vR1NSEvr4+9PX1wW63Y3JyEh9++CGUSiWam5uxZ88edHZ2YmJiAlNTU3C5XJQnbeTx4vP5WFxcRCQSIfRAKpVCS0sLMaBMTk4im82itLQUPT09EAqF8Hq98Hq9UKvVaGxshEKhwNWrV6lMzTy/SqWCxWLB6dOnceTIEcTjcbz00kvQ6/U4cODAQ89J+A97luOb3/wmzpw5g5deegkCgQAfffQRVlZWiBVko3EUFxejtrYWQ0NDCIVCGBoagsPhQEtLCxobG6FUKjE7O4tIJILS0lLqc7CHabPZwOVyCVW7MWxLp9PE/tHe3o6Ojg4IBAJMTExgdnYWUqkUXV1dqK2tpQ2ztraGq1evYmFhAVwuF42NjdizZw/0ej1UKhU8Hg8ikQhVljKZDORyOXK5HFGW8ng8mEwmIqdjMX80GiXKIpYjMW+yY8cOnDlzBv39/esMhH0mPp+PpaUlMsR4PI6RkRGMjIxg37592LFjB0wmE2pqahCJRHDjxg0MDg5ieHgYzc3N6O3tRUtLC27cuIGpqSlEIhGoVCrCS7FLIBDA7XZTyZnJLiQSCRpv1mg06OzspKLJxMQEldfb2trQ2NiI6upqTE1NrcuBhEIhPVOhUEgQo+eeew4XL15ES0vLQwU48h9WUs7n8/Gf//N/xs9//nM8++yzUCqVOHfuHKxWK9Rq9aYMG1wuF3V1dSgpKYFAIEB/fz8ikQjBH5qamlBbWwulUolkMgmtVguFQkHl21tVp9iJGwwGiW60t7cXMpkM4+PjmJqagkajwdGjR1FVVYVcLkcl2mg0il/96lcIh8OoqalBMBjE4OAgwuEwXnjhBRiNRszOzlKTMpVKEfhRKBQiEAjQIFQ+KJPBWY4cOYLOzk6qXrE8BgCqqqrQ2NiIGzduAADF7vkVorm5OeRyOZjNZrS3txPFkclkonxoeXkZHo8H27ZtQ2dnJ6ampnDjxg2MjY2hra0Nu3btQlNTEwYHBzE3Nwc+nw+lUnnT+C0LmxmphdVqxdraGng8HmpqaiCXy2GxWAidIBKJkE6nMTMzg/LycphMJrrf/MOUrc34+DgkEgmOHDmCV155BSdOnMDly5dhMBgempHw/vzP//zPH4Zx/OxnP8Of/Mmf4NChQ6isrMTVq1cxNjZGfY7NcoJsNgu32w21Wg2dTge9Xg+Xy0Vd2pWVFQQCAej1esjlcnLlPp/vlrEqmy3xer3QarU4ePAgOjo6sLS0hHPnziGZTOLAgQPYs2cP4vE4rFYrMYMIBAJcu3YN8/PzOH78OI4fP46mpibYbDZYLBbU1dWBw+FgYWEBxcXFRGXKmnUTExOIRCJoaGjA2toaLl68iFQqhQMHDsDr9WJ2dhZra2sYGRnBtWvXcO3aNZSXlxOSuLe3F0ajEaOjowCAiooKVFVVIZVKgc/nIxQK4fz580in0zREFgwG0d7eDq1WSw3K1157DcPDw3C73WhubobRaERLSwuEQiGGh4cxMzMDg8GAzs5OGI1GeDweOJ1O6tbnPys2m8KMjs3rNzU1EViS3V8+A01lZSU4HA4BITfydbH3sVqtkMlk2L17Ny5cuID+/n586UtfemiajPyHUbG6fv06vvnNb6KrqwuNjY0YHR3F0NAQZDIZAeg20vgwaEQkEsHVq1exfft26PV69PX1ob+/H6FQCEKhkB5Ma2srEokEVldXNx0+YgvJGobbt29Hd3c3PB4P3nrrLeRyOezduxeNjY0IBoP42c9+BqvVSn/f09ODo0ePUoJaUlJC8xFdXV00Q8GMwm63IxaLUTWtqqoKGo0GHo8H//f//l963f3795PxabVaSsb5fD6tDdswLK6vr6/H1NTUOhiHQCDAysoK4vE4duzYgfLycgwODmJ6epoKDRwOB2+99Rbcbjc1PAFQb6e1tRWNjY0YGhrC+fPnodfrsXPnTpw4cQIjIyMYGhqiMeONo7csDGQ5nUAgWEdAxxDAyWQSZrMZMpls3XAW80T5nkkmkyGTyeCTTz6BUqnE888/j5///Of43ve+hx/+8IcPJR/hP8i8g1U6vvCFL8BoNGLHjh2wWq24dOkSRCLRTfARlszW1dVheHiY5qhjsRgZicFgQF9fHy5duoRYLEaLzuZDNhs+Yp1fn8+H4uJiPPbYY9BoNLh8+TKsViu6u7vR1dUFHo+HWCyG1157DSsrK9i1axeKioowNDREIYxGo0Eul4Pb7UZRURFSqRQl4H6/n3KYyclJ4qti61FTUwMABD8pLi5GUVERIpEIqqqqUFVVdZN2SDqdxq5du9Db2wuJRIJEIoEDBw6gqakJGo2GRnFzuRzGxsbohC4rK0N9fT1isRj1VE6dOkWfd2xsjMI6FvJFIhFkMhns3LkT7e3tOHv2LN588020tbWhp6cHZrMZFy5cwOrq6rom7kY0cyKRQDgchkajIVh8XV0dJiYm1pWCWVmeVeS0Wi3sdvs6aIxSqYTX68VHH32Ez33uc3jiiSfwv/7X/8K2bdvw1a9+9YEbyQMJsfKFab785S9jcHAQzz77LMLhMD766CMkk0mo1epNR0y7urpQXl4OlUoFp9NJ46jJZBJra2vQaDTQ6XSEFcqf89gsJmUI4Ugkgq6uLhw+fBh+vx8ffPABBAIBnnrqKdTV1REpgtPpxMWLF9HW1oYnnngCCoUCGo0GdrsdLpcLjY2NGBwcRDAYRE1NDSQSCQYHB2Gz2dDa2orKykrMz8+Dy+XCbDajo6ODKE9LS0vR0tKC6upqlJSU0Ez8Rjg7S+zzy8T5PQqBQACDwUCVL1YKX11dRSgUwsLCAq5cuULd8MrKSly8eBH9/f3Q6XTYvXs3hoeHodfr0dTURHREH3zwAS5duoSZmRn6Pa1Wi6GhIczMzKCmpgZtbW3EacwI9DbmdwxKU1lZSaFvY2Mj9bJUKhWsViump6cJ6dvT04PGxkYCmeZverFYTBCavr4+5HI5/NM//RNOnDiB4uLim2ZgHnkDYaHVD37wA/zwhz/EiRMnIJPJcPbsWbhcLmi12lt+IJ/PB5VKBb1eD51OB6fTuc49e71eIhhYWVm5iYFjY/mWVaiOHDmC1tZWXL58GcPDw9i5cycOHz4MsVhMgpsCgQAulwsTExMoLy9HfX09Tp8+jQ8++ABOpxMulwu7d+9GKpXCzMwMRkdHMTIyQknwvn37qBy8bds2tLW1obS0FAqFgsgXWNLNaINude8bCdc2xulsE+b/Tn19Pc3CCAQCLC4uEuHc6dOnIRQKEQ6HKck3Go1ob2/HmTNncOnSJQiFQjQ1NWFtbY0MqLa2Fk1NTQgGgzh//jyRfzPkQigUom54/qHk9/uRTqdRVVUFg8GAWCwGo9EIsViMxcVFjIyMIJVKQaVSoa+vjwarlpaWqPGYHwEIhUJ4PB7E43Hs2bMH8/PzOHXqFL72ta+tg7I88gaSn3d88YtfRF9fH+rq6oj0+FYVq3y2DdYw1Gq1lJiz+edMJoOKigrqvObDTzZL8IuKivDUU09BIpHg3XffRTqdxnPPPYfGxkZMTU1RIsweCIfDofCus7MTYrGYKlnMg+3evZvyI4FAgO7ubhw4cIDKoawvwlgV8/Oqe9Uv3+wzbvwZa4IWFRWhoaEBra2tqK2tpW73M888g87OTqRSKXi9XpSWlkKlUuGtt96CWq3Gl770JezYsQPV1dW4du0aQqEQmpubkUwm0djYiOLiYly8eBGrq6tob29HTU0NXC4X1tbWqNGZ/yxdLhdBYlioNDIygrm5OSSTSRiNRmzfvp1K41evXoXP56NxZVbhyweR2u12KBQK9Pb24uTJkwgEAnjyyScfWFWroAbCNn0sFsNTTz0FDoeD/fv3w2Kx4MKFCwSSu9WgEav/MwRovpEw2syWlhaUlpZiYWEBy8vLN1Wr8nsbjY2NePzxx7G6uoqTJ0+iubkZTz/9NIRCIc6fP4/33nsPa2tr6OjooHBHoVDA6XTCbrcjHo+jtraWxm5Z6FhfX0/NwPb2doLU5ze9Pg1d8vyZFAZgFAqFqKmpQUtLC3lmuVyO4eFhlJWVIRqNwmKx4MCBA6isrMT169dhMBgIEtPR0QEulwufzwetVouuri7Mzc1hYGAAVVVVaG1tRSwWw9LSEkHy8+XfgsEgnE4n6uvrCVnN5XJRUlJCpfW1tTX09/dTzplOpyESiQhXx/pjbM5kaWkJ9fX1KC8vx7/8y79QeMaayo8saQNLmP79v//3+Ou//mt85StfQS6Xw9tvv41wOAytVntTzZtBDRjsgOUS6XSaeGeNRiPpXiiVStjt9nVd2HzjSCQSCAQC6O3tRV9fH65du4aJiQkcP36cHtLZs2exsLCA8vJynDhxAtFoFDKZjN47HA7jlVdeIWkEACgpKcHhw4epkbVxyvBRZebIRz+z9UokErhy5QoMBgNCoRCuXLmCr3/96xCLxfjf//t/Q6PRYPv27TAajdDr9eByufiXf/kXpFIpvPTSS1AoFLh06RKuXbuGxx57jDzOtWvXqAO/ceJTp9PRs1EoFNi9ezckEglsNhuGhoaoHcBAnNu3b4dYLMbly5epr8Uut9uNkpISGrYKhUK4ceMGdDpdwZ9FwTwIC60uXLiAb33rWzh48CBKSkpw4cIF6pTn3zjzFn19fTCbzRSeMENgRsIaT4zWZ2FhATdu3LipesHCs3A4jH379qGrq4u69C+++CJMJhOi0SjeeustLC0toaurC88//zwGBwfx+uuvQyqV0vCVRCJBU1MTzVy0t7dT5Ss/MX7YHuJevcrGnoFQKKQGbDKZxOTkJEKhECXQ4+PjWF1dJZDnuXPnMD09jaKiIjQ1NSGRSKC6uho6nQ6nT58GAKqyzc3NUe8n/zAMBoPUNK2vr0dpaSlsNhsGBgYohEomk5DL5ejr64PBYEAmk8Ha2tq6nISNELNO/o4dO3Dx4kWsra3hueeeK3ioVRAPwurhiUQC27dvh9/vxzPPPIPp6WmcPn16Ha4nf+Cps7MTNTU15FJZA48lxKzTzdjMWT2dnfT5pyMbQz18+DCqqqrw7rvvgs/n43Of+xwljVqtFjMzM3jjjTdQVFQEsVgMi8WC6upqHDt2jODn+Q+ChS3sPh5Gc+phsscIBAKcO3eOkMQSiQSxWAxHjx5FX18fRkdH8cYbb0ClUuHLX/4yxGIxASMlEgncbjdee+01VFRUYM+ePZiZmcGZM2doDiZfIo55r23btqG2thYXLlzA8vIyJBIJ4vE4tFotent7oVQq4fP5KA/ayBLD5XIRCoWQTCbxuc99DvF4HG+//TbeffddPPHEEwUt/RbEgzDv8Vd/9Vf45S9/iWeeeQaJRAJnzpwh+s2NpUAGcy4pKaF5B6FQCL1eD6PRiNLSUhQVFdE8BdPS2yznYCOvx48fR1lZGd58802o1Wo899xz4HA4OHnyJC5dukRildFoFNPT0/D7/Thy5AiefPJJ+Hw+vPzyy4hGo6itraWZcjYS+5vgLe7Fs2SzWSKsKC4uxvLyMpRKJZ566il4PB688cYbSKfTeOaZZ2A0GonNnoXUGo0GTU1NuHz5MtbW1tDT0wOdTofZ2Vnqb+Q/e7ZXysrKqPCRTCZhMpnQ29tLOSBjwWdl7nxKWNatj0QicLvd6Ovrg9frxfvvv49vfvObNHhWiGd13wbCXNrMzAx+67d+C729vaioqMDly5dht9uh0Wg2vVEulwuPx0NEZSsrKyQYqVarIRaLIZPJUFZWBpVKRZCEzapesVgMx44dQ2lpKV577TVCwbJT32q1YnFxEVarFVVVVWhoaMDCwgJisRhaW1uxuLiIV155BclkEs3NzdDr9evYDDn/ytVc2UavqKiAwWBAfX09FAoF3nrrLbhcLuzbtw+tra0U6rD+h9/vx6lTpwhdfe3aNdhsNioDz8zMrIONsGcWDAYhk8lQVVUFlUoFo9GIxsZGSCQSYudnz06tVmP79u3QaDRYXl5eN54sEAgIpd3b24szZ86Ay+Xi0KFDBQu17ttA2Eb6nd/5HSwtLeHIkSOw2Wy4fPkyicjcjvPJ7/ejpKSESAEEAgHq6+uxvLyMkZERZDIZTE1NIRgMrvMeDKIeDodx5MgRlJeX47XXXkNlZSWeeOIJImAQiUREdjY/Pw+bzUajsiMjIzQLUVZWhs9//vOoqam5ZW/lX+vFGo2JRIIasWx2RCKRYP/+/ZDJZARvZzCS119/HUtLS5ifn0dNTQ127tyJgYEBLC0toaenB2q1GtPT0wQ9yd8HTqcTQqEQZWVl0Ov1yGazmJ+fx40bN4iLrK6uDtu2bYNCoYBCoUA0GqW+Fstb0uk0VlZW0NjYCLVajZdffplAo4VoIN6XgbBY7/3338d/+S//BceOHaOkLhqNEunzZg0wZlgMCsGoZsxmM2KxGPr7++H3+7G6urpuCCq/WxsIBLB//37U1tbi9ddfh9lspinFt956Czdu3EBTUxN4PB4mJyeJqMFqtWLnzp2QyWRYWFjArl27cPz4cYqF/7UJUd5tyMXgMyKRCAsLC0TSzWbvM5kMXnvtNaytraG9vR02mw0TExOoqqrCjh07cP36daysrFDiPj09TVqM+ZXL1dVVuN1uuFwuzM7OEjBUq9Wiu7sbVVVVxHwvFotRVFSE1dVVCvNYqMXmcnbs2EEH3he/+MVN2S0fmoHkU06y2Y7t27djbGwMk5OTUKlUN21qNg6aX4rj8/nw+XzEGZvJZAiMyFScNrIF5nI5eL1e9Pb2orOzE2+//Tb0ej2efPJJAr/Nzc3BZrPB6XRidnYWU1NT2LVrFxQKBSwWC5aXl2lmvampiUjd/i0ax2aGwuVyCR6zuLhInfWSkhK8+uqrxPT++OOPo6OjA8PDwzTMtX37dmr69fb2AgDm5+dpApJtXA6Hg1AoBJ/Ph3A4DD6fT4rAarUamUwGExMTGBoaAgBigcynEmL3ura2RrMub775Jvbs2YOampr7fqb3bCAs2frxj3+Mv//7v8cTTzyBVCqFjz/+mBgrNnLmKhQKGAwGotDP9yaMJ5YRyOXPdGzMOxgmau/evfjwww/B4/Hw/PPPIxgM4oMPPoBUKsWuXbvgcDiwsLAAr9eLxx57DPv27UNFRQVWV1dhs9nQ1NSE4uJiou/5txRWbeVKJpOUkwBAdXU1zpw5g9nZWdTX1yOVSuHatWtobW1Fc3Mz8WQJhULU19fjwoULSKfT6OnpQSgUwtLSEmQy2U1YOTbPzgbTGNaL4bicTiex+FdWViISicDr9a5rIMZiMTo0WT77jW98475h8fdkIOwEiEQi+NKXvoSioiK0tLRgcHAQS0tLNyXmmUwGDQ0N6OnpQW1tLSXdyWSSwjRGcmA2myGXy29iQGSL6fV6YTQa8fjjj+Pq1atwu9148cUXkc1m8fbbb2N2dhYlJSUwmUyorq4mbiiFQoGKigrw+XyYzWaag3hUQ6rbce4+TG/COI1bWlpgs9nwySefQCqV4oUXXkBrayumpqbQ39+PnTt3EjSHaShWVlbSaG9bWxuFVPmHJ3uPuro61NTUIBAIYHBwEJOTk4QCTqVSBMQsKysjSqH8i8/nw+v1QqVSoaWlBSdPnkRLSwtaW1vvK2G/JwNhb/h3f/d3+MUvfoHHH3+chnUEAgHBSdiHr6qqQnd3NwKBANbW1jA/Pw+fzwez2YyioiLCLDFi6tXVVRKhzPccjCXjxIkTWFpawo0bN/DFL34RUqkU7733Hqanp9HT04MDBw5QUl9fXw+73Y65uTl4PB5UVVUR1J41JB8lg8gnSmA8vOweP40+DPPw8XgcOp0OEokEMzMzsNls6OjoIAZ9k8kEDoeD0dFRQirU1taioqICJ0+eJJKL+fl5xOPxdeVfVtFk/GYLCwskncCqa8FgEG63G8FgkPiC89dBIBAgHo/D4/Ggu7sbXq8XFy5cwO/8zu/cF5jxrg2EbfxwOIyvfvWrKC8vR0NDA65du0ZzAvkPWygUoqenB/F4HJcuXcLc3BwSiQR6e3vR2toKk8kEk8mEQCCAcDhMALeNeUc6nUYoFMKxY8cgEAhw6tQpPPPMMygqKsKpU6cwMjICAAiHwzRrEY/HqSpmsVjg9XrR1tZ2k8zao3CxGXTWrGRsLaFQiIaO2NjuZqzuDyMvyeVyqKioICzX1NQU6urq0NjYSLPn7777LuLxONbW1jAxMYG9e/dCKBTi4sWL6OjogEajwdTUFFGr5s/rhMNhVFdXQ61Ww263k5puaWkpAoEA/H4/otHoul7MRi/i9/shlUrR2tqKM2fOkDjQvXqRuzYQ9kb/8A//gF/84hc4duwYgsEgLl68SLSYG/XE2QSc1WqFQqFAT08P6XGsra1Bp9NBJpNheXmZNu5GA/F4POjq6kJzczPeeust9PT0oKurCxMTEzhz5gwBBycnJzE9PQ2NRoPS0lIq9VZXV6OtrQ0KheKRMI58QB9jTfT7/cRlNTk5CbvdTpOKk5OTJFEgEoluCfp8GHmJ2WyGTqfD1NQUTCYTpFIpMpkMFhYWsLS0hBMnTmD79u24fv06AoEAnnjiCSwsLBD7TDqdhsViWZePMGAjKw5kMhk4nU6k02nYbDaKKPLZ7DczkEQiAY/Hg87OTni9XvT39+Nb3/rWPXuRuzIQtvHj8Ti+/vWvw2AwoKmpCQMDAzd5j3zByYqKCqRSKSSTSXR0dKCsrIwQnIuLizAajZR3bKxdM5iITqfD0aNH8fHHH9MgfygUglKphFarRWdnJxE4sKqVVCpFaWkpkskkETmzrvhWoDO3WtCNG3Oj/vqd1KTyhW9YufPVV1/FysoKvF4vxfCM8FqhUCAQCCAYDMLj8aC6uhoKhYKGrTbjEt5MBuFuPuOd8hL27CsrK3Hy5ElcvXoVHR0dNHff29uLa9euIZlMorW1FTU1Nbhy5Qo4HA7a29vps8pksnWHhdfrhU6ng9lsps98N5UoRvckl8vR3NyMs2fPoqOj457ZULj3gt954403MDMzg66uLiIbYCXZ/AfASrirq6swm83Yv38/ibIweDOTA2B0nBs9B0veDxw4QPywx48fRzwep0Vta2sjnqq2tjY899xzEIlEOHXqFCYmJgg/tBXPwcJCqVS6KSs6YxhkXLpM5plhk0Qi0U0E2PlfjIKUhU6vvvoq3nzzTRpTdTqdmJubQyAQoG5zd3c3iouLIZPJoFariQAvnzY0XwKBeRh2P+w989eV5Yr5zChbDd2YkcjlciQSCaysrMDv96O8vBzNzc2wWq2YmZlBcXExysrKaM2OHz+OgYEBhMNh7NmzB8D/fx4+/3XHxsZI1jqf7XIrBziTkrhx4wYUCgVKSkrwP/7H/7hnlO9deRAWh/7e7/0eAKCzsxMjIyOw2WxECrCZUTmdTlr8paUlDA8PE66KUXqOj49TlzR/YVjprry8HCdPnsSRI0duwgSxDi8bUiopKUFRURHS6TTlHLc7KfOZ1AUCAcbGxrCwsACNRkOxMvOITHYgEAjA4/EgFArh1KlTNIbLPFS+IeWTVHu9XlgsFrz55puYnZ0l4J3ZbCaWdqbuxB4w49Lds2cP9uzZQxBxDoeDCxcuQKPRQKFQwOfzwePxYHV1FcvLy3A4HAiHw3QCs690Og2/34/x8XEMDQ0Rmprd61aEfVhfSyQSYW1tDQ6HgypRjMnkueeeQ2lpKXEcG41GxGIx3LhxA9u2bUM2m8XCwsK6UIs1j61WKwKBwD2BDnk8HgKBAHQ6HaqqqvDRRx/h0KFDqKiouOu+CP9uu+YXL17E5cuX8cwzzyASiWB2dva2C8sSMMaNxPirtm3bBh6PB41GA6vViqWlpXVwhPzQqru7G2fOnEFVVRXq6+upmrVZ+MDAi2VlZSgvL7+jkhOXy11Htcnn82EymfDWW2/hypUrRGmar+fBFKLyQ0kOh4PZ2VmMj4/TCc7CunxhnNnZWUgkEqhUKjJiv99P78Ne0+v1IhgMYm5uDiKRCK2trbBYLODxeKitrcXs7Cw+/PBDejbMcJmnzC+UME4qxujORH58Ph+qqqogk8kQi8WwtraGVCpF67ZVT7Jnzx5YrVb85Cc/QVlZGR00DGbEemaRSAS7du0irqyuri4sLi5StSof+csO0LvNs1h3ncPh4MaNGzhx4gTkcjl+9KMfYe/evXedg/DvduTz7//+76FQKOjUDwaDxPRxu79lBG58Ph8GgwEKhYJIxMbHx28KAVKpFBKJBI4fP06ECV/96leJZfxO95rvVW61kHw+Hx6PB4ODg1AoFOsMVKvVUsWEhXn53dv88Is1NJmLB34Ny2dhYL5oDtucYrEYS0tLiMVi0Ov1NEnHoP/s+0AggLq6Orz77rtQqVRYWFiATqdDZWUlxsfHIRQKSZYgf+Bs42dlxs0YTMRiMVXN3nnnHXg8HjgcDrS3t6OiooIG2LbiReRyOV588UWcOXOG5Oz279+PZDJ5E9yDw+HgwIEDeOedd1BdXY2+vj68++67hIDYqFZ8r5dMJoPD4YDL5UJPTw/eeecdWK1WVFRU3FUuwr+bytXq6irefvttdHR0IJPJYGZmhoBodzpx8j3D4uIiVldXkcvlSPpr43yHx+OhoZ5f/epX2LNnDyQSyaba3FuZ4b5VuMjGOhlVv1QqJVEcxtKYL72Qr7/O+hQbBWnYpsj3qqwZajQaUVxcTLSojFTN5XKhuLiYcEpMmiAcDtN9ejwe1NfXY3JyEnK5fB35AzNg5jFY2JifVzADYjoqUqkUq6urFMrs378fO3fupPfPP9Hv5EXUajU+//nPE8EGu6eNxpFIJFBRUYHq6mpcvnwZR48eRW1tLebm5mhICgUYvxCLxQiHw5iYmMCePXtw7tw5/OxnP8Of/dmf3ZXhbSkHYQbyT//0T3jzzTdx8OBBuFwuDA4O0rzG3V7sNN34t2wRM5kMjh07hqmpKWI73Ir3uNuFFAqFaGtrw7Zt22A2m6lSxDQBWT6RfzqzfCIfDr8ZFJ+FP/mVLlb6ZqyCjL9XKBRSqMEMz263w+/3w+/3o7Ozk96HiQex0JblO/mcWsyzsf/P11Bn4TJjhWc6iWzemzXyZDIZHX63a1Ky+2Kvyw6Qjb/LQlE2D3L58mVotVpUVFQQBVCh2Nvzc63m5mZixv/2t799VyVf7lbfLJvN4l/+5V9QWVlJ3U5mqffiCtnD2wxrFQgE0NzcDIFAgPHxcezdu7egvYt83i6hUEiU/KOjowgGg1AqlSRZxgQrWaKeD+bb2MnN/2L/ns8oz8IoVhZn8TrTa2fcVtlsFtPT03A6naioqKA+Eo/HoylHVq3ZTPqZhbRs0IjdE9ucrBmZL/bJejHRaBRDQ0N444038Oabb+LGjRs0hszyqXxpuI2Vr42eNJ+dRCqVQiwWY2FhAalUCr29vejv74darSZqoUI+YyYBt7i4iPb2dkxNTeHixYubHmj3HGKxjcTQmseOHUMkEsHi4iIteqEaVkyfQyQSoaurC4ODgygvL0dZWdlNg/v3g21imyYajdJMCCNuYM2wjSXefH2MrWCnNvs521RqtRrl5eXIZDJYWVmBQqEgLUOxWAy/349UKgW9Xg+1Wk2aHXNzc1AqlTexp9zN/eT/GzMkVv1LJBKQy+WkyuXxeDAwMICRkREUFxejsrKSelb5fRzmlTYaKfNuTIJ6cnISo6OjCIfDREHEaIDa29sxPT2NWCwGiUSy5Q18u8/IPtv09DQaGhogkUjw85//HAcOHNiyIfK3urFeeeUVcDgcotwJhUKbsiPer4EEg0EqAVqtVhLYuduTJX9jsx4BCzE8Hg9mZmYwOzsLACgqKkJdXR3m5uZojiWbzSISiVA8z3KtfBQy+3l+jJ+fC+T3F1jomEqlIJFIyCM0NTURaFOhUGBpaQm1tbXrRGui0SiUSuU6aAbLE/JzHJZbMHTrZs3BzVgcWU4UCARo47NGnkKhIKns6elp8Pl8KBQK6PV6aDQa0lxkoTYLI2OxGGHvWJFFIBCgubkZPT09xBTZ09OD/v5+fP7zn0dDQwOGh4epmleIiymLBYNBNDc347333qMoYSvzIvw7bTJWFnz77bdRU1NDAir5ykOFMg6W4LW2tmJoaAiVlZUwGAwIh8NbavBtPL1YXM5iUbvdDovFArfbDT6fj+LiYgo5GDGETqcjbl2FQkGz6SaTCQ6HAxwOB1KplBaZnbxFRUVEeqbRaOBwOFBcXAy/30+IYRbrs9eUSqWQyWRIJBJoamoiD2MwGAAAgUCA5uJ5PB5UKhUCgQCRXbOHzLzN4uIiZDIZlc6ZlAArTYvFYiQSCSrDCgQChMNhpFIpGrcNBoNYXV2FUqlEKpUi9hDG8AL8WsNkYmKCCKvz+w/5XoUVO0wmE7q6uoiKlDWE0+k0GhsbMTAwgNnZWQqDWBRxv3uLpQCRSAQLCwtoaGjAwMAAzp07h2eeeYbKz/dlIIxpcHJyEk8++SRCoRDsdjvVmgtlIAyt29LSAgBYWlrC888/j2QySd3gjYqs+YM3zIBYM49xvK6urmJtbQ3BYJAAfxqNBqlUCmtra+ByuQRHkclkUCqV8Hg8KCkpgVarJawYqyKVlpYiHo8TcM9ms6G4uJik2BiPFCNHk8vlWFlZoQIDY1RnOcr09DRUKhUxNRYVFVG+xU4+lUoFr9dLhs96ISw3Yh6G5UYqlQp+vx9ut5s0Sth9ikQiLC8vE1FCSUkJstks1tbWoFarqXknFouhUqnQ2NhIJXeGFmDKt/l9G9YbYp5WKpVCLpdDoVDQZmdVt2QyCafTCalUipKSEnR2dmJoaAh1dXWora0lXZBCVLRYmLewsIDOzk7IZDK8/vrreOaZZ+4/xGKb8d133wWXy0VRUREsFgspCBXSe7DQpbW1FRMTEzCZTDAYDCTMwmTBmNYG22DJZJI0y6PRKEkks0oYk1hmzImMAYUlsfF4HG63m7QPGWCuvLwckUgEOp0OSqUSiUSCSLUDgQAMBgMEAgGKi4uhVqspNGMwerZhFQoFhEIhKUflcjmUlJQgGAySEbO+i9vtppkHn89HnyEcDkOv11MjkCX+4XCYqHXyG2RMnkEoFEKr1ZInVSqVUKlUkEgkFE5pNBr4/X5EIhGMjIxAp9NBpVLRUJLX66UEWygUkhS1xWKBUCiETCajEIsl4czLRCIRLC8v0/ehUAgejwc+nw9isRjHjx8nWtOBgQFYrVa0tLRgamqKSMsLscckEgk8Hg8CgQAaGhrw0UcfIRKJEA7sdtEJ/06nei6Xw8mTJ1FeXg6hUEiDKvfS5byT9ygvL6cKGRNxZE0tprORSCQA/JqYjDW78itK7HvmOlnDjfUVlEolGRKbZMtXSWLGz4xJKpXSPAQjt2PlSOYNstksNQYlEgnS6TTcbjeEQiGCwSDNprAcgfU+SkpKaO6eNQVZR5xtkKKiIspf2EnNSBNcLhexujBeMbap2Odlp7pOp0M8Hkc6nYZcLqeBt3g8DrvdDqFQCLPZDKvVColEAq1WS0bE4/HgdruRy+XIc7A1YZokbJT6VpdAIIBcLifC7NraWrpnVhgYGxvDU089hdLSUtjtduh0uvv2IizMjEQisNlsqK2txeDgIK5du4b9+/ffMczi36l6ZbFYMDo6il27diEajZJATSHDK8Z43tLSAqvVStLKqVQKo6OjyGQy2L59O9LpNPUp2NxIPovfRkkzBoRkm9Ln88HlckEkEqG4uJjCmGw2S9OFrATKQjKRSIRwOIxkMkmASLYZmJDl6uoqhEIhVlZWCETIhDk5HA5VyJg0msfjgUQiITEetVpNdEcymQxut5u4uVi+k0gkEIlEyHuwkigDOdrtdmi1Wvh8PkgkEupis8/EyO/y74XH48FqtUKpVMLpdILD4aC+vh5LS0vw+XxETZpKpYglhB1CDEXNuAcYUoCpf7FSNHsGDHrDDJgNybF+THNzM27cuAGv14umpiZYrdaChFjsc3I4HPJQfD4fH3zwAfbv33/vIRbb/OfPn0c0GkVJSQlNdCkUioJ6DyYWWVJSQqOSzAAZf+vk5CQ8Hg+d4CzOzwcD5jfMWPjldDoRiUTA4XCgUqlQUVEB4Ne0M7FYjJhXmBExcB8LZRgAkQ3ryOVy+Hw+cDgcUqvyeDwoLy8Hn89HOBymnCIQCKC4uJg8Tzabpb9hoZFarcbi4iLpXDD8mdvtpuJBNBqFyWSCxWIBl8slI2JJN8s9UqkUHA4H1Go1fD4fVbuYUbMyOjtImDEztLXVagWHw0FVVRWcTidWV1dhMBjA5/Nht9uJGpSth81mo8KGwWCARqOBSqUizXXWHGWfnR2EGxuJ6XQaGo0GZWVlmJycJMZ3tt73W/JlB53T6aR5ljNnzmwJ4cu/E1TjzJkzVIufnJy8iQisEPlHNBpFV1cXwuEwYrEYnZ5M/KW2tpYeis/ng8/ng9frpWR5Ywc5Go0SxY9CoUBRURFVnBghBFN5cjqdkMlkCIVCcDqdlLSyuYJgMAij0Qi/309zLYFAAFqtlqYX2UaUSCQIh8PrBoBKSkqoEsi60/F4nDyx0+mERqOBXC6H3+8nxSmNRkP6jAyDBYDmuROJBHFVsQOCHQSMBEMmk9FsRDAYhFQqpQpXcXExCQsZjUYsLS3BbDZTf4uNvy4tLUEqlaKurg4+nw9OpxOZTIbk4sLhMIEcWSNTIpFAqVTSl1wuJ7Z2Pp8PtVq9Lr9goWNzczNOnz6Nvr4+VFZWEmS9EF6E9ZecTidqampw4cIF2Gw2mM3m22Kz+Lcjg0smk+jv70d5eTnRRLLTqhBWzU4PDoeD2tpazM/Pw2QyrVOqzXfFOp0ORUVF61w60xt3uVxwOBzwer3ErVRaWkqyaouLi8hkMlCpVDCZTAgGg7Db7TAYDIhGo/D7/TCbzdSkYiKhJpMJbrcbKpUKYrEYDodjXXONdceZUeUn0uz+WM9EIBAgEonQCRuJRCCRSEhqgAncMPwXKwiwJDgYDFJuwIR/JBIJrRXzGqxkrlAo6LNIJBKEQiEYDAbE43EEg0HodDr4/X6Ew2HodDrY7XaUlZXBZrNBKBRCLBajpqYGNpsNU1NTKCoqQlVVFUFUJBIJTCYTFUACgQACgQBCoRBWVlZI4So/3JLJZNi/fz+Ki4vXDXwlk0mUl5dDIBBgeXkZtbW1GB0dvQnEeK8Gwvo7drsdnZ2dJOvHpCvuyoOwDzU/P4/FxUUcOnQIkUgEHo9nHcFzoZJzJt9ss9mwZ8+edbASxqDIqk/hcBh+vx/BYBCRSASRSISGrdjIL9uIy8vLAECNLZVKhXQ6TZOLRUVFcDqdEIvFqK6upqoWy01kMhkkEglBPtLpNIVQLLRhf8PQr6wkKhQKUV5eDovFsq4JajabKYFn0soikQjl5eVwOp0k3eZ0OgnxzKpO7HR2OBzQ6/VUxvV6vcR+LxaLKddgnozpnrhcLsKCud1uIkSYnJyEWCyGQqGAx+NBUVERrFYr9b0qKirgcDhgt9uhVqshlUqRzWapEieTyWA0GlFXV0cwHRbqbsSj5RdPNipoSSQSVFZWYm5uDgcPHoRWq6Uo4H4jFhZlMLSCWCzG+fPn8cILL9x9iMVu5vr160gkEtDr9fB4PFRvLzS0pLm5GYFAALlcjnoSLFQQCASwWq0YHh4mg2CntUAggEwmg16vJ32PWCwGn89HHWKFQkGeaGVlhU5OoVAIu90Oo9FIPQxGhsyGdurr6wkKIhAIkEgkkEwmSS2JAQ3ZhmE9CCaG2dvbC5/PR+FRRUUFXC4XNBoNDU8xwu75+XlKeFnCPT4+Do1GQ2uj0WhgsVioJ8P6EIx0zWw2IxQKIRQKwWg0gsPhUJHBYDBQ6KXRaOByueh7s9mM+fl5NDY2IpFIkPeZnp4mGiamqejz+ShscjqdCIVCVCQAQCPC+dLdrPy9GfZu44hCbW0t3nvvPaTTaZSXl2N4eJgOkkLkISw0N5lM6O/vv+PE4m3LvP39/eTe89GWhTIQNrNRUVGBpaUlFBcXQyqVUsjAoNQNDQ2oq6sjjb98nA+jenE4HPTAeDwedWx9Ph/8fj8SiQRhoEKhEBYXF1FUVES8sGwaj0k1m81mZDIZGr5iG5FVkUKhEHQ6HYLBIFpbW6kY0NjYiMnJSYJh7Nq1i8KcUCiEeDyOQCBAc92MW5aFjizscDqdKCoqQi6Xg8/nw+7duyGXyzE1NUUUPKwRWlpaCq/Xi9raWpr7bm1tJYZLt9sNAFCpVAgGg6T/yHpLTKh0bm4OTU1NWFhYoHLu0tIS1Go1UY+KxWI4nU7weDzs3r0bPB4Py8vLcLvd5M39fj+xtjPPYTAY8PTTT9+SNIM9a6PRCKFQiNXVVVRUVGB4eHhLPAJbHaRiBHPl5eW4ceMGXC4XHR6bvQf/Vu4IAIaHh2E0GgGAFnmrI5lbcXnRaBQKhQIqlQpXr15FT0/PpoTDLH5nsIlIJILV1VWiEA0Gg+RtWMNKp9PBZDLB6XQiGo3CbDaDw+HA5XKRcAzrgayuriIcDlP8bTAYIJPJ4PV6afY8m83Sicug+lKpFD6fDy0tLeByubh69SqeeeYZrK6uUkNTrVbj8OHD+OSTTyj/yOVyVGpl4Dy3202wd9Y4DIVCFL+XlJSguroaLS0tcDqdMBgMGBoaIpm1ubk5FBcXE99YbW0tbty4QchiVphgrPYajYZ0WEwmE4qKipBIJLC2toaqqioi4GMNYrfbTcpOlZWVcDqdeP/999HQ0IDe3l5otVoKhRkzO4PJsD4Iy+9uN/oskUhQWlpK/Mls7p156ULkIS6XCxUVFfD5fJicnITBYLhlP4R/q/zD7/djfn6eKkob58ULhb2qrq4mPFNJScmmssgCgQBzc3OYmJhAMBikLrNIJIJOp0NTUxN0Ot06tx4IBHDhwgWsra0RxVA2m8Xhw4cxODgIpVIJPp+P+fl58Pl8km9m3eVMJkN0l6wilc1modVq6QRl1RGNRoPm5maMjY1BKBTi0KFDVNlhEsYsnGJkBGxIymAwQKvVUsk1Ho9TkzKZTNIkJst50uk0iouLKYTjcrnw+/1E28pYClUq1bopRVaNS6fTcDgcqKyshFarxcrKCsFvWDMxFAqhsrISVquVDpnHHnsMLpcLo6OjyOVy0Ov1KC8vx/LyMhYWFmA2m9HQ0ACTyUQ5Wn41lIEYtzKhWFFRgQsXLpBxMoxZIfYcM5DW1lYAwI0bN/DYY4/dMiq6pYEwojUGcWDhBQrIC5VOp1FWVkYJqVKppCR54zAOo/ZhnV1WNmSQEfZfxtHF8DwKhQLLy8uorKzEkSNHcPbsWYrRJycnodVqodFoCHPFQI4rKysIBALUyXY4HJQIM0/AXDWLu/ft2wcOh0Pio4zDKhwO08Znn40JVtpsNkpEg8Eg6brns6EzbFpzczMNm7HKDwDaPKyhylR7DQYD1tbWoNVqkU6nEY/HiWWEUYBWV1cT3IZ5XwYFYY1Hg8GA06dP46mnnkJvby9GR0cxPT0Nj8dDfajZ2VmMjY1BqVSioaEBXV1dN1WftjLlmUql6AAIBoMwmUyYm5srSFjPiioMPiOXy4lw8Fb3xr1Vgj41NYV0Ok1xayGxMSz/YLHp6uoqjZtu9vrZbBYajQaVlZWkPMVOSLaRAoEALl26hF/+8pcYGhqCQCCgEuHRo0fx3HPP0eyBVCrF2NgYQbZtNhv27dtHADuG9jWZTBAIBAS5YMDDlpYW6PV6+Hw+tLW1URjR1NS07tTOn5DcSJWZP/KbLwrKQhEWq7MQanZ2liAr+TQ5+dN8HA4HO3fupJCwoqICa2tr2L59O5WrpVIpjh49SjMnQqGQxIaYZ+7u7sby8jJ0Oh01WyUSCd5880309/ejq6sLX/rSl3DixAl0dXWhrKwMpaWlMJvNpGd+rzqODFWtUCiwtrZGiOtC5CGsiBAOh5FIJGA0GjExMXHbRP2WMdPU1BQxYQQCAQoLCkmKzMqoXq8XDQ0Nt50aZN3tjUjNxcVF3LhxAxaLBclkEhqNBiUlJTAYDKiqqiIZt+HhYXzyySdQKBTw+/0wGAyQSqWw2+144YUXkMvlqIsdjUZx/PhxkpDz+Xw4cOAALly4AB6Ph507d+Ktt95CV1cXjEYjFRU2I3LLZrMYHx8nz8wMl2mRsDl7xn5vt9tRXV1NMynFxcU0U8Em4zYbPc7vSrNQrKSkBG1tbaioqIBCoaCcsqioCAcPHsQHH3wAhUIBiUSCF154AWfOnMHY2Biampqwe/dufPLJJygvL4fD4SBPODQ0BIvFgu7ubjQ2NqKsrIxyDhbHM7XhezlMGTSkuLgYDocDNTU1kEqlBLspRD+ERUSsQXo74OItd/zs7CwUCgVxDOWDFwuRoCcSCZhMJoIf6PX6O54SG3MTVr6Vy+XYs2cPhUusLMuAfUNDQ3j77beh0WjQ3t4Oi8WCSCSCYDCI5557DmVlZbh48SJyuRxcLheefPJJErNkIj0mkwk+nw/PPvssuFwueZz8zbrx/oRCIcm/SSQSgmW4XC7odDosLS0RLkmn02FlZYXWl/UEmAdjz6S1tXVLa8QSXoaYNZlM6O7upvygrq4OsVgMly9fRjKZhEQiwZNPPomioiLE43Hs3r0bNpuN6GLNZjMaGxtx/fp1eL1enDx5Ejdu3EBPTw/MZjMdXndik9nK4ckOBqvVSp13h8NRkEEqdsgz3qzh4WGsra2hpqZmawbCHrbVaiVIOwPuFRKgmE6naUCHwabvxo0yL1RfX4/m5mY6rZmnYSf52bNnKSzYv38/Pv74YywuLqK+vh6HDh2CWCxGPB6n2Yvnn38eZWVlsNvtCIVCeOyxx9Da2gq/34/nn3+e5kG2ihEaGBggjFh5eTkxyzPs18zMDGGvGE9YKBTC2toa9Wg8Hg/1R1wuF/R6/U3FjFudmKynlEgkcODAAZqXyeVyaGlpWSfBnU6nsW3bNoLYP/7443jrrbdIY+XYsWN46aWXSOaC8QZ3d3fj4MGDW7qnre4NvV5PlEsGgwHLy8sFKfWy/e33+1FXV4d4PA6bzUYGctsQi1kQIxFjdXo2eooCsolks1nodDrSdGChx93yxLIKWP6pxTqmly5dAofDwZe+9CVUV1fTXP1jjz2G7du3E1yFDU21tLSgoqICkUgESqUSL730EoxGI6LRKMRiMSGM7zT0z3KLxcVFLC4u0ghsvuEyziy5XI7a2lr4/X4EAgHY7XZ0d3ejpqYGp0+fJmwZo/efmpoizqmtrFX+7+QfQPlhbj5jCVtL9jmeeeYZXL9+HSMjI3jnnXewe/duHDx4kCAlfr+fmEwKYRysksWiANbY3ch9fD/RC0NrM4/EJmS3nIN4vV74fD4StIzFYgUt8bKuM6swabXa+3LJ+TE/S9iHhobQ1dVFSkiRSASpVArPP/886uvrCdXKwrS2tjbqS7BqBzvFmOe8GwPOZrO4evUq/S3LZRhsgs1jRKNROqFTqRSKioqwc+dOmpEfGxtbR9szMzODnp6eeyqYbNac24y7aiNNz65du9DW1oaZmRmqsrEZE9ZkY4WKQlU4maf1er0wGAyE/yuUEYbDYapYMrGmLXsQNojDmjT5LB+FuDnGxcTQr9XV1QX58OyBy2QyPPHEEwQ9YRerfed36vM90WZ1+1ttntsZhkQiwfj4OJaWlgiOwnQVWWjGeiOs58QoiCoqKkjMknlVNlcvEong8/kwOztLgLv75QnbSj4TjUYhFArR3d1NYRsrNz8IBSx2cKlUKvh8PlRUVFB1sBBI8vx9IZFICCazqVz5ZiVet9tNnWLGxFEoiAkzEMYqHo/Hicqm0NJh+dqDzAhuJb6yWSnyXh56PgqalVvz9cEZ3+7i4iKhgAUCAdLpNCoqKqhncvXqVYRCIULUisVi8nojIyMEjnwYGiHsfWKx2LoQ7G5LuHd7qdVqhMNhmh4tVKmXAUzZYbq2trY1A2GXy+WimnE8Hi+YKHt+LMxi32w2C5lMVnBRm1tt+AcpnJPNZiESiTA+Pg63202k2AyLlU6nMT8/j/b2duzatYvYTlhIke9t8jdfNptFZ2cnduzYgbq6OgSDQUxMTKyTabsTF1ahDOVhCA+xz6xUKinkZSI9KJCaF5t+lMlkNJm6ZQNhnUY2R303Gg1bDYNYbZvH490zO+OjdjHXPTIygrKyMmIoZ+DKXC6H4uJiHD9+HJ2dnaioqKDYmo2/SqVS2Gw26jv09fUhnU7j0qVLpBfe1dWFWCyGqakprKysEHwln23xN3092cHJvCwzkEJVslh7gSEH2KG0cd02zbx9Ph+dTBtj80J9eBa+MZhIoUqEn+YDlUql6O/vpw44G6xisxkAsG/fPvIUbCKSkReIRCJYrVaaP3e5XIjH4zhx4gQGBgYwODhIY8JsDEEul0Mmk0Eul1MHmjGQMMDgp6WSe7/rycCNrLFaKA/CDnv2ug6HA4lEghhZ7uhBGKSBuaJC90DYhBuDrzyKMsz30v2NRqMEYbHb7eSF6+vrsXPnTmg0GqTTaczOzsJms6G5uRkcDgcmkwlarZb4b0tKSmC324lh/Wc/+xna29uxe/duRCIREqXx+XwEebFarZifn8fs7Czm5+exvLxMzC3Mszxs8c/7VdZl2D+2kQs5hwSAZCgYbdSWy7z5fY9Clu/yOW7zaWp+Ew2EueR8kupTp06RJ2hqaqIycTKZxOLiImKxGNxuN42mqlQqNDc3IxKJ0AOrqamhJm1xcTFRAb322mt4/PHHceDAAVy8eBGNjY2wWq2kUb+6uorV1VWa1xeJROu8Sz496G+CZ2ElewbhKaS6L/vMzNPn99K2ZCCs78HyhQfhQVjjK59C6FEOA/IJBhiNTDqdJlK0aDQKkUiE7u5ukqweGRmhXg8jmROLxZiZmcGOHTtw5coVSKVS4ukCQLE2SyLzlV3Pnj2LPXv24ODBg/j444+hVCrxySef4Pnnnyc9QIbMXV1dhd/vp3FcRr0jl8uhVCofeWNhXjnfQArpofJV09h6b8ZfzL2VdsdmwjCFTmgZovdRNop8kCGjPw0EAlhZWcHS0hKsVitsNhsWFxcRDoeJFX14eBjNzc04cOAA5HI5vvjFL9LM9+LiIk3zjY+P04Niw2jpdBp79+6Fx+OBWCymyUm1Wo33338fAHD8+HEa571+/To1HgGgpKQEvb292Lt3L1pbWyGTyahLb7VaMTs7S2Eem8BkMg+PUhjG+M3Y+hT6yjeQW82q8G/1h5tJCxdaH5zNlj+KniJf9YqJ6TAmQjZUFI1GqVRYXFwMo9GI0tJSXLt2DQCwfft2zM7O4tlnn8W1a9cgkUgwMTEBpVKJ6elpgu57vV7s2LEDa2trRHbd2tpKRicSibB7927cuHGDGBi1Wi1OnDiBs2fPYmVlBR0dHbSJGNaK8QMzvXi32w2Hw0GwFjaByeD1bHacbZqtKEw96BCWRTEsDC9kiMXeg2H47kujsNBJ2KMSVm0WOmUyGTIIRu0Zi8WIt4tx7tbW1sJoNJJEACOeq6qqQlVVFRYXF6HT6Yi6tauri2iMgsEgRkdHSdnWaDTCZDLh/PnzFP50d3fjnXfegUAgQGlpKaqrq/HBBx+grKwMKpUKdrsdjz/+OBwOBx02+XivrRhLIBCA3+8nb8W4dh8FY3kY++ROjoB/L/p+hQxdPg13vlGzj+UTjPiaUQwxFhXGf6XValFXVwe9Xg+xWLyOmys/t2IVJrFYjLm5Oezfvx9GoxGpVArHjx/H4uIiTp48CaFQCIvFgvb2doyNjaG6uhoejweNjY3E8MKoiZh24jPPPEOhqclkIg7byclJ1NfX09z+xqGqWxlLPukFAyCyJqdUKiXC60/DWB7UPtkoFMqKLVs2kHxhlkJXmPITJNawedhGwWAzjD+KGQX7PhaLUaOKERqo1Wo6oVlynt/tZpU5xpTOQHDt7e1UsWM9kYqKCnR2dqK/vx9HjhyBRqPBhx9+SKI6DILP4/GwZ88eAtYx2s58PJvZbMby8jKMRiNmZmZQVVVFLJK3QxLczlicTicZS75n+TSMhd3jg8iF8/MbNvu/JQNhuJf8AZNCn/T5CdLDKMWyRWZNOGYQ4XCYPAZTTzKbzcS1xTYj07XI1yjcOBzFMGyMlZGB+/LHbdmwWGdnJ2pra6HRaJBMJonUrry8HDMzM6iurkZxcTFUKhWNvm4ETrI1ZLRJBoMBi4uLKC0thV6vJyjLnaA4tzIWr9dLniUcDlP5mHkWRknLDrpCGgvLDRjKoJDV1PzDknnjWwl78m8lW8UwQbeyrEKACVkHvVAfON9lblaKZTkE+392Cmu1WhQVFUGj0dwUOt1prpoZBxPjYbxX3d3d65jON/s7pmDFGmFyuZxgJvkHya2QzvmbpbKyEktLS9DpdFhdXUUqlYLJZNqyrvxmxlJcXAyTyUTGwjxLNBpdVz5mnoUxwKTT6U2NJf85bfUQZXCdjWpWhdgvfD6fWhp35UEY83h+lYkt2v1u5vwHoVAobruJtiJOyWY3mDGwxk8gEKAcIj+vAH7NAlJeXg6j0Uj0P5uFTnfaWMw47HY7xGIxkR50dXWtM67bbQDg15DrxsZGWCwWBAIBlJWVET5tqwDLTCaDyspK2Gw2YndPJpOorKy8iSnmfo3F4/FQwzMUCsHn89H4Qr5n2Wgs+ZzGW2U4YVLd+d67UAbCFI4lEgkx1mzJQBg5GkOnFjrEYqRxbHR0q2FWfnc1X4o4GAzC6XSSV2K5BZMy4PP5UKlUqKyshE6no4SXNePy4TR3k3MJBAIsLS0RAwefzydSha1O+zEjYCyQjNmRHVJ3syEYAfTq6ipkMhlisRhmZ2dRW1t7E6vK/RgLC8NisRicTidJ3DHOsrW1NWKI0Wq1kMvlEAqFVKbu6OhYZ7SbiY0yHCCLYra6ptgizos9v3g8vk4Za8sGkq+RwV60UM0aZiAikYg26O3KefnNOq/Xi0gkAoFAAK1Wi9HR0XWaF4FAABwOB2KxGJWVlUSbmQ/e2xg63Wv5cWlpieQEFAoFampqEI1G77qwwUIzg8GAkZERHDhwAFKplJp4dzuCXFJSApfLRRD7yclJ0hosxPhAvrGYzWYaU3Y4HFhbWyMojUgkIrIFg8GAZDIJq9VK1TnmFVjetq6D/f/WhGnAxGKxguw/ltvkS4HnKwhvKQfR6/VU5WHi8YWqIuQD+9imZUND+VQ5+R9IKBQik8lgYGCApvAYqzhbTLfbDafTuS5BTSQSKC4upj7GVkOnO917NpulUeH5+XkUFRWhrKzsnowD+PV8TFVVFZaXl1FVVUX6Jlqt9q6nBpmRGAwG+Hw+BAIB8Hg8jI+Pr1PSvZ/TON9YGL2PQCCg/k84HMbKygpWVlbg8XgQDAbh9/tJAuHSpUswm80wGo1EVLER0c1m8VnDln1fqAIRQ0ZEIhESVdps7om/WX7AlFqZfBdjvShUPZopurIPPDY2hqKiIgSDQVRUVBATOCMR8Hq9sNvtxMBYX1+PK1euUBInFouhVquxc+dOGI1GSKVSOBwOqjwVolzNwrtkMklshTMzM6isrITRaLzn8Ve25haLBVqtFsFgEKWlpZienoZWq0VTUxPB4u/WSFhpmomUMs6rQpMssH3BjEUkEhHhOJPfXl1dJbxZOByGw+HAwsICVfB27dpFcg9WqxVarZbCV6aydb86IfkHklwuJ44sxj99x5l0dhkMBohEIkSjURgMBkqSConSZA+dES8zwjemkrS6ugqPx0P8t2q1Gr29vQS/YPnRzp07ifhLJpMRMpNpjReKGZy5Y5fLBbVajenpadTX10OtVt+zcbC1mJmZAQAsLy+jrKwMdXV1qK6uxocffogLFy6go6Pjrkka8llL+Hw+HA4HtFotJiYmNm0oFrrzzQoiCoUC7e3taGlpgcfjwfLyMpaXl+FwOIjYz263EwSHMU06HA5SDmbEIYUarMtkMpBIJIRfM5lMW2M1yfcgCoUCoVAIpaWlxP5XyBCLcR7J5XKYTCbqKjM9PZlMBq1WC5lMRmXZmZkZKjm2trYSlxHT8svPLfIT7/u9X6FQSKI9SqUSMzMzaG1tpZmWe/VOjCGEz+ejtbUV8/PzJLV8/vx56HQ6hEIhjI+Po7e3964T7fzKnslkwsrKCgwGA6anp1FdXX3LhmIhG8LZbJYIEtghyOPxMDMzQ7xgSqUSKysrmJiYIA7mpaUlRKNRaLVawrwxZvxCdOdZEYQVNu6K9kepVMJgMKzjpHU6nQXvYIZCIZIZU6lUJL2l0WgI+8RccEVFBSorK2G326mBthmBQCHhMvkNwHg8DrFYjPn5eSLRvp8TmHkPl8uFRCKBlZUVcLlceDwe+P1+iEQiIojevXv3PWOS8sF+ZWVlpEVisVhQVlZ2x4ZiIY2FwXlaW1vR3t4Oq9VK8m+Tk5PUqB0fH4fBYMDKygp0Oh0CgQDlB4XqmSmVSgoJWQ6yJQ/CbqSsrAxjY2PEX1XIUi9LlD0eDwwGA6amplBZWYmysjIkEgmi5iwuLqZTgzGlNzQ0kKb5g8QCMc+0trZGa2Kz2dDd3V2Q0I2d7ktLSwgGg8Sswao1DMWr0WgwPT0NiUQCs9l8x3Busz5Rfu7IjMRoNMJut1ND8W56JfcbgrFwnbHQZ7NZqFQqOJ1OTE5OkjQ0h8OBXC4n9d37hSblzzepVCqC8JjN5q2TNrCFrKmpIctlEliFIu7K18dgN2oymUgOuqamhriQGC8Xu7dEIlHQ+7idcTC6y2QyCZfLhW3btq1jUi/ESVZRUUEqTUqlEuXl5di2bRuOHj2KqqoqCIVCLC8v45133sHq6irNad8K1MfEN9kX24Ds/dLpNEpLSynXZPMpD5M4I99QWLWRTUD29fURWpnP55O4UKEQHfkGwlg92XpsmdUEABoaGkjERaVSrSMmLhQ9DhOV4fP56O/vJxIvp9O5rjZe6NAJW6DIX1xchEgkIqHKrq6uguU1+R6koaEBlZWVJH5ZVlZGpN7MqzJ13ldffZVkmfP14vN5o+x2O27cuIGBgQFMTk4iHA5DKpWuS/KZBgePx6MYf2Zm5qGzy2wEeyaTSczMzFCRRqPRkHZ8IQjjWG7KQjmXy4XS0lLSqNySPgi7GOQ6HA5DoVBQU69QsT2rQcfjcdLHEwqFqKysRHl5ecFIwu7Fs1ksFigUCjidTmSzWbS3t99yqP9+DgkG45mbmyOGl/wKH/BrNsiSkhLI5XI0NTXh1VdfxdzcHJRKJVXWFhYWcOXKFQwODuLy5cvkifh8PkZGRnDu3Dm4XC7SKWdGYjQaqWqUy+UwPj5e0NHWuz0s9Ho9KisrSYmLlf5Zz6wQxsvUAJjWYl1d3W1pTbm3Sqjq6uqIG5UN/hcSMMYYO1wuF4xGIzQaDXp7e29bUXgYqN+FhQWo1WosLy9DKpWiqampoDCHfFaXcDiM1157DXa7HcFgEAsLC6QLwvJBxsLO8GW9vb146623cO7cOfT39+PKlSsk1qnVasHlchEIBOBwOCCXy9HV1YVIJIJr167ho48+QjAYJPgQ01NhJXKxWIzR0VECej7sWZ1sNgu9Xo+amhoSG3U4HAQXKlQPRKPREOVrW1vbbfPrWxpISUkJysrKSDyFyXgV8tQQCAQkxczGQAv5HnfbHbdYLNDpdLBYLNDr9aiuribwYiFnG4RCIaampjAyMoJIJIJjx44hlUqho6OD8on80Ekul0MkEmF2dhahUAj79u3DxYsXMTs7S7qDq6urWFtbo6GrQCCA+fl5nD17lsREa2tr8f7772NsbIyAg0xDnfUg1Go16RAWqjF3t3mZ3W4Hh8OBRqPBysrKOlWtQmCwDAYDiRZ1dHTc9m+4t8OqtLS0wOFwUG+kkCQOrAG4uroKsVgMHo8Hh8NRMFd6t91xNk8xNzcHs9lMYLxClT9Z3hWPxzEwMEAiodu2baO+RE1NDWmbR6NRzM3N4cKFC7Shv/Od76C2thZ2u50kCC5cuICWlhZ0dHSgvb0dzc3NUCqVKC0txbZt29DT0wONRgOHw4HV1VVUV1djfn4eV65cWYeClkgk0Gq1JIs3NjZGIqIP83kIBALYbDbSpnE4HAXJjdjnZAbidrshEomI0HzLGoX5ltzT00OwaZ1ORydOoaxZJBKR8H1xcTEsFstDO7XYw2C4Ib1ej+npadTV1cFgMBSsN8A8AqMUnZqagk6nw8jICOLxOMHlDxw4AIfDgcnJSZw/fx5DQ0Okxc6AfleuXMG1a9dQUlKCYDCIbdu2gcPh4Ny5c/B4POBwOFhZWYHb7cbU1BRWV1chl8tRV1eHvXv3IpVKYW1tDSUlJZBIJFhaWqKcg+GT9Ho9OBwOSkpKMDk5iVAotI6E+0HnIplMBktLS6ioqIDH46Fy9/2+P6uaCQQC6HQ62O12mM1mVFZW3tZAbkvawERm/H4/NBoN0YWKRKKCbGKGxbLZbKioqEB/f/99dabvxjjFYjE8Hg88Hg/hqgrRHd9M353D4WBoaIhImM+fPw+NRoO9e/fi5ZdfhlqtxtTUFJaWllBcXEzKRy6XC4uLi4SaPXPmDLhcLh5//HFEo1HMzs6iu7sbg4OD+PDDD6mwwEqZ09PT6OzsREtLC0QiEbZt24bJyUlYLBYYjUbU1NSsO/BYv4edsOXl5Zifn6cJywfZUGTenBlFaWkpbty4sS5fvd8rHo/TuIPNZsPhw4eJyumuZtLZL7e1tUGv12N1dRWtra3Q6XSw2WwFT1YtFgtaWlqQTqextraG0tLSBwaBYJyvNpsNsVgMSqWyYN3xzYwwFAphbGwMCoWCPER3dzfa2towNDREOoKMWtPlcsFqtSKXy6GpqQnFxcWQSqV0OH388cc4f/48mpub4fP54Pf70d3djfHxcTKOfKDn1atXsbS0hJqaGpJ+Bn49gahSqW5qELKDjxlJWVkZbDYbkslkwcPOzTz6wsIC5UNMX6UQhzFDiRcXFyOdTsPn82HPnj13bIDzbzfIo9Fo0NbWRidRUVERlpaWCuZu2WZlMx7FxcWYmZlBRUVFwTvl+eKYTBGXx+Nhbm4OO3fupFmR+3nP/JFSmUwGq9WKiYkJyGQyDA4Oklik1+uF3+/HjRs3cPz4caysrMDhcBBBAqPjZ6XadDqNYDBIxAl2u50Gk9j7dXZ2YmJiApFIhFCzXC4Xer2ejHXnzp2IRqPg8/kwm8237Z5ns1lqJJaXl2NlZQXJZBJVVVUPpOvOct/5+XnU1tbC4/HA6/VSLlKI/gcAlJaWwu12g8vlYvfu3Xfsa3HvlPHv27eP2K+Li4u3PDJ5N+XeXC6H+fl51NXVwWq1FvyUYu6bASJZlcjpdGL37t23nfveSn6RX3ViJdTLly/jl7/8JQ0PdXV14Wtf+xp4PB52796N69evIx6P4+zZs4hGo2hqaqLO+eHDhxEOh3H27FlYLBZcvHgRb775Jt577z3E43EaOGIaew6HA1euXEEwGASHw0FTUxOOHTuGsrIyGgOorq7GysoKQd63sunS6TTlngzpMD09XfCGIvMeDoeDRh7m5uYAoCBFAibUJBQKYTQasbi4CLPZjObm5ns3EPZHBw4cQDqdhsfjgU6nWydqUqjFkclkmJ+fh1qtBpfLpS52oVwrk2MeGhqCz+dDPB7HyMgITCbTuhn0uzEK9vDEYjE1PWdnZ3H16lV8+OGHuH79Ojo6OrBv3z709fVBIpFgdHR0XUWppqaGxmwZ5IGNDxcVFcHlcmF4eBgTExM0KZlMJjE/P4/FxUV8/vOfh0qlonnw8vJyPPnkk2hoaEAqlYJKpaIiQH9/Px14Wq12S6Ekq/yo1WrweDwUFRUhl8thbGysoKPYzEAmJiZgNBrB5/OxsLBw37ro+RcbgZBKpVhYWMDu3bsJtnO7deDfyUA6OzthNpthtVrR19eHkpISTE1NFTwncLlccDgcqKurw9jYGHXy7zfk4fP5WF1dxfT0NGpqamC325FOp1FTUwOLxUJNozs9CJbIMQ7bVCpFHFI+nw/AryXDmpubYbfbSVZtbm6OMD9cLhft7e342c9+ht27d8NoNGJ+fh4XLlxAc3MzlpaWsLKygvn5echkMjQ1NRHLYyAQoHtk4eHs7Cz6+vpgMBggEAgwMjKC2dlZRKPRdXM0er0excXFNC9zt3Lb6XQaSqUSkUgEer0eXq8Xg4OD6OjoKMiEIpsYXFhYwN69e4kzmIWHhaiM5XI5AnsGg0EcPXp0SwbOv1NMKJFIsG/fPrz55pvYvn07ysrKMDU1VVDdQjZ3PD4+jn379mFsbIwGfO4lL2CnvEQiwdzcHILBIEpKSmC1WhGNRtHT0wODwUANwjtJOrOcIh6PY3l5GW63m0SGfD4fOjo60NTUhHA4DJfLBZvNhpmZGZjNZmrQMSb7gYEBqNVqlJSUYGlpCUqlElwuF8PDw/B6ves2DJuP2LVrFz766CMyso6ODhQVFUEikRAsY3V1lWbQi4qKUFRUBL1eT2FYKpWikeB7gczna1YyJpjr16+jq6trHeXp3R5qTHjoxo0b4PP5KC4uxnvvvQeBQFAQ3jQWXnG5XJSXl2NpaQkymQwHDhzYEq6Ov5Wk88knn8SPf/xjBAIBin3ZtFchDCSbzUKhUFC1pKysDCMjI9RhvpsFZ16D6b3H43ESSkkkEuju7qYq2Z0Wn70Wk3ReWFiATqdDSUkJWlpaoNFoMDk5ieXlZXi9XrhcLshkMqjVakSjUepBMEVblUqF4eFhaLVavPLKK4jFYjAajUR6EAwGKR9iYQE7hHbt2kVUSc3NzXC73bBarXC5XBRONTQ0wGg0UkVsI0HF/eR17CQWiURkMKWlpRgcHER7eztNKDLPebfJ+cjICJqamuDz+bC8vEyQm0JcsVgMWq0WWq0W58+fx/bt21FeXk654z0bCPvj/fv3w2AwwGq1or29HaWlpZidnS14ksbi29bWVnzwwQfw+/2bwrvv9DoulwsWiwXBYJDUlVKpFCoqKlBeXr6lChkzjmg0io8//hh6vR4mkwn19fXgcrlYWVnB6OgokskkZDIZRCIR2tvbIZFIwOPxMDo6ipGRERiNRiwvL6O9vR0ff/wxstks3G73OrKJWCyG0tJSVFVVYX5+HjqdDnV1dTT1lj9SnE6nce7cOcoN6uvr6dDajPCukMUOZiRCoRA6nQ5ra2soLy/HyMgIWlpaIJPJ4HA4oNPpcDdjBRaLBZFIBPX19bhw4QLljYXofbADp6qqCqlUCqurq/j+97+/ZaYe/lasW6fTYf/+/Thz5gw6OjpQUVGB2dnZgoZZzIvMzMygq6sLer0eQ0NDOHDgAOmab3Wx19bWSJ6A4ZjKysqg1Wq3XIFjFKEDAwPYuXMnysrK8P777+Py5ctENFZWVkZsjAwRyqQRFAoFEokEhoaGKOG22WzrNDiY4YdCIXA4HCiVSlRXV0MgEEAulxPshMfjwev1kgdpbGykECubzRIP2IMwilsZCSPPdjqdqKiowOTkJIqKijA6Oore3l4i677dWrMT/Nq1a2hsbEQ8Hsfc3BwRNRQidGd7p6qqClarFWKxGE899RS2OrbA32pt/4UXXsDLL78Mn8+HkpISKBQKRCIRqNXqglUyRCIRAoEAJiYm0N3djZMnT6K7u5voQO+0GKFQCEtLS1hbW8Phw4fhdrsxPDyMffv2ratYbfVeGPQknU7jjTfeoPCGzW4wo4jFYvB6vURI4Ha7IRQKUVdXBx6Ph87OTvzqV79aVz5nJcfy8nKYTCZoNBpEo1EaDmIjxwxMWF1dTUbBFJEellHcjvCuuLgYq6urKC8vJ/Jthr5NJBK3PKFZEWFhYQFerxeHDx/G9evXiY2lkOGV0WiEVqvFJ598gh07dqC2tnZL4dWWDIS9yJEjR1BaWoq5uTn09vaisrKSUJ+FDLWUSiVGR0fR0tICg8GAa9eu4fDhw7f1Iiwc4vF48Hg8aG5uhsvlgtvtJmzV3aBy2WfKZrO4cOEC1Go1qqqqUFxcTKc/YzhZXl6mxt3GU3ZxcRF79+7FJ598gkgkAqFQiPr6egSDQXR3d6OoqIhi9kAgALfbDb/fTzlFTU0N5RSftlHcrhhiMpmwtraGxsZGzMzMYHJyEmKxGHq9/pbaf2ydrly5gubmZiSTSUxOTkKhUBRMJIdJSNfV1SEWi2FtbQ1//ud/fldEiPytulSlUomnn34aP/vZz9Dd3Y2qqiqMj48TmUGhvIhEIiF9v+3bt+Ptt99GV1cXcSZtrJSwvCORSODChQvYsWMHnE4n5ufnYTQa6bS4WzYQNpuQSCRQVFSEUCgEq9UKvV4Pm82GlZUVBIPBm+bs2QwHyx0WFhag0Whw7Ngx6qqbTCaYTCZiT/d6vchms9BqtaitrUVRURFJRT9qRnGrhqLJZMLq6iqy2SxKSkowNDSEqqqqm+Z78iuM09PTCAQCOH78OC5fvoxEIlGw5JxR+ohEIlRVVWFmZgZqtRonTpy4q6nQu1rtr3zlK4hGo1hbW4PRaERxcTHxWBWyL6JSqYgworKyEufPnydEKetY5yOCA4EALl68iM7OTni9XpIRqKmpoUT3XqAJer0eKpWK5iza2tqQTCYxNTVFXev84SJWbxcKhWhubsahQ4dQU1OD4uJiIkdgG//ixYsYHx9HLpdDW1sbDh8+TLkOABp3Zl78URY4zW8oulwuyk/n5+dht9tphIEZOCsLX7x4Edu2bUM4HKahr0IKxSYSCVRWVkImk+HGjRt48sknUVxcfFtw4j0ZCIOg9/X1oaenB2NjYxRjs8pJITvrrIt+9epV9Pb2Ynl5GRaLhZpV8/PzdArZ7XZcvnwZ3d3dcDgc4HK52LFjBzo6OqDT6e753pjxmc1mLC0t0WQlA/mxe2VGodVq0d7ejqeffhrHjh2jcdZ0Ok1S0JlMhkjvmFHs2LEDJSUlFLb9phjFZuslFAqxa9cuAL+m1WHwesYesry8DJfLBQC4fv06uFwuGhsbceXKFcKLFSq8YmiPpqYmrK2tIRKJ4Bvf+MZdd/95f86Csi0sAGus/fSnP0VDQwPUajUWFxcRjUYLKvTOkliG2ddqtbh+/TrUajW8Xi+MRiPcbjdcLhdGR0exd+9eLC0tQSAQoLW1FZFIZB3Tx/2A5/R6PUZGRuB2u6HX66mCwxgWm5ub0dPTg66uLlRXV0OtVkMmkyGXy8Hv96+rplVVVaG5uZnoVRlxGetEF4re/9PyImy9VCoVVlZWaN6GNTHLysrg9/uxsLCAgYEBHDx4EB6PB1evXiVEAwpEju73+1FUVITe3l58/PHHqKiowH/7b//trteZezdvyqpZxcXFmJ6ehkKhQF1d3V1JGNxNP0MsFuPChQtUDbp48SLi8TgtPisDWywWiEQitLS0ENCxEJuNnYrHjh2j+YuxsTFEIhHU1NSsC4sYB+7Y2BguX76MhYUFCAQCNDU1Yf/+/ejt7aUk/zfZU2zl5Nbr9Xj88cdRWVlJybFEIsHAwACSySRJMmi1Wly6dInIJArlPRghXEtLCyKRCJaWlvCd73yHmr53s95b9iAsWZdKpXA6nXjrrbfQ0tICuVyO+fl5pFKpgqI8WRnQ7XaDz+ejp6cHV69exa5du+D3+zE6OopDhw5hcXERUqmU6uiF5ppl0I1MJoOFhQU0NjairKwMtbW1EIvFcLlcWFpawsLCAnw+H+RyORoaGtDc3Ayz2UwUPf9aPMVWPUkikVgHivT5fBRGLSws4PDhwxgcHMTCwgK0Wm3B9g0jrVCpVNizZw8GBgaQy+Xwd3/3d8THezdrz72X+jezxvn5eWg0GpqAK/RYZi6Xg1qtxvXr15FKpdDT04MzZ85Ar9cTfabf70dlZeUDG7BiuKht27ahu7sbNpsNDocD09PT6O/vx+LiIiQSCbq7u3Hw4EH09PRQKMY4ZTd6inyYfD46+E6Q+jv97qNkJKyix4CU6XQaJSUlOH/+PPbs2QO/34+hoSHK5wop7ZfJZNDa2opcLofR0VF84xvfgFarvSfCP+7dbpZcLofq6mq8+OKLGBgYQDabRUNDA5EuF3qOg7nfM2fOoK2tDel0GgsLC6ipqcHKygpaW1sxPT39QGemmdtubW3Fjh07SFizt7cXBw4cQHt7OzQaDUm4sVNzs/CJScZt/Nps3VjFJ/+LVc0e9YvH4yEUChGtU0VFBUZHR1FZWYnS0lKcPXsWfD6/oFEHh8MhFENDQwNGR0chk8nwe7/3e/ecj/LvdeN+97vfxc9//nNYLBbU1NSgvr4eY2NjJGqDAqrhqtVqOJ1OXLt2DceOHcMvf/lLlJeXo6mpCSMjI9BqtesQpQ/SSBQKBTHxMfXbfMbFW7Jj/D9eWSbPwCpbTMMvnU6jrKyMwgCPx0Nkb0yFVSgU0lAWA2Q+qh6F8U+53W4ylHA4jGPHjuHixYtwu90wGAwFy13ZrEw6nUZ7ezt4PB6uX7+O73znOzCbzXdV2r0vA2Gus7W1FS+88ALefvttVFVVoampCbOzswiHw1AqlQU90dn47+DgIEwmEw4fPozXXnsNnZ2d0Ol0aGtrK5ggzFbia8ayeDfxrNVqRSgUohAgf2MzyDcrbzMMVn4jMn/9uVwu5HI5zGbzp8KEeDcbtqWlBVeuXMHy8jKefPJJWCwW3LhxAxqNpuDvx9QCGhsbMTo6CqFQiO9+97v3dYhw72fT/umf/ini8TghUJubmxGPxwuufc6qWjKZDB999BGxME5MTFCs+Wlwyt4NWVwqlUIkErkpdBIIBOByudBoNFTJyWazkMlkUCgUN4VZzEgFAgHJqz2KXoQ1TF0uF/r7+9HX1wcAOHv27E1cwYXy7plMBp2dneByubh69Sq+8Y1vkIbMvYb+3HtNXFkZ7Stf+QouX76MdDqNxsZGyOVyBIPBgkMistks5HI50uk0PvjgA3R0dKC0tBTvvPPOI3uK5j9AnU63DvuTn3SzgayNRsUqYPnNrVQqhdLSUng8nnV66o+acTAJ6FdffRVNTU2orKzEyZMnkclkCobWzb9CoRAMBgMaGhowODgImUyG73//+/dthNz7XYg/+7M/A5fLxeTkJNRqNdrb20kbsNAhTyaTgVarhcPhwLlz53Do0CF4vV589NFHkMlkD4Xc7F7DMoVCsSkqmW0m1mjNXzOZTLZOKjmRSMBsNsPlciEQCMBgMHxqJN93msDk8/l47bXXoNPpsH37dpw+fRoul4sUlAvde8lms+jp6UEymcTAwAD+3b/7d/eVe9y3gbBcpKqqCn/8x3+MK1eu0NALY+V+EA8ul8sRC+LQ0BBOnDiB6elpXLx4EXK5/JE0EhYSMTr/jTxUTHE1/95ZBY89XGYc2WwW/f39pFj7KF5isRhvvfUW0uk0jhw5gsuXL2N2dnbLg1R3ux/C4TAp7F68eBElJSX43ve+d1+hVUE8CAu1vve978FkMmFgYIB6AqxjXOhQi51QWq0W/f39WFhYwHPPPYf+/n5cu3btkTQSVm3S6XQ3dYwZVD9/ndjvM1bGZDKJmpoacLlcnDp1CkajESaTqeAinIV4NlKpFO+//z5cLheefvppjI6OYnBwEBqNpiASapvNAAmFQvT19cHpdGJ2dhb/3//3/216GD10A2Hhg1qtxl/+5V8Su19ZWRkaGxsJmPegaCpVKhXOnj0Lp9OJ5557DufPn8fg4OAjaSRMWVWtVlPFjRnC7eAmAoEALS0tiEaj+PDDD5FOp9Hc3FwwaEYh50KkUik++OADWK1WfO5zn8P8/DzOnz9PWiaFvF8WciYSCXR2dkKr1eLMmTPo6+vDb//2b993aFUQAwFAAMYvfelLOHToED7++GMAv6YLUigUCAQCD2SGgaFtFQoFTp48iWAwiGeffRbnzp17ZD1JLpeDwWC46STdaByskiUWi9HY2IjZ2VmcOXMG6XQaBoMBlZWVj4z3YB6deQ6LxYLPf/7zsNlsOH36NInVPIhnEQwGYTAY0NHRgbGxMXi9XvzgBz8gkaBCrA+3kBb9wx/+EMFgEFNTU1CpVOjt7UUqlSq4AM1GTi2ZTIb33nsPoVAIn/vc53DhwgVcuHCBULWPwknLsGwKhWJdoroxH2HeUSQSwel04tSpUxgYGKB5mObm5ge24e5V70QkEuHNN9/E0tISXnjhBSwvL+PUqVOQSqUPpHjCQisOh0NsL5988gn+4A/+ADt37iR+4kJcWwYrbuXhFxUVAQB+/OMfo76+HkajkeDOrEP8oAQ3ORwOxsfHUVpaiu3bt+PMmTMIBAJoaGigKb9P+8RlYZVQKITX6yVqHi6XC6PRSFxQXq8X/f39uHr1KsLhMMRiMZLJJAwGA22AT/uzsMIDALzyyit0OC0sLODDDz8kFpZCGwfLySKRCDHXnzx5Emq1Gi+//DIR+xVqfTi5Ah2v7PRLp9PYuXMn1tbW8NRTTyEUCuHdd98lUfgHdfJxuVzEYjGEQiEcOHAA1dXVePPNN6HRaPD000+Dy+UimUw+EnPcfD4fi4uLCAQCUKvVUKvVkEgkWFtbw8LCApaWlpBIJCAUCulBJ5NJHD169IECM+/WcweDQbzyyitQKBQ4fvw4RkdHcf78eSgUiruia7rby+12o6ioCM888wwWFhZw+vRpvPPOO3jyySdpXqdgBpkrYPzBEqPBwUH09fVhx44daG1thcVieaAudyNVTyAQwPbt29Hd3Y1Tp04hFArhueeeI0XXR2GuO5fLYXV1FZFIBG63G6urqwgGgzSDkj97n0gkUFtbi0OHDn2qxsG2ilQqhcViwdtvv436+nrs2rULly9fxuDgIHEFP4hnzOFwEAgEAADPPPMMpFIpfvKTn+Bb3/oW/v7v/77gxlGwEGtjqFVaWgqxWIx//Md/RHV1NQ0Ksam/Qn+IjT0FkUiEubk5hEIhHDp0CLFYDKdPn4ZarUZpaSlSqdSnGnLl67CfPn0afr8f6XSa4CSb/e7BgwcpD/k07pvJ8onFYly5cgUfffQR9uzZg9bWVnz00UcYHx+HRqN5YGpULEKIxWLYvXs3qqqq8M4776C4uBivvPJKwUOrB+JB8iswHA4Hx48fR39/P55//nlks1mcPn0aNpuN9A4fdN+BueLjx4/D6/XizJkzNOHHwpZP05vw+Xx8+OGHsFqtm24s5j0ee+wxNDc3F1wz5W5Dqmg0ivfffx9utxuPP/44eDweTp48CZfLBZ1OV/A+x8Y5D7/fj8bGRhw8eBDXr1/HtWvXcP78eezevbtgZd0HVsXamIhyuVz84z/+I4RCIS5fvgyRSIRdu3ZBqVTC5/M90AfNvIPRaITX68XLL7+MXC6HF154Aaurq/jpT39KPLqFovC/15yNSSNshIywcLG6uhpNTU2finGwg04mk2F2dhY//vGPwefz8YUvfAE+nw+vvPIK/H7/pqXrQt+H3++H0WjErl27SM7hL//yL0nf5UEddAUNsTaGWmq1Gq2trfjhD39I+hcajQbz8/NIp9MFF2K5VWc3nU5jfHwcXC4X+/fvRyaTwZkzZwi+IRAI1s10PMyyr1wuJ30UFnqyUV+FQoHDhw8TYvdh3Vt+rpFIJKjUvHv3bnR0dODKlSu4ePEiRCIRlErlA32GbFxXIpHg6NGj4PF4eOWVV/D000/jRz/60TrJud8YA8kfEKqvrwefz8c//uM/orKykugz5+fnqeT5oI1EJBKRupTNZkNnZycNWw0PD0Oj0ZA4zMMsoTJDMBqNyGQysNls69bj8OHD0Ol0Dw2QyLwaG8gaHR3FO++8A5FIhCeeeAK5XI6agYyT+EFPcjLG+0OHDqGkpARvv/02jEYj3n77bUgkknWEIg/kHnIPcHeyfITH4+GFF17AW2+9hS984QsQiUQYGBjA0NAQCTYW+jY2TtuxDcYWvLu7Gx0dHZifn8f169dRWlqK3bt3w2AwIJFI0KZ8WMbC4/Fw+vRpzM/Pg8vlUgL8oEQzNzMMoVAIPp8Pm82G8+fPIxwOY9euXTCZTBgcHMTQ0BB4PN46XrAHdXG5XITDYUSjUezZswcdHR04e/Ys5ufniXDuQVStHqqB5C9iOBzG3r17sbKygqeffhq5XA6XLl3C9PQ01Gp1wbE66XR60/ltHo+HRCIBv98PvV6P3bt3Q6vVYmBgAIuLi2hoaEBPTw/UavVDMxTWkc5ms3jvvfdgNBqxZ8+eByKWeSvDEAgEWFtbw5UrV2C329HS0oK2tjasrKzg0qVLpG+SX8J9UCO/jCgjHA6jq6sLO3fuxPDwMC5duoRf/OIX+OIXv/hQjOOhGEh+f8RisWDnzp2Qy+U4ePAgyRpbrdZ1E3X3G7K0trYS9eVmr8c2fCgUQjweR21tLbZv345cLofr16/D6XSisbERnZ2d0Gg0N82dP8gho1QqRWO1DzLpZeEtj8eDw+HA9evXYbVaUVVVhe7ubiQSCVy5cgULCwsQi8VQKBTrCiBMd2NjWbpQIMRgMIjGxkbs378fFosFJ0+exF/8xV/gz/7szx6acTw0AwFAH+rKlSs4cOAAGhoa0NfXh0gkgjNnzmB1dRVarbYgI6R79+6FTqfDmTNnSCqNPdj812Z5EhPIbGlpQUdHB2KxGIaGhuB2u1FZWUmSZ8Cv5zLy+a0ehCd5EI+EeQsejweRSEQ5z/DwMFZXV2E2m9HR0QEul4uhoSFMTk4il8tBpVKtI1zL5XIkyaBUKuFwOAoH6/h/MJJAIIDq6mocPnwYTqcTb7zxBr797W/j//yf//PAk/JPzUBY2MPn8/H222/jxIkT2L59Ozo6OhAKhXD69Gk4nc77MhJGfrB//37E43F88sknhMNi+RA7nTdyOLEOPGNobGlpQSqVwtjYGJaXl6HVatHS0oKqqiqqjKVSqQdmLIU2Cjb7HgwGMTc3h4mJCUSjUVRXV6O5uZk4pCYnJ5FMJtflhuxZpNNpCAQClJWVoaGhAVKpFOfOnVt3CBXCOMxmM44cOYJgMIhf/epXOHHiBF599dVPhXTvoRpIvpH8+Mc/xm//9m9j7969aGpqQjAYxJkzZ+7ZSFgzqaioCHv37oXFYsHg4CC9TkdHBzKZDGZnZ5FIJNYZCfMuTPCRDeHU19ejpaUFIpEI8/PzmJubQyaTgdlsRl1dHUwmE53GzFjyX+vTMgjGOs+MIhKJYHl5GdPT01hdXYVUKkVDQwNpI46NjREjOxsNzjcMVtkrLi5GXV0djEYjYrEYLBYLLBbLffdo8o2jvLwcR44cQSwWw8svv4w9e/bgvffeI4m5h93YfegGkm8kf/u3f4s/+IM/wP79+0lY5uzZs6RwezdGwha5vr4eXV1duH79Oubm5iASidDZ2YmqqiqEQiFcuXIFfr9/3WbK55himzuRSBCkury8HM3NzSgqKkIgEMDc3BxWVlbA5/NhMplIXEcul1PYxviu2P3nz5YXouiR/z3zioxYLpPJIBgMwm63kyQdl8uF2WxGTU0NZDIZVlZWMDExgeXlZQCAQqFY5zHYfbKBuLq6OhQXFwMAbDYb5ubm4PF47hs6lJ9zmM1mHDp0CIlEAq+88go6OzvxwQcf0HTgp4F6+FQMJD8n+cEPfoDvfve72L9/PxoaGhAKhXDu3DmsrKxArVZvGdvDPEhPTw8qKirw0UcfIRQKoa+vD+Xl5VhbW8PAwACCwSBkMhl0Oh2EQiHC4TAJ2OSHCSz0YtDqZDJJqk/V1dWQy+Xwer0k+ZZKpUjeuaSkBHq9HjKZjCDh2WyWEtuNNKK3ewT5hsXuKf+L5QRMgnplZQVra2sIBoOQSCQwmUyoqKiAUqlEIBDA/Pw85ufnEQqFSAuRVRDz74eFU6lUCs3NzcSaPzQ0REZlMBjQ1NSE1dVVIuu+W6/PpOaqq6tx4MABxGIxvPLKKwRjNxgMn5pxAPfIrFioun8mk8Gf/MmfAAC++93vIpPJoKmpCQcPHsT58+dhtVq3jA5lMHK1Wg2/3494PI4dO3agvLwci4uLGB4eRjQahclkQnt7O2mOZzIZuN1ujI+Pw+PxkJGwpiGfz6cBp3g8juHhYQwNDUGn06GyshJVVVXo6OhAPB6H0+nE6uoq5ubmkE6nIRKJoFarodVqodFooFQqSRGXnby3SzjzpeAYK2M8HifJaJ/PB6/Xi0AgQBLMOp0O9fX1xIkbCASwsLCAxcVFkomTSqXQ6/U0DbpxqIzP56Ouro7K3/Pz8ygpKYFarYZYLIZMJkNDQwMqKyshEokQiUTu2oswBahoNIrGxkbs3bsXwWAQr732Gtra2vD+++9/6sbxqXqQjY1EFm7t2LED7e3tSCQSuHr1KqampiCXyykGvVOCfvDgQRJpMZvNmJqawtjYGDKZDDQaDXbt2gWxWEwk1Ex/kKk+sYQzv9afX/VipWSGLAUAuVyOkpISlJaWwmAwQCKRIJVKIRAIwOfzwefzIRwOIx6PU6WKMZmwr3xjYZs2nU6vozdlmntcLhdisRhKpZIMUKlUgsfjIRqNwul0wm63Y3V1FeFwGBwOh5R52UZmny9/aIt9boFAgP3790OpVOLq1auYm5tDXV0duru7EY1GiVTc6XRienoaTqcT2Wx2S2Xf/IYtmyfv6+uDy+XC66+/jp07d+LNN99cp8XyaV6fqoFsDLd+8pOf4Otf/zra2tqwfft2pNNpjIyMYHBwkHA/m4UkLLwqLS1Fb28v0uk0hEIhxsfHMf3/a+9cY9suzzb+cx07dhIfEh+a5B+To3MobdMmIU1bjYxqQMVJU7WNg9A0iS8g9mHa8QsHCYkvwBhok/g2NiEVQdmo1E2TxgrqKD1QSNqkbeIc68R2HXyIYzu2k9jxPrx6Hv0dkqwv4+VNVz9SpB7SxrKf639f931f93V7PPKD7+npoaGhAY/Hw6VLl+TPbmlpoaenB6/Xy4ULF+QFzOfzpNPpdT8kcZlzuRxLS0tkMhnZwygvL6eqqgqHwyEvr5ioFJFARIPl5eWCy6+OsMJ5UfjxqiOPsEBdWFggGo0SCoWIRqMsLi7Ki2o0GmV3XJ3Eq9/DkpISOQIwMzODXq9naWmJjo4O2Sg8e/as3NzldDrJZDJ4PB5mZ2dZXl4mn89TUVFBdXU1Pp9vQ2mMAL/IAcUmsNnZWf7yl79wzz33cOzYMWlduxXmdkpgaziB53I5fvjDH1JZWcmjjz5KMpmkv7+frq4uTCaT7OZardYNewXqxTmi8SUW0ptMJqqrq4nH44yNjcknZi6XIxgMkkqlsFgs6PV6MpkMra2t1NXV8dlnnxEMBr9UxlRfZqPRSFlZmaRly8vLBINBZmZmZMTQ6/WSnpSVlVFWVobRaKS0tBSDwVAQQdTTmSsrK8zPz5NKpUin05KWCHCJi6TT6dDr9VRWVhbsTRSvSeQ/4qKK/EJRFHp6eohEInIJp1arJRAI0NzcjN1ux2azEQwGC7ytvvjiC1KpFOXl5SiKgtvtlg73Xq/3S/mIsF8VwsM777yT5uZmRkZG+Oijj3j00Ud58803JZ3eKstKtwRABEiy2SwPPvggJ0+e5MiRI5w4cYJ7772XtrY2TCYTH3/8MZFI5EvJu8g//H6/HIYKBoPSklQoiwW1SqfTBYmpKIeKyySehqI/shFNWEsVxd8JwAggqelSJBIpoCQ3EsDVybmILAJsajmNeB1rDejEYtTKykqZl4RCITQajYw8ZrMZp9OJz+ejtLSUWCzG3NwcTU1N1NXVEQqF5Nrr5uZmOjo6mJmZob29HafTSSqVYmhoiHA4/KXqo0ajkdIRh8NBf38/DoeDc+fOMTAwwM9+9jNeeeWVAtXFVjlbBiAi3OdyOfbt28fp06f5/ve/z7Fjx7j//vtRFIXDhw9z/vx5uVVq7TzHtm3bCAaDBSphcXkETUqn0wV/Lqx0jEYjc3NzpNNpGhsbMZlMTE9PE41GC56G6v3bQj8lSsXrRRdU/lYCsGudTG4EIGu/X53AC6CtlagI8O/cuZO6ujr581dWVvD5fAwPD5NMJgkGg1RWVuJyuQgEAvK9nJ2dxeVyyRJ2MplkcnKS6upqtm/fLjfyTk1NMT4+TiwWk5FQrdVaWFiQJfgDBw6g1Wr529/+htfr5be//S0//vGPCz7DrXT+z+Tu/Icy+aqqKh577DHGx8c5duwYJpMJRVFwuVxScZrJZOT+DPEGiw9IfaEFJ7/tttvI5/P4/X5JX0wmE52dneh0Oq5cuUIqlWLPnj0yhxEbWtXgsFgstLa20tjYiN1ulxWZf9fn2GxT1GYbpEQUWPs9os8iEnDRU1BveOrq6qKpqYlIJMLVq1eZm5vDYrHgcDiIx+NEo1FyuRw1NTWUl5cTCoVYXFxEp9ORSqWw2+1UVlaysLAgq4N6vZ6amhqCwSAXL16UTUbhBKmmVNFolG3btrF//376+vpIJBIcP36c1dVV/vSnP/HYY48VGOlttVMCW3M7kXBzf/vtt9m9ezfPPPMMc3Nz9PX10dXVJUN0JBKRLhobXbySkhKi0SiBQACXy0Vvby/T09PodDpaWlqwWq14vV58Ph8ul0sufhH7EUXEEZy9q6tLWvFotVrcbjezs7NcunRpU0O39QCiblaqq0rqKKHugYhfZ7NZbDYbLS0t2Gw2dDodmUyGmZkZxsbGpKpAURTC4TDnzp0jlUoBEI1GZSXJYDAwPz/PF198QX19PXV1dYTDYUpLS0mlUoTDYWpqaqRYUavVcu3aNRKJBH6/n1wuJ3s96sicSCRIp9NyCrC2thaPx8PJkyfZt28fb731Fm63e0tUqm46gKh9f8Uekq6uLp544gn+/Oc/c/fdd1NfX09lZaUU1qXTaSwWiwTXemdwcJBsNovL5cLlcskP1efzMTQ0hFarxeVyodVqZT4jqJpI9Ds7OykpKeHKlSvShKK1tVXa8QwODq7bMBNLh6xWq9yZrk7Cg8GgpJlVVVVyyMtgMMhEXmz2jcfj2O12+vr60Ov1hMNhMpkMDoeDPXv2oNVqpcOITqcjGo2STqdlZU70Q9Tv8ezsLLW1tSiKInsm6olBsTl227ZtEoiiyqamR0IyAtDZ2Ul3dzcajYYPP/yQ0dFRnnrqKX79619jNBq3PDi2NEDUT85cLse9997L+fPnefLJJ3nvvfc4ePAgO3bs4ODBgyiKwoULF4hEIlRUVMhJs7WJ4srKCp999hlTU1PY7XZ0Oh3z8/PMzc2RzWaxWq04nU5isRizs7MFFpa5XA6Xy0VFRQUTExNcvnxZ5kyXLl3CarVSW1vL+Pj4htZC4v8XWjCRdOfzecbGxhgaGsJkMtHX11fgcKIGk3CBr6+vx2g0cuHCBaampsjn8yiKQlNTkyxNq8WKajCIsrdWq8VgMJBKpZibmyMcDlNdXU13dzehUAiHw4HD4SAcDktAiCihLnKIXCMej5PJZLDb7ezbt4/6+nquX7/O3//+d3Q6HW+99RaPP/64fGBsdXBseYCsLQMrisKJEyd49dVXefbZZ5mamqK/v5+WlhacTidDQ0NcvXqVZDIpK11qOiOoTDQaJRwOF5Q8ARoaGigrKyMWi1FaWiqf9EL453A4WFlZwev1ymqSVqtleXmZZDKJ0+mUneWNJhpzuRwDAwPEYjF0Oh1VVVXs2LGDxsZGrl27RiaTIZvNks/nuXz5MolEQvZNhCBSq9XKSKnRaGSZOBwOEwwGpSQ8mUzKXYGi3K22QO3t7SWVSnH27FkAhoaG0Ov1VFVVYbfbSafTjI+P4/F4WFpaKsj11HRKCDxLSkrkpGZJSYmsUh06dIg33niD1tZW+Zq3WjJ+UwNEnZdoNBp++tOfcujQIZ5++mneeecdDhw4QEdHBwcOHKChoYGBgQECgQA6nQ6TyVTQGRdP0I22sorlkocOHeL69et4vV7C4TB6vZ7y8nJSqZTc5qt+IhsMBvmk34gyiiewkIlotVpisRiNjY2YzWb0er3ckqvX6/H7/ZLqCECKEwqFqK+vp7Ozk/b2dpmwC3uc0dFRIpEIiUQCs9mMoiiMjY3J3MlsNmOz2YjFYrJ7Ho/HOX36tFxSmkgkSCaTBZFOHdkFncrn89TX19Pd3U11dTWBQICTJ0+SzWZ56aWX+PnPfy6BeTNEjZsSIOoSoNhF989//pNXXnmFF198kdHRUb71rW9RV1eHw+FgcnKSS5cuEY1GKS0tpaKiokB7tB6dm5ycZHZ2FqfTicvlkkrdkZERRkZG1lXRZjIZnE6nFAOmUqkv9QEEzRE/XyS9oj9jMpmIx+Mkk0nJ900mE7t27ZKeVGKZzpkzZ8jlcvh8PilGVEtVKioqpM/v2bNn8Xq97N69m7a2NlZWVgiFQtTW1uJ2u8lms1y/fr2gzK7+M9GAVFMpQVUTiYQsFOzdu5fm5mYymQwfffQRIyMj3HXXXbz22mvs3r37pqJUNzVA1kYTrVbLr371Kx566CF++ctfcvz4cTo6Ouju7ub222/H5XLh8Xi4evUqkUikoLm2XsVL8Hufz4ff78disdDU1EQ0GiWTyRCLxaitraW2tlZaF+n1etxuNzqdjkAgwPLy8rpOLepBrV27dhVEoFQqxeDgoLQVFc1JIS8XK+1EKVmcoaEhRkZGJMUSGqm9e/dis9kwmUxMTExgtVqpr6/njjvuYGlpCYPBgEajYXx8XMr21dFBXZVSAyObzcpNvRUVFezatYuOjg50Oh0jIyOcPn0am83GG2+8wZNPPikfZmuH1G6msyW0WHwNYkeAd999l+eee46JiQl6enrkqoBoNIrH48Hj8ZBOpwsiynpAUTcRRQ9ldXUVm83G/v37KSkpwefzkUgkqK6uxuFwEIlE+OSTT9bVIYko0N/fD8Dly5elvc5tt92GxWJhaGhIJtu7d++mvb2dq1evMj09LamTul+g0WhQFAWz2czExIRcGW21Wvn2t7/NysoKp06dku6RDQ0N1NTUoNPpSCaTUsy42cVVUymRz5SXl9PR0UFHRwcmk4mZmRk+/vhjEokETzzxBM8//zyKomzJrvgtE0HUH6A6N/nBD37Afffdx+uvv85vfvMbhoeHueOOO3C73fT19dHa2sr4+DhjY2NS2l5RUSE7zOo8RVAOdd4SiUQ4e/YsbW1tktpks1n8fj/Dw8OsrKysK7MQUU+r1ZLJZAgEAlKhm8/n6enpwW63SzCIZl8ulyvYZquWlYiqmsvlwmKxyElBRVEwGo1MTEyQyWQkRRofH2dqaopt27bJPGm9XEy9+UoMjeXzecxmM21tbbS1tWE2m7l+/ToffPABwWCQ73znO7zwwgvs37+/QHx6s4Pjpo8gbKAKhv+Zenv55Zf5wx/+IC9hc3MzpaWlzM/PS3mEaJqJTUhq6rORa4pGo5HlZCFrF3nGetFIlJD7+/tJJBKcPn2afD4vdw92dXUxOTnJ4OAg+XyehoYGuru7CQaD+P1+OUMieiKDg4PMz89jNpvZs2dPwWxHMplkenqaqampgkimrqppVNqttcBYK+W32+20t7fLScRgMMinn36Kz+eju7ubZ555hu9+97sFbilbsSNeBMgGtMvj8fDqq69y9OhR8vk8e/fuxe12YzQa5az2+Ph4QVe4rKysYAXB2oukFgWKKLaRR5S4dFVVVRw4cICFhQXOnDkjqYvb7aa3t5dr165x7tw5VldXURSF/fv3F0w5rq6uSpp1/vx5IpGILJdarVZKSkpk8ry8vHxDdjziMq+urrK0tCSl8sKYobW1FZfLhU6nw+fzceHCBYLBIJ2dnfziF7/gkUceKaCp/w0R478eIJsB5Xe/+x1Hjx4lmUyyY8cOOjo65FLNUCjEtWvXCibv9Hq9nKlQA2CzJ/FmFThB5TKZjPx3RqMRh8NBPp+X1MtsNsuGXyaTYWlpqaAXIkq64jWpf7+Zp5b66S5AkU6nJeWy2Ww0NjbS1NSE3W5neXmZyclJBgYGWFhYYN++ffzkJz/he9/7XkET82asTt3yAFEnyIL+COr15ptv8sc//pHp6WlcLhc7d+5EURQp0AsGg3i9Xvx+v0x+1QNI4v+6kZnyta9lrWJVjNNupMdSX+yNbG82Aqr6ewWQBCjEa7FarbhcLumbrNfrpbBRGH4fPnyYp59+msOHDxfQ2W/Sn6oIkG8YKIuLi7z//vv8/ve/58yZM2i1WlpbW3G73XLXhTBC8Pl8BAIBYrGYXL6p1+ulXkp9Uf63oNksJ9jM0WQzcwc1IJaXl1laWpLOkGLGXlEU6urq2L59OwaDgcXFRaanpxkeHiYajVJbW8vDDz/Mj370I9nLuJWAccsBZCOgAFy8eJGjR4/y/vvvMzU1hdlspqWlhaamJmk/lE6npW5L6JYSiURBVBAet2IAaz1Ovp7a+EbmQNhkWEuAIZvNSiqmrsSZTCYcDgfV1dVUV1dLL+TFxUVmZmYYHR0lEAjIUvTjjz/OAw88IE2q1fMmtwowblmArM1R1B96JpPh1KlTHDt2jH/84x/Mzs5SXl5OfX09DQ0NOJ1OKatPpVIsLCwQiUQIh8PMz88Tj8elqYH6QgvhoZBsiJ+pHiy6EXm8oGPr+W6JMnBZWZmUkYhxWYvFgsFgIJvNMj8/z8zMDBMTE4RCIQwGAz09PRw5coSHHnqI5ubmgmhxM+mmigD5BqNKMpnkk08+4a9//Ssffvih7Jzb7XYpQ6mqqpKDSmIffDKZJB6PE4/HpZZJzJALc4av+pYLPZdOp5OqgIqKCsxms/wS5WdhhL2wsCDn4/1+P0tLS9jtdnp7e7nvvvu45557cLvdX3ovbsVoUQTIDUYV9YiueJJeuXKFU6dOcerUKQYGBvD7/ayurmIymXA6nWzfvh273Y7ZbMZgMBRUeYRUROQDIicQgFEbyqkboGpnE71eL/MekfuIqCSaeouLi3LmfW5ujmg0ysrKChaLhfb2dg4ePMhdd91Fb29vwZ5I9V7JWzlaFAHyNYAFIJVKMTo6yueff86nn37K8PAwXq9Xjq+WlpZiMpmwWCxYLBZMJpN8sq81jduIZq2lVSK/EMZxyWSShYUF+SWonfDoEpq03t5edu7cSU1NzbpRswiKIkC+NlPozS5UJBJhenqasbExPB4PExMTeL1e5ubmiMViUsauzntEBBBfa616RLlXHV3EkJNIvBVFobm5mdbWVtra2mhpaUFRlHXXSasLCkX6VATINwKY9SKM+ghzt0gkIr/m5+eJxWIkk0nZDBRUSwBHNCnLy8uxWCzSQdFms2Gz2aSV6b/Lq4qAKAJkS4Lmm7qYa+db/j92aBQBUjz/8bqCjQSQX0XBzNe4TqF4igApnuL5yqdYviie4ikCpHiKpwiQ4imer/38Cxhk1WbdEFVYAAAAAElFTkSuQmCC';
 
 function generatePDF(){
-  showToast('📄 Génération du PDF premium...','ok');
+  showToast('Génération du PDF premium...','ok');
   
   const p = plan;
   const team = p.equipe.filter(e=>e.nom);
@@ -1596,7 +1695,7 @@ function generatePDF(){
   
   // Reusable style constants
   const C = {
-    dark:'#0C0608', card:'#1C1012', orange:'#E65100', gold:'#D4A017', green:'#059669',
+    dark:'#0C0608', card:'#1C1012', orange:'#C9A84C', gold:'#C9A84C', green:'#059669',
     red:'#DC2626', blue:'#2563EB', purple:'#7C3AED', muted:'#9CA3AF', light:'#F9FAFB',
     border:'#E5E7EB', text:'#1F2937', textM:'#4B5563', textL:'#6B7280',
     greenBg:'#ECFDF5', blueBg:'#EFF6FF', purpleBg:'#F5F3FF', redBg:'#FEF2F2', yellowBg:'#FFFBEB'
@@ -1622,7 +1721,7 @@ function generatePDF(){
   <!-- ═══════ HEADER BAND ═══════ -->
   <div style="background:linear-gradient(135deg,${C.dark} 0%,${C.card} 60%,#2A1A1E 100%);padding:18px 22px;display:flex;align-items:center;gap:16px;border-radius:6px 6px 0 0;position:relative;overflow:hidden">
     <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,${C.orange},${C.gold},${C.orange})"></div>
-    <img src="${EAGLE_LOGO_B64}" style="width:68px;height:68px;border-radius:50%;border:2px solid rgba(212,160,23,.5);flex-shrink:0" />
+    <img src="${EAGLE_LOGO_B64}" style="width:68px;height:68px;border-radius:50%;border:2px solid rgba(201,168,76,.4);flex-shrink:0" />
     <div style="flex:1">
       <div style="font-weight:800;font-size:19px;color:${C.orange};letter-spacing:3px;text-transform:uppercase">PLAN DE TRAVAIL</div>
       <div style="font-weight:600;font-size:10.5px;color:${C.gold};letter-spacing:2px;margin-top:2px">SAUVETAGE TECHNIQUE — THE GOLDEN EAGLES</div>
@@ -1637,7 +1736,7 @@ function generatePDF(){
 
   <!-- ═══════ SECTION 1: MISSION ═══════ -->
   <div style="border:1px solid ${C.border};border-top:none;padding:14px 20px;background:#fff">
-    ${secH('1','📍','Information de la mission')}
+    ${secH('1','','Information de la mission')}
     <table style="width:100%;border-collapse:collapse">
       <tr>
         <td style="width:120px;padding:5px 0;color:${C.textL};font-size:8.5px;font-weight:700;letter-spacing:1.2px;vertical-align:top;text-transform:uppercase">Site / Compagnie</td>
@@ -1668,7 +1767,7 @@ function generatePDF(){
 
   <!-- ═══════ SECTION 2: ÉQUIPE ═══════ -->
   <div style="border:1px solid ${C.border};border-top:none;padding:14px 20px;background:#fff">
-    ${secH('2','👥','Équipe <span style="font-size:9px;color:'+C.muted+';font-weight:400;letter-spacing:0">— '+team.length+' membres assignés</span>')}
+    ${secH('2','','Équipe <span style="font-size:9px;color:'+C.muted+';font-weight:400;letter-spacing:0">— '+team.length+' membres assignés</span>')}
     <table style="width:100%;border-collapse:collapse;font-size:10px">
       <tr style="background:${C.card}">
         <td style="padding:7px 10px;color:${C.gold};font-weight:700;font-size:8.5px;letter-spacing:1.2px;border-radius:4px 0 0 0;width:35%">POSTE</td>
@@ -1686,16 +1785,16 @@ function generatePDF(){
 
   <!-- ═══════ SECTION 3: ZONES À RISQUES ═══════ -->
   <div style="border:1px solid ${C.border};border-top:none;padding:14px 20px;background:#fff">
-    ${secH('3','⚠️','Zones à risques')}
+    ${secH('3','','Zones à risques')}
     ${zonesR.length?`
-    <div style="font-size:8.5px;font-weight:800;color:#92400E;letter-spacing:1.2px;margin-bottom:6px;text-transform:uppercase">🟡 Zones de danger</div>
+    <div style="font-size:8.5px;font-weight:800;color:#92400E;letter-spacing:1.2px;margin-bottom:6px;text-transform:uppercase">Zones de danger</div>
     ${zonesR.map(z=>`
     <div style="background:${C.yellowBg};border-left:4px solid #F59E0B;border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:5px">
       <div style="font-weight:700;font-size:10.5px;color:#92400E">${esc(z.lieu)} <span style="font-weight:400;color:#B45309;font-size:9px">— ${z.type||'Non spécifié'}</span></div>
       <div style="color:#78716C;font-size:9px;margin-top:3px">Préventif : ${[...z.preventif,...(z.customPrev||[])].join(' • ')||'—'}</div>
     </div>`).join('')}`:'<div style="color:#bbb;font-size:10px;font-style:italic;padding:4px 0">Aucune zone à risque identifiée</div>'}
     ${zonesC.length?`
-    <div style="font-size:8.5px;font-weight:800;color:#991B1B;letter-spacing:1.2px;margin-top:10px;margin-bottom:6px;text-transform:uppercase">🔴 Zones de chute</div>
+    <div style="font-size:8.5px;font-weight:800;color:#991B1B;letter-spacing:1.2px;margin-top:10px;margin-bottom:6px;text-transform:uppercase"> Zones de chute</div>
     ${zonesC.map(z=>`
     <div style="background:${C.redBg};border-left:4px solid ${C.red};border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:5px">
       <div style="font-weight:700;font-size:10.5px;color:#991B1B">${esc(z.lieu)} <span style="font-weight:400;color:#B91C1C;font-size:9px">— ${z.type||'Non spécifié'}</span></div>
@@ -1705,25 +1804,25 @@ function generatePDF(){
 
   <!-- ═══════ SECTION 4: EPI, PERMIS & ÉQUIPEMENTS ═══════ -->
   <div style="border:1px solid ${C.border};border-top:none;padding:14px 20px;background:#fff">
-    ${secH('4','🛡️','EPI, Permis & Équipements')}
+    ${secH('4','','EPI, Permis & Équipements')}
     <table style="width:100%;border-collapse:collapse;font-size:9.5px">
       <tr style="vertical-align:top">
         <td style="width:33%;padding-right:10px">
           <div style="background:${C.greenBg};border-radius:6px;padding:10px;min-height:50px">
-            <div style="font-weight:800;color:${C.green};font-size:8.5px;letter-spacing:1.2px;margin-bottom:6px;border-bottom:1px solid rgba(5,150,105,.15);padding-bottom:4px;text-transform:uppercase">🛡️ EPI — ${allEpi.length}</div>
-            ${allEpi.map(e=>`<div style="padding:1.5px 0;color:${C.textM}"><span style="color:${C.green};font-weight:700">✓</span> ${esc(e)}</div>`).join('')||'<div style="color:#bbb;font-style:italic">—</div>'}
+            <div style="font-weight:800;color:${C.green};font-size:8.5px;letter-spacing:1.2px;margin-bottom:6px;border-bottom:1px solid rgba(5,150,105,.15);padding-bottom:4px;text-transform:uppercase">EPI — ${allEpi.length}</div>
+            ${allEpi.map(e=>`<div style="padding:1.5px 0;color:${C.textM}"><span style="color:${C.green};font-weight:700">&check;</span> ${esc(e)}</div>`).join('')||'<div style="color:#bbb;font-style:italic">—</div>'}
           </div>
         </td>
         <td style="width:33%;padding-right:10px">
           <div style="background:${C.blueBg};border-radius:6px;padding:10px;min-height:50px">
-            <div style="font-weight:800;color:${C.blue};font-size:8.5px;letter-spacing:1.2px;margin-bottom:6px;border-bottom:1px solid rgba(37,99,235,.15);padding-bottom:4px;text-transform:uppercase">📜 Permis — ${allPermis.length}</div>
-            ${allPermis.map(e=>`<div style="padding:1.5px 0;color:${C.textM}"><span style="color:${C.blue};font-weight:700">✓</span> ${esc(e)}</div>`).join('')||'<div style="color:#bbb;font-style:italic">—</div>'}
+            <div style="font-weight:800;color:${C.blue};font-size:8.5px;letter-spacing:1.2px;margin-bottom:6px;border-bottom:1px solid rgba(37,99,235,.15);padding-bottom:4px;text-transform:uppercase">Permis — ${allPermis.length}</div>
+            ${allPermis.map(e=>`<div style="padding:1.5px 0;color:${C.textM}"><span style="color:${C.blue};font-weight:700">&check;</span> ${esc(e)}</div>`).join('')||'<div style="color:#bbb;font-style:italic">—</div>'}
           </div>
         </td>
         <td style="width:34%">
           <div style="background:${C.purpleBg};border-radius:6px;padding:10px;min-height:50px">
-            <div style="font-weight:800;color:${C.purple};font-size:8.5px;letter-spacing:1.2px;margin-bottom:6px;border-bottom:1px solid rgba(124,58,237,.15);padding-bottom:4px;text-transform:uppercase">🔧 Équipements — ${allEquip.length}</div>
-            ${allEquip.map(e=>`<div style="padding:1.5px 0;color:${C.textM}"><span style="color:${C.purple};font-weight:700">✓</span> ${esc(e)}</div>`).join('')||'<div style="color:#bbb;font-style:italic">—</div>'}
+            <div style="font-weight:800;color:${C.purple};font-size:8.5px;letter-spacing:1.2px;margin-bottom:6px;border-bottom:1px solid rgba(124,58,237,.15);padding-bottom:4px;text-transform:uppercase">Équipements — ${allEquip.length}</div>
+            ${allEquip.map(e=>`<div style="padding:1.5px 0;color:${C.textM}"><span style="color:${C.purple};font-weight:700">&check;</span> ${esc(e)}</div>`).join('')||'<div style="color:#bbb;font-style:italic">—</div>'}
           </div>
         </td>
       </tr>
@@ -1732,27 +1831,27 @@ function generatePDF(){
 
   <!-- ═══════ SECTION 5: ANALYSE DE RISQUE ═══════ -->
   <div style="border:1px solid ${C.border};border-top:none;padding:14px 20px;background:#fff;page-break-inside:avoid">
-    ${secH('5','🔍','Analyse de risque')}
+    ${secH('5','','Analyse de risque')}
     
     <div style="display:flex;gap:10px;margin-bottom:12px">
       <div style="flex:1;background:${C.redBg};border-radius:6px;padding:10px;border-left:4px solid ${C.red}">
-        <div style="font-weight:800;color:#991B1B;font-size:8.5px;letter-spacing:1.2px;margin-bottom:4px;text-transform:uppercase">⚠️ Dangers identifiés</div>
+        <div style="font-weight:800;color:#991B1B;font-size:8.5px;letter-spacing:1.2px;margin-bottom:4px;text-transform:uppercase">Dangers identifiés</div>
         <div style="color:${C.text};font-size:10px;white-space:pre-wrap">${esc(p.dangers)||'—'}</div>
       </div>
       <div style="flex:1;background:${C.greenBg};border-radius:6px;padding:10px;border-left:4px solid ${C.green}">
-        <div style="font-weight:800;color:#065F46;font-size:8.5px;letter-spacing:1.2px;margin-bottom:4px;text-transform:uppercase">🛡️ Mesures de contrôle</div>
+        <div style="font-weight:800;color:#065F46;font-size:8.5px;letter-spacing:1.2px;margin-bottom:4px;text-transform:uppercase">Mesures de contrôle</div>
         <div style="color:${C.text};font-size:10px;white-space:pre-wrap">${esc(p.mesuresRisques)||'—'}</div>
       </div>
     </div>
 
     <table style="width:100%;border-collapse:separate;border-spacing:0;font-size:10px;border-radius:6px;overflow:hidden;border:1px solid ${C.border}">
-      ${infoRow('🌤️ Météo', '<b>'+esc(p.meteo.conditions.join(', ')||'—')+'</b>'+(p.meteo.temperature?' <span style="color:'+C.orange+';font-weight:700"> • '+p.meteo.temperature+'°C</span>':''), C.light)}
-      ${infoRow('🔨 Travaux adjacents', p.travauxAdj.active?'<b>'+esc(p.travauxAdj.quoi)+'</b> — Contrôle : '+esc(p.travauxAdj.controle):'<span style="color:#bbb">N/A</span>')}
-      ${infoRow('⚓ Ancrages', p.securiteAncrages.active?allAncrages.map(a=>esc(a)).join(' • ')+(p.securiteAncrages.comment?' — <em>'+esc(p.securiteAncrages.comment)+'</em>':''):'<span style="color:#bbb">N/A</span>', C.light)}
-      ${infoRow('👥 Sécurité public', p.securitePublic.active?'<b>'+esc(p.securitePublic.quoi)+'</b> — Contrôle : '+esc(p.securitePublic.controle):'<span style="color:#bbb">N/A</span>')}
-      ${infoRow('🔒 Cadenassage', esc(p.cadenassage)||'<span style="color:#bbb">N/A</span>', C.light)}
+      ${infoRow('Météo', '<b>'+esc(p.meteo.conditions.join(', ')||'—')+'</b>'+(p.meteo.temperature?' <span style="color:'+C.orange+';font-weight:700"> • '+p.meteo.temperature+'°C</span>':''), C.light)}
+      ${infoRow('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg> Travaux adjacents', p.travauxAdj.active?'<b>'+esc(p.travauxAdj.quoi)+'</b> — Contrôle : '+esc(p.travauxAdj.controle):'<span style="color:#bbb">N/A</span>')}
+      ${infoRow('<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0020 0h-3"/></svg> Ancrages', p.securiteAncrages.active?allAncrages.map(a=>esc(a)).join(' • ')+(p.securiteAncrages.comment?' — <em>'+esc(p.securiteAncrages.comment)+'</em>':''):'<span style="color:#bbb">N/A</span>', C.light)}
+      ${infoRow('Sécurité public', p.securitePublic.active?'<b>'+esc(p.securitePublic.quoi)+'</b> — Contrôle : '+esc(p.securitePublic.controle):'<span style="color:#bbb">N/A</span>')}
+      ${infoRow('Cadenassage', esc(p.cadenassage)||'<span style="color:#bbb">N/A</span>', C.light)}
       <tr>
-        <td style="padding:7px 12px;font-weight:700;color:${C.textL};font-size:8.5px;letter-spacing:1.2px;width:155px;text-transform:uppercase">⚡ Matières instables</td>
+        <td style="padding:7px 12px;font-weight:700;color:${C.textL};font-size:8.5px;letter-spacing:1.2px;width:155px;text-transform:uppercase">Matières instables</td>
         <td style="padding:7px 12px;font-size:10px;color:${C.text}">${p.matieresInstables.active?'<b>'+esc(p.matieresInstables.quoi)+'</b> — Contrôle : '+esc(p.matieresInstables.controle):'<span style="color:#bbb">N/A</span>'}</td>
       </tr>
     </table>
@@ -1890,10 +1989,10 @@ function generatePDF(){
     }).from(container.firstElementChild).save();
   }).then(()=>{
     document.body.removeChild(container);
-    showToast('✅ PDF téléchargé: '+filename,'ok');
+    showToast(' PDF téléchargé: '+filename,'ok');
   }).catch(err=>{
     try{document.body.removeChild(container);}catch(e){}
-    showToast('❌ Erreur PDF: '+err.message,'err');
+    showToast(' Erreur PDF: '+err.message,'err');
     console.error(err);
   });
 }
@@ -1911,7 +2010,7 @@ function viewPlanPDF(idx){
 function renderHistorique(){
   const plans = getPlans();
   return `
-    <h2>📜 HISTORIQUE DES PLANS</h2>
+    <h2>HISTORIQUE DES PLANS</h2>
     <p style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:14px">${plans.length} plan${plans.length>1?'s':''} enregistré${plans.length>1?'s':''}</p>
     ${plans.length===0?'<div style="text-align:center;color:var(--muted);padding:30px">Aucun plan enregistré</div>':''}
     ${plans.map((p,i)=>`
@@ -1923,16 +2022,16 @@ function renderHistorique(){
             <div style="font-size:11px;color:var(--gold)">${Array.isArray(p.installationType)?p.installationType.join(' + '):p.installationType} • ${p.equipe.filter(e=>e.nom).length} membres</div>
           </div>
           <div style="text-align:right">
-            <div class="badge badge-green">✅</div>
+            <div class="badge badge-green">OK</div>
             <div style="font-size:10px;color:var(--muted);margin-top:2px">${p.timestamp?p.timestamp.split(' ')[1]:''}</div>
-            ${p.revisions.length?`<div style="font-size:10px;color:var(--orange)">🔄 ×${p.revisions.length}</div>`:''}
-            <button onclick="event.stopPropagation();viewPlanPDF(${i})" style="margin-top:4px;padding:4px 10px;background:var(--rescue);border:none;border-radius:6px;color:#fff;font-size:10px;font-family:Oswald;letter-spacing:1px;cursor:pointer">📄 PDF</button>
+            ${p.revisions&&p.revisions.length?`<div style="font-size:10px;color:var(--orange)">×${p.revisions.length}</div>`:''}
+            <button onclick="event.stopPropagation();viewPlanPDF(${i})" style="margin-top:4px;padding:4px 10px;background:var(--gold);border:none;border-radius:6px;color:#fff;font-size:10px;font-family:Oswald;letter-spacing:1px;cursor:pointer">PDF</button>
           </div>
         </div>
       </div>
     `).join('')}
     <div class="btn-nav">
-      <button class="btn btn-outline" onclick="plan.step=0;render()">◀ ACCUEIL</button>
+      <button class="btn btn-outline" onclick="plan.step=0;render()">&larr; ACCUEIL</button>
     </div>`;
 }
 
@@ -1948,7 +2047,7 @@ function viewPlan(idx){
 
 function revisePlan(){
   const el=document.createElement('div');el.id='pt-modal-overlay';el.className='pt-modal-overlay';
-  el.innerHTML='<div class="pt-modal"><h3>🔄 RÉVISION DU PLAN</h3><textarea id="pt-revision-note" rows="3" placeholder="Note de révision (optionnel)..."></textarea><div class="pt-modal-btns"><button onclick="document.getElementById(\'pt-modal-overlay\').remove()" style="background:#1C1012;color:var(--muted)">ANNULER</button><button onclick="_doRevisePlan()" style="background:rgba(230,81,0,.15);color:var(--rescue);border-color:rgba(230,81,0,.3)">RÉVISER</button></div></div>';
+  el.innerHTML='<div class="pt-modal"><h3>RÉVISION DU PLAN</h3><textarea id="pt-revision-note" rows="3" placeholder="Note de révision (optionnel)..."></textarea><div class="pt-modal-btns"><button onclick="document.getElementById(\'pt-modal-overlay\').remove()" style="background:#1C1012;color:var(--muted)">ANNULER</button><button onclick="_doRevisePlan()" style="background:rgba(201,168,76,.15);color:var(--gold);border-color:rgba(201,168,76,.3)">RÉVISER</button></div></div>';
   document.body.appendChild(el);
   setTimeout(function(){document.getElementById('pt-revision-note').focus();},100);
 }
@@ -1964,7 +2063,7 @@ function _doRevisePlan(){
   plan.confirmed = false;
   plan.step = 1;
   render();
-  showToast('🔄 Mode révision activé','info');
+  showToast('Mode révision activé','info');
 }
 
 // ===== DICTÉE VOCALE =====
@@ -1972,7 +2071,7 @@ function renderDicteeButton(fieldKey, label){
   return `
     <div style="margin-top:8px;margin-bottom:12px">
       <button class="mic-btn" id="mic_${fieldKey}" onclick="startDictation('${fieldKey}')">
-        🎙️ Dictée vocale
+        Dictée vocale
       </button>
       <div id="preview_${fieldKey}" style="display:none"></div>
     </div>`;
@@ -2022,7 +2121,7 @@ function stopRecording(){
 
 function startDictation(fieldKey){
   if(!PT_CONFIG.WHISPER_PROXY && !PT_CONFIG.OPENAI_API_KEY){
-    showToast('❌ Clé OpenAI non configurée (OPENAI_API_KEY)','err');
+    showToast(' Clé OpenAI non configurée (OPENAI_API_KEY)','err');
     return;
   }
   
@@ -2035,46 +2134,46 @@ function startDictation(fieldKey){
   mediaTarget = fieldKey;
   const btn = document.getElementById('mic_'+fieldKey);
   btn.classList.add('recording');
-  btn.innerHTML = '🔴 Enregistrement... (cliquez pour arrêter)';
+  btn.innerHTML = 'Enregistrement... (cliquez pour arrêter)';
   
   startRecording().then(()=>{
-    showToast('🎙️ Parlez maintenant...','info');
+    showToast(' Parlez maintenant...','info');
   }).catch(err=>{
     btn.classList.remove('recording');
-    btn.innerHTML = '🎙️ Dictée vocale';
-    showToast('❌ Accès micro refusé: '+err.message,'err');
+    btn.innerHTML = 'Dictée vocale';
+    showToast(' Accès micro refusé: '+err.message,'err');
   });
 }
 
 async function stopFieldRecording(fieldKey){
   const btn = document.getElementById('mic_'+fieldKey);
   btn.classList.remove('recording');
-  btn.innerHTML = '⏳ Transcription...';
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Transcription...';
   
   const blob = await stopRecording();
   if(!blob || blob.size < 1000){
-    btn.innerHTML = '🎙️ Dictée vocale';
-    showToast('❌ Enregistrement trop court','err');
+    btn.innerHTML = 'Dictée vocale';
+    showToast(' Enregistrement trop court','err');
     return;
   }
   
   try {
-    showToast('🔄 Transcription Whisper...','info');
+    showToast(' Transcription Whisper...','info');
     let finalText = await transcribeWithWhisper(blob);
     
     // Try Claude restructuring
     if(PT_CONFIG.CLAUDE_PROXY || PT_CONFIG.CLAUDE_API_KEY){
-      showToast('🦅 Restructuration Eagle SST...','info');
+      showToast(' Restructuration Eagle SST...','info');
       try {
         finalText = await restructureWithClaude(finalText);
       } catch(e){ console.error('Claude error:', e); }
     }
     
-    btn.innerHTML = '🎙️ Dictée vocale';
+    btn.innerHTML = 'Dictée vocale';
     showDicteePreview(fieldKey, finalText, finalText);
   } catch(e){
-    btn.innerHTML = '🎙️ Dictée vocale';
-    showToast('❌ '+e.message,'err');
+    btn.innerHTML = 'Dictée vocale';
+    showToast(' '+e.message,'err');
   }
 }
 
@@ -2084,9 +2183,9 @@ function showDicteePreview(fieldKey, text, rawText){
   container.innerHTML = `
     <div class="preview-box">${text}</div>
     <div class="preview-actions">
-      <button style="background:var(--green);color:#fff" onclick="applyDictee('${fieldKey}',true)">✅ Confirmer</button>
-      <button style="background:var(--card);color:var(--txt);border:1px solid var(--border)" onclick="applyDictee('${fieldKey}',false)">✏️ Modifier</button>
-      <button style="background:var(--card);color:var(--rescue);border:1px solid var(--rescue)" onclick="startDictation('${fieldKey}')">🎙️ Re-dicter</button>
+      <button style="background:var(--green);color:#fff" onclick="applyDictee('${fieldKey}',true)">Confirmer</button>
+      <button style="background:var(--card);color:var(--txt);border:1px solid var(--border)" onclick="applyDictee('${fieldKey}',false)">Modifier</button>
+      <button style="background:var(--card);color:var(--gold);border:1px solid var(--gold)" onclick="startDictation('${fieldKey}')">Re-dicter</button>
     </div>`;
   container.dataset.text = text;
   container.dataset.raw = rawText;
@@ -2117,7 +2216,7 @@ function applyDictee(fieldKey, confirmed){
     }
   }
   container.style.display = 'none';
-  showToast('✅ Texte appliqué','ok');
+  showToast(' Texte appliqué','ok');
 }
 
 async function restructureWithClaude(text){
@@ -2131,49 +2230,49 @@ async function restructureWithClaude(text){
 // ===== MODE DICTÉE GUIDÉE =====
 const DICTEE_PROMPTS = [
   {
-    icon: '📍', title: 'SITE & MISSION',
+    icon: '', title: 'SITE & MISSION',
     hint: 'Nommez le site, la compagnie ou le chantier.',
     example: '"On est à Sherbrooke, usine Kruger, pour une intervention en silo 3"',
     field: 'site_mission'
   },
   {
-    icon: '🔧', title: 'TYPE D\'INSTALLATION',
+    icon: '', title: 'TYPE D\'INSTALLATION',
     hint: 'Horizontale, verticale, ou les deux?',
     example: '"Installation verticale... ou les deux, horizontale et verticale"',
     field: 'type_install'
   },
   {
-    icon: '👥', title: 'RESPONSABLE & ÉQUIPE',
+    icon: '', title: 'RESPONSABLE & ÉQUIPE',
     hint: 'Qui est le responsable? Nommez les membres de l\'équipe et leur poste.',
     example: '"Le responsable c\'est Alexandre Gendreau. Éclaireur: Jonathan Milone. Support: Maxime Boisvert. Je suis au P.C."',
     field: 'equipe'
   },
   {
-    icon: '⚠️', title: 'ZONES À RISQUE',
+    icon: '', title: 'ZONES À RISQUE',
     hint: 'Décrivez les zones dangereuses, les zones de chute, le type d\'espace. Quelles mesures préventives?',
     example: '"Zone à risque: silo numéro 3, espace clos. On met un périmètre jaune. Zone de chute autour du silo, périmètre rouge, identification danger"',
     field: 'zones'
   },
   {
-    icon: '🛡️', title: 'EPI, PERMIS & ÉQUIPEMENTS',
+    icon: '', title: 'EPI, PERMIS & ÉQUIPEMENTS',
     hint: 'Quels EPI? Quels permis sont requis? Quels équipements techniques?',
     example: '"Casque, lunettes, gants, bottes d\'acier, protection respiratoire. Permis: AST et espace clos. On prend les harnais, cordage statique, détecteur 4 gaz"',
     field: 'epi_permis'
   },
   {
-    icon: '🔥', title: 'DANGERS & MESURES',
+    icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4650E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c.5 3.5 4 6 4 10a4 4 0 11-8 0c0-4 3.5-6.5 4-10z"/></svg>', title: 'DANGERS & MESURES',
     hint: 'Quels sont les dangers prévisibles? Quelles mesures de contrôle?',
     example: '"Danger de gaz H2S, manque d\'oxygène, résidus au sol. On met la ventilation forcée, détecteur 4 gaz en continu, atmosphère testée avant entrée"',
     field: 'dangers'
   },
   {
-    icon: '🌤️', title: 'MÉTÉO & SÉCURITÉ',
+    icon: '', title: 'MÉTÉO & SÉCURITÉ',
     hint: 'Conditions météo? Travaux adjacents? Enjeux d\'ancrage? Sécurité du public? Cadenassage? Matières instables? Temps estimé?',
     example: '"Vent fort, moins 8. Pas de travaux adjacents. Ancrages: risque d\'endommager les cordes, on élargit le périmètre. Cadenassage avec cadenas personnel. Mission estimée à 4 heures"',
     field: 'securite'
   },
   {
-    icon: '🚁', title: 'PLAN DE SAUVETAGE',
+    icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 3 0 3 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-3 0-3"/></svg>', title: 'PLAN DE SAUVETAGE',
     hint: 'Endroits de sauvetage? Système débrayable? Procédures? Communication?',
     example: '"Sauvetage à l\'intérieur du silo 3, accès par le haut. Système débrayable oui, pré-installé. Extraction verticale avec civière Sked. Communication par radio, chef d\'équipe au P.C."',
     field: 'sauvetage'
@@ -2191,7 +2290,7 @@ let dicteeState = {
 
 function startDicteeMode(){
   if(!PT_CONFIG.WHISPER_PROXY && !PT_CONFIG.OPENAI_API_KEY){
-    showToast('❌ Clé OpenAI non configurée — ajoutez OPENAI_API_KEY dans le config','err');
+    showToast(' Clé OpenAI non configurée — ajoutez OPENAI_API_KEY dans le config','err');
     return;
   }
   // Reset
@@ -2237,15 +2336,15 @@ function renderDicteeStep(){
       <div class="dp-icon">${prompt.icon}</div>
       <div class="dp-title">${prompt.title}</div>
       <div class="dp-hint">${prompt.hint}</div>
-      <div class="dp-example">💬 ${prompt.example}</div>
+      <div class="dp-example">EX: ${prompt.example}</div>
     </div>
     
     <div class="dictee-mic">
       <button class="dictee-mic-btn ${isRec?'recording':transcript?'done':''}" onclick="toggleDicteeMic()">
-        ${isRec?'🔴':transcript?'✅':'🎙️'}
+        ${isRec?'':transcript?'<span style="color:#22C55E;font-weight:700">OK</span>':''}
       </button>
       <div style="font-size:11px;color:${isRec?'var(--red)':transcript?'var(--green)':'var(--muted)'};margin-top:8px;font-family:Oswald;letter-spacing:1px">
-        ${isRec?'🔴 ÉCOUTE EN COURS... Appuyez pour arrêter':transcript?'✅ Capté — Appuyez pour re-dicter':'Appuyez pour parler'}
+        ${isRec?' ÉCOUTE EN COURS... Appuyez pour arrêter':transcript?'Capté — Appuyez pour re-dicter':'Appuyez pour parler'}
       </div>
     </div>
     
@@ -2260,9 +2359,9 @@ function renderDicteeStep(){
     </div>
     
     <div class="dictee-actions">
-      ${s>0?`<button class="dictee-nav-prev" onclick="dicteeNav(-1)">◀ PRÉCÉDENT</button>`:'<button class="dictee-nav-prev" onclick="closeDicteeMode()">✕ QUITTER</button>'}
+      ${s>0?`<button class="dictee-nav-prev" onclick="dicteeNav(-1)">&larr; PRÉCÉDENT</button>`:'<button class="dictee-nav-prev" onclick="closeDicteeMode()">X QUITTER</button>'}
       <button class="dictee-nav-next ${s===total-1?'finish':''}" onclick="dicteeNav(1)">
-        ${s===total-1?'🦅 STRUCTURER AVEC EAGLE SST ▶':'SUIVANT ▶'}
+        ${s===total-1?'STRUCTURER AVEC EAGLE SST &rarr;':'SUIVANT &rarr;'}
       </button>
     </div>
   `;
@@ -2300,34 +2399,34 @@ async function toggleDicteeMic(){
       const blob = new Blob(chunks, { type: rec.mimeType || 'audio/webm' });
       
       if(blob.size < 1000){
-        showToast('❌ Enregistrement trop court','err');
+        showToast(' Enregistrement trop court','err');
         renderDicteeStep();
         return;
       }
       
       // Show transcribing state
       const box = document.querySelector('.dictee-transcript');
-      if(box){ box.classList.remove('empty'); box.innerHTML = '<span style="color:var(--blue)">⏳ Transcription en cours...</span>'; }
+      if(box){ box.classList.remove('empty'); box.innerHTML = '<span style="color:var(--blue)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Transcription en cours...</span>'; }
       const micBtn = document.querySelector('.dictee-mic-btn');
-      if(micBtn){ micBtn.innerHTML = '⏳'; micBtn.className = 'dictee-mic-btn'; }
+      if(micBtn){ micBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'; micBtn.className = 'dictee-mic-btn'; }
       
       try {
         const text = await transcribeWithWhisper(blob);
         dicteeState.transcripts[prompt.field] = text;
-        showToast('✅ Transcription réussie','ok');
+        showToast(' Transcription réussie','ok');
       } catch(e){
-        showToast('❌ '+e.message,'err');
+        showToast(' '+e.message,'err');
       }
       renderDicteeStep();
     };
     
     rec.start(250);
     renderDicteeStep();
-    showToast('🎙️ Parlez maintenant...','info');
+    showToast(' Parlez maintenant...','info');
     
   } catch(err){
     dicteeState.recording = false;
-    showToast('❌ Accès micro refusé: '+err.message,'err');
+    showToast(' Accès micro refusé: '+err.message,'err');
     renderDicteeStep();
   }
 }
@@ -2365,7 +2464,7 @@ async function processDicteeWithClaude(){
   // Check if there's anything to process
   const hasContent = Object.values(dicteeState.transcripts).some(t => t.trim());
   if(!hasContent){
-    showToast('❌ Aucun texte dicté','err');
+    showToast(' Aucun texte dicté','err');
     return;
   }
   
@@ -2373,7 +2472,7 @@ async function processDicteeWithClaude(){
   body.innerHTML = `
     <div class="dictee-loading">
       <div class="spinner"></div>
-      <div style="font-family:Oswald;font-size:18px;color:var(--blue);letter-spacing:2px;margin-bottom:8px">🦅 EAGLE SST STRUCTURE VOTRE PLAN...</div>
+      <div style="font-family:Oswald;font-size:18px;color:var(--blue);letter-spacing:2px;margin-bottom:8px">EAGLE SST STRUCTURE VOTRE PLAN...</div>
       <div style="font-size:12px;color:var(--muted)">Analyse en cours — quelques secondes</div>
     </div>
   `;
@@ -2385,7 +2484,7 @@ async function processDicteeWithClaude(){
   
   // If no API key, do basic structuring
   if(!PT_CONFIG.CLAUDE_PROXY && !PT_CONFIG.CLAUDE_API_KEY){
-    showToast('⚠️ API Eagle SST non configurée — application du texte brut','err');
+    showToast(' API Eagle SST non configurée — application du texte brut','err');
     applyRawDictee();
     return;
   }
@@ -2458,7 +2557,7 @@ FORMAT JSON ATTENDU:
       parsed = JSON.parse(clean);
     } catch(e) {
       console.error('JSON parse error:', e, rawResponse);
-      showToast('⚠️ Erreur de structuration — texte brut appliqué','err');
+      showToast(' Erreur de structuration — texte brut appliqué','err');
       applyRawDictee();
       return;
     }
@@ -2471,7 +2570,7 @@ FORMAT JSON ATTENDU:
     
   } catch(e){
     console.error('Claude API error:', e);
-    showToast('❌ Erreur API: '+e.message+' — texte brut appliqué','err');
+    showToast(' Erreur API: '+e.message+' — texte brut appliqué','err');
     applyRawDictee();
   }
 }
@@ -2487,39 +2586,39 @@ function showDicteeReview(parsed){
   body.innerHTML = `
     <div class="dictee-review">
       <div style="text-align:center;margin-bottom:16px">
-        <div style="font-size:36px;margin-bottom:8px">🤖</div>
+        <div style="font-size:36px;margin-bottom:8px"></div>
         <div style="font-family:Oswald;font-size:18px;color:var(--green);letter-spacing:2px">PLAN STRUCTURÉ PAR EAGLE SST</div>
         <div style="font-size:11px;color:var(--muted);margin-top:4px">Vérifiez et corrigez si nécessaire avant d'appliquer</div>
       </div>
       
       <div class="dictee-review-section">
-        <h4>📍 MISSION</h4>
+        <h4>MISSION</h4>
         <div class="dictee-review-field"><span class="label">Site / Cie</span><span class="value">${esc(parsed.cie||'—')}</span></div>
-        <div class="dictee-review-field"><span class="label">Type</span><span class="value" style="color:var(--rescue)">${(parsed.installationType||[]).join(' + ')||'—'}</span></div>
+        <div class="dictee-review-field"><span class="label">Type</span><span class="value" style="color:var(--gold)">${(parsed.installationType||[]).join(' + ')||'—'}</span></div>
         <div class="dictee-review-field"><span class="label">Responsable</span><span class="value">${esc(parsed.responsable||'—')}</span></div>
         <div class="dictee-review-field"><span class="label">Temps estimé</span><span class="value">${parsed.tempsEstime?((parsed.tempsEstime.jours||0)?parsed.tempsEstime.jours+'j ':'')+(parsed.tempsEstime.heures||0)+'h'+String(parsed.tempsEstime.minutes||0).padStart(2,'0'):'—'}</span></div>
       </div>
       
       <div class="dictee-review-section">
-        <h4>👥 ÉQUIPE (${team.length})</h4>
+        <h4>ÉQUIPE (${team.length})</h4>
         ${team.map(e=>`<div class="dictee-review-field"><span class="label">${e.poste||'—'}</span><span class="value">${esc(e.nom||'—')} <span style="color:var(--muted);font-size:10px">${e.id||''}</span></span></div>`).join('')||'<div style="color:var(--muted);font-size:11px">Aucun membre identifié</div>'}
       </div>
 
       <div class="dictee-review-section">
-        <h4>⚠️ ZONES</h4>
-        ${(parsed.zonesRisque||[]).filter(z=>z.lieu).map(z=>`<div class="dictee-review-field"><span class="label" style="color:#856404">🟡 ${esc(z.lieu)}</span><span class="value">${z.type||'—'} • ${(z.preventif||[]).join(', ')||'—'}</span></div>`).join('')||'<div style="color:var(--muted);font-size:11px">—</div>'}
-        ${(parsed.zonesChute||[]).filter(z=>z.lieu).map(z=>`<div class="dictee-review-field"><span class="label" style="color:#721C24">🔴 ${esc(z.lieu)}</span><span class="value">${z.type||'—'} • ${(z.preventif||[]).join(', ')||'—'}</span></div>`).join('')}
+        <h4>ZONES</h4>
+        ${(parsed.zonesRisque||[]).filter(z=>z.lieu).map(z=>`<div class="dictee-review-field"><span class="label" style="color:#856404"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#EAB308;margin-right:4px"></span>${esc(z.lieu)}</span><span class="value">${z.type||'—'} • ${(z.preventif||[]).join(', ')||'—'}</span></div>`).join('')||'<div style="color:var(--muted);font-size:11px">—</div>'}
+        ${(parsed.zonesChute||[]).filter(z=>z.lieu).map(z=>`<div class="dictee-review-field"><span class="label" style="color:#721C24"> ${esc(z.lieu)}</span><span class="value">${z.type||'—'} • ${(z.preventif||[]).join(', ')||'—'}</span></div>`).join('')}
       </div>
 
       <div class="dictee-review-section">
-        <h4>🛡️ EPI / PERMIS / ÉQUIPEMENTS</h4>
+        <h4>EPI / PERMIS / ÉQUIPEMENTS</h4>
         <div class="dictee-review-field"><span class="label">EPI (${epi.length})</span><span class="value">${epi.join(', ')||'—'}</span></div>
         <div class="dictee-review-field"><span class="label">Permis (${permis.length})</span><span class="value">${permis.join(', ')||'—'}</span></div>
         <div class="dictee-review-field"><span class="label">Équipements (${equip.length})</span><span class="value">${equip.join(', ')||'—'}</span></div>
       </div>
 
       <div class="dictee-review-section">
-        <h4>🔥 ANALYSE DE RISQUE</h4>
+        <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4650E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c.5 3.5 4 6 4 10a4 4 0 11-8 0c0-4 3.5-6.5 4-10z"/></svg> ANALYSE DE RISQUE</h4>
         <div class="dictee-review-field"><span class="label" style="color:var(--red)">Dangers</span><span class="value">${esc(parsed.dangers||'—')}</span></div>
         <div class="dictee-review-field"><span class="label" style="color:var(--green)">Mesures</span><span class="value">${esc(parsed.mesuresRisques||'—')}</span></div>
         <div class="dictee-review-field"><span class="label">Météo</span><span class="value">${(parsed.meteo?.conditions||[]).join(', ')||'—'} ${parsed.meteo?.temperature?'• '+parsed.meteo.temperature+'°C':''}</span></div>
@@ -2529,7 +2628,7 @@ function showDicteeReview(parsed){
       </div>
 
       <div class="dictee-review-section">
-        <h4>🚁 PLAN DE SAUVETAGE</h4>
+        <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 3 0 3 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-3 0-3"/></svg> PLAN DE SAUVETAGE</h4>
         <div class="dictee-review-field"><span class="label">Endroits</span><span class="value">${esc(parsed.endroitsSauvetage||'—')}</span></div>
         <div class="dictee-review-field"><span class="label">Débrayable</span><span class="value" style="color:${parsed.debrayable?'var(--green)':'var(--muted)'}">${parsed.debrayable?'OUI':'NON'}</span></div>
         <div class="dictee-review-field"><span class="label">Procédures</span><span class="value">${esc(parsed.procedures||'—')}</span></div>
@@ -2538,7 +2637,7 @@ function showDicteeReview(parsed){
 
       <!-- RECOMMANDATIONS EAGLE SST -->
       <div id="eagleRecommendations" class="dictee-review-section" style="border:1px solid rgba(59,130,246,.3);background:rgba(59,130,246,.04)">
-        <h4 style="color:var(--blue)">🦅 RECOMMANDATIONS EAGLE SST</h4>
+        <h4 style="color:var(--blue)">RECOMMANDATIONS EAGLE SST</h4>
         <div style="text-align:center;padding:12px;color:var(--muted);font-size:11px">
           <div class="spinner" style="width:24px;height:24px;border-width:2px;margin:0 auto 8px"></div>
           Analyse de sécurité en cours...
@@ -2546,8 +2645,8 @@ function showDicteeReview(parsed){
       </div>
       
       <div class="dictee-actions" style="padding-top:12px">
-        <button class="dictee-nav-prev" onclick="dicteeState.step=${DICTEE_PROMPTS.length-1};renderDicteeStep()">◀ MODIFIER</button>
-        <button class="dictee-nav-next" style="background:var(--green)" onclick="applyParsedToPlan(window._dicteeParsed)">✅ APPLIQUER AU PLAN</button>
+        <button class="dictee-nav-prev" onclick="dicteeState.step=${DICTEE_PROMPTS.length-1};renderDicteeStep()">&larr; MODIFIER</button>
+        <button class="dictee-nav-next" style="background:var(--green)" onclick="applyParsedToPlan(window._dicteeParsed)">APPLIQUER AU PLAN</button>
       </div>
     </div>
   `;
@@ -2558,7 +2657,7 @@ function showDicteeReview(parsed){
 async function analyzeWithClaude(parsed){
   const container = document.getElementById('eagleRecommendations');
   if(!container || (!PT_CONFIG.CLAUDE_PROXY && !PT_CONFIG.CLAUDE_API_KEY)) {
-    if(container) container.innerHTML = `<h4 style="color:var(--blue)">🦅 RECOMMANDATIONS EAGLE SST</h4><div style="color:var(--muted);font-size:11px;padding:8px">Proxy API requis pour l'analyse Eagle SST</div>`;
+    if(container) container.innerHTML = `<h4 style="color:var(--blue)">RECOMMANDATIONS EAGLE SST</h4><div style="color:var(--muted);font-size:11px;padding:8px">Proxy API requis pour l'analyse Eagle SST</div>`;
     return;
   }
   
@@ -2576,7 +2675,7 @@ async function analyzeWithClaude(parsed){
     const verdictColor = analysis.verdict === 'BON' ? 'var(--green)' : analysis.verdict === 'ATTENTION' ? 'var(--red)' : 'var(--orange)';
     
     container.innerHTML = `
-      <h4 style="color:var(--blue)">🦅 RECOMMANDATIONS EAGLE SST</h4>
+      <h4 style="color:var(--blue)">RECOMMANDATIONS EAGLE SST</h4>
       
       <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 12px;padding:10px;background:rgba(28,16,18,.5);border-radius:8px">
         <div>
@@ -2590,7 +2689,7 @@ async function analyzeWithClaude(parsed){
       
       ${(analysis.critiques||[]).length?`
         <div style="margin-bottom:10px">
-          <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:4px">🚨 CRITIQUES</div>
+          <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:4px">CRITIQUES</div>
           ${analysis.critiques.map(c=>`
             <div style="padding:6px 10px;margin:3px 0;background:rgba(192,57,43,.08);border-left:3px solid var(--red);border-radius:0 6px 6px 0;font-size:11px">${esc(c)}</div>
           `).join('')}
@@ -2599,7 +2698,7 @@ async function analyzeWithClaude(parsed){
       
       ${(analysis.avertissements||[]).length?`
         <div style="margin-bottom:10px">
-          <div style="font-size:11px;font-weight:700;color:var(--orange);margin-bottom:4px">⚠️ AVERTISSEMENTS</div>
+          <div style="font-size:11px;font-weight:700;color:var(--orange);margin-bottom:4px">AVERTISSEMENTS</div>
           ${analysis.avertissements.map(a=>`
             <div style="padding:6px 10px;margin:3px 0;background:rgba(230,126,34,.06);border-left:3px solid var(--orange);border-radius:0 6px 6px 0;font-size:11px">${esc(a)}</div>
           `).join('')}
@@ -2608,7 +2707,7 @@ async function analyzeWithClaude(parsed){
       
       ${(analysis.suggestions||[]).length?`
         <div>
-          <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:4px">💡 SUGGESTIONS</div>
+          <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:4px">SUGGESTIONS</div>
           ${analysis.suggestions.map(s=>`
             <div style="padding:6px 10px;margin:3px 0;background:rgba(39,174,96,.06);border-left:3px solid var(--green);border-radius:0 6px 6px 0;font-size:11px">${esc(s)}</div>
           `).join('')}
@@ -2619,8 +2718,8 @@ async function analyzeWithClaude(parsed){
   } catch(e){
     console.error('Safety analysis error:', e);
     container.innerHTML = `
-      <h4 style="color:var(--blue)">🦅 RECOMMANDATIONS EAGLE SST</h4>
-      <div style="color:var(--muted);font-size:11px;padding:8px">⚠️ Analyse non disponible — ${esc(e.message)}</div>
+      <h4 style="color:var(--blue)">RECOMMANDATIONS EAGLE SST</h4>
+      <div style="color:var(--muted);font-size:11px;padding:8px">Analyse non disponible — ${esc(e.message)}</div>
     `;
   }
 }
@@ -2698,7 +2797,7 @@ function applyParsedToPlan(parsed){
   closeDicteeMode();
   plan.step = 6;
   render();
-  showToast('✅ Plan structuré — vérifiez le récapitulatif','ok');
+  showToast(' Plan structuré — vérifiez le récapitulatif','ok');
 }
 
 function applyRawDictee(){
@@ -2724,7 +2823,7 @@ function applyRawDictee(){
   closeDicteeMode();
   plan.step = 1; // Go to step 1 for manual review
   render();
-  showToast('⚠️ Texte brut appliqué — complétez manuellement','err');
+  showToast(' Texte brut appliqué — complétez manuellement','err');
 }
 
 // ===== STORAGE =====
@@ -2793,9 +2892,9 @@ async function sendWebhook(){
   try {
     const r = await fetchWH(PT_CONFIG.WEBHOOK, payload);
     if(r.ok) { /* webhook sent */ }
-    else console.error('❌ Webhook error:', r.status);
+    else console.error('Webhook error:', r.status);
   } catch(e){
-    console.error('❌ Webhook network error:', e);
+    console.error('Webhook network error:', e);
     _queuePayload(payload);
   }
 }
@@ -2812,7 +2911,7 @@ window.addEventListener('online', async ()=>{
     }
     if(fail.length) localStorage.setItem('volo_pt_queue', JSON.stringify(fail));
     else localStorage.removeItem('volo_pt_queue');
-    showToast('✅ '+(q.length-fail.length)+' plan(s) envoyé(s)','ok');
+    showToast(' '+(q.length-fail.length)+' plan(s) envoyé(s)','ok');
   } catch(e){}
 });
 
@@ -2903,7 +3002,7 @@ function renderEagleAssistBtn(stepNum){
   if(!PT_CONFIG.CLAUDE_PROXY && !PT_CONFIG.CLAUDE_API_KEY) return '';
   return `<button onclick="launchStepAssist(${stepNum})" id="eagleBtn${stepNum}" 
     style="width:100%;margin-top:14px;padding:10px 14px;background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(59,130,246,.04));border:1px solid rgba(59,130,246,.35);border-radius:10px;color:var(--blue);font-size:11px;font-family:Oswald;letter-spacing:1.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
-    <span style="font-size:16px">🦅</span> EAGLE SST — SUGGESTIONS POUR CETTE ÉTAPE
+    <span style="font-size:16px">GE</span> EAGLE SST — SUGGESTIONS POUR CETTE ÉTAPE
   </button>`;
 }
 
@@ -2977,7 +3076,7 @@ async function launchStepAssist(stepNum){
   const btn = document.getElementById('eagleBtn'+stepNum);
   const container = document.getElementById('eagleAssist'+stepNum);
   if(!container) return;
-  if(btn){ btn.disabled=true; btn.innerHTML='<span style="font-size:14px">🦅</span> Analyse en cours...'; }
+  if(btn){ btn.disabled=true; btn.innerHTML='<span style="font-size:14px">GE</span> Analyse en cours...'; }
   
   container.innerHTML = `<div style="padding:10px;text-align:center;border:1px solid rgba(59,130,246,.2);border-radius:10px;margin-top:4px">
     <div class="spinner" style="width:20px;height:20px;border:2px solid var(--border);border-top:2px solid var(--blue);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 6px"></div>
@@ -2994,9 +3093,9 @@ async function launchStepAssist(stepNum){
     const result = JSON.parse(clean);
     renderStepAssistResultV2(container, result.suggestions||[], stepNum);
   } catch(e){
-    container.innerHTML = `<div style="padding:8px 12px;border:1px solid rgba(230,81,0,.3);border-radius:8px;font-size:10px;color:var(--orange)">Eagle indisponible: ${e.message}</div>`;
+    container.innerHTML = `<div style="padding:8px 12px;border:1px solid rgba(201,168,76,.3);border-radius:8px;font-size:10px;color:var(--gold)">Eagle indisponible: ${e.message}</div>`;
   } finally {
-    if(btn){ btn.disabled=false; btn.innerHTML='<span style="font-size:16px">🦅</span> EAGLE SST — ACTUALISER SUGGESTIONS'; }
+    if(btn){ btn.disabled=false; btn.innerHTML='<span style="font-size:16px">GE</span> EAGLE SST — ACTUALISER SUGGESTIONS'; }
   }
 }
 
@@ -3038,8 +3137,8 @@ function renderRecapAnalysisUI(container, analysis, scoreColor, verdictColor){
       return `<div style="display:flex;align-items:flex-start;gap:6px;padding:7px 8px;margin:3px 0;background:${bg};border-left:3px solid ${borderColor};border-radius:0 7px 7px 0">
         <span style="font-size:10.5px;flex:1;line-height:1.45;color:var(--txt)">${escHtml(txt)}</span>
         <div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0">
-          <button onclick="eagleRecapApply(${idx})" style="padding:3px 9px;background:${borderColor};border:none;border-radius:5px;color:#fff;font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer;white-space:nowrap">➕ APPLIQUER</button>
-          <button onclick="eagleRecapEdit(${idx})" style="padding:3px 9px;background:none;border:1px solid ${borderColor};border-radius:5px;color:${labelColor};font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer;white-space:nowrap">✏️ MODIFIER</button>
+          <button onclick="eagleRecapApply(${idx})" style="padding:3px 9px;background:${borderColor};border:none;border-radius:5px;color:#fff;font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer;white-space:nowrap">APPLIQUER</button>
+          <button onclick="eagleRecapEdit(${idx})" style="padding:3px 9px;background:none;border:1px solid ${borderColor};border-radius:5px;color:${labelColor};font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer;white-space:nowrap">MODIFIER</button>
         </div>
       </div>`;
     }).join('');
@@ -3049,29 +3148,29 @@ function renderRecapAnalysisUI(container, analysis, scoreColor, verdictColor){
     </div>`;
   }
 
-  const critiqueRows = makeRows(critiques, 0, 'rgba(192,57,43,.08)', 'var(--red)', 'var(--red)', '🚨 CRITIQUES');
-  const avertRows = makeRows(avertissements, critiques.length, 'rgba(230,126,34,.06)', 'var(--orange)', 'var(--orange)', '⚠️ AVERTISSEMENTS');
-  const suggRows = makeRows(suggestions, critiques.length+avertissements.length, 'rgba(39,174,96,.06)', 'var(--green)', 'var(--green)', '💡 SUGGESTIONS');
+  const critiqueRows = makeRows(critiques, 0, 'rgba(192,57,43,.08)', 'var(--red)', 'var(--red)', 'CRITIQUES');
+  const avertRows = makeRows(avertissements, critiques.length, 'rgba(230,126,34,.06)', 'var(--orange)', 'var(--orange)', 'AVERTISSEMENTS');
+  const suggRows = makeRows(suggestions, critiques.length+avertissements.length, 'rgba(39,174,96,.06)', 'var(--green)', 'var(--green)', 'SUGGESTIONS');
 
   // Edit-field buttons for existing content
   const editFields = [
-    {champ:'dangers', label:'✏️ Éditer Dangers', color:'var(--red)'},
-    {champ:'mesuresRisques', label:'✏️ Éditer Mesures', color:'var(--orange)'},
-    {champ:'procedures', label:'✏️ Éditer Procédures', color:'var(--blue)'},
-    {champ:'endroitsSauvetage', label:'✏️ Éditer Endroits', color:'var(--muted)'},
+    {champ:'dangers', label:'Éditer Dangers', color:'var(--red)'},
+    {champ:'mesuresRisques', label:'Éditer Mesures', color:'var(--orange)'},
+    {champ:'procedures', label:'Éditer Procédures', color:'var(--blue)'},
+    {champ:'endroitsSauvetage', label:'Éditer Endroits', color:'var(--muted)'},
   ].filter(f => plan[f.champ] && plan[f.champ].trim());
 
   const editButtons = editFields.length ? `
-    <div style="margin-top:10px;padding:10px;background:rgba(212,160,23,.07);border:1px solid rgba(212,160,23,.25);border-radius:8px">
-      <div style="font-size:9px;color:var(--gold);font-weight:700;letter-spacing:1.5px;margin-bottom:6px">📝 MODIFIER VOS RÉPONSES EXISTANTES</div>
+    <div style="margin-top:10px;padding:10px;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.25);border-radius:8px">
+      <div style="font-size:9px;color:var(--gold);font-weight:700;letter-spacing:1.5px;margin-bottom:6px">MODIFIER VOS RÉPONSES EXISTANTES</div>
       <div style="display:flex;flex-wrap:wrap;gap:5px">
-        ${editFields.map(f=>`<button onclick="eagleOpenFieldEditor('${f.champ}')" style="padding:5px 10px;background:none;border:1px solid rgba(212,160,23,.4);border-radius:7px;color:var(--gold);font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer">${f.label}</button>`).join('')}
+        ${editFields.map(f=>`<button onclick="eagleOpenFieldEditor('${f.champ}')" style="padding:5px 10px;background:none;border:1px solid rgba(201,168,76,.4);border-radius:7px;color:var(--gold);font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer">${f.label}</button>`).join('')}
       </div>
     </div>` : '';
 
   container.innerHTML = `
     <div style="border:1px solid rgba(59,130,246,.3);background:rgba(59,130,246,.04);border-radius:var(--radius);padding:14px">
-      <h4 style="font-family:Oswald;font-size:13px;color:var(--blue);letter-spacing:1px;margin-bottom:8px">🦅 RECOMMANDATIONS EAGLE SST</h4>
+      <h4 style="font-family:Oswald;font-size:13px;color:var(--blue);letter-spacing:1px;margin-bottom:8px">RECOMMANDATIONS EAGLE SST</h4>
       <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 12px;padding:10px;background:var(--card);border-radius:8px">
         <div><span style="font-family:Oswald;font-size:28px;color:${scoreColor}">${analysis.score}</span><span style="font-size:11px;color:var(--muted)">/100</span></div>
         <div style="font-family:Oswald;font-size:14px;letter-spacing:2px;color:${verdictColor};padding:4px 12px;border:1px solid ${verdictColor};border-radius:6px">${analysis.verdict}</div>
@@ -3079,12 +3178,12 @@ function renderRecapAnalysisUI(container, analysis, scoreColor, verdictColor){
       ${critiqueRows}${avertRows}${suggRows}
       ${(critiques.length||avertissements.length||suggestions.length) ? `
       <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px">
-        <button onclick="eagleRecapApplyGroup('dangers')" style="flex:1;min-width:110px;padding:7px;background:rgba(192,57,43,.1);border:1px solid var(--red);border-radius:7px;color:var(--red);font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer">🚨 TOUT→ DANGERS</button>
-        <button onclick="eagleRecapApplyGroup('mesuresRisques')" style="flex:1;min-width:110px;padding:7px;background:rgba(230,126,34,.08);border:1px solid var(--orange);border-radius:7px;color:var(--orange);font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer">⚠️ TOUT→ MESURES</button>
-        <button onclick="eagleRecapApplyGroup('procedures')" style="flex:1;min-width:110px;padding:7px;background:rgba(39,174,96,.08);border:1px solid var(--green);border-radius:7px;color:var(--green);font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer">💡 TOUT→ PROCÉDURES</button>
+        <button onclick="eagleRecapApplyGroup('dangers')" style="flex:1;min-width:110px;padding:7px;background:rgba(192,57,43,.1);border:1px solid var(--red);border-radius:7px;color:var(--red);font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer">TOUT→ DANGERS</button>
+        <button onclick="eagleRecapApplyGroup('mesuresRisques')" style="flex:1;min-width:110px;padding:7px;background:rgba(230,126,34,.08);border:1px solid var(--orange);border-radius:7px;color:var(--orange);font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer">TOUT→ MESURES</button>
+        <button onclick="eagleRecapApplyGroup('procedures')" style="flex:1;min-width:110px;padding:7px;background:rgba(39,174,96,.08);border:1px solid var(--green);border-radius:7px;color:var(--green);font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer">TOUT→ PROCÉDURES</button>
       </div>
-      <button onclick="eagleRecapApplyAll()" style="width:100%;margin-top:6px;padding:10px;background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(39,174,96,.1));border:1.5px solid var(--blue);border-radius:7px;color:var(--blue);font-size:10px;font-family:Oswald;letter-spacing:1.5px;cursor:pointer;font-weight:700">✅ APPLIQUER TOUTES LES SUGGESTIONS</button>
-      ` : '<div style="color:var(--green);font-size:11px;text-align:center;padding:8px">✅ Plan complet — aucun oubli détecté</div>'}
+      <button onclick="eagleRecapApplyAll()" style="width:100%;margin-top:6px;padding:10px;background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(39,174,96,.1));border:1.5px solid var(--blue);border-radius:7px;color:var(--blue);font-size:10px;font-family:Oswald;letter-spacing:1.5px;cursor:pointer;font-weight:700">APPLIQUER TOUTES LES SUGGESTIONS</button>
+      ` : '<div style="color:var(--green);font-size:11px;text-align:center;padding:8px">Plan complet — aucun oubli détecté</div>'}
       ${editButtons}
     </div>`;
 }
@@ -3104,12 +3203,12 @@ function eagleRecapEdit(idx){
 
 function eagleRecapApplyGroup(champ){
   (window._eagleItems||[]).filter(i=>i.champ===champ).forEach(i=>eagleAppendToField(i.texte, i.champ));
-  showToast('✅ Appliqué à '+champ,'ok');
+  showToast(' Appliqué à '+champ,'ok');
 }
 
 function eagleRecapApplyAll(){
   (window._eagleItems||[]).forEach(i=>eagleAppendToField(i.texte, i.champ));
-  showToast('✅ Toutes les suggestions appliquées!','ok');
+  showToast(' Toutes les suggestions appliquées!','ok');
 }
 
 // Core: append text to a plan field
@@ -3130,7 +3229,7 @@ function eagleAppendToField(text, champ){
   plan[champ] = cur + (cur.trim()?'\n':'') + text;
   const el = document.getElementById('field_'+champ);
   if(el) el.value = plan[champ];
-  showToast('✅ Ajouté','ok');
+  showToast(' Ajouté','ok');
 }
 
 // === Drawer pour modifier une SUGGESTION avant injection ===
@@ -3143,11 +3242,11 @@ function eagleOpenSuggestionEditor(text, champ){
 function eagleOpenFieldEditor(champ){
   const labels = {dangers:'Dangers identifiés',mesuresRisques:'Mesures de contrôle',procedures:'Procédures de sauvetage',endroitsSauvetage:'Endroits de sauvetage',cadenassage:'Cadenassage'};
   const current = plan[champ]||'';
-  _eagleDrawer(current, '✏️ '+(labels[champ]||champ), (edited)=>{
+  _eagleDrawer(current, '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg> '+(labels[champ]||champ), (edited)=>{
     plan[champ] = edited;
     const el = document.getElementById('field_'+champ);
     if(el) el.value = edited;
-    showToast('✅ Champ mis à jour','ok');
+    showToast(' Champ mis à jour','ok');
   });
 }
 
@@ -3161,12 +3260,12 @@ function _eagleDrawer(initialText, title, onConfirm){
     <div style="background:var(--card);border-radius:16px 16px 0 0;padding:18px 16px 24px;width:100%;max-width:540px;border-top:2px solid var(--blue);box-shadow:0 -8px 30px rgba(0,0,0,.4)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div style="font-family:Oswald;font-size:13px;color:var(--blue);letter-spacing:1.5px">${escHtml(title)}</div>
-        <button onclick="document.getElementById('eagleEditOverlay').remove()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0 4px">✕</button>
+        <button onclick="document.getElementById('eagleEditOverlay').remove()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0 4px">X</button>
       </div>
       <textarea id="eagleDrawerTA" style="width:100%;box-sizing:border-box;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--txt);padding:12px;font-size:12px;min-height:110px;font-family:inherit;resize:vertical;line-height:1.5">${escHtml(initialText)}</textarea>
       <div style="display:flex;gap:8px;margin-top:10px">
         <button onclick="document.getElementById('eagleEditOverlay').remove()" style="flex:1;padding:13px;background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:Oswald;font-size:12px;cursor:pointer">ANNULER</button>
-        <button id="eagleDrawerConfirm" style="flex:2;padding:13px;background:var(--blue);border:none;border-radius:10px;color:#fff;font-family:Oswald;font-size:13px;letter-spacing:1.5px;cursor:pointer">✅ APPLIQUER AU PLAN</button>
+        <button id="eagleDrawerConfirm" style="flex:2;padding:13px;background:var(--blue);border:none;border-radius:10px;color:#fff;font-family:Oswald;font-size:13px;letter-spacing:1.5px;cursor:pointer">APPLIQUER AU PLAN</button>
       </div>
     </div>`;
   document.body.appendChild(overlay);
@@ -3184,13 +3283,13 @@ function _eagleDrawer(initialText, title, onConfirm){
 // Fix renderStepAssistResult to also use index approach
 function renderStepAssistResultV2(container, suggestions, stepNum){
   if(!suggestions.length){
-    container.innerHTML = `<div style="padding:10px 14px;border:1px solid rgba(39,174,96,.3);border-radius:10px;background:rgba(39,174,96,.05);font-size:11px;color:var(--green);text-align:center;margin-top:4px">✅ Étape complète — Aucun oubli détecté par Eagle SST</div>`;
+    container.innerHTML = `<div style="padding:10px 14px;border:1px solid rgba(39,174,96,.3);border-radius:10px;background:rgba(39,174,96,.05);font-size:11px;color:var(--green);text-align:center;margin-top:4px">Étape complète — Aucun oubli détecté par Eagle SST</div>`;
     return;
   }
   eagleStoreItems(suggestions);
   const chipBg = {critique:'rgba(192,57,43,.08)',recommande:'rgba(39,174,96,.07)',default:'rgba(59,130,246,.07)'};
   const chipBorder = {critique:'var(--red)',recommande:'var(--green)',default:'var(--blue)'};
-  const chipIcon = {critique:'🚨',recommande:'💡',default:'💡'};
+  const chipIcon = {critique:'!',recommande:'*',default:'*'};
 
   const chips = suggestions.map((s,i) => {
     const bg = chipBg[s.priorite]||chipBg.default;
@@ -3202,17 +3301,17 @@ function renderStepAssistResultV2(container, suggestions, stepNum){
         <div style="font-size:10.5px;color:var(--txt);margin-bottom:4px;line-height:1.4">${escHtml(s.texte||s.label||'')}</div>
         <div style="font-size:9px;color:var(--muted);margin-bottom:5px">${s.label||''} ${s.scenario?'• '+s.scenario:''}</div>
         <div style="display:flex;gap:5px;flex-wrap:wrap">
-          <button onclick="eagleStepApply(${i})" style="padding:4px 10px;background:${border};border:none;border-radius:6px;color:#fff;font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer">➕ APPLIQUER</button>
-          <button onclick="eagleStepEdit(${i})" style="padding:4px 10px;background:none;border:1px solid ${border};border-radius:6px;color:${border};font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer">✏️ MODIFIER</button>
+          <button onclick="eagleStepApply(${i})" style="padding:4px 10px;background:${border};border:none;border-radius:6px;color:#fff;font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer">APPLIQUER</button>
+          <button onclick="eagleStepEdit(${i})" style="padding:4px 10px;background:none;border:1px solid ${border};border-radius:6px;color:${border};font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer">MODIFIER</button>
         </div>
       </div>
     </div>`;
   }).join('');
 
   container.innerHTML = `<div style="border:1px solid rgba(59,130,246,.25);border-radius:10px;padding:12px;margin-top:4px;background:rgba(59,130,246,.03)">
-    <div style="font-family:Oswald;font-size:11px;color:var(--blue);letter-spacing:1.5px;margin-bottom:8px">🦅 SUGGESTIONS EAGLE SST — ÉTAPE ${stepNum}</div>
+    <div style="font-family:Oswald;font-size:11px;color:var(--blue);letter-spacing:1.5px;margin-bottom:8px">SUGGESTIONS EAGLE SST — ÉTAPE ${stepNum}</div>
     ${chips}
-    <button onclick="eagleStepApplyAll()" style="width:100%;margin-top:6px;padding:8px;background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(39,174,96,.1));border:1.5px solid var(--blue);border-radius:8px;color:var(--blue);font-size:10px;font-family:Oswald;letter-spacing:1.5px;cursor:pointer">✅ TOUT APPLIQUER (${suggestions.length})</button>
+    <button onclick="eagleStepApplyAll()" style="width:100%;margin-top:6px;padding:8px;background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(39,174,96,.1));border:1.5px solid var(--blue);border-radius:8px;color:var(--blue);font-size:10px;font-family:Oswald;letter-spacing:1.5px;cursor:pointer">TOUT APPLIQUER (${suggestions.length})</button>
   </div>`;
 }
 
@@ -3228,22 +3327,22 @@ function eagleStepEdit(idx){
 }
 function eagleStepApplyAll(){
   (window._eagleItems||[]).forEach(i=>eagleInjectDirect(i.texte, i.champ||'', i.preventif||[], i.type||''));
-  showToast('✅ Toutes les suggestions appliquées!','ok');
+  showToast(' Toutes les suggestions appliquées!','ok');
 }
 
 function eagleInjectDirect(text, champ, preventif, type){
   if(champ==='zonesRisque'){
     plan.zonesRisque.push({lieu:text,type:type||'',preventif:preventif||[],customPrev:[],autre:''});
-    showToast('✅ Zone de danger ajoutée','ok'); render(true); return;
+    showToast(' Zone de danger ajoutée','ok'); render(true); return;
   }
   if(champ==='zonesChute'){
     plan.zonesChute.push({lieu:text,type:type||'',preventif:preventif||[],customPrev:[],autre:''});
-    showToast('✅ Zone de chute ajoutée','ok'); render(true); return;
+    showToast(' Zone de chute ajoutée','ok'); render(true); return;
   }
   if(['epiCustom','permisCustom','equipementsCustom'].includes(champ)){
     if(!plan[champ]) plan[champ]=[];
     if(!plan[champ].includes(text)){ plan[champ].push(text); }
-    showToast('✅ Ajouté à la liste','ok'); render(true); return;
+    showToast(' Ajouté à la liste','ok'); render(true); return;
   }
   if(['dangers','mesuresRisques','procedures','endroitsSauvetage'].includes(champ)){
     const cur = plan[champ]||'';
@@ -3252,14 +3351,14 @@ function eagleInjectDirect(text, champ, preventif, type){
     }
     const el = document.getElementById('field_'+champ);
     if(el) el.value = plan[champ];
-    showToast('✅ Ajouté au champ','ok'); return;
+    showToast(' Ajouté au champ','ok'); return;
   }
 }
 
 // Appliquer toutes les suggestions d'un step
 function eagleApplyAll(suggestions){
   suggestions.forEach(s => eagleInjectDirect(s.texte, s.champ||'', s.preventif||[], s.type||''));
-  showToast('✅ Toutes les suggestions appliquées!','ok');
+  showToast(' Toutes les suggestions appliquées!','ok');
 }
 
 // Ouvrir l'éditeur de suggestion
@@ -3277,14 +3376,14 @@ function eagleEditOpen(text, champ, preventif, type){
   const label = champLabels[champ] || champ;
 
   overlay.innerHTML = `<div style="background:var(--card);border-radius:16px 16px 0 0;padding:20px;width:100%;max-width:520px;border-top:2px solid var(--blue)">
-    <div style="font-family:Oswald;font-size:13px;color:var(--blue);letter-spacing:1.5px;margin-bottom:4px">✏️ MODIFIER LA SUGGESTION</div>
+    <div style="font-family:Oswald;font-size:13px;color:var(--blue);letter-spacing:1.5px;margin-bottom:4px">MODIFIER LA SUGGESTION</div>
     <div style="font-size:10px;color:var(--muted);margin-bottom:12px">→ Sera injecté dans : <strong>${label}</strong></div>
     <textarea id="eagleEditTA" style="width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--txt);padding:10px 12px;font-size:12px;min-height:90px;font-family:inherit;resize:vertical">${text}</textarea>
     <div style="display:flex;gap:8px;margin-top:10px">
       <button onclick="document.getElementById('eagleEditOverlay').remove()" 
         style="flex:1;padding:12px;background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:Oswald;font-size:12px;cursor:pointer">ANNULER</button>
       <button onclick="eagleEditConfirm('${champ}',${JSON.stringify(preventif||[])},${JSON.stringify(type||'')})"
-        style="flex:2;padding:12px;background:var(--blue);border:none;border-radius:8px;color:#fff;font-family:Oswald;font-size:13px;letter-spacing:1.5px;cursor:pointer">➕ INJECTER DANS LE PLAN</button>
+        style="flex:2;padding:12px;background:var(--blue);border:none;border-radius:8px;color:#fff;font-family:Oswald;font-size:13px;letter-spacing:1.5px;cursor:pointer">INJECTER DANS LE PLAN</button>
     </div>
   </div>`;
   document.body.appendChild(overlay);
@@ -3311,7 +3410,7 @@ function eagleInject(text, field){
   // Update textarea if visible on screen
   const el = document.getElementById('field_'+field);
   if(el){ el.value = plan[field]; }
-  showToast('✅ Ajouté à '+field,'ok');
+  showToast(' Ajouté à '+field,'ok');
 }
 
 function eagleInjectAll(items, field){

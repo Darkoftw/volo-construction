@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="view-transition" content="same-origin">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0C0608">
 <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
@@ -13,14 +14,17 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <script src="error-monitor.js"></script>
-<script src="data-inventory.js?v=19"></script>
-<script src="data-personnel-stub.js?v=19"></script>
+<script src="data.js?v=20"></script>
+<script src="volo-icons.js?v=20"></script>
 <script src="firebase-config.js"></script>
 <script src="firebase-service.js"></script>
 <script src="volo-network.js"></script>
 <script src="logo.js"></script>
+<script src="king-logo.js"></script>
 <script>
 // Filter destroyed items (synced from caisses-stock.html destruction system)
 (function(){
@@ -37,7 +41,7 @@
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
   --bg:#0C0608;--card:rgba(28,16,18,.90);--card2:rgba(38,22,26,.94);--cardSolid:#1C1012;
-  --gold:#D4A017;--goldL:#E8C547;
+  --gold:#C9A84C;--goldL:#E8C84A;
   --rescue:#E65100;--rescueL:#FF6D00;--rescueD:#BF360C;--rescueGlow:rgba(230,81,0,.15);
   --red:#C0392B;--green:#27AE60;--orange:#E67E22;--blue:#3B82F6;--violet:#8B5CF6;
   --warning:#F59E0B;--danger:#EF4444;--success:#10B981;
@@ -57,6 +61,30 @@ html.light .slide-panel{background:#fff!important}
 html.light .gold-bar{opacity:.6}
 html.light input,html.light select{background:rgba(255,255,255,.95)!important;color:#0F172A!important;border-color:#CBD5E1!important}
 body{font-family:'Inter',sans-serif;font-size:15px;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
+@view-transition{navigation:auto}
+/* -- View Transitions -- */
+@keyframes vt-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes vt-fade-out{from{opacity:1}to{opacity:0}}
+@keyframes vt-slide-from-right{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes vt-slide-to-left{from{transform:translateX(0);opacity:1}to{transform:translateX(-30px);opacity:0}}
+@keyframes vt-slide-from-left{from{transform:translateX(-30px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes vt-slide-to-right{from{transform:translateX(0);opacity:1}to{transform:translateX(30px);opacity:0}}
+
+::view-transition-old(root){animation:.25s ease-out both vt-fade-out}
+::view-transition-new(root){animation:.25s ease-out both vt-fade-in}
+
+::view-transition-old(page-content){animation:.3s ease-out both vt-slide-to-left}
+::view-transition-new(page-content){animation:.3s ease-in both vt-slide-from-right}
+
+.header{view-transition-name:main-header}
+::view-transition-old(main-header){animation:.2s ease-out both vt-fade-out}
+::view-transition-new(main-header){animation:.2s ease-in both vt-fade-in}
+
+@media(prefers-reduced-motion:reduce){
+  ::view-transition-old(root),::view-transition-new(root),
+  ::view-transition-old(page-content),::view-transition-new(page-content),
+  ::view-transition-old(main-header),::view-transition-new(main-header){animation-duration:.01s}
+}
 body::before{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.025'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.6}
 body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background:radial-gradient(ellipse at 20% 0%,rgba(230,81,0,.06) 0%,transparent 50%),
@@ -76,9 +104,9 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);position:sticky;top:4px;z-index:50;
   background:rgba(12,6,8,.94);border-radius:0 0 var(--radius) var(--radius);flex-wrap:wrap}
 .header-left{display:flex;align-items:center;gap:12px}
-.header-left img{width:44px;height:44px;border-radius:50%;border:2px solid var(--rescue);
-  box-shadow:0 0 16px rgba(230,81,0,.2);transition:all .3s cubic-bezier(.4,0,.2,1)}
-.header-left img:hover{transform:scale(1.12) rotate(3deg);box-shadow:0 0 24px rgba(230,81,0,.35)}
+.header-left img{width:44px;height:44px;border-radius:50%;border:2px solid rgba(201,168,76,.35);
+  box-shadow:0 0 16px rgba(201,168,76,.2);transition:all .3s cubic-bezier(.4,0,.2,1)}
+.header-left img:hover{transform:scale(1.12) rotate(3deg);box-shadow:0 0 24px rgba(201,168,76,.35)}
 .header-brand{display:flex;flex-direction:column}
 .header-brand .title{font-family:'Oswald',sans-serif;font-size:18px;letter-spacing:3px;color:var(--rescue);text-shadow:0 0 20px rgba(230,81,0,.15)}
 .header-brand .subtitle{font-size:11px;color:var(--muted);letter-spacing:2px;font-family:'Oswald',sans-serif}
@@ -160,7 +188,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;color:var(--txt);flex-shrink:0}
 .avatar.sauveteur{background:linear-gradient(135deg,var(--rescue),var(--rescueD))}
-.avatar.chef{background:linear-gradient(135deg,var(--gold),#B8860B)}
+.avatar.chef{background:linear-gradient(135deg,var(--gold),#9A8230)}
 .avatar.surveillant{background:linear-gradient(135deg,var(--blue),#1D4ED8)}
 .avatar.active{animation:breathe-slow 4s ease-in-out infinite}
 .avatar.urgence{animation:breathe-fast 1s ease-in-out infinite}
@@ -235,7 +263,7 @@ tr:hover td{background:var(--rescueGlow)}
 .photo-gallery img:hover{transform:scale(1.03);border-color:var(--rescue)}
 .contacts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
 .contact-card{display:flex;align-items:center;gap:14px;padding:16px}
-.contact-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#B8860B);
+.contact-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#9A8230);
   display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;color:var(--txt)}
 .contact-info .cname{font-weight:700;font-size:15px}
 .contact-info .cemail{font-size:12px;color:var(--blue);text-decoration:none}
@@ -286,6 +314,45 @@ tr:hover td{background:var(--rescueGlow)}
   .app{padding:4px 8px 40px}
   .slide-panel{width:100%;max-width:100%}
 }
+/* ═══ POPOVER API ═══ */
+[popover]{
+  background:var(--cardSolid,#0a0a0f);
+  border:1px solid var(--gold,#C9A84C);
+  color:var(--txt,#EBE6DF);
+  border-radius:12px;
+  padding:16px 18px;
+  max-width:340px;
+  box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 1px rgba(201,168,76,.1);
+  font-family:'Inter',sans-serif;
+  font-size:13px;
+  line-height:1.6;
+  margin:auto;
+}
+[popover]::backdrop{
+  background:rgba(4,4,10,.4);
+}
+[popover] .pop-title{
+  font-family:'Oswald',sans-serif;
+  font-size:13px;
+  letter-spacing:1.5px;
+  color:var(--gold,#C9A84C);
+  margin-bottom:8px;
+  display:flex;align-items:center;gap:8px;
+}
+[popover] .pop-title svg{flex-shrink:0}
+[popover] p{color:var(--muted,#C9BAA9);margin-bottom:6px}
+[popover] p:last-child{margin-bottom:0}
+.pop-trigger{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;border-radius:50%;
+  border:1px solid rgba(201,168,76,.25);background:rgba(201,168,76,.06);
+  color:var(--gold,#C9A84C);font-size:11px;font-weight:700;
+  cursor:pointer;transition:all .2s;flex-shrink:0;
+  font-family:'Inter',sans-serif;line-height:1;
+  padding:0;vertical-align:middle;
+}
+.pop-trigger:hover{background:rgba(201,168,76,.15);border-color:var(--gold)}
+
 @media print{
   @page{size:letter;margin:18mm 14mm 22mm 14mm}
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
@@ -298,14 +365,14 @@ tr:hover td{background:var(--rescueGlow)}
   .header{position:static!important;background:#FAFAF8!important;border:none!important;backdrop-filter:none!important;padding:0!important;display:none!important}
   .section{page-break-inside:avoid;animation:none!important;margin-top:8px!important}
   .card{backdrop-filter:none!important;border:1px solid #ccc!important;background:#fff!important;box-shadow:none!important;transform:none!important}
-  .section-title{color:#D4A017!important;font-size:15pt;border-bottom:2px solid #D4A017;padding-bottom:4px;margin-bottom:10px!important}
+  .section-title{color:#C9A84C!important;font-size:15pt;border-bottom:2px solid #C9A84C;padding-bottom:4px;margin-bottom:10px!important}
   .kpi-bar{grid-template-columns:repeat(6,1fr)!important;gap:8px!important}
   .kpi{border:1px solid #ddd!important;padding:10px 6px!important}
   .kpi .num{font-size:24pt!important}
   .kpi .label{font-size:8pt!important}
   .kpi .bar{height:3px!important}
   table{font-size:9pt;width:100%;border:1px solid #999}
-  th{background:#D4A017!important;color:#fff!important;font-size:8pt;padding:6px 8px!important;text-transform:uppercase}
+  th{background:#C9A84C!important;color:#fff!important;font-size:8pt;padding:6px 8px!important;text-transform:uppercase}
   td{padding:5px 8px!important;border:1px solid #ddd!important}
   tr:nth-child(even) td{background:#F8F6F3!important}
   tr.overdue td{background:#FFF0F0!important;color:#C0392B!important}
@@ -317,7 +384,7 @@ tr:hover td{background:var(--rescueGlow)}
   .person-card{padding:8px!important}
   .avatar{width:32px!important;height:32px!important;font-size:12px!important;color:#fff!important}
   .avatar.sauveteur{background:#E65100!important}
-  .avatar.chef{background:#D4A017!important}
+  .avatar.chef{background:#C9A84C!important}
   .avatar.surveillant{background:#3B82F6!important}
   .person-info .pname{font-size:11px!important}
   .person-info .prole{font-size:9px!important}
@@ -334,15 +401,15 @@ tr:hover td{background:var(--rescueGlow)}
   .plans-grid{grid-template-columns:repeat(2,1fr)!important}
   .plan-card{border:1px solid #ddd!important;padding:10px!important}
   .timeline{padding-left:20px!important}
-  .timeline::before{background:#D4A017!important}
+  .timeline::before{background:#C9A84C!important}
   .tl-item{padding:8px 10px!important;margin-bottom:8px!important;border:1px solid #ddd!important}
-  .tl-item::before{background:#D4A017!important;left:-18px!important}
+  .tl-item::before{background:#C9A84C!important;left:-18px!important}
   .tl-item.hot{border-color:#E65100!important}
   .donut-wrap{page-break-inside:avoid}
   .print-cover{display:block!important;page-break-after:always;text-align:center;padding:60px 40px;position:relative}
-  .print-cover h1{font-family:'Oswald',sans-serif;font-size:42pt;color:#D4A017;letter-spacing:6px;margin-bottom:4px}
+  .print-cover h1{font-family:'Oswald',sans-serif;font-size:42pt;color:#C9A84C;letter-spacing:6px;margin-bottom:4px}
   .print-cover .pc-sub{font-family:'Oswald',sans-serif;font-size:16pt;letter-spacing:4px;color:#666;margin-top:8px}
-  .print-cover .pc-line{width:120px;height:3px;background:#D4A017;margin:24px auto}
+  .print-cover .pc-line{width:120px;height:3px;background:#C9A84C;margin:24px auto}
   .print-cover .pc-type{font-family:'Oswald',sans-serif;font-size:14pt;letter-spacing:3px;color:#333;margin-top:20px}
   .print-cover .pc-date{font-family:'JetBrains Mono',monospace;font-size:12pt;margin-top:20px;color:#555}
   .print-cover .pc-supervisor{font-size:11pt;margin-top:10px;color:#333}
@@ -358,7 +425,7 @@ tr:hover td{background:var(--rescueGlow)}
     font-size:80pt;color:rgba(0,0,0,.025);font-family:'Oswald',sans-serif;letter-spacing:12px;white-space:nowrap;pointer-events:none;z-index:0}
   .print-footer{display:block!important;position:fixed;bottom:0;left:0;right:0;text-align:center;font-size:8pt;color:#999;
     border-top:1px solid #ddd;padding:6px 0;font-family:'JetBrains Mono',monospace}
-  .print-sig{display:block!important;margin-top:30px;page-break-inside:avoid;border-top:2px solid #D4A017;padding-top:16px}
+  .print-sig{display:block!important;margin-top:30px;page-break-inside:avoid;border-top:2px solid #C9A84C;padding-top:16px}
   .print-sig table{border:none!important;font-size:10pt}
   .print-sig td{border:none!important;padding:10px 20px!important;text-align:center}
   .print-sig .sig-line{display:inline-block;width:180px;border-bottom:1px solid #333;margin-top:30px}
@@ -388,7 +455,25 @@ tr:hover td{background:var(--rescueGlow)}
 <body>
 <div id="pickOnActiveBanner"></div>
 <script>
-(function(){try{var h=JSON.parse(localStorage.getItem('volo_history')||'[]'),closed=new Set();h.forEach(function(tx){if(tx.statut==='ANNULÉ'||tx.statut==='RETOURNÉ')closed.add((tx.original_timestamp||tx.timestamp)+tx.sauveteur_id)});var active=h.filter(function(tx){return tx.statut==='ACTIF'&&tx.mode==='PICK-ON'&&!closed.has(tx.timestamp+tx.sauveteur_id)});if(active.length===0)return;var totalItems=active.reduce(function(n,tx){try{return n+JSON.parse(tx.items||'[]').length}catch(e){return n}},0);document.getElementById('pickOnActiveBanner').innerHTML='<div onclick="window.location.href=\'index.html\'" style="position:sticky;top:0;z-index:9999;padding:10px 16px;background:linear-gradient(135deg,rgba(230,81,0,.95),rgba(192,57,43,.9));color:#fff;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:2px solid #E65100"><span style="font-size:20px">⚠️</span><div style="flex:1"><div style="font-weight:800;font-size:13px;letter-spacing:1px;font-family:Oswald,sans-serif">PICK ON ACTIF — '+totalItems+' item'+(totalItems>1?'s':'')+' sorti'+(totalItems>1?'s':'')+'</div><div style="font-size:10px;opacity:.85">Toucher pour retourner au Pick-Off</div></div><span style="font-size:16px">→</span></div>';}catch(e){}})();
+(function(){try{var h=JSON.parse(localStorage.getItem('volo_history')||'[]'),closed=new Set();h.forEach(function(tx){if(tx.statut==='ANNULÉ'||tx.statut==='RETOURNÉ')closed.add((tx.original_timestamp||tx.timestamp)+tx.sauveteur_id)});var active=h.filter(function(tx){return tx.statut==='ACTIF'&&tx.mode==='PICK-ON'&&!closed.has(tx.timestamp+tx.sauveteur_id)});if(active.length===0)return;var totalItems=active.reduce(function(n,tx){try{return n+JSON.parse(tx.items||'[]').length}catch(e){return n}},0);document.getElementById('pickOnActiveBanner').innerHTML='<div onclick="window.location.href=\'index.html\'" style="position:sticky;top:0;z-index:9999;padding:10px 16px;background:linear-gradient(135deg,rgba(230,81,0,.95),rgba(192,57,43,.9));color:#fff;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:2px solid #E65100"><span style="font-size:20px;font-weight:bold">!</span><div style="flex:1"><div style="font-weight:800;font-size:13px;letter-spacing:1px;font-family:Oswald,sans-serif">PICK ON ACTIF — '+totalItems+' item'+(totalItems>1?'s':'')+' sorti'+(totalItems>1?'s':'')+'</div><div style="font-size:10px;opacity:.85">Toucher pour retourner au Pick-Off</div></div><span style="font-size:16px">→</span></div>';}catch(e){}})();
+
+// -- View Transitions -- smooth navigation --
+(function(){
+  var mainContent = document.querySelector('#app') || document.querySelector('.screen') || document.querySelector('main') || document.body.firstElementChild;
+  if(mainContent) mainContent.style.viewTransitionName = 'page-content';
+
+  document.addEventListener('click', function(e){
+    var link = e.target.closest('a[href]');
+    if(!link) return;
+    var href = link.getAttribute('href');
+    if(!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+    if(!document.startViewTransition) return;
+    e.preventDefault();
+    document.startViewTransition(function(){
+      window.location.href = href;
+    });
+  });
+})();
 </script>
 <div class="gold-bar"></div>
 <div class="print-cover" id="printCover">
@@ -416,7 +501,7 @@ tr:hover td{background:var(--rescueGlow)}
     <div class="header">
       <div class="header-left">
         <a href="index.html" style="width:36px;height:36px;border-radius:10px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:16px;text-decoration:none;transition:all .2s;flex-shrink:0" title="Retour">&larr;</a>
-        <img src="eagle_tactic.png" alt="Golden Eagles" onerror="this.style.display='none'">
+        <img src="eagle_tactic.png" alt="Golden Eagles" onerror="if(typeof KING_LOGO_B64!=='undefined')this.src=KING_LOGO_B64;else this.style.display='none'">
         <div class="header-brand">
           <div class="title">GOLDEN EAGLES</div>
           <div class="subtitle">DASHBOARD SUPERVISEUR</div>
@@ -429,40 +514,48 @@ tr:hover td{background:var(--rescueGlow)}
         <div class="header-user" id="headerUser"></div>
       </div>
       <div class="header-actions">
-        <button class="btn-head" onclick="openReportModal()">&#128228; ENVOYER</button>
-        <button class="btn-head" onclick="openPrintModal()">&#128424; IMPRIMER</button>
-        <button class="btn-head" onclick="exportCSV()">&#128202; CSV</button>
-        <button class="btn-head danger" onclick="sendUrgence()">&#128680; URGENCE</button>
+        <button class="btn-head" onclick="openReportModal()">ENVOYER</button>
+        <button class="btn-head" onclick="openPrintModal()">IMPRIMER</button>
+        <button class="btn-head" onclick="exportCSV()">CSV</button>
+        <button class="btn-head danger" onclick="sendUrgence()">URGENCE</button>
       </div>
     </div>
   </div>
   <div class="section" id="secKpi"><div class="kpi-bar" id="kpiBar"></div></div>
   <div class="section alert-zone" id="secAlerts">
-    <div class="section-title" onclick="toggleSection('secAlerts')"><span class="icon">&#128680;</span> ALERTES PRIORITAIRES<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-title" onclick="toggleSection('secAlerts')"><span class="icon">!</span> ALERTES PRIORITAIRES <button class="pop-trigger" popovertarget="pop-ds-alertes" onclick="event.stopPropagation()">?</button><span class="toggle-arrow">&#9660;</span></div>
     <div class="section-body" id="body-secAlerts"><div id="alertList"></div></div>
   </div>
+  <div class="section" id="secLiveUrgences">
+    <div class="section-title" onclick="toggleSection('secLiveUrgences')"><span class="icon">!</span> URGENCES TEMPS R&Eacute;EL <button class="pop-trigger" popovertarget="pop-ds-urgences" onclick="event.stopPropagation()">?</button><span class="fs-section-badge" id="urgenceCount" style="background:var(--red);color:#fff">0</span><span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-body" id="body-secLiveUrgences"><div id="liveUrgences"><p style="color:var(--muted);text-align:center;font-style:italic;padding:8px">Aucune urgence recente</p></div></div>
+  </div>
+  <div class="section" id="secLivePointages">
+    <div class="section-title" onclick="toggleSection('secLivePointages')"><span class="icon"></span> POINTAGES AUJOURD'HUI<span class="fs-section-badge" id="pointageCount" style="background:var(--green);color:#fff">0</span><span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-body" id="body-secLivePointages"><div id="livePointages"><p style="color:var(--muted);text-align:center;font-style:italic;padding:8px">Aucun pointage aujourd'hui</p></div></div>
+  </div>
   <div class="section" id="secFirestoreTx">
-    <div class="section-title" onclick="toggleSection('secFirestoreTx')"><span class="icon">&#128259;</span> TRANSACTIONS AUJOURD'HUI<span class="fs-section-badge" id="fsTxCount" style="background:var(--rescue);color:#fff">0</span><span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-title" onclick="toggleSection('secFirestoreTx')"><span class="icon"></span> TRANSACTIONS AUJOURD'HUI<span class="fs-section-badge" id="fsTxCount" style="background:var(--rescue);color:#fff">0</span><span class="toggle-arrow">&#9660;</span></div>
     <div class="section-body" id="body-secFirestoreTx">
       <div class="filter-row">
-        <button class="btn-filter" onclick="exportTodayCSV()">&#128202; Exporter CSV</button>
-        <button class="btn-filter" onclick="refreshFirestoreTx()">&#128260; Rafra&icirc;chir</button>
+        <button class="btn-filter" onclick="exportTodayCSV()">Exporter CSV</button>
+        <button class="btn-filter" onclick="refreshFirestoreTx()">Rafra&icirc;chir</button>
       </div>
       <div class="timeline" id="firestoreTxList"><p style="color:var(--muted);text-align:center">Chargement...</p></div>
     </div>
   </div>
   <div class="section" id="secCerts">
-    <div class="section-title" onclick="toggleSection('secCerts')"><span class="icon">&#127891;</span> CERTIFICATIONS<span class="fs-section-badge" id="certAlertCount" style="background:var(--warning);color:#000">0</span><span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-title" onclick="toggleSection('secCerts')"><span class="icon"></span> CERTIFICATIONS <button class="pop-trigger" popovertarget="pop-ds-certs" onclick="event.stopPropagation()">?</button><span class="fs-section-badge" id="certAlertCount" style="background:var(--warning);color:#000">0</span><span class="toggle-arrow">&#9660;</span></div>
     <div class="section-body" id="body-secCerts">
       <div id="certAlertsList"><p style="color:var(--muted);text-align:center">Chargement...</p></div>
     </div>
   </div>
   <div class="section" id="secMap">
-    <div class="section-title" onclick="toggleSection('secMap')"><span class="icon">&#128506;</span> CARTE DES SITES<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-title" onclick="toggleSection('secMap')"><span class="icon"></span> CARTE DES SITES<span class="toggle-arrow">&#9660;</span></div>
     <div class="section-body" id="body-secMap"><div id="map"></div></div>
   </div>
   <div class="section" id="secPersonnel">
-    <div class="section-title" onclick="toggleSection('secPersonnel')"><span class="icon">&#128101;</span> PERSONNEL D&Eacute;PLOY&Eacute;<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-title" onclick="toggleSection('secPersonnel')"><span class="icon"></span> PERSONNEL D&Eacute;PLOY&Eacute;<span class="toggle-arrow">&#9660;</span></div>
     <div class="section-body" id="body-secPersonnel">
       <div class="filter-row">
         <input type="text" id="filterPersonSearch" placeholder="Rechercher..." oninput="renderPersonnel()">
@@ -475,7 +568,7 @@ tr:hover td{background:var(--rescueGlow)}
     </div>
   </div>
   <div class="section" id="secInventaire">
-    <div class="section-title" onclick="toggleSection('secInventaire')"><span class="icon">&#128230;</span> INVENTAIRE EN CIRCULATION<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-title" onclick="toggleSection('secInventaire')"><span class="icon"></span> INVENTAIRE EN CIRCULATION<span class="toggle-arrow">&#9660;</span></div>
     <div class="section-body" id="body-secInventaire">
       <div class="filter-row">
         <input type="text" id="filterItemSearch" placeholder="Rechercher item..." oninput="renderInventaire()">
@@ -488,17 +581,17 @@ tr:hover td{background:var(--rescueGlow)}
     </div>
   </div>
   <div class="section" id="secAudit">
-    <div class="section-title" onclick="toggleSection('secAudit')"><span class="icon">&#128209;</span> TRA&Ccedil;ABILIT&Eacute; AUDIT<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-title" onclick="toggleSection('secAudit')"><span class="icon"></span> TRA&Ccedil;ABILIT&Eacute; AUDIT <button class="pop-trigger" popovertarget="pop-ds-audit" onclick="event.stopPropagation()">?</button><span class="toggle-arrow">&#9660;</span></div>
     <div class="section-body" id="body-secAudit">
       <div class="filter-row">
         <input type="text" id="filterAuditSearch" placeholder="Filtrer..." oninput="renderAudit()">
-        <button class="btn-filter" onclick="exportAuditCSV()">&#128202; Export CSV</button>
+        <button class="btn-filter" onclick="exportAuditCSV()">Export CSV</button>
       </div>
       <div class="timeline" id="auditTimeline"></div>
     </div>
   </div>
   <div class="section" id="secCritique">
-    <div class="section-title" onclick="toggleSection('secCritique')"><span class="icon">&#128200;</span> INVENTAIRE CRITIQUE<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-title" onclick="toggleSection('secCritique')"><span class="icon"></span> INVENTAIRE CRITIQUE <button class="pop-trigger" popovertarget="pop-ds-critique" onclick="event.stopPropagation()">?</button><span class="toggle-arrow">&#9660;</span></div>
     <div class="section-body" id="body-secCritique">
       <div class="donut-wrap">
         <div class="donut-container"><canvas id="donutCanvas" width="200" height="200"></canvas>
@@ -510,11 +603,11 @@ tr:hover td{background:var(--rescueGlow)}
     </div>
   </div>
   <div class="section" id="secMissions">
-    <div class="section-title" onclick="toggleSection('secMissions')"><span class="icon">&#127919;</span> MISSIONS EN COURS<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-title" onclick="toggleSection('secMissions')"><span class="icon"></span> MISSIONS EN COURS<span class="toggle-arrow">&#9660;</span></div>
     <div class="section-body" id="body-secMissions"><div id="missionsList"></div></div>
   </div>
   <div class="section" id="secPlans">
-    <div class="section-title" onclick="toggleSection('secPlans')"><span class="icon">&#128203;</span> PLANS DE TRAVAIL<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-title" onclick="toggleSection('secPlans')"><span class="icon"></span> PLANS DE TRAVAIL<span class="toggle-arrow">&#9660;</span></div>
     <div class="section-body" id="body-secPlans">
       <div class="filter-row" id="plansTabs">
         <button class="btn-filter active" data-tab="all" onclick="setPlanTab('all')">Tous</button>
@@ -530,25 +623,62 @@ tr:hover td{background:var(--rescueGlow)}
     <div class="section-body" id="body-secMeteo"><div class="weather-grid" id="weatherGrid"></div></div>
   </div>
   <div class="section" id="secPhotos">
-    <div class="section-title" onclick="toggleSection('secPhotos')"><span class="icon">&#128247;</span> PHOTOS<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-title" onclick="toggleSection('secPhotos')"><span class="icon"></span> PHOTOS<span class="toggle-arrow">&#9660;</span></div>
     <div class="section-body" id="body-secPhotos"><div class="photo-gallery" id="photoGallery"><p style="color:var(--muted);grid-column:1/-1;text-align:center">Aucune photo pour le moment.</p></div></div>
   </div>
   <div class="section" id="secRecent">
-    <div class="section-title" onclick="toggleSection('secRecent')"><span class="icon">&#128338;</span> ACTIVIT&Eacute; R&Eacute;CENTE<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-title" onclick="toggleSection('secRecent')"><span class="icon"></span> ACTIVIT&Eacute; R&Eacute;CENTE<span class="toggle-arrow">&#9660;</span></div>
     <div class="section-body" id="body-secRecent"><div class="timeline" id="recentTimeline"></div></div>
   </div>
   <div class="section" id="secContacts">
-    <div class="section-title" onclick="toggleSection('secContacts')"><span class="icon">&#128222;</span> CONTACTS CHEFS<span class="toggle-arrow">&#9660;</span></div>
+    <div class="section-title" onclick="toggleSection('secContacts')"><span class="icon"></span> CONTACTS CHEFS<span class="toggle-arrow">&#9660;</span></div>
     <div class="section-body" id="body-secContacts"><div class="contacts-grid" id="contactsGrid"></div></div>
   </div>
 </div>
+<!-- ═══ POPOVER API — INFO POPOVERS ═══ -->
+<div id="pop-ds-alertes" popover>
+  <div class="pop-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>ALERTES PRIORITAIRES</div>
+  <p>Cette section regroupe toutes les alertes critiques necessitant une action immediate du superviseur :</p>
+  <p style="padding-left:8px">- Equipements en retard d'inspection<br>- Certifications expirees<br>- Items manquants apres un deploiement<br>- Anomalies detectees sur le terrain</p>
+  <p style="margin-top:8px;font-size:11px;color:var(--red)">Les alertes sont triees par priorite. Traitez-les dans l'ordre affiche.</p>
+</div>
+
+<div id="pop-ds-urgences" popover>
+  <div class="pop-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 10 10-12h-9l1-10z"/></svg>URGENCES TEMPS REEL</div>
+  <p>Flux en direct des urgences declenchees par les equipes sur le terrain via le bouton d'urgence de l'application.</p>
+  <p>Les urgences sont synchronisees en temps reel via Firebase Firestore et apparaissent instantanement ici.</p>
+  <p style="margin-top:8px;font-size:11px;color:var(--muted)">Le badge rouge indique le nombre d'urgences recentes non resolues.</p>
+</div>
+
+<div id="pop-ds-certs" popover>
+  <div class="pop-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>CERTIFICATIONS</div>
+  <p>Suivi des 10 certifications obligatoires pour chaque membre : RCR, PDSB, SIMDUT, Nacelle, Chariot, Espace clos, Travail en hauteur, Sauvetage, Electricite, Premiers secours.</p>
+  <p style="margin-top:6px"><span style="color:var(--green)">Vert</span> = A jour | <span style="color:#F39C12">Jaune</span> = Expire dans 30 jours | <span style="color:var(--red)">Rouge</span> = Expire</p>
+  <p style="margin-top:8px;font-size:11px;color:var(--muted)">Le badge indique le nombre de certifications expirees ou bientot expirees.</p>
+</div>
+
+<div id="pop-ds-audit" popover>
+  <div class="pop-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>TRACABILITE AUDIT</div>
+  <p>Journal chronologique de toutes les transactions (PICK-ON, PICK-OFF, modifications) pour assurer la tracabilite complete de l'inventaire.</p>
+  <p>Chaque entree enregistre : l'operateur, la date/heure, les items concernes et le type d'operation.</p>
+  <p style="margin-top:8px;font-size:11px;color:var(--muted)">Exportable en CSV pour les rapports CNESST et les audits internes.</p>
+</div>
+
+<div id="pop-ds-critique" popover>
+  <div class="pop-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--rescue)" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>INVENTAIRE CRITIQUE</div>
+  <p>Vue d'ensemble des equipements par statut avec le graphique donut. Identifie rapidement :</p>
+  <p style="padding-left:8px">- Repartition disponible / sorti / inspection / maintenance<br>- Items avec date d'expiration proche<br>- Equipements necessitant un remplacement</p>
+  <p style="margin-top:8px;font-size:11px;color:var(--muted)">Essentiel pour la planification des achats et la conformite CNESST.</p>
+</div>
+<!-- ═══ END POPOVERS ═══ -->
+
 <div class="overlay" id="overlay" onclick="closePanel()"></div>
 <div class="slide-panel" id="slidePanel"><button class="close-btn" onclick="closePanel()">&times;</button><div id="panelContent"></div></div>
 <div class="lightbox" id="lightbox" onclick="closeLightbox()"><img id="lbImg" src=""></div>
 <audio id="eagle-snd" src="eagle.mp3" preload="none"></audio>
 <div class="modal-overlay" id="reportModal">
   <div class="modal">
-    <h3>&#128228; ENVOYER RAPPORT</h3>
+    <h3>ENVOYER RAPPORT</h3>
     <div style="margin-bottom:14px">
       <label style="font-size:12px;color:var(--muted);letter-spacing:1px">TYPE DE RAPPORT</label>
       <select id="reportType" style="width:100%;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);color:var(--txt);margin-top:4px;font-size:14px">
@@ -560,34 +690,34 @@ tr:hover td{background:var(--rescueGlow)}
       <label style="font-size:12px;color:var(--muted);letter-spacing:1px">DESTINATAIRES</label>
       <div style="margin-top:6px;font-size:13px" id="recipientsList"></div>
     </div>
-    <button class="btn-modal" style="background:linear-gradient(135deg,#3B82F6,#2563EB);color:var(--txt);box-shadow:0 4px 16px rgba(59,130,246,.2)" onclick="sendGmail()">&#128231; ENVOYER PAR GMAIL</button>
-    <button class="btn-modal" style="background:linear-gradient(135deg,#25D366,#128C7E);color:var(--txt);box-shadow:0 4px 16px rgba(37,211,102,.2)" onclick="sendWhatsApp()">&#128172; ENVOYER PAR WHATSAPP</button>
-    <button class="btn-modal" style="background:linear-gradient(135deg,var(--gold),#B8860B);color:var(--txt);box-shadow:0 4px 16px rgba(212,160,23,.2)" onclick="sendDrive()">🖨️ IMPRIMER PDF</button>
+    <button class="btn-modal" style="background:linear-gradient(135deg,#3B82F6,#2563EB);color:var(--txt);box-shadow:0 4px 16px rgba(59,130,246,.2)" onclick="sendGmail()">ENVOYER PAR GMAIL</button>
+    <button class="btn-modal" style="background:linear-gradient(135deg,#25D366,#128C7E);color:var(--txt);box-shadow:0 4px 16px rgba(37,211,102,.2)" onclick="sendWhatsApp()">ENVOYER PAR WHATSAPP</button>
+    <button class="btn-modal" style="background:linear-gradient(135deg,var(--gold),#9A8230);color:var(--txt);box-shadow:0 4px 16px rgba(201,168,76,.2)" onclick="sendDrive()">IMPRIMER PDF</button>
     <button class="btn-modal" style="background:var(--card);color:var(--muted);border:1px solid var(--border)" onclick="closeReportModal()">ANNULER</button>
   </div>
 </div>
 <div class="modal-overlay" id="printModal">
   <div class="modal">
-    <h3>&#128424; IMPRIMER / G&Eacute;N&Eacute;RER PDF</h3>
+    <h3>IMPRIMER / G&Eacute;N&Eacute;RER PDF</h3>
     <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Choisissez le type de rapport. Le PDF sera nomm&eacute; automatiquement.</p>
     <button class="btn-modal" style="background:linear-gradient(135deg,var(--rescue),var(--rescueD));color:var(--txt)" onclick="doPrint('full')">
-      &#128196; RAPPORT COMPLET<br><span style="font-size:11px;opacity:.7">Couverture + KPIs + Alertes + Personnel + Inventaire + Audit + Missions + Plans</span>
+      RAPPORT COMPLET<br><span style="font-size:11px;opacity:.7">Couverture + KPIs + Alertes + Personnel + Inventaire + Audit + Missions + Plans</span>
     </button>
-    <button class="btn-modal" style="background:linear-gradient(135deg,var(--gold),#B8860B);color:var(--txt)" onclick="doPrint('personnel')">
-      &#128101; HORAIRES PERSONNEL<br><span style="font-size:11px;opacity:.7">Couverture + KPIs + Grille personnel d&eacute;ploy&eacute; avec heures</span>
+    <button class="btn-modal" style="background:linear-gradient(135deg,var(--gold),#9A8230);color:var(--txt)" onclick="doPrint('personnel')">
+      HORAIRES PERSONNEL<br><span style="font-size:11px;opacity:.7">Couverture + KPIs + Grille personnel d&eacute;ploy&eacute; avec heures</span>
     </button>
     <button class="btn-modal" style="background:linear-gradient(135deg,var(--blue),#2563EB);color:var(--txt)" onclick="doPrint('inventory')">
-      &#128230; INVENTAIRE<br><span style="font-size:11px;opacity:.7">Couverture + Tableau items en circulation + Donut critique + Audit</span>
+      INVENTAIRE<br><span style="font-size:11px;opacity:.7">Couverture + Tableau items en circulation + Donut critique + Audit</span>
     </button>
     <div style="margin-top:8px;padding:10px;border-radius:var(--radius-sm);background:var(--card2);font-size:11px;color:var(--muted)">
-      &#128161; Astuce : Dans la fen&ecirc;tre d'impression, choisissez &laquo; Enregistrer en PDF &raquo; comme imprimante pour g&eacute;n&eacute;rer un fichier PDF.
+      Astuce : Dans la fen&ecirc;tre d'impression, choisissez &laquo; Enregistrer en PDF &raquo; comme imprimante pour g&eacute;n&eacute;rer un fichier PDF.
     </div>
     <button class="btn-modal" style="background:var(--card);color:var(--muted);border:1px solid var(--border);margin-top:4px" onclick="closePrintModal()">ANNULER</button>
   </div>
 </div>
 <div class="theme-pill">
-  <button id="btnDark" class="active" onclick="setTheme('dark')">&#127769;</button>
-  <button id="btnLight" onclick="setTheme('light')">&#9728;&#65039;</button>
+  <button id="btnDark" class="active" onclick="setTheme('dark')">/button>
+  <button id="btnLight" onclick="setTheme('light')">/button>
 </div>
 <script>
 /* ═══════════════════════════════════════════
@@ -622,7 +752,7 @@ function restoreCollapsed(){
   });
 }
 document.addEventListener('DOMContentLoaded',restoreCollapsed);
-var AUTH_ROLES=["CHEF D'EQUIPE","COORDONNATEUR"];
+var AUTH_ROLES=["CHEF D'EQUIPE","COORDONNATEUR","ADMIN","CHEF"];
 var WEBHOOK_MAIN='/api/webhook-main';
 var WEBHOOK_URGENCE='/api/webhook-urgence';
 var SITES=[
@@ -662,14 +792,25 @@ var CERT_DEFS=(typeof CERTS_LIST!=='undefined')?CERTS_LIST:[
 ];
 
 function checkAuth(){
-  // Use volo_last_volo (non-sensitive VOLO ID) instead of plaintext PIN
+  // Essayer volo_last_volo, puis volo_pin, puis volo_last_id
   var volo=localStorage.getItem('volo_last_volo');
+  if(!volo){
+    var pin=localStorage.getItem('volo_pin');
+    if(pin) volo='V'+pin;
+  }
   if(!volo) return null;
+  // Chercher dans PERSONNEL local
   var p=(typeof PERSONNEL!=='undefined')?PERSONNEL.find(function(x){return x.volo===volo;}):null;
-  if(!p) return null;
-  // Tous les SAUVETEURS et CHEFS ont accès au dashboard
-  if(p.type==='SAUVETEUR'||AUTH_ROLES.indexOf(p.role)!==-1) return p;
-  return null;
+  // Si pas trouvé dans stub, construire un profil minimal depuis localStorage
+  if(!p){
+    var name=localStorage.getItem('volo_last_user')||'Utilisateur';
+    var role=localStorage.getItem('volo_last_role')||'SAUVETEUR';
+    p={id:volo,volo:volo,name:name,role:role,type:role,region:'',ville:''};
+  }
+  // Accès : tout le monde sauf SURVEILLANT
+  var role=(p.role||p.type||'').toUpperCase();
+  if(role==='SURVEILLANT') return null;
+  return p;
 }
 
 document.addEventListener('DOMContentLoaded',function(){
@@ -961,7 +1102,7 @@ function renderPersonnel(){
     var ini=p.name?p.name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase():'??';
     var rc=p.role==='SURVEILLANT'?'var(--blue)':(p.role==="CHEF D'EQUIPE"?'var(--gold)':'var(--rescue)');
     var sn=(SITES.find(function(s){return s.id===p.site;})||{name:p.site||'---'}).name;
-    html+='<div class="card person-card'+(over?' overdue':'')+'"><div class="avatar '+ac+' '+anim+'">'+ini+'</div><div class="person-info"><div class="pname">'+p.name+(p.role==="CHEF D'EQUIPE"?' &#11088;':'')+'</div><div class="prole" style="color:'+rc+'">'+p.role+'</div><div class="ptimer" data-in="'+(p.inTime||'')+'">'+hrs+'h'+String(mins).padStart(2,'0')+' - '+sn+'</div></div>'+(over?'<span class="badge badge-danger" style="position:absolute;top:8px;right:8px">+24H</span>':'')+'</div>';
+    html+='<div class="card person-card'+(over?' overdue':'')+'"><div class="avatar '+ac+' '+anim+'">'+ini+'</div><div class="person-info"><div class="pname">'+p.name+(p.role==="CHEF D'EQUIPE"?' *':'')+'</div><div class="prole" style="color:'+rc+'">'+p.role+'</div><div class="ptimer" data-in="'+(p.inTime||'')+'">'+hrs+'h'+String(mins).padStart(2,'0')+' - '+sn+'</div></div>'+(over?'<span class="badge badge-danger" style="position:absolute;top:8px;right:8px">+24H</span>':'')+'</div>';
   });
   document.getElementById('personnelGrid').innerHTML=html||'<p style="color:var(--muted)">Aucun personnel deploye.</p>';
 }
@@ -995,7 +1136,7 @@ function renderInventaire(){
   document.getElementById('invBody').innerHTML=html||'<tr><td colspan="8" style="text-align:center;color:var(--muted)">Aucun item en circulation.</td></tr>';
 }
 function forcePickOff(txId){
-  showDsPrompt('📝 NOTE DE RETOUR FORCÉ','Ajoutez une note pour ce retour forcé:','CONFIRMER',function(note){
+  showDsPrompt('NOTE DE RETOUR FORCÉ','Ajoutez une note pour ce retour forcé:','CONFIRMER',function(note){
     if(!note){showToast('Note obligatoire','err');return;}
     closeDsModal();
     var txs=JSON.parse(localStorage.getItem('volo_transactions')||'[]');
@@ -1113,7 +1254,7 @@ function openPlanPanel(planId){
   });
   html+='<div style="margin-bottom:14px"><div style="font-family:Oswald,sans-serif;font-size:14px;letter-spacing:2px;color:var(--goldL);margin-bottom:6px">METEO</div><div style="font-size:13px">'+(p.meteo||'-')+'</div></div>';
   html+='<div style="margin-bottom:14px"><div style="font-family:Oswald,sans-serif;font-size:14px;letter-spacing:2px;color:var(--goldL);margin-bottom:6px">COMMUNICATION</div><div style="font-size:13px">'+(p.communication||'-')+'</div></div>';
-  html+='<button class="btn-head" style="width:100%;margin-top:16px;padding:12px" onclick="printPlan(\''+p.id+'\')">&#128424; GENERER PDF</button>';
+  html+='<button class="btn-head" style="width:100%;margin-top:16px;padding:12px" onclick="printPlan(\''+p.id+'\')">GENERER PDF</button>';
   document.getElementById('panelContent').innerHTML=html;
   openPanel();
 }
@@ -1132,7 +1273,7 @@ function loadWeather(){
       .then(function(d){
         var temp=d.current?d.current.temperature_2m:'--';
         var code=d.current?d.current.weather_code:0;
-        var emoji=code===0?'&#9728;&#65039;':code<4?'&#9925;':code<50?'&#127787;&#65039;':code<70?'&#127783;&#65039;':'&#127784;&#65039;';
+        var emoji=code===0?'SOL':code<4?'NUA':code<50?'BRU':code<70?'PLU':'NEI';
         var card=document.createElement('div');
         card.className='card weather-card';
         card.innerHTML='<div class="wemoji">'+emoji+'</div><div class="temp">'+temp+'&deg;C</div><div class="wsite">'+s.name+'</div>';
@@ -1141,7 +1282,7 @@ function loadWeather(){
       .catch(function(){
         var card=document.createElement('div');
         card.className='card weather-card';
-        card.innerHTML='<div class="wemoji">&#9888;&#65039;</div><div class="temp">--</div><div class="wsite">'+s.name+'</div>';
+        card.innerHTML='<div class="wemoji">ERR</div><div class="temp">--</div><div class="wsite">'+s.name+'</div>';
         grid.appendChild(card);
       });
   });
@@ -1181,7 +1322,7 @@ function renderContacts(){
   CHEFS.forEach(function(c){
     var on=deployedPersonnel.some(function(p){return p.id===c.id;});
     var ini=c.name.split(' ').map(function(w){return w[0];}).join('').substring(0,2);
-    html+='<div class="card contact-card"><div class="contact-avatar">'+ini+'</div><div class="contact-info"><div class="cname">'+c.name+' &#11088;</div><a class="cemail" href="mailto:'+c.email+'">'+c.email+'</a><div class="cstatus"><span class="badge '+(on?'badge-green':'badge-red')+'">'+(on?'En ligne':'Hors ligne')+'</span> '+c.ville+'</div></div></div>';
+    html+='<div class="card contact-card"><div class="contact-avatar">'+ini+'</div><div class="contact-info"><div class="cname">'+c.name+' *</div><a class="cemail" href="mailto:'+c.email+'">'+c.email+'</a><div class="cstatus"><span class="badge '+(on?'badge-green':'badge-red')+'">'+(on?'En ligne':'Hors ligne')+'</span> '+c.ville+'</div></div></div>';
   });
   document.getElementById('contactsGrid').innerHTML=html;
 }
@@ -1206,8 +1347,8 @@ function openLightbox(src){var i=document.getElementById('lbImg'),l=document.get
 function closeLightbox(){var l=document.getElementById('lightbox');if(l)l.classList.remove('show');}
 
 function renderRecipients(){
-  var html='<div style="padding:6px 0;font-weight:700;color:var(--gold)">&#128081; Manager: '+DESTINATAIRES.manager.nom+'</div>';
-  DESTINATAIRES.chefs.forEach(function(c){html+='<div style="padding:4px 0;font-size:13px">&#11088; '+c.nom+'</div>';});
+  var html='<div style="padding:6px 0;font-weight:700;color:var(--gold)">Manager: '+DESTINATAIRES.manager.nom+'</div>';
+  DESTINATAIRES.chefs.forEach(function(c){html+='<div style="padding:4px 0;font-size:13px">*'+c.nom+'</div>';});
   document.getElementById('recipientsList').innerHTML=html;
 }
 function openReportModal(){document.getElementById('reportModal').classList.add('show');}
@@ -1266,7 +1407,7 @@ function doPrint(type){
   var siteAlerts=SITES.filter(function(s){return s.status==='attention'||s.alerte;});
 
   /* Colors */
-  var V={bg:'#0A0F1A',panel:'#111827',orange:'#F97316',orangeD:'#EA580C',green:'#10B981',yellow:'#F59E0B',red:'#EF4444',gold:'#D4A017',muted:'#94A3B8',txt:'#E2E8F0',border:'rgba(249,115,22,.15)',borderL:'rgba(249,115,22,.25)',blue:'#3B82F6'};
+  var V={bg:'#0A0F1A',panel:'#111827',orange:'#F97316',orangeD:'#EA580C',green:'#10B981',yellow:'#F59E0B',red:'#EF4444',gold:'#C9A84C',muted:'#94A3B8',txt:'#E2E8F0',border:'rgba(249,115,22,.15)',borderL:'rgba(249,115,22,.25)',blue:'#3B82F6'};
 
   /* Helpers */
   function esc(s){return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -1303,7 +1444,7 @@ function doPrint(type){
   html+='<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-35deg);font-family:Oswald,sans-serif;font-size:100px;color:rgba(249,115,22,.03);letter-spacing:15px;white-space:nowrap;pointer-events:none">CONFIDENTIEL</div>';
   /* Header */
   html+='<div style="text-align:center;margin-bottom:40px">';
-  html+='<div style="text-align:center;margin-bottom:8px"><img src="'+(typeof VOLO_LOGO_B64!=="undefined"?VOLO_LOGO_B64:'eagle_tactic.png')+'" style="width:80px;height:80px;border-radius:50%;border:2px solid rgba(212,160,23,.4)" /></div>';
+  html+='<div style="text-align:center;margin-bottom:8px"><img src="'+(typeof VOLO_LOGO_B64!=="undefined"?VOLO_LOGO_B64:'eagle_tactic.png')+'" style="width:80px;height:80px;border-radius:50%;border:2px solid rgba(201,168,76,.4)" /></div>';
   html+='<div style="font-size:14px;color:'+V.muted+';letter-spacing:4px;font-weight:600;margin-bottom:8px">VOLO CONSTRUCTION SST</div>';
   html+='<div style="font-family:Oswald,sans-serif;font-size:48px;font-weight:700;color:'+V.orange+';letter-spacing:6px;line-height:1.1">GOLDEN EAGLES</div>';
   html+='<div style="font-family:Oswald,sans-serif;font-size:16px;color:'+V.gold+';letter-spacing:4px;margin-top:4px">SAUVETAGE TECHNIQUE</div>';
@@ -1334,11 +1475,11 @@ function doPrint(type){
     html+='<div style="font-family:Oswald,sans-serif;font-size:12px;color:'+V.red+';letter-spacing:2px;margin-bottom:8px">ALERTES ACTIVES</div>';
     siteAlerts.forEach(function(s){
       var ppl=deployedPersonnel.filter(function(p){return p.site===s.id;});
-      html+='<div style="font-size:10px;color:'+V.txt+';padding:3px 0">&#128308; '+esc(s.name)+' '+(s.alerte?esc(s.alerte):'')+' — '+ppl.length+' personnes</div>';
+      html+='<div style="font-size:10px;color:'+V.txt+';padding:3px 0">[!] '+esc(s.name)+' '+(s.alerte?esc(s.alerte):'')+' — '+ppl.length+' personnes</div>';
     });
     ovList.forEach(function(p){
       var hrs=Math.floor((Date.now()-new Date(p.inTime).getTime())/3600000);
-      html+='<div style="font-size:10px;color:'+V.yellow+';padding:3px 0">&#9888;&#65039; '+esc(p.name)+' — '+hrs+'h sur site sans OUT</div>';
+      html+='<div style="font-size:10px;color:'+V.yellow+';padding:3px 0">[!] '+esc(p.name)+' — '+hrs+'h sur site sans OUT</div>';
     });
     html+='</div>';
   }
@@ -1360,7 +1501,7 @@ function doPrint(type){
 
   /* ═══ PERSONNEL TABLE ═══ */
   if(showPersonnel&&deployedPersonnel.length){
-    html+=secHead('&#128101;','Personnel déployé — '+deployedPersonnel.length+' membres');
+    html+=secHead('','Personnel déployé — '+deployedPersonnel.length+' membres');
     html+='<table style="width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden">';
     html+=tableHead(['NOM','RÔLE','RÉGION','SITE','DEPUIS','DURÉE']);
     deployedPersonnel.forEach(function(p,i){
@@ -1384,7 +1525,7 @@ function doPrint(type){
 
   /* ═══ INVENTAIRE TABLE ═══ */
   if(showInventory&&circulatingItems.length){
-    html+=secHead('&#128230;','Inventaire en circulation — '+circulatingItems.length+' items');
+    html+=secHead('','Inventaire en circulation — '+circulatingItems.length+' items');
     html+='<table style="width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden">';
     html+=tableHead(['ITEM','SÉRIE','SAUVETEUR','SITE','DEPUIS']);
     circulatingItems.forEach(function(it,i){
@@ -1401,7 +1542,7 @@ function doPrint(type){
 
   /* ═══ AUDIT TABLE ═══ */
   if(showAudit&&auditLog.length){
-    html+=secHead('&#128209;','Traçabilité audit — '+Math.min(auditLog.length,50)+' dernières entrées');
+    html+=secHead('','Traçabilité audit — '+Math.min(auditLog.length,50)+' dernières entrées');
     html+='<table style="width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden">';
     html+=tableHead(['TYPE','UTILISATEUR','DÉTAIL','DATE']);
     auditLog.slice(0,50).forEach(function(a,i){
@@ -1418,7 +1559,7 @@ function doPrint(type){
 
   /* ═══ MISSIONS ═══ */
   if(showMissions&&plans.length){
-    html+=secHead('&#128203;','Plans de travail actifs — '+plans.length);
+    html+=secHead('','Plans de travail actifs — '+plans.length);
     plans.slice(0,10).forEach(function(p,i){
       html+='<div style="background:'+V.panel+';border:1px solid '+V.border+';border-radius:8px;padding:12px 16px;margin-bottom:8px;border-left:3px solid '+V.orange+'">';
       html+='<div style="display:flex;justify-content:space-between;align-items:center">';
@@ -1505,7 +1646,7 @@ function downloadCSV(csv,filename){
 }
 
 function sendUrgence(){
-  showDsConfirm('🚨 ALERTE URGENCE','Envoyer une ALERTE URGENCE à toute l\'équipe?','ENVOYER L\'ALERTE',function(){
+  showDsConfirm('ALERTE URGENCE','Envoyer une ALERTE URGENCE à toute l\'équipe?','ENVOYER L\'ALERTE',function(){
     closeDsModal();
     var user=checkAuth();
     fetch(WEBHOOK_URGENCE,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'URGENCE',user:user?user.name:'Superviseur',userId:user?user.id:'',timestamp:new Date().toISOString(),source:'dashboard'})}).catch(function(){});
@@ -1536,8 +1677,16 @@ function showToast(msg,type){
 }
 
 // ── FIRESTORE REAL-TIME ──
+var _firestoreUrgences=[];
+var _firestorePointages=[];
+var _firestorePhotos=[];
+var _unsubUrgences=null;
+var _unsubPointages=null;
+var _unsubPhotos=null;
+
 function initFirestoreListeners(){
   if(typeof VoloData==='undefined'){updateFirestoreIndicator();renderFirestoreTx();return;}
+  // Transactions listener (existant)
   try{
     _unsubTx=VoloData.onTransactionsChange(function(txs){
       _firestoreTx=txs||[];
@@ -1546,8 +1695,104 @@ function initFirestoreListeners(){
       renderFirestoreTx();
     });
   }catch(e){console.warn('Firestore listener error:',e);}
+  // Urgences listener — temps réel
+  try{
+    if(VoloData.onUrgencesChange){
+      _unsubUrgences=VoloData.onUrgencesChange(function(urgences){
+        _firestoreUrgences=urgences||[];
+        renderLiveUrgences();
+      });
+    }
+  }catch(e){console.warn('Urgences listener error:',e);}
+  // Pointages listener — temps réel
+  try{
+    if(VoloData.onPointagesChange){
+      _unsubPointages=VoloData.onPointagesChange(function(ptgs){
+        _firestorePointages=ptgs||[];
+        renderLivePointages();
+      });
+    }
+  }catch(e){console.warn('Pointages listener error:',e);}
+  // Photos listener — temps réel
+  try{
+    if(VoloData.onPhotosChange){
+      _unsubPhotos=VoloData.onPhotosChange(function(photos){
+        _firestorePhotos=photos||[];
+        renderLivePhotos();
+      });
+    }
+  }catch(e){console.warn('Photos listener error:',e);}
   updateFirestoreIndicator();
   loadFirestoreCerts();
+}
+
+function renderLiveUrgences(){
+  var el=document.getElementById('liveUrgences');
+  var badge=document.getElementById('urgenceCount');
+  if(badge) badge.textContent=String(_firestoreUrgences.length);
+  if(!el) return;
+  if(!_firestoreUrgences.length){el.innerHTML='<p style="color:var(--muted);text-align:center;font-style:italic;padding:8px">Aucune urgence recente</p>';return;}
+  var html='';
+  _firestoreUrgences.forEach(function(u){
+    var d=u.createdAt?new Date(u.createdAt).toLocaleString('fr-CA',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'}):'';
+    html+='<div style="padding:10px 14px;background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.3);border-radius:10px;margin-bottom:6px">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center">';
+    html+='<span style="font-weight:600;color:var(--red)">'+escapeHtml(u.type||'Alerte')+'</span>';
+    html+='<span style="font-size:11px;color:var(--muted)">'+d+'</span></div>';
+    if(u.sauveteur) html+='<div style="font-size:12px;color:var(--txt);margin-top:4px">'+escapeHtml(u.sauveteur)+'</div>';
+    if(u.details) html+='<div style="font-size:11px;color:var(--muted);margin-top:2px">'+escapeHtml(u.details)+'</div>';
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+
+function renderLivePointages(){
+  var el=document.getElementById('livePointages');
+  var badge=document.getElementById('pointageCount');
+  if(badge) badge.textContent=String(_firestorePointages.length);
+  if(!el) return;
+  if(!_firestorePointages.length){el.innerHTML='<p style="color:var(--muted);text-align:center;font-style:italic;padding:8px">Aucun pointage aujourd\'hui</p>';return;}
+  var html='<div style="display:flex;flex-direction:column;gap:4px">';
+  _firestorePointages.slice(0,15).forEach(function(p){
+    var d=p.savedAt?new Date(p.savedAt).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'}):'';
+    var typeColor=p.type==='ARRIVEE'?'var(--green)':'var(--red)';
+    html+='<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--card);border-radius:8px;border:1px solid var(--border)">';
+    html+='<span style="width:8px;height:8px;border-radius:50%;background:'+typeColor+';flex-shrink:0"></span>';
+    html+='<span style="flex:1;font-size:13px">'+escapeHtml(p.userName||p.voloId||'?')+'</span>';
+    html+='<span style="font-size:11px;color:var(--muted)">'+escapeHtml(p.type||'')+'</span>';
+    html+='<span style="font-size:11px;color:var(--muted)">'+d+'</span>';
+    html+='</div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function renderLivePhotos(){
+  var grid=document.getElementById('photoGallery');
+  if(!grid) return;
+  // Merge Firestore photos (avec Storage URL) + localStorage photos
+  var localPhotos=[];
+  try{localPhotos=JSON.parse(localStorage.getItem('volo_photos')||'[]');}catch(e){}
+  var allPhotos=[];
+  // Firestore photos d'abord (ont des URLs Storage)
+  _firestorePhotos.forEach(function(p){
+    if(p.storageUrl){allPhotos.push({url:p.storageUrl,lieu:p.lieu,date:p.createdAt||p.timestamp,sauveteur:p.sauveteur});}
+  });
+  // Puis les locales
+  localPhotos.forEach(function(p){
+    allPhotos.push({url:p.dataUrl||p.url||'',lieu:p.lieu,date:p.date||p.timestamp});
+  });
+  if(!allPhotos.length){grid.innerHTML='<p style="color:var(--muted);grid-column:1/-1;text-align:center;font-style:italic">Aucune photo pour le moment.</p>';return;}
+  var html='';
+  allPhotos.slice(0,16).forEach(function(ph){
+    var src=ph.url||'';
+    var cap=escapeHtml((ph.lieu||'')+(ph.sauveteur?' - '+ph.sauveteur:''));
+    if(src) html+='<img src="'+escapeHtml(src)+'" alt="'+cap+'" title="'+cap+'" class="photo-thumb" data-src="'+escapeHtml(src)+'" onerror="this.style.display=\'none\'">';
+  });
+  grid.innerHTML=html||'<p style="color:var(--muted);grid-column:1/-1;text-align:center;font-style:italic">Aucune photo pour le moment.</p>';
+  grid.querySelectorAll('.photo-thumb').forEach(function(img){
+    img.addEventListener('click',function(){openLightbox(this.getAttribute('data-src'));});
+  });
 }
 function updateFirestoreIndicator(){
   var dot=document.querySelector('#firestoreBadge .fs-dot');
@@ -1677,7 +1922,7 @@ function renderCertAlerts(){
   _certAlerts.forEach(function(a){
     var color=a.expired?'var(--red)':'var(--warning)';
     var label=a.expired?'EXPIRÉ ('+Math.abs(a.daysLeft)+'j)':a.daysLeft+'j restants';
-    var icon=a.expired?'&#128308;':'&#128992;';
+    var icon=a.expired?'[!]':'[OK]';
     html+='<div class="cert-alert-card" style="border-left:3px solid '+color+'">'+
       '<div style="font-weight:600">'+icon+' '+escapeHtml(a.name)+' <span style="color:var(--muted);font-weight:400;font-size:11px">('+escapeHtml(a.volo)+')</span></div>'+
       '<div style="font-size:12px;margin-top:3px"><span style="color:'+color+';font-weight:600">'+escapeHtml(a.cert)+'</span> — '+label+'</div></div>';

@@ -22,6 +22,9 @@ seed-firestore.html
 .claude/
 .netlify/
 
+# Worktrees
+.worktrees/
+
 # OS
 .DS_Store
 Thumbs.db

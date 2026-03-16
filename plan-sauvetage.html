@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="view-transition" content="same-origin">
+<meta name="mobile-web-app-capable" content="yes">
+<title>VOLO SST — Plan de Sauvetage</title>
+<link rel="icon" href="eagle_tactic.png">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+<script src="data.js"></script>
+<script src="logo.js"></script>
+<script src="king-logo.js"></script>
+<style>
+:root{
+  --bg:#0C0608;--card:#151015;--card2:#1A141A;--txt:#F5F0EB;--muted:#8A8A9A;
+  --rescue:#E65100;--gold:#C9A84C;--green:#27AE60;--red:#C0392B;--blue:#3B82F6;
+  --purple:#8B5CF6;--border:rgba(201,168,76,.15);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;-webkit-font-smoothing:antialiased;padding-bottom:100px}
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:vt-fade-out .2s ease-out}
+::view-transition-new(root){animation:vt-fade-in .3s ease-in}
+@keyframes vt-fade-out{from{opacity:1}to{opacity:0}}
+@keyframes vt-fade-in{from{opacity:0}to{opacity:1}}
+input,select,textarea{font-size:16px!important}
+
+.top-bar{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0C0608,rgba(12,6,8,.97));backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:10px}
+.top-bar img{width:32px;height:32px;border-radius:8px;border:2px solid rgba(201,168,76,.35)}
+.top-bar h1{font-family:'Oswald',sans-serif;font-size:15px;letter-spacing:2px;color:var(--gold);flex:1}
+.btn-back{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--txt);padding:5px 12px;font-size:12px;cursor:pointer;text-decoration:none}
+
+.hero{text-align:center;padding:24px 20px 16px;background:linear-gradient(180deg,rgba(230,81,0,.06),transparent)}
+.hero h2{font-family:'Oswald',sans-serif;font-size:22px;letter-spacing:3px;color:var(--rescue);margin-bottom:4px}
+.hero p{color:var(--muted);font-size:12px}
+
+/* Templates chooser */
+.tpl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:10px 14px}
+.tpl-card{background:var(--card);border:2px solid transparent;border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.tpl-card:active{transform:scale(.97)}
+.tpl-card.active{border-color:var(--rescue);background:rgba(230,81,0,.08)}
+.tpl-icon{font-size:28px;margin-bottom:6px}
+.tpl-name{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1px;color:var(--txt)}
+.tpl-desc{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* Sections */
+.section{margin:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.sec-head{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.sec-num{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--rescue),#B33600);color:#fff;font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sec-title{flex:1;font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1.5px}
+.sec-chev{color:var(--muted);font-size:10px;transition:transform .3s}
+.sec-chev.open{transform:rotate(180deg)}
+.sec-body{padding:0 14px 14px;display:none}
+.sec-body.open{display:block}
+
+/* Form */
+.field{margin-bottom:12px}
+.field label{display:block;font-size:11px;color:var(--gold);letter-spacing:1px;margin-bottom:4px;font-weight:600}
+.field input,.field select,.field textarea{width:100%;background:var(--card2);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--txt);padding:10px 12px;font-family:'Inter',sans-serif;font-size:14px;outline:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--rescue)}
+.field textarea{resize:vertical;min-height:60px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* Risk chips */
+.risk-grid{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.risk-chip{padding:6px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);font-size:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px}
+.risk-chip.active{border-color:var(--red);background:rgba(192,57,43,.12);color:var(--red)}
+
+/* Steps */
+.step-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.step-num{width:24px;height:24px;border-radius:50%;background:rgba(230,81,0,.15);color:var(--rescue);font-family:'Oswald',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.step-txt{flex:1;font-size:13px;line-height:1.5}
+.step-warn{font-weight:700;color:var(--red)}
+
+/* Equipment list */
+.equip-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.equip-chk{width:20px;height:20px;border-radius:6px;border:2px solid rgba(255,255,255,.15);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--green);flex-shrink:0;transition:all .2s}
+.equip-chk.checked{background:rgba(39,174,96,.2);border-color:var(--green)}
+.equip-name{flex:1;font-size:13px}
+.equip-count{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--rescue);font-weight:600}
+.equip-match{font-size:10px;color:var(--green)}
+
+/* Photo upload */
+.photo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:8px 0}
+.photo-slot{aspect-ratio:4/3;background:var(--card2);border:2px dashed rgba(255,255,255,.1);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative}
+.photo-slot img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.photo-slot .ph-icon{font-size:24px;color:var(--muted)}
+.photo-slot .ph-label{font-size:10px;color:var(--muted);margin-top:4px}
+
+/* Category badge */
+.cat-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:8px;font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1px;font-weight:700}
+.cat-I{background:rgba(39,174,96,.15);color:var(--green);border:1px solid rgba(39,174,96,.3)}
+.cat-II{background:rgba(243,156,18,.15);color:#F39C12;border:1px solid rgba(243,156,18,.3)}
+.cat-III{background:rgba(192,57,43,.15);color:var(--red);border:1px solid rgba(192,57,43,.3)}
+
+/* AI */
+.ai-card{background:linear-gradient(135deg,rgba(201,168,76,.06),rgba(230,81,0,.04));border:1px solid rgba(201,168,76,.2);border-radius:14px;padding:16px;margin:10px 12px;position:relative;overflow:hidden}
+.ai-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--rescue),transparent)}
+.ai-btn{width:100%;padding:14px;border-radius:10px;border:1px solid rgba(201,168,76,.3);background:linear-gradient(135deg,rgba(201,168,76,.12),rgba(230,81,0,.06));color:var(--gold);font-family:'Oswald',sans-serif;font-size:15px;letter-spacing:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .3s}
+.ai-btn:hover{border-color:var(--gold);box-shadow:0 0 20px rgba(201,168,76,.15)}
+.ai-btn:disabled{opacity:.5;cursor:not-allowed}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Generate */
+.gen-wrap{padding:20px 16px 40px;text-align:center}
+.gen-btn{width:100%;padding:18px;border-radius:14px;border:2px solid var(--rescue);background:linear-gradient(135deg,rgba(230,81,0,.15),rgba(201,168,76,.08));color:var(--rescue);font-family:'Oswald',sans-serif;font-size:18px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s}
+.gen-btn:hover{border-color:#FF6D00;box-shadow:0 4px 20px rgba(230,81,0,.2)}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90%}
+.toast.show{opacity:1}
+.toast.ok{background:rgba(39,174,96,.9);color:#fff}
+.toast.err{background:rgba(192,57,43,.9);color:#fff}
+.toast.info{background:rgba(59,130,246,.9);color:#fff}
+
+@media(max-width:480px){.field-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <img src="eagle_tactic.png" alt="Eagle" onerror="if(typeof KING_LOGO_B64!=='undefined')this.src=KING_LOGO_B64;else this.style.display='none'">
+  <h1>PLAN DE SAUVETAGE</h1>
+  <a href="index.html" class="btn-back">← RETOUR</a>
+</div>
+
+<div class="hero">
+  <h2>GÉNÉRATEUR DE PLAN</h2>
+  <p>Sauvetage technique — Conforme RSST</p>
+</div>
+
+<!-- TEMPLATE CHOOSER -->
+<div style="padding:0 14px 4px"><div style="font-family:Oswald,sans-serif;font-size:12px;letter-spacing:1.5px;color:var(--gold)">TYPE D'INTERVENTION</div></div>
+<div class="tpl-grid" id="tplGrid"></div>
+
+<!-- SECTIONS -->
+<div id="sectionsWrap"></div>
+
+<!-- AI -->
+<div class="ai-card">
+  <div style="text-align:center;margin-bottom:10px">
+    <div style="display:flex;gap:4px;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/><path d="M8 15h8"/><path d="M6 4V2M18 4V2"/></svg><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L9 9l-7 1 5 5-1.5 7L12 18l6.5 4L17 15l5-5-7-1z"/></svg></div>
+    <div style="font-family:Oswald,sans-serif;font-size:14px;letter-spacing:2px;color:var(--gold)">EAGLE SST M — INTELLIGENCE ARTIFICIELLE</div>
+    <div style="font-size:11px;color:var(--muted)">Analyse IA specialisee sauvetage technique</div>
+  </div>
+  <div class="field" style="margin-bottom:8px">
+    <label>CLÉ API CLAUDE</label>
+    <input type="password" id="apiKey" placeholder="sk-ant-..." style="font-family:JetBrains Mono,monospace;font-size:12px!important">
+  </div>
+  <button class="ai-btn" id="btnAI" onclick="runAI()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M12 2L9 9l-7 1 5 5-1.5 7L12 18l6.5 4L17 15l5-5-7-1z"/></svg> EAGLE SST M — GENERER
+  </button>
+</div>
+
+<!-- GENERATE PDF -->
+<div class="gen-wrap">
+  <button class="gen-btn" onclick="generatePDF()">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> GÉNÉRER LE PDF
+  </button>
+  <div style="margin-top:6px;font-size:11px;color:var(--muted)">Document A4 professionnel • Prêt pour le terrain</div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none">
+
+<script>
+// ══════════════════════════════════════════
+//  VOLO SST — Générateur Plan de Sauvetage
+// ══════════════════════════════════════════
+
+// ── TEMPLATES ──
+var TEMPLATES = [
+  {id:'espace_clos', icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>', name:'ESPACE CLOS', desc:'Station pompage, réservoir, tunnel', cat:'III',
+    risques:['gaz','asphyxie','chute','noyade','electrique'],
+    equipDefault:['detecteur','ventilateur','enrouleur','potence','harnais','cadenas','lampe','radio','trousse_ps','dea','civiere','ancrage','mousqueton','cordage','descendeur','sangle','poulie','plaque','epi','apria']},
+  {id:'hauteur', icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M5 20V8l7-6 7 6v12"/><path d="M9 20v-6h6v6"/></svg>', name:'TRAVAIL EN HAUTEUR', desc:'Échafaudage, nacelle, toiture', cat:'III',
+    risques:['chute','vent','electrique','thermique'],
+    equipDefault:['harnais','cordage','descendeur','ancrage','mousqueton','sangle','poulie','plaque','civiere','radio','trousse_ps','dea','epi','lampe']},
+  {id:'tranchee', icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4l-4 16M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg>', name:'TRANCHÉE / EXCAVATION', desc:'Tranchée, fouille, effondrement', cat:'II',
+    risques:['effondrement','gaz','ensevelissement','electrique'],
+    equipDefault:['detecteur','harnais','cordage','ancrage','mousqueton','civiere','radio','trousse_ps','dea','ventilateur','epi','lampe']},
+  {id:'aquatique', icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 7c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg>', name:'MILIEU AQUATIQUE', desc:'Bassin, rivière, inondation', cat:'III',
+    risques:['noyade','hypothermie','courant','contamination'],
+    equipDefault:['harnais','cordage','ancrage','mousqueton','civiere','radio','trousse_ps','dea','epi','lampe']},
+  {id:'industriel', icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20V8l4-2v4l4-2v4l4-2v8H2z"/><rect x="16" y="4" width="6" height="16" rx="1"/><path d="M18 8h2M18 12h2M18 16h2"/></svg>', name:'INDUSTRIEL / MACHINE', desc:'Convoyeur, presse, broyeur', cat:'II',
+    risques:['ecrasement','electrique','thermique','chimique'],
+    equipDefault:['cadenas','harnais','radio','trousse_ps','dea','civiere','epi','lampe','detecteur']},
+  {id:'custom', icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>', name:'PERSONNALISÉ', desc:'Plan sur mesure', cat:'I',
+    risques:[],
+    equipDefault:['harnais','radio','trousse_ps','dea','civiere','epi']}
+];
+
+var RISQUES = [
+  {id:'gaz', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M8 16c-2-2-3-5-1-8s4-4 5-6c1 2 3 3 5 6s1 6-1 8"/><path d="M12 20c-2 0-3-2-3-4s2-3 3-5c1 2 3 3 3 5s-1 4-3 4z"/></svg>', label:'Gaz / Atmosphère'},
+  {id:'asphyxie', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="5"/><path d="M8 21v-2a4 4 0 018 0v2"/><line x1="9" y1="7" x2="9.01" y2="7"/><line x1="15" y1="7" x2="15.01" y2="7"/><path d="M10 10c0 0 1 1 2 1s2-1 2-1"/></svg>', label:'Asphyxie'},
+  {id:'chute', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>', label:'Chute'},
+  {id:'noyade', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg>', label:'Noyade'},
+  {id:'electrique', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>', label:'Électrique'},
+  {id:'thermique', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M12 12c-2-3-4-5-4-7a4 4 0 018 0c0 2-2 4-4 7z"/><path d="M12 12c-1 2-3 4-3 6a3 3 0 006 0c0-2-2-4-3-6z"/></svg>', label:'Thermique'},
+  {id:'chimique', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M9 3h6v5l3 9a3 3 0 01-3 3H9a3 3 0 01-3-3l3-9V3z"/><line x1="9" y1="3" x2="15" y2="3"/></svg>', label:'Chimique'},
+  {id:'effondrement', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>', label:'Effondrement'},
+  {id:'ensevelissement', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20L8 10l4 6 4-8 4 12H4z"/></svg>', label:'Ensevelissement'},
+  {id:'ecrasement', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>', label:'Écrasement'},
+  {id:'vent', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M9.59 4.59A2 2 0 1111 8H2"/><path d="M12.59 19.41A2 2 0 1014 16H2"/><path d="M17.73 7.73A2.5 2.5 0 1119.5 12H2"/></svg>', label:'Vent fort'},
+  {id:'hypothermie', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M17 5l-5 3-5-3M17 19l-5-3-5 3M22 12h-4M6 12H2M19 7l-3 2M8 15l-3 2M19 17l-3-2M8 9L5 7"/></svg>', label:'Hypothermie'},
+  {id:'courant', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 7c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg>', label:'Courant fort'},
+  {id:'contamination', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="9"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/></svg>', label:'Contamination'},
+  {id:'biologique', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="5" r="2"/><circle cx="17" cy="17" r="2"/><circle cx="7" cy="17" r="2"/></svg>', label:'Biologique'},
+  {id:'bruit', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>', label:'Bruit excessif'}
+];
+
+// ── EQUIPMENT MAPPING to data.js ITEMS ──
+var EQUIP_DEFS = [
+  {id:'detecteur', name:'Détecteur de gaz (4-5 gaz)', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M8 16c-2-2-3-5-1-8s4-4 5-6c1 2 3 3 5 6s1 6-1 8"/><path d="M12 20c-2 0-3-2-3-4s2-3 3-5c1 2 3 3 3 5s-1 4-3 4z"/></svg>', searchCat:['Détecteur']},
+  {id:'ventilateur', name:'Ventilateur + tuyau', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1c3 3 3 5 0 8M23 12c-3 3-5 3-8 0M12 23c-3-3-3-5 0-8M1 12c3-3 5-3 8 0"/></svg>', searchCat:['Ventilateur']},
+  {id:'enrouleur', name:'Enrouleur/Dérouleur', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>', searchCat:['Enrouleur']},
+  {id:'potence', name:'Potence de sauvetage', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M2 20h20M5 20V8l7-6 7 6v12"/><path d="M9 20v-6h6v6"/></svg>', searchCat:['Potence']},
+  {id:'harnais', name:'Harnais', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M12 2v6M8 8l4 4 4-4M8 12v6l4 4 4-4v-6"/></svg>', searchId:['HAR-'], searchCat:['Harnais']},
+  {id:'cadenas', name:'Cadenas (cadenassage)', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>', searchCat:['Cadenas']},
+  {id:'lampe', name:'Lampe de poche/frontale', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M9 18h6M10 22h4M12 2v1M4.22 7.22l.71.71M1 14h2M19.07 7.93l.71-.71M21 14h2"/><path d="M18 14a6 6 0 00-12 0c0 2 1 4 3 5v1h6v-1c2-1 3-3 3-5z"/></svg>', searchCat:['Lampe']},
+  {id:'radio', name:'Radio émetteur/récepteur', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><rect x="5" y="8" width="14" height="14" rx="2"/><path d="M16 2l-4 6"/><circle cx="12" cy="15" r="2"/></svg>', searchCat:['Radio']},
+  {id:'trousse_ps', name:'Trousse premiers soins', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M18 6H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V8a2 2 0 00-2-2z"/><path d="M12 10v6M9 13h6"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>', searchCat:['Premiers soins']},
+  {id:'dea', name:'DEA (défibrillateur)', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>', searchCat:['DEA']},
+  {id:'civiere', name:'Civière / SPEK-PAK / panier', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><rect x="2" y="10" width="20" height="4" rx="1"/><path d="M6 14v4M18 14v4M4 10V8M20 10V8"/></svg>', searchId:['RSP-','BNK-'], searchCat:['Civière','Panier']},
+  {id:'ancrage', name:'Ancrage certifié', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="3"/><path d="M12 8v14M5 18c0-4 3-6 7-6s7 2 7 6"/></svg>', searchId:['ANC-'], searchCat:['Ancrage']},
+  {id:'mousqueton', name:'Mousqueton', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="12" rx="6" ry="9"/><path d="M18 9V6"/></svg>', searchId:['MSQ-'], searchCat:['Mousqueton']},
+  {id:'cordage', name:'Cordage statique/sauvetage', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M4 4c4 4 4 8 0 12M20 4c-4 4-4 8 0 12M12 2v20"/></svg>', searchId:['COR-'], searchCat:['Cordage']},
+  {id:'descendeur', name:'Descendeur/bloqueur', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>', searchId:['DES-'], searchCat:['Descendeur']},
+  {id:'sangle', name:'Sangle d\'ancrage', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M4 12h16M4 12c0-4 4-8 8-8M20 12c0 4-4 8-8 8"/></svg>', searchId:['SNG-'], searchCat:['Sangle']},
+  {id:'poulie', name:'Poulie', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="5"/><path d="M7 8v12M17 8v12"/><line x1="7" y1="20" x2="17" y2="20"/></svg>', searchId:['PUL-'], searchCat:['Poulie']},
+  {id:'plaque', name:'Plaque d\'ancrage', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="3"/></svg>', searchId:['PAL-'], searchCat:['Plaque']},
+  {id:'epi', name:'EPI sauveteur (casque, gants, lunettes)', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M12 2C8 2 4 5 4 9v1h16V9c0-4-4-7-8-7z"/><rect x="2" y="10" width="20" height="3" rx="1"/><path d="M8 13v2M16 13v2"/></svg>', searchId:['SURV-'], searchCat:['EPI']},
+  {id:'apria', name:'APRIA / protection respiratoire', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M6 10c0-3 2-6 6-6s6 3 6 6"/><path d="M4 14h16a2 2 0 010 4H4a2 2 0 010-4z"/><path d="M8 18v2M16 18v2"/></svg>', searchId:['BTL-'], searchCat:['Respiratoire','Bouteille']}
+];
+
+// ── STATE ──
+var PS = {
+  template: 'espace_clos',
+  compagnie: '',
+  espaceClos: '',
+  nomEspace: '',
+  adresse: '',
+  categorie: 'III',
+  risques: [],
+  photos: [null, null, null, null],
+  equipChecked: {},
+  nbIntervenants: 3,
+  etapes: [],
+  procedure: [],
+  communication: '',
+  notes: '',
+  aiResult: null,
+  currentPhotoSlot: -1
+};
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+
+function init() {
+  renderTemplates();
+  selectTemplate('espace_clos');
+  var savedKey = sessionStorage.getItem('_vk');
+  if (savedKey) document.getElementById('apiKey').value = atob(savedKey);
+}
+
+function renderTemplates() {
+  var html = '';
+  TEMPLATES.forEach(function(t) {
+    html += '<div class="tpl-card" id="tpl_' + t.id + '" onclick="selectTemplate(\'' + t.id + '\')">' +
+      '<div class="tpl-icon">' + t.icon + '</div>' +
+      '<div class="tpl-name">' + t.name + '</div>' +
+      '<div class="tpl-desc">' + t.desc + '</div>' +
+    '</div>';
+  });
+  document.getElementById('tplGrid').innerHTML = html;
+}
+
+function selectTemplate(id) {
+  PS.template = id;
+  var tpl = TEMPLATES.find(function(t){ return t.id === id; });
+  if (!tpl) return;
+  PS.categorie = tpl.cat;
+  PS.risques = tpl.risques.slice();
+  PS.equipChecked = {};
+  tpl.equipDefault.forEach(function(e){ PS.equipChecked[e] = true; });
+  PS.etapes = getDefaultSteps(id);
+  PS.procedure = getDefaultProcedure(id);
+  PS.communication = getDefaultComm();
+
+  // Update active card
+  document.querySelectorAll('.tpl-card').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById('tpl_' + id).classList.add('active');
+
+  renderSections();
+}
+
+// ── DEFAULT STEPS ──
+function getDefaultSteps(tplId) {
+  var common = [
+    {txt:'Approcher le lieu de l\'incident avec un détecteur de gaz et s\'assurer de la conformité du cadenassage.', warn:false},
+    {txt:'SI PRÉSENCE D\'ALARME, NE PAS INTERVENIR ET APPELER LES RENFORTS (911).', warn:true},
+    {txt:'Établir un périmètre de sécurité et faire l\'évacuation des gens non concernés.', warn:false},
+    {txt:'Prendre connaissance des risques associés (fiche d\'analyse de risque).', warn:false}
+  ];
+  var especeClos = common.concat([
+    {txt:'S\'assurer de la validité du permis d\'entrée.', warn:false},
+    {txt:'Apport d\'air frais à la victime (ventilateur et pression positive).', warn:false},
+    {txt:'Prise d\'informations au surveillant.', warn:false},
+    {txt:'Contact avec la victime (visuel/auditif) et analyser les besoins.', warn:false},
+    {txt:'SI LA BLESSURE EST D\'ORIGINE TRAUMATIQUE (FRACTURE, CHUTE, ETC.) NE PAS INTERVENIR, APPELER LES RENFORTS (911).', warn:true},
+    {txt:'Mettre l\'enrouleur/dérouleur en mode manuel.', warn:false},
+    {txt:'Sortir la victime à l\'aide de la manivelle, à deux.', warn:false},
+    {txt:'Sortir la victime de l\'espace clos.', warn:false},
+    {txt:'Faire les premiers soins et attendre les services d\'urgences si requis.', warn:false}
+  ]);
+  var hauteur = common.concat([
+    {txt:'Vérifier les points d\'ancrage et la solidité de la structure.', warn:false},
+    {txt:'Contact avec la victime (visuel/auditif) et analyser les besoins.', warn:false},
+    {txt:'SI LA BLESSURE EST D\'ORIGINE TRAUMATIQUE, NE PAS INTERVENIR, APPELER 911.', warn:true},
+    {txt:'Installer le système de descente (cordage + descendeur + ancrage).', warn:false},
+    {txt:'Sécuriser la victime avec harnais et longe.', warn:false},
+    {txt:'Descendre la victime de façon contrôlée.', warn:false},
+    {txt:'Faire les premiers soins et attendre les services d\'urgences si requis.', warn:false}
+  ]);
+  var tranchee = common.concat([
+    {txt:'Vérifier la stabilité des parois et des étançons.', warn:false},
+    {txt:'Contact avec la victime et évaluer l\'ensevelissement.', warn:false},
+    {txt:'SI ENSEVELISSEMENT COMPLET, NE PAS INTERVENIR, APPELER 911.', warn:true},
+    {txt:'Dégager la victime manuellement (pas d\'équipement lourd).', warn:false},
+    {txt:'Sécuriser la victime sur civière.', warn:false},
+    {txt:'Faire les premiers soins et attendre les services d\'urgences.', warn:false}
+  ]);
+  if (tplId === 'espace_clos') return especeClos;
+  if (tplId === 'hauteur') return hauteur;
+  if (tplId === 'tranchee') return tranchee;
+  return common.concat([
+    {txt:'Contact avec la victime (visuel/auditif) et analyser les besoins.', warn:false},
+    {txt:'Intervenir selon les risques identifiés.', warn:false},
+    {txt:'Évacuer la victime en sécurité.', warn:false},
+    {txt:'Faire les premiers soins et attendre les services d\'urgences.', warn:false}
+  ]);
+}
+
+function getDefaultProcedure(tplId) {
+  return [
+    'ARRIVÉE',
+    'Compte rendu au gardien',
+    'Appel du renfort (intervenant, 911, etc.)',
+    'Périmètres de sécurité',
+    'Approche avec lecture de gaz',
+    'Valider informations premiers intervenants',
+    'Valider le permis d\'entrée',
+    'Visualiser fiche d\'analyse risque',
+    'Contact victime (auditif/visuel)',
+    'État de la victime',
+    'Analyse des risques présents',
+    'INTERVENIR',
+    'Division des tâches',
+    'Ventilation (positif)',
+    'Récupération de la victime',
+    'Lecture des gaz en continu',
+    'Évacuation de la victime',
+    'Valider les blessures à la sortie',
+    'Examen médical',
+    'FIN DE L\'INTERVENTION',
+    'Prise en charge par ambulance et premiers répondants',
+    'Décompte des intervenants',
+    'Vérification des équipements',
+    'Inventaire des équipements pour être prêt à la prochaine intervention'
+  ];
+}
+
+function getDefaultComm() {
+  return 'Radio émetteur/récepteur\nAppel 911 / Avertir le poste de contrôle\nAcheminer la situation au Superviseur\nAppeler l\'équipe spécialisée si présente\nVictimes : nombre / endroit / consciente ou non';
+}
+
+// ══════════════════════════════════════════
+//  RENDER SECTIONS
+// ══════════════════════════════════════════
+
+function renderSections() {
+  var html = '';
+
+  // 1 — IDENTIFICATION
+  html += sec(1, '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/><path d="M9 9h.01M15 9h.01M9 13h.01M15 13h.01"/></svg>', 'IDENTIFICATION DU SITE', function() {
+    var catClass = 'cat-' + PS.categorie;
+    return '<div class="field"><label>COMPAGNIE / CLIENT</label><input type="text" value="' + esc(PS.compagnie) + '" onchange="PS.compagnie=this.value" placeholder="Ex: Ville de Shawinigan"></div>' +
+    '<div class="field-row">' +
+      '<div class="field"><label>ESPACE CLOS #</label><input type="text" value="' + esc(PS.espaceClos) + '" onchange="PS.espaceClos=this.value" placeholder="Ex: P.P DES BOIS-FRANCS"></div>' +
+      '<div class="field"><label>CATÉGORIE RISQUE</label><select onchange="PS.categorie=this.value;renderSections()"><option value="I" ' + (PS.categorie==='I'?'selected':'') + '>Cat. I — Risque faible</option><option value="II" ' + (PS.categorie==='II'?'selected':'') + '>Cat. II — Risque modéré</option><option value="III" ' + (PS.categorie==='III'?'selected':'') + '>Cat. III — Risque élevé</option></select></div>' +
+    '</div>' +
+    '<div class="field"><label>NOM DE L\'ESPACE / INSTALLATION</label><input type="text" value="' + esc(PS.nomEspace) + '" onchange="PS.nomEspace=this.value" placeholder="Ex: Station pompage des Bois-Francs"></div>' +
+    '<div class="field"><label>ADRESSE</label><input type="text" value="' + esc(PS.adresse) + '" onchange="PS.adresse=this.value" placeholder="Ex: 10593 ch des Bois-Francs"></div>' +
+    '<div style="margin-top:8px"><span class="cat-badge ' + catClass + '">CATÉGORIE ' + PS.categorie + ' — ' + (PS.categorie==='III'?'RISQUE ÉLEVÉ':PS.categorie==='II'?'RISQUE MODÉRÉ':'RISQUE FAIBLE') + '</span></div>';
+  });
+
+  // 2 — PHOTOS
+  html += sec(2, '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>', 'PHOTOS DE L\'INSTALLATION', function() {
+    var p = '<div class="photo-grid">';
+    for (var i = 0; i < 4; i++) {
+      p += '<div class="photo-slot" onclick="triggerPhoto(' + i + ')">';
+      if (PS.photos[i]) {
+        p += '<img src="' + PS.photos[i] + '">';
+      } else {
+        p += '<div class="ph-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="ph-label">Photo ' + (i+1) + '</div>';
+      }
+      p += '</div>';
+    }
+    return p + '</div>';
+  });
+
+  // 3 — RISQUES
+  html += sec(3, '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>', 'RISQUES IDENTIFIÉS', function() {
+    var chips = '<div class="risk-grid">';
+    RISQUES.forEach(function(r) {
+      var active = PS.risques.indexOf(r.id) !== -1;
+      chips += '<div class="risk-chip ' + (active?'active':'') + '" onclick="toggleRisk(\'' + r.id + '\')">' + r.icon + ' ' + r.label + '</div>';
+    });
+    return chips + '</div>';
+  });
+
+  // 4 — AIDE-MÉMOIRE
+  html += sec(4, '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/></svg>', 'AIDE-MÉMOIRE INTERVENTION', function() {
+    var s = '';
+    PS.etapes.forEach(function(e, i) {
+      s += '<div class="step-item"><div class="step-num">' + (i+1) + '</div><div class="step-txt ' + (e.warn?'step-warn':'') + '">' + e.txt + '</div></div>';
+    });
+    s += '<div class="field" style="margin-top:12px"><label>AJOUTER UNE ÉTAPE</label><div style="display:flex;gap:6px"><input type="text" id="newStep" placeholder="Nouvelle étape..." style="flex:1"><button onclick="addStep()" style="padding:8px 14px;border-radius:8px;border:1px solid var(--rescue);background:rgba(230,81,0,.12);color:var(--rescue);cursor:pointer;font-weight:700">+</button></div></div>';
+    return s;
+  });
+
+  // 5 — PROCÉDURE
+  html += sec(5, '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>', 'PROCÉDURE COMPLÈTE', function() {
+    var txt = PS.procedure.join('\n');
+    return '<div class="field"><label>PROCÉDURE (modifiable)</label><textarea rows="15" style="font-size:13px;line-height:1.6" onchange="PS.procedure=this.value.split(\'\\n\')">' + esc(txt) + '</textarea></div>';
+  });
+
+  // 6 — COMMUNICATION
+  html += sec(6, '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M5 12.55a11 11 0 0114.08 0M1.42 9a16 16 0 0121.16 0M8.53 16.11a6 6 0 016.95 0"/><circle cx="12" cy="20" r="1" fill="#C9A84C"/></svg>', 'PROTOCOLE DE COMMUNICATION', function() {
+    return '<div class="field"><label>PROTOCOLE (modifiable)</label><textarea rows="6" onchange="PS.communication=this.value">' + esc(PS.communication) + '</textarea></div>';
+  });
+
+  // 7 — ÉQUIPEMENTS
+  html += sec(7, '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', 'ÉQUIPEMENTS ADAPTÉS', function() {
+    var items = typeof ITEMS !== 'undefined' ? ITEMS : [];
+    var s = '';
+    EQUIP_DEFS.forEach(function(eq) {
+      var checked = PS.equipChecked[eq.id] || false;
+      // Count matching items in inventory
+      var matchCount = 0;
+      if (items.length > 0) {
+        items.forEach(function(item) {
+          if (eq.searchId) {
+            for (var i = 0; i < eq.searchId.length; i++) {
+              if (item.id.indexOf(eq.searchId[i]) === 0) { matchCount++; return; }
+            }
+          }
+          if (eq.searchCat) {
+            for (var i = 0; i < eq.searchCat.length; i++) {
+              if ((item.cat||'').indexOf(eq.searchCat[i]) !== -1 || (item.name||'').indexOf(eq.searchCat[i]) !== -1) { matchCount++; return; }
+            }
+          }
+        });
+      }
+      s += '<div class="equip-item">' +
+        '<div class="equip-chk ' + (checked?'checked':'') + '" onclick="toggleEquip(\'' + eq.id + '\')">' + (checked?'✓':'') + '</div>' +
+        '<span style="font-size:16px">' + eq.icon + '</span>' +
+        '<div class="equip-name">' + eq.name + '</div>' +
+        (matchCount > 0 ? '<div class="equip-match">×' + matchCount + ' dispo</div>' : '') +
+      '</div>';
+    });
+    s += '<div class="field" style="margin-top:12px"><label>NOMBRE D\'INTERVENANTS REQUIS (RSST art. 309)</label><input type="number" min="1" max="20" value="' + PS.nbIntervenants + '" onchange="PS.nbIntervenants=parseInt(this.value)" style="width:80px"></div>';
+    return s;
+  });
+
+  // 8 — NOTES
+  html += sec(8, '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>', 'NOTES ET OBSERVATIONS', function() {
+    return '<div class="field"><label>NOTES SUPPLÉMENTAIRES</label><textarea rows="4" onchange="PS.notes=this.value" placeholder="Conditions particulières, accès, dangers supplémentaires...">' + esc(PS.notes) + '</textarea></div>';
+  });
+
+  document.getElementById('sectionsWrap').innerHTML = html;
+  // Open first 3 sections by default
+  ['sec1','sec2','sec3'].forEach(function(id){ toggleSec(id, true); });
+}
+
+function sec(num, icon, title, contentFn) {
+  var id = 'sec' + num;
+  return '<div class="section"><div class="sec-head" onclick="toggleSec(\'' + id + '\')">' +
+    '<div class="sec-num">' + num + '</div><span style="font-size:16px">' + icon + '</span>' +
+    '<div class="sec-title">' + title + '</div><div class="sec-chev" id="chev_' + id + '">▼</div>' +
+  '</div><div class="sec-body" id="body_' + id + '">' + contentFn() + '</div></div>';
+}
+
+function toggleSec(id, forceOpen) {
+  var body = document.getElementById('body_' + id);
+  var chev = document.getElementById('chev_' + id);
+  if (forceOpen) { body.classList.add('open'); chev.classList.add('open'); }
+  else { body.classList.toggle('open'); chev.classList.toggle('open'); }
+}
+
+// ══════════════════════════════════════════
+//  INTERACTIONS
+// ══════════════════════════════════════════
+
+function toggleRisk(id) {
+  var idx = PS.risques.indexOf(id);
+  if (idx === -1) PS.risques.push(id);
+  else PS.risques.splice(idx, 1);
+  renderSections();
+}
+
+function toggleEquip(id) {
+  PS.equipChecked[id] = !PS.equipChecked[id];
+  renderSections();
+}
+
+function addStep() {
+  var input = document.getElementById('newStep');
+  var txt = input.value.trim();
+  if (!txt) return;
+  PS.etapes.push({txt: txt, warn: false});
+  input.value = '';
+  renderSections();
+}
+
+function triggerPhoto(slot) {
+  PS.currentPhotoSlot = slot;
+  document.getElementById('photoInput').click();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  init();
+  document.getElementById('photoInput').addEventListener('change', function(e) {
+    var file = e.target.files[0];
+    if (!file || PS.currentPhotoSlot < 0) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      PS.photos[PS.currentPhotoSlot] = ev.target.result;
+      renderSections();
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  });
+});
+
+function esc(str) { return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type||'info') + ' show';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+
+// ══════════════════════════════════════════
+//  AI — Claude API
+// ══════════════════════════════════════════
+
+async function runAI() {
+  // Save API key in sessionStorage only (base64, cleared on tab close)
+  var apiKeyField = document.getElementById('apiKey').value.trim();
+  if (apiKeyField) sessionStorage.setItem('_vk', btoa(apiKeyField));
+
+  var btn = document.getElementById('btnAI');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> GÉNÉRATION EN COURS...';
+
+  var tpl = TEMPLATES.find(function(t){ return t.id === PS.template; });
+  var risquesLabels = PS.risques.map(function(id) { var r = RISQUES.find(function(x){ return x.id === id; }); return r ? r.label : id; });
+
+  var prompt = 'Tu es un expert en sauvetage technique et en santé-sécurité au travail (SST) au Québec, spécialisé dans les plans de sauvetage conformes au RSST.\n\n' +
+    'Génère un plan de sauvetage complet pour cette situation :\n\n' +
+    '## CONTEXTE\n' +
+    '- Type : ' + tpl.name + '\n' +
+    '- Compagnie : ' + (PS.compagnie || 'Non spécifié') + '\n' +
+    '- Installation : ' + (PS.nomEspace || 'Non spécifié') + '\n' +
+    '- Adresse : ' + (PS.adresse || 'Non spécifié') + '\n' +
+    '- Catégorie : ' + PS.categorie + ' (' + (PS.categorie==='III'?'Risque élevé':PS.categorie==='II'?'Risque modéré':'Risque faible') + ')\n' +
+    '- Risques identifiés : ' + (risquesLabels.join(', ') || 'Aucun') + '\n' +
+    '- Notes : ' + (PS.notes || 'Aucune') + '\n\n' +
+    '## FORMAT DE RÉPONSE\n' +
+    'Réponds UNIQUEMENT en JSON valide (pas de markdown) :\n' +
+    '{\n' +
+    '  "aide_memoire": [{"txt": "string", "warn": boolean}],\n' +
+    '  "procedure": ["string"],\n' +
+    '  "communication": "string (séparé par \\n)",\n' +
+    '  "equipements_supplementaires": ["string"],\n' +
+    '  "nb_intervenants": number,\n' +
+    '  "notes_securite": ["string"],\n' +
+    '  "conditions_arret": ["string — conditions où il faut arrêter l\'intervention"]\n' +
+    '}';
+
+  try {
+    // Direct browser call — proxy timeout too short for Claude responses
+    var apiKey = document.getElementById('apiKey').value.trim() || (sessionStorage.getItem('_vk')?atob(sessionStorage.getItem('_vk')):'');
+    if (!apiKey) throw new Error('Entrez votre cle API dans le champ ci-dessus.');
+
+    var response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 4096,
+        messages: [{role: 'user', content: prompt}]
+      })
+    });
+
+    if (!response.ok) throw new Error('Erreur API ' + response.status);
+    var data = await response.json();
+    var text = data.content[0].text;
+    var jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Réponse invalide');
+
+    var jsonStr = jsonMatch[0];
+    // Auto-repair truncated JSON
+    var opens = (jsonStr.match(/\[/g)||[]).length;
+    var closes = (jsonStr.match(/\]/g)||[]).length;
+    var openBraces = (jsonStr.match(/\{/g)||[]).length;
+    var closeBraces = (jsonStr.match(/\}/g)||[]).length;
+    // Remove trailing comma before closing
+    jsonStr = jsonStr.replace(/,\s*$/, '');
+    for (var bi = 0; bi < opens - closes; bi++) jsonStr += ']';
+    for (var bj = 0; bj < openBraces - closeBraces; bj++) jsonStr += '}';
+
+    var result;
+    try {
+      result = JSON.parse(jsonStr);
+    } catch(parseErr) {
+      showToast('Reponse tronquee — relancez l\'IA', 'err');
+      return;
+    }
+    PS.aiResult = result;
+
+    // Apply AI results
+    if (result.aide_memoire) PS.etapes = result.aide_memoire;
+    if (result.procedure) PS.procedure = result.procedure;
+    if (result.communication) PS.communication = result.communication;
+    if (result.nb_intervenants) PS.nbIntervenants = result.nb_intervenants;
+
+    renderSections();
+    showToast('Eagle SST M — Plan genere', 'ok');
+  } catch(e) {
+    showToast('Erreur : ' + e.message, 'err');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M12 2L9 9l-7 1 5 5-1.5 7L12 18l6.5 4L17 15l5-5-7-1z"/></svg> EAGLE SST M — GENERER';
+  }
+}
+
+// ══════════════════════════════════════════
+//  PDF GENERATION
+// ══════════════════════════════════════════
+
+function generatePDF() {
+  showToast('Generation du PDF...', 'info');
+  setTimeout(function() {
+    try {
+      var doc = new jspdf.jsPDF('p', 'mm', 'a4');
+      var pw = 210, ph = 297, ml = 16, mr = 16, mt = 26, mb = 20;
+      var cw = pw - ml - mr;
+      var pageNum = 0;
+      var totalPages = 0;
+      // Dark theme colors
+      var C = {
+        bg:[12,6,8], bg2:[21,16,21], bg3:[26,20,26], rescue:[230,81,0], gold:[212,160,23],
+        txt:[184,169,154], txtLight:[245,240,235], muted:[107,91,78], green:[39,174,96],
+        red:[192,57,43], blue:[59,130,246], purple:[139,92,246],
+        white:[255,255,255], line:[60,50,45], lineGold:[212,160,23]
+      };
+
+      function setC(c,t){ if(t==='fill')doc.setFillColor(c[0],c[1],c[2]);else if(t==='draw')doc.setDrawColor(c[0],c[1],c[2]);else doc.setTextColor(c[0],c[1],c[2]); }
+
+      // Dark page background
+      function darkBg(){
+        setC(C.bg,'fill'); doc.rect(0,0,pw,ph,'F');
+      }
+
+      // Gradient-like band (simulated with 2 rects)
+      function gradBand(x,y,w,h,c1,c2){
+        setC(c1,'fill'); doc.rect(x,y,w,h/2,'F');
+        setC(c2||c1,'fill'); doc.rect(x,y+h/2,w,h/2,'F');
+      }
+
+      // Section title bar
+      function sectionBar(y,title,color){
+        color = color || C.rescue;
+        setC(color,'fill'); doc.roundedRect(ml,y,cw,9,2,2,'F');
+        // Subtle shine line on top
+        doc.setDrawColor(255,255,255); doc.setLineWidth(0.15);
+        doc.line(ml+4,y+0.5,ml+cw-4,y+0.5);
+        doc.setFont('helvetica','bold');doc.setFontSize(10);setC(C.white,'text');
+        doc.text(title,ml+5,y+6.2);
+        return y+14;
+      }
+
+      // Header bar with king logo
+      function header(title) {
+        setC(C.bg,'fill'); doc.rect(0,0,pw,18,'F');
+        // Gold accent line
+        setC(C.gold,'fill'); doc.rect(0,18,pw,0.6,'F');
+        // Rescue thin line under gold
+        setC(C.rescue,'fill'); doc.rect(0,18.6,pw,0.3,'F');
+        // King logo in header — masked corners + gold ring
+        var hlx=ml+7,hly=9,hlr=7;
+        try{if(typeof KING_LOGO_B64!=='undefined'){doc.addImage(KING_LOGO_B64,'JPEG',hlx-hlr,hly-hlr,hlr*2,hlr*2);}}catch(e){
+          try{if(typeof VOLO_LOGO_B64!=='undefined'){var ld=VOLO_LOGO_B64;if(ld.indexOf('data:')===-1)ld='data:image/png;base64,'+ld;doc.addImage(ld,'PNG',ml+1,2.5,12,12);}}catch(e2){}
+        }
+        // Mask square corners with thick dark ring
+        setC(C.bg,'draw');doc.setLineWidth(5);doc.circle(hlx,hly,9.5,'S');
+        // Gold ring
+        setC(C.gold,'draw');doc.setLineWidth(0.5);doc.circle(hlx,hly,7,'S');
+        doc.setFont('helvetica','bold');doc.setFontSize(7.5);setC(C.gold,'text');
+        doc.text('VOLO CONSTRUCTION SST',ml+17,7.5);
+        doc.setFont('helvetica','normal');doc.setFontSize(6.5);setC(C.muted,'text');
+        doc.text('THE GOLDEN EAGLES — SAUVETAGE TECHNIQUE',ml+17,12.5);
+        if(title){doc.setFont('helvetica','bold');doc.setFontSize(7);setC(C.rescue,'text');doc.text(title,pw-mr,10,{align:'right'});}
+      }
+
+      function footer(){
+        setC(C.line,'draw');doc.setLineWidth(0.2);doc.line(ml,ph-13,pw-mr,ph-13);
+        setC(C.gold,'fill'); doc.rect(ml,ph-13,30,0.4,'F'); // Gold accent
+        doc.setFont('helvetica','normal');doc.setFontSize(5.5);setC(C.muted,'text');
+        doc.text('CONFIDENTIEL — '+(PS.compagnie||'VOLO CONSTRUCTION')+' — '+new Date().toLocaleDateString('fr-CA'),ml,ph-8.5);
+        doc.text('Page '+pageNum,pw-mr,ph-8.5,{align:'right'});
+        // Tiny king logo in footer — masked + blended
+        try{if(typeof KING_LOGO_B64!=='undefined'){
+          doc.setGState(new doc.GState({opacity:0.35}));
+          doc.addImage(KING_LOGO_B64,'JPEG',pw/2-3,ph-14,6,6);
+          doc.setGState(new doc.GState({opacity:1}));
+          // Mask corners
+          setC(C.bg,'draw');doc.setLineWidth(3);doc.circle(pw/2,ph-11,4.5,'S');
+          setC(C.gold,'draw');doc.setLineWidth(0.15);doc.circle(pw/2,ph-11,3,'S');
+        }}catch(e){}
+      }
+
+      function newPage(title){doc.addPage();pageNum++;darkBg();header(title);footer();return mt;}
+      function checkY(y,need){if(y+need>ph-mb){return newPage();}return y;}
+
+      // ══════════════════════════════════════════════
+      //  PAGE 1 — COUVERTURE ROYALE
+      // ══════════════════════════════════════════════
+      pageNum++;
+      darkBg();
+
+      // Top band dark gradient
+      setC([28,16,24],'fill'); doc.rect(0,0,pw,140,'F');
+      setC(C.bg,'fill'); doc.rect(0,130,pw,10,'F'); // blend
+
+      // Decorative corner lines
+      setC(C.gold,'draw'); doc.setLineWidth(0.3);
+      doc.line(12,12,40,12); doc.line(12,12,12,40);
+      doc.line(pw-12,12,pw-40,12); doc.line(pw-12,12,pw-12,40);
+      doc.line(12,ph-12,40,ph-12); doc.line(12,ph-12,12,ph-40);
+      doc.line(pw-12,ph-12,pw-40,ph-12); doc.line(pw-12,ph-12,pw-12,ph-40);
+
+      // King logo — big and centered, corners masked
+      var logoX=pw/2, logoY=46, logoR=30;
+      var coverBg=[28,16,24]; // top band color
+      // 1) Draw image first
+      try{if(typeof KING_LOGO_B64!=='undefined'){doc.addImage(KING_LOGO_B64,'JPEG',logoX-logoR,logoY-logoR,logoR*2,logoR*2);}}catch(e){
+        try{if(typeof VOLO_LOGO_B64!=='undefined'){var ld=VOLO_LOGO_B64;if(ld.indexOf('data:')===-1)ld='data:image/png;base64,'+ld;doc.addImage(ld,'PNG',logoX-25,logoY-25,50,50);}}catch(e2){}
+      }
+      // 2) Thick ring OVER corners to mask the square JPEG edges
+      doc.setDrawColor(coverBg[0],coverBg[1],coverBg[2]);
+      doc.setLineWidth(16);
+      doc.circle(logoX,logoY,36,'S');
+      // 3) Gold glow rings
+      for(var gr=3;gr>=1;gr--){
+        doc.setGState(new doc.GState({opacity:gr*0.07}));
+        setC(C.gold,'draw');doc.setLineWidth(1);doc.circle(logoX,logoY,28+gr*1.5,'S');
+      }
+      doc.setGState(new doc.GState({opacity:1}));
+      // 4) Gold ring border tight on the badge
+      setC(C.gold,'draw');doc.setLineWidth(1.2);doc.circle(logoX,logoY,28.5,'S');
+      // 5) Thin inner gold ring
+      setC(C.gold,'draw');doc.setLineWidth(0.4);doc.circle(logoX,logoY,26,'S');
+
+      // Gold separator
+      setC(C.gold,'draw'); doc.setLineWidth(0.6);
+      doc.line(pw/2-45,82,pw/2+45,82);
+      setC(C.rescue,'fill'); doc.circle(pw/2,82,1.5,'F');
+
+      // Title
+      doc.setFont('helvetica','bold');doc.setFontSize(28);setC(C.txtLight,'text');
+      doc.text('PLAN DE SAUVETAGE',pw/2,98,{align:'center'});
+
+      // Template type
+      var tpl=TEMPLATES.find(function(t){return t.id===PS.template;});
+      doc.setFontSize(14);setC(C.rescue,'text');
+      doc.text(tpl?tpl.name:'',pw/2,110,{align:'center'});
+
+      // Subtitle
+      doc.setFont('helvetica','normal');doc.setFontSize(8);setC(C.gold,'text');
+      doc.text('THE GOLDEN EAGLES — SAUVETAGE TECHNIQUE',pw/2,120,{align:'center'});
+
+      // Gold separator 2
+      setC(C.gold,'draw'); doc.setLineWidth(0.4);
+      doc.line(pw/2-35,126,pw/2+35,126);
+
+      // Category badge
+      var catColor=PS.categorie==='III'?C.red:PS.categorie==='II'?[243,156,18]:C.green;
+      var catLabel='CATEGORIE '+PS.categorie+(PS.categorie==='III'?' — RISQUE ELEVE':PS.categorie==='II'?' — RISQUE MODERE':' — RISQUE FAIBLE');
+      setC(catColor,'fill'); doc.roundedRect(pw/2-38,134,76,11,3,3,'F');
+      doc.setFont('helvetica','bold');doc.setFontSize(9);setC(C.white,'text');
+      doc.text(catLabel,pw/2,141,{align:'center'});
+
+      // Info card (dark card style like QA report)
+      var bx=28,by=156,bw=pw-56;
+      setC(C.bg2,'fill'); doc.roundedRect(bx,by,bw,58,4,4,'F');
+      setC(C.rescue,'fill'); doc.rect(bx,by,bw,1.5,'F'); // Top accent
+      setC(C.rescue,'draw'); doc.setLineWidth(0.2); doc.roundedRect(bx,by,bw,58,4,4,'S');
+
+      var infoY=by+14;
+      var infoData=[
+        ['COMPAGNIE',PS.compagnie||'—'],
+        ['INSTALLATION',PS.nomEspace||'—'],
+        ['ADRESSE',PS.adresse||'—'],
+        ['DATE',new Date().toLocaleDateString('fr-CA')]
+      ];
+      infoData.forEach(function(pair){
+        doc.setFont('helvetica','bold');doc.setFontSize(7);setC(C.muted,'text');
+        doc.text(pair[0],bx+8,infoY);
+        doc.setFont('helvetica','normal');doc.setFontSize(9);setC(C.txtLight,'text');
+        doc.text(pair[1],bx+42,infoY);
+        infoY+=11;
+      });
+
+      // Risques on cover (dark card)
+      if(PS.risques.length>0){
+        var ry=222;
+        setC(C.bg2,'fill'); doc.roundedRect(bx,ry,bw,22,4,4,'F');
+        setC(C.red,'fill'); doc.rect(bx,ry,bw,1.2,'F');
+        doc.setFont('helvetica','bold');doc.setFontSize(7);setC(C.red,'text');
+        doc.text('RISQUES IDENTIFIES',bx+8,ry+9);
+        doc.setFont('helvetica','normal');doc.setFontSize(8);setC(C.txt,'text');
+        var rLabels=PS.risques.map(function(id){var r=RISQUES.find(function(x){return x.id===id;});return r?r.label:id;});
+        var rText = doc.splitTextToSize(rLabels.join('  |  '),bw-16);
+        doc.text(rText,bx+8,ry+16);
+      }
+
+      // Metrics cards at bottom (like QA score-hero)
+      var mcY=PS.risques.length>0?250:228;
+      var mcW=(cw-8)/3;
+      var metrics=[
+        [PS.etapes.length+'','ETAPES',C.rescue],
+        [PS.nbIntervenants+'','INTERVENANTS',C.gold],
+        [Object.keys(PS.equipChecked).filter(function(k){return PS.equipChecked[k];}).length+'','EQUIPEMENTS',C.green]
+      ];
+      metrics.forEach(function(m,i){
+        var mx=ml+i*(mcW+4);
+        setC(C.bg2,'fill'); doc.roundedRect(mx,mcY,mcW,20,3,3,'F');
+        setC(m[2],'fill'); doc.rect(mx,mcY,mcW,1,'F');
+        setC(m[2],'draw'); doc.setLineWidth(0.15); doc.roundedRect(mx,mcY,mcW,20,3,3,'S');
+        doc.setFont('helvetica','bold');doc.setFontSize(18);setC(m[2],'text');
+        doc.text(m[0],mx+mcW/2,mcY+11,{align:'center'});
+        doc.setFont('helvetica','normal');doc.setFontSize(5.5);setC(C.muted,'text');
+        doc.text(m[1],mx+mcW/2,mcY+16.5,{align:'center'});
+      });
+
+      // Footer cover
+      doc.setFont('helvetica','normal');doc.setFontSize(5.5);setC(C.muted,'text');
+      doc.text('CONFIDENTIEL — Usage terrain uniquement — Genere par Eagle SST M — VOLO SST',pw/2,ph-12,{align:'center'});
+
+      // ══════════════════════════════════════════════
+      //  PAGE 2 — AIDE-MEMOIRE + PROCEDURE
+      // ══════════════════════════════════════════════
+      var y=newPage('AIDE-MEMOIRE');
+
+      y = sectionBar(y,'AIDE-MEMOIRE POUR L\'INTERVENTION',C.rescue);
+
+      PS.etapes.forEach(function(e,i){
+        y=checkY(y,14);
+        // Step number circle
+        var circColor = e.warn ? C.red : C.rescue;
+        setC(circColor,'fill'); doc.circle(ml+4,y+0.5,3.5,'F');
+        doc.setFont('helvetica','bold');doc.setFontSize(9);setC(C.white,'text');
+        doc.text(''+(i+1),ml+4,y+1.5,{align:'center'});
+        // Connecting line to next step
+        if(i<PS.etapes.length-1){setC(C.line,'draw');doc.setLineWidth(0.2);doc.line(ml+4,y+4,ml+4,y+10);}
+        // Step text
+        doc.setFont('helvetica',e.warn?'bold':'normal');doc.setFontSize(8.5);
+        setC(e.warn?C.red:C.txtLight,'text');
+        var lines=doc.splitTextToSize(e.txt,cw-16);
+        doc.text(lines,ml+12,y+1.5);
+        // Warning background
+        if(e.warn){
+          setC([40,15,15],'fill');
+          doc.roundedRect(ml+10,y-3,cw-14,lines.length*4+4,2,2,'F');
+          setC(C.red,'text');doc.setFont('helvetica','bold');doc.setFontSize(8.5);
+          doc.text(lines,ml+12,y+1.5);
+        }
+        y+=lines.length*4.5+5;
+      });
+
+      // ── PROCEDURE ──
+      y=checkY(y,30);y+=4;
+      y = sectionBar(y,'PROCEDURE COMPLETE',C.gold);
+
+      PS.procedure.forEach(function(line){
+        y=checkY(y,7);
+        var isHeader=line===line.toUpperCase()&&line.length<30;
+        if(isHeader){
+          // Phase header with accent
+          setC(C.bg3,'fill'); doc.roundedRect(ml,y-3,cw,8,2,2,'F');
+          setC(C.rescue,'fill'); doc.rect(ml,y-3,2,8,'F');
+          doc.setFont('helvetica','bold');doc.setFontSize(9);setC(C.rescue,'text');
+          doc.text(line,ml+6,y+1.5);
+          y+=9;
+        }else{
+          setC(C.green,'fill');doc.circle(ml+3,y+0.5,1,'F');
+          doc.setFont('helvetica','normal');doc.setFontSize(8);setC(C.txt,'text');
+          doc.text(line,ml+8,y+1);
+          y+=5;
+        }
+      });
+
+      // ── COMMUNICATION ──
+      y=checkY(y,30);y+=4;
+      y = sectionBar(y,'PROTOCOLE DE COMMUNICATION',C.blue);
+
+      // Comm in a dark card
+      setC(C.bg2,'fill');
+      var commLines = PS.communication.split('\n').filter(function(l){return l.trim();});
+      var commH = commLines.length * 6 + 10;
+      doc.roundedRect(ml,y,cw,commH,3,3,'F');
+      setC(C.blue,'draw');doc.setLineWidth(0.15);doc.roundedRect(ml,y,cw,commH,3,3,'S');
+      var cy=y+7;
+      commLines.forEach(function(line){
+        doc.setFont('helvetica','normal');doc.setFontSize(8.5);setC(C.txtLight,'text');
+        doc.text('> '+line.trim(),ml+6,cy);
+        cy+=6;
+      });
+      y+=commH+6;
+
+      // ══════════════════════════════════════════════
+      //  PAGE 3 — EQUIPEMENTS + INTERVENANTS
+      // ══════════════════════════════════════════════
+      y=newPage('EQUIPEMENTS');
+
+      y = sectionBar(y,'EQUIPEMENTS ADAPTES',C.green);
+
+      var equipBody=[];
+      var equipTotal=0;
+      EQUIP_DEFS.forEach(function(eq){
+        if(!PS.equipChecked[eq.id])return;
+        var count=0;
+        if(typeof ITEMS!=='undefined'){
+          ITEMS.forEach(function(item){
+            if(eq.searchId){for(var i=0;i<eq.searchId.length;i++){if(item.id.indexOf(eq.searchId[i])===0){count++;return;}}}
+            if(eq.searchCat){for(var i=0;i<eq.searchCat.length;i++){if((item.cat||'').indexOf(eq.searchCat[i])!==-1||(item.name||'').indexOf(eq.searchCat[i])!==-1){count++;return;}}}
+          });
+        }
+        equipTotal+=count;
+        var status=count>0?'EN STOCK':'A VERIFIER';
+        equipBody.push([eq.name,count>0?''+count:'—',status]);
+      });
+
+      doc.autoTable({
+        startY:y,margin:{left:ml,right:mr},
+        head:[['Equipement','Inventaire','Statut']],
+        body:equipBody,
+        theme:'plain',
+        headStyles:{fillColor:C.bg2,textColor:C.gold,fontStyle:'bold',fontSize:7.5,lineColor:C.line,lineWidth:0.2},
+        styles:{fontSize:8,cellPadding:3,textColor:C.txt,fillColor:C.bg},
+        alternateRowStyles:{fillColor:C.bg2},
+        columnStyles:{
+          0:{cellWidth:100},
+          1:{halign:'center',cellWidth:28,fontStyle:'bold'},
+          2:{halign:'center',cellWidth:32}
+        },
+        didParseCell:function(data){
+          if(data.section==='body'&&data.column.index===2){
+            var val=data.cell.raw;
+            if(val==='EN STOCK'){data.cell.styles.textColor=C.green;data.cell.styles.fontStyle='bold';}
+            else{data.cell.styles.textColor=C.red;data.cell.styles.fontStyle='bold';}
+          }
+          if(data.section==='body'&&data.column.index===1){
+            var cnt=parseInt(data.cell.raw);
+            if(cnt>0)data.cell.styles.textColor=C.green;
+            else data.cell.styles.textColor=C.muted;
+          }
+        },
+        didDrawCell:function(data){
+          if(data.section==='head'){
+            setC(C.gold,'fill');
+            doc.rect(data.cell.x,data.cell.y+data.cell.height-0.3,data.cell.width,0.3,'F');
+          }
+        }
+      });
+      y=doc.lastAutoTable.finalY+8;
+
+      // Intervenants hero card
+      y=checkY(y,28);
+      setC(C.bg2,'fill'); doc.roundedRect(ml,y,cw,24,4,4,'F');
+      setC(C.rescue,'fill'); doc.rect(ml,y,cw,1.5,'F');
+      setC(C.rescue,'draw'); doc.setLineWidth(0.2); doc.roundedRect(ml,y,cw,24,4,4,'S');
+      doc.setFont('helvetica','bold');doc.setFontSize(22);setC(C.rescue,'text');
+      doc.text(''+PS.nbIntervenants,ml+14,y+16,{align:'center'});
+      doc.setFont('helvetica','bold');doc.setFontSize(10);setC(C.txtLight,'text');
+      doc.text('INTERVENANTS REQUIS (minimum)',ml+26,y+14);
+      doc.setFont('helvetica','normal');doc.setFontSize(7);setC(C.muted,'text');
+      doc.text('En vertu de la R.S.S.T. art. 309 pour categorie '+PS.categorie,ml+26,y+20);
+      y+=30;
+
+      // Stats summary card
+      y=checkY(y,22);
+      var statW=(cw-6)/3;
+      var stats=[
+        [equipBody.length+'','Equipements',C.green],
+        [equipTotal+'','En inventaire',C.gold],
+        [PS.risques.length+'','Risques',C.red]
+      ];
+      stats.forEach(function(s,i){
+        var sx=ml+i*(statW+3);
+        setC(C.bg2,'fill'); doc.roundedRect(sx,y,statW,18,3,3,'F');
+        setC(s[2],'draw'); doc.setLineWidth(0.15); doc.roundedRect(sx,y,statW,18,3,3,'S');
+        doc.setFont('helvetica','bold');doc.setFontSize(14);setC(s[2],'text');
+        doc.text(s[0],sx+statW/2,y+10,{align:'center'});
+        doc.setFont('helvetica','normal');doc.setFontSize(5.5);setC(C.muted,'text');
+        doc.text(s[1],sx+statW/2,y+15,{align:'center'});
+      });
+      y+=24;
+
+      // ══════════════════════════════════════════════
+      //  PAGE 4 — AI + NOTES + SIGNATURES
+      // ══════════════════════════════════════════════
+
+      // AI notes if available
+      if(PS.aiResult){
+        if(PS.aiResult.notes_securite&&PS.aiResult.notes_securite.length>0){
+          y=checkY(y,30);
+          y = sectionBar(y,'NOTES DE SECURITE — EAGLE SST M',C.gold);
+          setC(C.bg2,'fill');
+          var aiH=PS.aiResult.notes_securite.length*6+8;
+          doc.roundedRect(ml,y,cw,aiH,3,3,'F');
+          setC(C.gold,'draw');doc.setLineWidth(0.15);doc.roundedRect(ml,y,cw,aiH,3,3,'S');
+          var ay=y+6;
+          PS.aiResult.notes_securite.forEach(function(n){
+            ay=checkY(ay,6);
+            setC([243,156,18],'fill');doc.circle(ml+5,ay,1.2,'F');
+            doc.setFont('helvetica','normal');doc.setFontSize(8);setC(C.txt,'text');
+            var nl=doc.splitTextToSize(n,cw-14);
+            doc.text(nl,ml+9,ay+1);
+            ay+=nl.length*4+3;
+          });
+          y=ay+4;
+        }
+        if(PS.aiResult.conditions_arret&&PS.aiResult.conditions_arret.length>0){
+          y=checkY(y,24);
+          y = sectionBar(y,'CONDITIONS D\'ARRET',C.red);
+          PS.aiResult.conditions_arret.forEach(function(c){
+            y=checkY(y,7);
+            setC(C.bg3,'fill');doc.roundedRect(ml,y-2,cw,7,2,2,'F');
+            setC(C.red,'fill');doc.rect(ml,y-2,2,7,'F');
+            doc.setFont('helvetica','bold');doc.setFontSize(8);setC(C.red,'text');
+            doc.text('STOP — '+c,ml+6,y+2);
+            y+=9;
+          });
+          y+=4;
+        }
+      }
+
+      // Notes
+      if(PS.notes){
+        y=checkY(y,24);
+        y = sectionBar(y,'NOTES ET OBSERVATIONS',C.gold);
+        setC(C.bg2,'fill');
+        var noteLines=doc.splitTextToSize(PS.notes,cw-12);
+        var noteH=noteLines.length*4+10;
+        doc.roundedRect(ml,y,cw,noteH,3,3,'F');
+        doc.setFont('helvetica','normal');doc.setFontSize(8);setC(C.txt,'text');
+        doc.text(noteLines,ml+6,y+7);
+        y+=noteH+6;
+      }
+
+      // ── SIGNATURES ──
+      y=checkY(y,60);
+      y = sectionBar(y,'SIGNATURES',C.gold);
+
+      var sigW=(cw-8)/2;
+      var sigs=[
+        ['Responsable SST','Nom, date et signature'],
+        ['Chef d\'equipe','Nom, date et signature'],
+        ['Superviseur','Nom, date et signature'],
+        ['Direction','Nom, date et signature']
+      ];
+      for(var si=0;si<sigs.length;si+=2){
+        y=checkY(y,28);
+        for(var sj=0;sj<2&&(si+sj)<sigs.length;sj++){
+          var sx=ml+sj*(sigW+8);
+          setC(C.bg2,'fill');doc.roundedRect(sx,y,sigW,24,3,3,'F');
+          doc.setFont('helvetica','bold');doc.setFontSize(7);setC(C.gold,'text');
+          doc.text(sigs[si+sj][0],sx+4,y+6);
+          // Signature line
+          setC(C.line,'draw');doc.setLineWidth(0.3);doc.line(sx+4,y+16,sx+sigW-4,y+16);
+          doc.setFont('helvetica','normal');doc.setFontSize(5.5);setC(C.muted,'text');
+          doc.text(sigs[si+sj][1],sx+4,y+20.5);
+        }
+        y+=28;
+      }
+
+      // Watermark king logo on every content page — gold tinted circle
+      var pCount=doc.getNumberOfPages();
+      for(var wp=2;wp<=pCount;wp++){
+        doc.setPage(wp);
+        try{
+          if(typeof KING_LOGO_B64!=='undefined'){
+            // Faint gold ring around watermark
+            doc.setGState(new doc.GState({opacity:0.02}));
+            setC(C.gold,'draw');doc.setLineWidth(0.5);doc.circle(pw/2,ph/2,32,'S');
+            doc.setGState(new doc.GState({opacity:0.025}));
+            doc.addImage(KING_LOGO_B64,'JPEG',pw/2-30,ph/2-30,60,60);
+            doc.setGState(new doc.GState({opacity:1}));
+          }
+        }catch(e){}
+      }
+
+      // Save
+      var filename='PLAN-SAUVETAGE-'+(PS.nomEspace||PS.template).replace(/[^a-zA-Z0-9]/g,'-').substring(0,30)+'-'+new Date().toISOString().slice(0,10)+'.pdf';
+      doc.save(filename);
+      showToast('PDF genere : '+filename,'ok');
+    }catch(e){
+      console.error('[PDF]',e);
+      showToast('Erreur PDF : '+e.message,'err');
+    }
+  },100);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,2311 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="view-transition" content="same-origin">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>VOLO SST — Automation Center</title>
+
+<!-- Firebase CDN compat v9.23.0 -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════
+   VOLO AUTOMATION CENTER — Tactic Gold V7
+   ══════════════════════════════════════════ */
+:root {
+  --noir: #04040A;
+  --noir2: #0A0A12;
+  --noir3: #10101A;
+  --gold: #C9A84C;
+  --gold-dim: #8A7433;
+  --gold-bright: #E8C84A;
+  --blanc: #EBE6DF;
+  --blanc-dim: #9E9A94;
+  --rescue: #D4650E;
+  --green: #2ECC40;
+  --yellow: #F0AD4E;
+  --red: #E74C3C;
+  --blue: #3B82F6;
+  --card-bg: #0D0D15;
+  --card-border: #1A1A2A;
+  --radius: 12px;
+  --shadow: 0 4px 20px rgba(0,0,0,.5);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:vt-fade-out .2s ease-out}
+::view-transition-new(root){animation:vt-fade-in .3s ease-in}
+@keyframes vt-fade-out{from{opacity:1}to{opacity:0}}
+@keyframes vt-fade-in{from{opacity:0}to{opacity:1}}
+html, body {
+  background: var(--noir);
+  color: var(--blanc);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:var(--noir2); }
+::-webkit-scrollbar-thumb { background:var(--gold-dim); border-radius:3px; }
+
+/* ── Header ── */
+.header {
+  background: linear-gradient(135deg, var(--noir2) 0%, var(--noir) 100%);
+  border-bottom: 1px solid var(--gold-dim);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-left { display:flex; align-items:center; gap:14px; }
+.header-logo {
+  width: 42px; height: 42px;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--noir);
+}
+.header-logo svg { width:24px; height:24px; }
+.header-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.header-subtitle {
+  font-size: 11px;
+  color: var(--blanc-dim);
+  letter-spacing: 0.5px;
+}
+.header-right { display:flex; align-items:center; gap:12px; }
+.header-status {
+  display: flex; align-items: center; gap:6px;
+  font-size: 12px; font-family:'JetBrains Mono',monospace;
+  color: var(--blanc-dim);
+}
+.status-dot {
+  width:8px; height:8px; border-radius:50%;
+  display:inline-block;
+}
+.status-dot.green { background:var(--green); box-shadow:0 0 6px var(--green); }
+.status-dot.yellow { background:var(--yellow); box-shadow:0 0 6px var(--yellow); }
+.status-dot.red { background:var(--red); box-shadow:0 0 6px var(--red); }
+.status-dot.pulse { animation: pulse-dot 1.5s infinite; }
+@keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+
+.btn-back {
+  background: none;
+  border: 1px solid var(--gold-dim);
+  color: var(--gold);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-family:'Inter',sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all .2s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-back:hover { background:var(--gold); color:var(--noir); }
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--card-border);
+  background: var(--noir2);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.tab-btn {
+  flex: 1;
+  min-width: 140px;
+  padding: 14px 16px;
+  font-family:'Oswald',sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--blanc-dim);
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition: all .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.tab-btn:hover { color: var(--blanc); background: rgba(201,168,76,.05); }
+.tab-btn.active {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+  background: rgba(201,168,76,.08);
+}
+.tab-btn svg { width:16px; height:16px; flex-shrink:0; }
+.tab-badge {
+  background: var(--rescue);
+  color: #fff;
+  font-family:'JetBrains Mono',monospace;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* ── Content ── */
+.content { padding: 24px; max-width: 1400px; margin: 0 auto; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── Cards ── */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  transition: border-color .2s;
+}
+.card:hover { border-color: var(--gold-dim); }
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-family:'Oswald',sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card-title svg { width:20px; height:20px; }
+
+/* ── Grid ── */
+.grid-2 { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
+.grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+.grid-5 { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
+
+@media(max-width:1024px) {
+  .grid-4,.grid-5 { grid-template-columns:repeat(2,1fr); }
+  .grid-3 { grid-template-columns:repeat(2,1fr); }
+}
+@media(max-width:640px) {
+  .grid-2,.grid-3,.grid-4,.grid-5 { grid-template-columns:1fr; }
+  .content { padding:12px; }
+  .header { padding:12px 16px; }
+  .header-title { font-size:16px; }
+  .tabs { gap:0; }
+  .tab-btn { min-width:100px; font-size:11px; padding:10px 8px; }
+}
+
+/* ── Stat Cards ── */
+.stat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:3px;
+  background: var(--gold);
+}
+.stat-card.green::before { background:var(--green); }
+.stat-card.yellow::before { background:var(--yellow); }
+.stat-card.red::before { background:var(--red); }
+.stat-card.blue::before { background:var(--blue); }
+.stat-value {
+  font-family:'JetBrains Mono',monospace;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1.1;
+}
+.stat-card.green .stat-value { color:var(--green); }
+.stat-card.yellow .stat-value { color:var(--yellow); }
+.stat-card.red .stat-value { color:var(--red); }
+.stat-card.blue .stat-value { color:var(--blue); }
+.stat-label {
+  font-size: 11px;
+  color: var(--blanc-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 6px;
+}
+
+/* ── Tables ── */
+.table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th {
+  font-family:'Oswald',sans-serif;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: var(--noir2);
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--gold-dim);
+  white-space: nowrap;
+}
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--card-border);
+  color: var(--blanc);
+  font-family:'Inter',sans-serif;
+}
+td.mono {
+  font-family:'JetBrains Mono',monospace;
+  font-size: 12px;
+}
+tr:hover td { background: rgba(201,168,76,.04); }
+
+/* ── Buttons ── */
+.btn {
+  font-family:'Oswald',sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all .2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn svg { width:16px; height:16px; }
+.btn-gold { background:var(--gold); color:var(--noir); }
+.btn-gold:hover { background:var(--gold-bright); }
+.btn-gold:disabled { opacity:.4; cursor:not-allowed; }
+.btn-outline {
+  background:none;
+  border:1px solid var(--gold-dim);
+  color:var(--gold);
+}
+.btn-outline:hover { background:var(--gold); color:var(--noir); }
+.btn-danger { background:var(--red); color:#fff; }
+.btn-danger:hover { background:#c0392b; }
+.btn-green { background:var(--green); color:var(--noir); }
+.btn-green:hover { background:#27ae60; }
+.btn-sm { padding:6px 12px; font-size:11px; }
+
+/* ── Badges ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-family:'JetBrains Mono',monospace;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-green { background:rgba(46,204,64,.15); color:var(--green); }
+.badge-yellow { background:rgba(240,173,78,.15); color:var(--yellow); }
+.badge-red { background:rgba(231,76,60,.15); color:var(--red); }
+.badge-blue { background:rgba(59,130,246,.15); color:var(--blue); }
+.badge-gold { background:rgba(201,168,76,.15); color:var(--gold); }
+
+/* ── Alert Rules ── */
+.rule-card {
+  background: var(--noir2);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.rule-icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex; align-items:center; justify-content:center;
+  flex-shrink: 0;
+}
+.rule-icon.orange { background:rgba(212,101,14,.15); }
+.rule-icon.red { background:rgba(231,76,60,.15); }
+.rule-icon.yellow { background:rgba(240,173,78,.15); }
+.rule-icon.blue { background:rgba(59,130,246,.15); }
+.rule-icon svg { width:22px; height:22px; }
+.rule-body { flex:1; }
+.rule-name {
+  font-family:'Oswald',sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--blanc);
+  margin-bottom: 4px;
+}
+.rule-desc {
+  font-size: 12px;
+  color: var(--blanc-dim);
+}
+.rule-right { display:flex; align-items:center; gap:10px; }
+
+/* ── Toggle ── */
+.toggle {
+  width:44px; height:24px;
+  background:var(--card-border);
+  border-radius:12px;
+  position:relative;
+  cursor:pointer;
+  transition: background .2s;
+  flex-shrink:0;
+}
+.toggle.on { background:var(--gold); }
+.toggle::after {
+  content:'';
+  width:18px; height:18px;
+  background:#fff;
+  border-radius:50%;
+  position:absolute;
+  top:3px; left:3px;
+  transition: transform .2s;
+}
+.toggle.on::after { transform:translateX(20px); }
+
+/* ── Diff rows ── */
+.diff-added { border-left:3px solid var(--green); }
+.diff-removed { border-left:3px solid var(--red); }
+.diff-changed { border-left:3px solid var(--yellow); }
+
+/* ── Spinner ── */
+.spinner {
+  width:20px; height:20px;
+  border:2px solid var(--card-border);
+  border-top-color:var(--gold);
+  border-radius:50%;
+  animation: spin .8s linear infinite;
+  display:inline-block;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── Progress bar ── */
+.progress-bar {
+  height:6px;
+  background:var(--noir);
+  border-radius:3px;
+  overflow:hidden;
+  margin-top:8px;
+}
+.progress-fill {
+  height:100%;
+  border-radius:3px;
+  transition: width .5s ease;
+}
+.progress-fill.green { background:var(--green); }
+.progress-fill.yellow { background:var(--yellow); }
+.progress-fill.red { background:var(--red); }
+.progress-fill.gold { background:var(--gold); }
+
+/* ── Log entries ── */
+.log-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--card-border);
+  font-size: 13px;
+}
+.log-entry:last-child { border-bottom:none; }
+.log-time {
+  font-family:'JetBrains Mono',monospace;
+  font-size: 11px;
+  color: var(--blanc-dim);
+  white-space:nowrap;
+  min-width:80px;
+}
+.log-msg { flex:1; color:var(--blanc); }
+.log-status { flex-shrink:0; }
+
+/* ── Report cards ── */
+.report-card {
+  background: var(--noir2);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.report-card-header {
+  display:flex; align-items:center; gap:10px;
+}
+.report-card-icon {
+  width:40px; height:40px;
+  border-radius:8px;
+  background:rgba(201,168,76,.1);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.report-card-icon svg { width:20px; height:20px; }
+.report-card-title {
+  font-family:'Oswald',sans-serif;
+  font-size:14px;
+  font-weight:500;
+  color:var(--blanc);
+}
+.report-card-desc { font-size:12px; color:var(--blanc-dim); }
+.report-card-footer {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-top:auto;
+}
+.report-card-meta { font-size:11px; color:var(--blanc-dim); font-family:'JetBrains Mono',monospace; }
+
+/* ── Toast ── */
+.toast {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+  padding:12px 24px;
+  border-radius:10px;
+  font-family:'Inter',sans-serif;
+  font-size:13px;
+  font-weight:500;
+  z-index:9999;
+  opacity:0;
+  transition: opacity .3s;
+  pointer-events:none;
+  max-width:90vw;
+}
+.toast.show { opacity:1; }
+.toast.ok { background:var(--green); color:var(--noir); }
+.toast.err { background:var(--red); color:#fff; }
+.toast.info { background:var(--gold); color:var(--noir); }
+
+/* ── Empty state ── */
+.empty-state {
+  text-align:center;
+  padding:40px 20px;
+  color:var(--blanc-dim);
+}
+.empty-state svg { width:48px; height:48px; opacity:.3; margin-bottom:12px; }
+.empty-state p { font-size:14px; }
+
+/* ── Section title ── */
+.section-title {
+  font-family:'Oswald',sans-serif;
+  font-size:14px;
+  font-weight:500;
+  color:var(--gold);
+  text-transform:uppercase;
+  letter-spacing:1px;
+  margin:24px 0 12px;
+  display:flex; align-items:center; gap:8px;
+}
+.section-title:first-child { margin-top:0; }
+
+/* ── Alerts list ── */
+.alert-item {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 14px;
+  background:var(--noir2);
+  border-radius:8px;
+  margin-bottom:8px;
+  border-left:3px solid var(--yellow);
+  font-size:13px;
+}
+.alert-item.critical { border-left-color:var(--red); }
+.alert-item.ok { border-left-color:var(--green); }
+
+/* ── Refresh bar ── */
+.refresh-bar {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:8px 0;
+  margin-bottom:16px;
+  font-size:12px;
+  color:var(--blanc-dim);
+}
+.refresh-bar button { margin-left:auto; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HEADER ══════════════ -->
+<div class="header">
+  <div class="header-left">
+    <div class="header-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5">
+        <path d="M12 2L9 7l-5 1 3.5 4L6 17l6-3 6 3-1.5-5L20 8l-5-1-3-5z"/>
+      </svg>
+    </div>
+    <div>
+      <div class="header-title">Automation Center</div>
+      <div class="header-subtitle">VOLO SST — Golden Eagles</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="header-status">
+      <span class="status-dot" id="fbStatusDot"></span>
+      <span id="fbStatusText">Connexion...</span>
+    </div>
+    <a href="index.html" class="btn-back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M15 18l-6-6 6-6"/></svg>
+      Retour
+    </a>
+  </div>
+</div>
+
+<!-- ══════════════ TABS ══════════════ -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('sync')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4v5h5M20 20v-5h-5"/><path d="M20.49 9A9 9 0 005.64 5.64L4 4m16 16l-1.64-1.64A9 9 0 019 20.49"/></svg>
+    Sync Data
+    <span class="tab-badge" id="syncBadge" style="display:none">0</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('alerts')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    Alertes Auto
+    <span class="tab-badge" id="alertsBadge" style="display:none">0</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('reports')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    Rapports PDF
+  </button>
+  <button class="tab-btn" onclick="switchTab('webhooks')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+    Webhooks
+  </button>
+  <button class="tab-btn" onclick="switchTab('health')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    Firebase Health
+  </button>
+</div>
+
+<!-- ══════════════ CONTENT ══════════════ -->
+<div class="content">
+
+  <!-- ────────── TAB 1: SYNC DATA ────────── -->
+  <div class="tab-panel active" id="panel-sync">
+    <div class="grid-4" style="margin-bottom:20px">
+      <div class="stat-card">
+        <div class="stat-value" id="syncLocalItems">0</div>
+        <div class="stat-label">Items data.js</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-value" id="syncFsItems">--</div>
+        <div class="stat-label">Items Firestore</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="syncLocalPersonnel">0</div>
+        <div class="stat-label">Personnel data.js</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-value" id="syncFsPersonnel">--</div>
+        <div class="stat-label">Personnel Firestore</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M4 4v5h5M20 20v-5h-5"/><path d="M20.49 9A9 9 0 005.64 5.64L4 4m16 16l-1.64-1.64A9 9 0 019 20.49"/></svg>
+          Comparaison data.js vs Firestore
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline btn-sm" onclick="runComparison()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 019 20.49"/></svg>
+            Comparer
+          </button>
+          <button class="btn btn-gold btn-sm" id="btnSyncToFs" onclick="syncToFirestore()" disabled>
+            Sync vers Firestore
+          </button>
+        </div>
+      </div>
+      <div id="comparisonResults">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M4 4v5h5M20 20v-5h-5"/><path d="M20.49 9A9 9 0 005.64 5.64L4 4m16 16l-1.64-1.64A9 9 0 019 20.49"/></svg>
+          <p>Cliquer sur COMPARER pour analyser les differences</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          Journal de synchronisation
+        </div>
+      </div>
+      <div id="syncLog">
+        <div class="empty-state"><p>Aucune synchronisation effectuee</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────── TAB 2: ALERTS ────────── -->
+  <div class="tab-panel" id="panel-alerts">
+    <div class="section-title">Regles d'alertes configurables</div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
+      <!-- Rule 1: Inspection overdue -->
+      <div class="rule-card">
+        <div class="rule-icon orange">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#D4650E" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+        </div>
+        <div class="rule-body">
+          <div class="rule-name">Inspection equipement en retard</div>
+          <div class="rule-desc">Alerte quand un item n'a pas ete inspecte depuis X jours</div>
+        </div>
+        <div class="rule-right">
+          <select id="ruleInspDays" style="background:var(--noir);color:var(--blanc);border:1px solid var(--card-border);padding:6px 10px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:12px">
+            <option value="30">30 jours</option>
+            <option value="60" selected>60 jours</option>
+            <option value="90">90 jours</option>
+          </select>
+          <div class="toggle on" id="toggleInsp" onclick="toggleRule(this)"></div>
+        </div>
+      </div>
+
+      <!-- Rule 2: Certifications expiring -->
+      <div class="rule-card">
+        <div class="rule-icon red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#E74C3C" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="rule-body">
+          <div class="rule-name">Certifications expirant bientot</div>
+          <div class="rule-desc">Alerte quand une certification expire dans les 30 prochains jours</div>
+        </div>
+        <div class="rule-right">
+          <select id="ruleCertDays" style="background:var(--noir);color:var(--blanc);border:1px solid var(--card-border);padding:6px 10px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:12px">
+            <option value="15">15 jours</option>
+            <option value="30" selected>30 jours</option>
+            <option value="60">60 jours</option>
+          </select>
+          <div class="toggle on" id="toggleCert" onclick="toggleRule(this)"></div>
+        </div>
+      </div>
+
+      <!-- Rule 3: Items deployed too long -->
+      <div class="rule-card">
+        <div class="rule-icon yellow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#F0AD4E" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="rule-body">
+          <div class="rule-name">Items deployes trop longtemps</div>
+          <div class="rule-desc">Alerte quand un item est sorti depuis plus de X jours</div>
+        </div>
+        <div class="rule-right">
+          <select id="ruleDeployDays" style="background:var(--noir);color:var(--blanc);border:1px solid var(--card-border);padding:6px 10px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:12px">
+            <option value="3">3 jours</option>
+            <option value="7" selected>7 jours</option>
+            <option value="14">14 jours</option>
+          </select>
+          <div class="toggle on" id="toggleDeploy" onclick="toggleRule(this)"></div>
+        </div>
+      </div>
+
+      <!-- Rule 4: Personnel no pointage -->
+      <div class="rule-card">
+        <div class="rule-icon blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="rule-body">
+          <div class="rule-name">Personnel sans pointage recent</div>
+          <div class="rule-desc">Alerte quand un membre n'a pas de pointage depuis X jours</div>
+        </div>
+        <div class="rule-right">
+          <select id="rulePointDays" style="background:var(--noir);color:var(--blanc);border:1px solid var(--card-border);padding:6px 10px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:12px">
+            <option value="7">7 jours</option>
+            <option value="14" selected>14 jours</option>
+            <option value="30">30 jours</option>
+          </select>
+          <div class="toggle" id="togglePoint" onclick="toggleRule(this)"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Alertes actives
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="runAlertScan()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M1 4v6h6M23 20v-6h-6"/></svg>
+          Scanner
+        </button>
+      </div>
+      <div id="alertResults">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+          <p>Cliquer sur SCANNER pour detecter les alertes</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────── TAB 3: REPORTS ────────── -->
+  <div class="tab-panel" id="panel-reports">
+    <div class="grid-2" style="margin-bottom:24px">
+      <!-- Report 1: Weekly Inventory -->
+      <div class="report-card">
+        <div class="report-card-header">
+          <div class="report-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div>
+            <div class="report-card-title">Resume inventaire hebdomadaire</div>
+            <div class="report-card-desc">Items par statut, mouvements de la semaine, alertes</div>
+          </div>
+        </div>
+        <div class="report-card-footer">
+          <div class="report-card-meta" id="reportWeeklyMeta">Jamais genere</div>
+          <button class="btn btn-gold btn-sm" onclick="generateReport('weekly')">Generer PDF</button>
+        </div>
+      </div>
+
+      <!-- Report 2: Monthly Conformity -->
+      <div class="report-card">
+        <div class="report-card-header">
+          <div class="report-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div>
+            <div class="report-card-title">Rapport conformite mensuel</div>
+            <div class="report-card-desc">Score CNESST, non-conformites, plan d'action</div>
+          </div>
+        </div>
+        <div class="report-card-footer">
+          <div class="report-card-meta" id="reportMonthlyMeta">Jamais genere</div>
+          <button class="btn btn-gold btn-sm" onclick="generateReport('monthly')">Generer PDF</button>
+        </div>
+      </div>
+
+      <!-- Report 3: Certifications -->
+      <div class="report-card">
+        <div class="report-card-header">
+          <div class="report-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div>
+            <div class="report-card-title">Rapport expirations certifications</div>
+            <div class="report-card-desc">Matrice personnel x certifications, alertes, planning renouvellement</div>
+          </div>
+        </div>
+        <div class="report-card-footer">
+          <div class="report-card-meta" id="reportCertMeta">Jamais genere</div>
+          <button class="btn btn-gold btn-sm" onclick="generateReport('certs')">Generer PDF</button>
+        </div>
+      </div>
+
+      <!-- Report 4: Deployed Items -->
+      <div class="report-card">
+        <div class="report-card-header">
+          <div class="report-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+          </div>
+          <div>
+            <div class="report-card-title">Items deployes en cours</div>
+            <div class="report-card-desc">Liste complete des items sortis, duree, localisation</div>
+          </div>
+        </div>
+        <div class="report-card-footer">
+          <div class="report-card-meta" id="reportDeployMeta">Jamais genere</div>
+          <button class="btn btn-gold btn-sm" onclick="generateReport('deployed')">Generer PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Historique des rapports generes
+        </div>
+      </div>
+      <div id="reportHistory">
+        <div class="empty-state"><p>Aucun rapport genere</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────── TAB 4: WEBHOOKS ────────── -->
+  <div class="tab-panel" id="panel-webhooks">
+    <div class="grid-3" style="margin-bottom:20px">
+      <div class="stat-card green">
+        <div class="stat-value" id="whSuccess">0</div>
+        <div class="stat-label">Succes (24h)</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-value" id="whErrors">0</div>
+        <div class="stat-label">Erreurs (24h)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="whTotal">0</div>
+        <div class="stat-label">Total appels</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          Appels webhook recents
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="refreshWebhooks()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M1 4v6h6M23 20v-6h-6"/></svg>
+          Rafraichir
+        </button>
+      </div>
+      <div id="webhookLog">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Heure</th>
+                <th>Type</th>
+                <th>Payload</th>
+                <th>Statut</th>
+                <th>Duree</th>
+              </tr>
+            </thead>
+            <tbody id="webhookTableBody">
+              <tr><td colspan="5" style="text-align:center;color:var(--blanc-dim);padding:30px">Chargement des logs webhook...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          File d'attente hors-ligne
+        </div>
+      </div>
+      <div id="offlineQueue">
+        <div class="empty-state"><p>Aucun webhook en attente</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────── TAB 5: FIREBASE HEALTH ────────── -->
+  <div class="tab-panel" id="panel-health">
+    <div class="grid-5" style="margin-bottom:20px">
+      <div class="stat-card" id="healthAuth">
+        <div class="stat-value">--</div>
+        <div class="stat-label">Auth</div>
+      </div>
+      <div class="stat-card" id="healthFirestore">
+        <div class="stat-value">--</div>
+        <div class="stat-label">Firestore</div>
+      </div>
+      <div class="stat-card" id="healthRTDB">
+        <div class="stat-value">--</div>
+        <div class="stat-label">Realtime DB</div>
+      </div>
+      <div class="stat-card" id="healthStorage">
+        <div class="stat-value">--</div>
+        <div class="stat-label">Storage</div>
+      </div>
+      <div class="stat-card" id="healthFCM">
+        <div class="stat-value">--</div>
+        <div class="stat-label">FCM</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+            Collections Firestore
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="refreshHealth()">Rafraichir</button>
+        </div>
+        <div id="firestoreCollections">
+          <div style="text-align:center;padding:20px"><span class="spinner"></span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+            Quotas et utilisation
+          </div>
+        </div>
+        <div id="quotaInfo">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+                <span>Writes aujourd'hui</span>
+                <span class="mono" id="quotaWriteCount">0 / 20,000</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill green" id="quotaWriteBar" style="width:0%"></div>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+                <span>Reads aujourd'hui</span>
+                <span class="mono" id="quotaReadCount">0 / 50,000</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill gold" id="quotaReadBar" style="width:0%"></div>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+                <span>Circuit Breaker</span>
+                <span class="mono" id="quotaCircuit">FERME</span>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+                <span>Persistance offline</span>
+                <span class="mono" id="quotaPersist">--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="card-header">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          Diagnostic systeme
+        </div>
+      </div>
+      <div id="diagnosticLog" style="font-family:'JetBrains Mono',monospace;font-size:12px;max-height:300px;overflow-y:auto">
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════ TOAST ══════════════ -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════ SCRIPTS ══════════════ -->
+<script src="firebase-config.js"></script>
+<script src="firebase-service.js"></script>
+<script src="data.js"></script>
+<script src="logo.js"></script>
+
+<script>
+(function() {
+  'use strict';
+
+  // ══════════════════════════════════════
+  //  GLOBALS
+  // ══════════════════════════════════════
+  var ORG = window.VOLO_ORG || 'ORG_VOLO_PROD';
+  var _fs = function() { return window.firebaseFS; };
+  var _db = function() { return window.firebaseDB; };
+  var _enabled = function() { return !!(window.VOLO_FIREBASE && window.VOLO_FIREBASE.enabled && _fs()); };
+
+  var comparisonData = { items:[], personnel:[], caisses:[] };
+  var alertResults = [];
+  var reportHistoryData = [];
+  var webhookLogs = [];
+  var diagLines = [];
+  var _listeners = [];
+
+  // Load saved state
+  try {
+    var savedRules = JSON.parse(localStorage.getItem('volo_auto_rules') || '{}');
+    var savedReportHistory = JSON.parse(localStorage.getItem('volo_auto_report_history') || '[]');
+    reportHistoryData = savedReportHistory;
+  } catch(e) {}
+
+  // ══════════════════════════════════════
+  //  INIT
+  // ══════════════════════════════════════
+  window.addEventListener('DOMContentLoaded', function() {
+    updateFirebaseStatus();
+    updateLocalCounts();
+    loadSavedRules();
+    refreshWebhooks();
+    refreshHealth();
+    renderReportHistory();
+
+    // Live Firebase status check every 10s
+    setInterval(updateFirebaseStatus, 10000);
+
+    diag('Automation Center initialise');
+    diag('data.js: ' + (typeof ITEMS !== 'undefined' ? ITEMS.length : 0) + ' items, ' +
+         (typeof PERSONNEL !== 'undefined' ? PERSONNEL.length : 0) + ' personnel, ' +
+         (typeof CAISSES !== 'undefined' ? CAISSES.length : 0) + ' caisses');
+    diag('Firebase: ' + (_enabled() ? 'CONNECTE' : 'NON DISPONIBLE'));
+  });
+
+  // ══════════════════════════════════════
+  //  TAB SWITCHING
+  // ══════════════════════════════════════
+  window.switchTab = function(tab) {
+    var panels = document.querySelectorAll('.tab-panel');
+    var btns = document.querySelectorAll('.tab-btn');
+    panels.forEach(function(p) { p.classList.remove('active'); });
+    btns.forEach(function(b) { b.classList.remove('active'); });
+    var panel = document.getElementById('panel-' + tab);
+    if (panel) panel.classList.add('active');
+    // Find matching tab button
+    btns.forEach(function(b) {
+      if (b.getAttribute('onclick') && b.getAttribute('onclick').indexOf("'" + tab + "'") !== -1) {
+        b.classList.add('active');
+      }
+    });
+  };
+
+  // ══════════════════════════════════════
+  //  TOAST
+  // ══════════════════════════════════════
+  function showToast(msg, type) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + (type || 'info') + ' show';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function() { t.classList.remove('show'); }, 3000);
+  }
+
+  // ══════════════════════════════════════
+  //  DIAGNOSTICS
+  // ══════════════════════════════════════
+  function diag(msg) {
+    var now = new Date();
+    var ts = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') + ':' + String(now.getSeconds()).padStart(2,'0');
+    diagLines.push({ ts: ts, msg: msg });
+    if (diagLines.length > 200) diagLines.shift();
+    var el = document.getElementById('diagnosticLog');
+    if (el) {
+      el.innerHTML = diagLines.map(function(l) {
+        return '<div class="log-entry"><span class="log-time">' + l.ts + '</span><span class="log-msg">' + escHtml(l.msg) + '</span></div>';
+      }).reverse().join('');
+    }
+  }
+
+  function escHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  // ══════════════════════════════════════
+  //  FIREBASE STATUS
+  // ══════════════════════════════════════
+  function updateFirebaseStatus() {
+    var dot = document.getElementById('fbStatusDot');
+    var txt = document.getElementById('fbStatusText');
+    if (_enabled()) {
+      dot.className = 'status-dot green pulse';
+      txt.textContent = 'Firebase connecte';
+    } else {
+      dot.className = 'status-dot red';
+      txt.textContent = 'Firebase hors-ligne';
+    }
+  }
+
+  function updateLocalCounts() {
+    setEl('syncLocalItems', typeof ITEMS !== 'undefined' ? ITEMS.length : 0);
+    setEl('syncLocalPersonnel', typeof PERSONNEL !== 'undefined' ? PERSONNEL.length : 0);
+  }
+
+  function setEl(id, val) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = val;
+  }
+
+  // ══════════════════════════════════════
+  //  TAB 1: SYNC DATA.JS <-> FIRESTORE
+  // ══════════════════════════════════════
+  window.runComparison = function() {
+    if (!_enabled()) {
+      showToast('Firebase non connecte', 'err');
+      return;
+    }
+    var resultEl = document.getElementById('comparisonResults');
+    resultEl.innerHTML = '<div style="text-align:center;padding:30px"><span class="spinner"></span> Comparaison en cours...</div>';
+    diag('Demarrage comparaison data.js vs Firestore...');
+
+    var fs = _fs();
+    var promises = [];
+
+    // Fetch items from Firestore
+    promises.push(
+      fs.collection('orgs').doc(ORG).collection('items').get()
+        .then(function(snap) {
+          var fsItems = {};
+          snap.forEach(function(doc) { fsItems[doc.id] = doc.data(); });
+          return fsItems;
+        }).catch(function(e) { diag('Erreur lecture items Firestore: ' + e.message); return {}; })
+    );
+
+    // Fetch personnel from Firestore
+    promises.push(
+      fs.collection('orgs').doc(ORG).collection('personnel').get()
+        .then(function(snap) {
+          var fsPers = {};
+          snap.forEach(function(doc) { fsPers[doc.id] = doc.data(); });
+          return fsPers;
+        }).catch(function(e) { diag('Erreur lecture personnel Firestore: ' + e.message); return {}; })
+    );
+
+    // Fetch caisses from Firestore
+    promises.push(
+      fs.collection('orgs').doc(ORG).collection('caisses').get()
+        .then(function(snap) {
+          var fsCaisses = {};
+          snap.forEach(function(doc) { fsCaisses[doc.id] = doc.data(); });
+          return fsCaisses;
+        }).catch(function(e) { diag('Erreur lecture caisses Firestore: ' + e.message); return {}; })
+    );
+
+    Promise.all(promises).then(function(results) {
+      var fsItems = results[0];
+      var fsPers = results[1];
+      var fsCaisses = results[2];
+
+      setEl('syncFsItems', Object.keys(fsItems).length);
+      setEl('syncFsPersonnel', Object.keys(fsPers).length);
+
+      // Compare items
+      var localItems = typeof ITEMS !== 'undefined' ? ITEMS : [];
+      var localPersonnel = typeof PERSONNEL !== 'undefined' ? PERSONNEL : [];
+      var localCaisses = typeof CAISSES !== 'undefined' ? CAISSES : [];
+
+      var diffs = { added:[], removed:[], changed:[], total:0 };
+
+      // Items: local vs Firestore
+      var localMap = {};
+      localItems.forEach(function(item) { localMap[item.id] = item; });
+
+      // Items in local but not Firestore
+      localItems.forEach(function(item) {
+        if (!fsItems[item.id]) {
+          diffs.added.push({ type:'item', id:item.id, name:item.name, action:'A ajouter dans Firestore' });
+        } else {
+          // Compare key fields
+          var fsItem = fsItems[item.id];
+          var changes = [];
+          ['name','cat','etat','fab','serial'].forEach(function(field) {
+            if ((item[field] || '') !== (fsItem[field] || '')) {
+              changes.push(field);
+            }
+          });
+          if (changes.length > 0) {
+            diffs.changed.push({ type:'item', id:item.id, name:item.name, fields:changes });
+          }
+        }
+      });
+
+      // Items in Firestore but not local
+      Object.keys(fsItems).forEach(function(id) {
+        if (!localMap[id]) {
+          diffs.removed.push({ type:'item', id:id, name:fsItems[id].name || id, action:'Absent de data.js' });
+        }
+      });
+
+      // Personnel comparison
+      var localPersMap = {};
+      localPersonnel.forEach(function(p) { localPersMap[p.id] = p; });
+      localPersonnel.forEach(function(p) {
+        if (!fsPers[p.id]) {
+          diffs.added.push({ type:'personnel', id:p.id, name:p.name, action:'A ajouter dans Firestore' });
+        }
+      });
+      Object.keys(fsPers).forEach(function(id) {
+        if (!localPersMap[id]) {
+          diffs.removed.push({ type:'personnel', id:id, name:fsPers[id].name || id, action:'Absent de data.js' });
+        }
+      });
+
+      diffs.total = diffs.added.length + diffs.removed.length + diffs.changed.length;
+      comparisonData = diffs;
+
+      diag('Comparaison terminee: ' + diffs.added.length + ' a ajouter, ' +
+           diffs.removed.length + ' absents, ' + diffs.changed.length + ' modifies');
+
+      // Update badge
+      var badge = document.getElementById('syncBadge');
+      if (diffs.total > 0) {
+        badge.style.display = 'inline';
+        badge.textContent = diffs.total;
+      } else {
+        badge.style.display = 'none';
+      }
+
+      // Enable sync button if there are diffs
+      document.getElementById('btnSyncToFs').disabled = diffs.added.length === 0;
+
+      // Render results
+      renderComparison(diffs);
+    });
+  };
+
+  function renderComparison(diffs) {
+    var el = document.getElementById('comparisonResults');
+    if (diffs.total === 0) {
+      el.innerHTML = '<div class="empty-state" style="padding:20px"><p style="color:var(--green)">Tout est synchronise. Aucune difference detectee.</p></div>';
+      return;
+    }
+
+    var html = '<div class="table-wrap"><table><thead><tr><th>Statut</th><th>Type</th><th>ID</th><th>Nom</th><th>Detail</th></tr></thead><tbody>';
+
+    diffs.added.forEach(function(d) {
+      html += '<tr class="diff-added"><td><span class="badge badge-green">NOUVEAU</span></td>';
+      html += '<td>' + escHtml(d.type) + '</td>';
+      html += '<td class="mono">' + escHtml(d.id) + '</td>';
+      html += '<td>' + escHtml(d.name) + '</td>';
+      html += '<td>' + escHtml(d.action) + '</td></tr>';
+    });
+
+    diffs.changed.forEach(function(d) {
+      html += '<tr class="diff-changed"><td><span class="badge badge-yellow">MODIFIE</span></td>';
+      html += '<td>item</td>';
+      html += '<td class="mono">' + escHtml(d.id) + '</td>';
+      html += '<td>' + escHtml(d.name) + '</td>';
+      html += '<td>Champs: ' + d.fields.join(', ') + '</td></tr>';
+    });
+
+    diffs.removed.forEach(function(d) {
+      html += '<tr class="diff-removed"><td><span class="badge badge-red">ABSENT</span></td>';
+      html += '<td>' + escHtml(d.type) + '</td>';
+      html += '<td class="mono">' + escHtml(d.id) + '</td>';
+      html += '<td>' + escHtml(d.name) + '</td>';
+      html += '<td>' + escHtml(d.action) + '</td></tr>';
+    });
+
+    html += '</tbody></table></div>';
+    el.innerHTML = html;
+  }
+
+  window.syncToFirestore = function() {
+    if (!_enabled() || !comparisonData.added || comparisonData.added.length === 0) {
+      showToast('Rien a synchroniser', 'info');
+      return;
+    }
+
+    var btn = document.getElementById('btnSyncToFs');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Synchronisation...';
+    diag('Debut synchronisation vers Firestore...');
+
+    var fs = _fs();
+    var batch = fs.batch();
+    var count = 0;
+
+    comparisonData.added.forEach(function(d) {
+      if (d.type === 'item') {
+        var item = (typeof ITEMS !== 'undefined' ? ITEMS : []).find(function(i) { return i.id === d.id; });
+        if (item) {
+          var ref = fs.collection('orgs').doc(ORG).collection('items').doc(item.id);
+          batch.set(ref, Object.assign({}, item, { synced_at: new Date().toISOString() }));
+          count++;
+        }
+      } else if (d.type === 'personnel') {
+        var pers = (typeof PERSONNEL !== 'undefined' ? PERSONNEL : []).find(function(p) { return p.id === d.id; });
+        if (pers) {
+          var ref2 = fs.collection('orgs').doc(ORG).collection('personnel').doc(pers.id);
+          batch.set(ref2, Object.assign({}, pers, { synced_at: new Date().toISOString() }));
+          count++;
+        }
+      }
+      // Firestore batch limit is 500
+      if (count >= 490) return;
+    });
+
+    batch.commit().then(function() {
+      diag('Synchronisation terminee: ' + count + ' documents ecrits');
+      showToast(count + ' documents synchronises vers Firestore', 'ok');
+      btn.innerHTML = 'Sync vers Firestore';
+      btn.disabled = false;
+      logSync('SYNC_TO_FS', count + ' docs', 'ok');
+    }).catch(function(e) {
+      diag('Erreur synchronisation: ' + e.message);
+      showToast('Erreur: ' + e.message, 'err');
+      btn.innerHTML = 'Sync vers Firestore';
+      btn.disabled = false;
+      logSync('SYNC_TO_FS', e.message, 'err');
+    });
+  };
+
+  function logSync(type, detail, status) {
+    var logs = [];
+    try { logs = JSON.parse(localStorage.getItem('volo_auto_sync_log') || '[]'); } catch(e) {}
+    logs.unshift({ ts: new Date().toISOString(), type: type, detail: detail, status: status });
+    if (logs.length > 50) logs = logs.slice(0, 50);
+    localStorage.setItem('volo_auto_sync_log', JSON.stringify(logs));
+    renderSyncLog();
+  }
+
+  function renderSyncLog() {
+    var logs = [];
+    try { logs = JSON.parse(localStorage.getItem('volo_auto_sync_log') || '[]'); } catch(e) {}
+    var el = document.getElementById('syncLog');
+    if (logs.length === 0) {
+      el.innerHTML = '<div class="empty-state"><p>Aucune synchronisation effectuee</p></div>';
+      return;
+    }
+    el.innerHTML = logs.map(function(l) {
+      var d = new Date(l.ts);
+      var ts = d.toLocaleDateString('fr-CA') + ' ' + d.toLocaleTimeString('fr-CA');
+      var badge = l.status === 'ok' ? '<span class="badge badge-green">OK</span>' : '<span class="badge badge-red">ERREUR</span>';
+      return '<div class="log-entry"><span class="log-time">' + ts + '</span><span class="log-msg">' + escHtml(l.type) + ' — ' + escHtml(l.detail) + '</span><span class="log-status">' + badge + '</span></div>';
+    }).join('');
+  }
+
+  // ══════════════════════════════════════
+  //  TAB 2: AUTO ALERTS
+  // ══════════════════════════════════════
+  window.toggleRule = function(el) {
+    el.classList.toggle('on');
+    saveRules();
+  };
+
+  function saveRules() {
+    var rules = {
+      insp: { enabled: document.getElementById('toggleInsp').classList.contains('on'), days: parseInt(document.getElementById('ruleInspDays').value) },
+      cert: { enabled: document.getElementById('toggleCert').classList.contains('on'), days: parseInt(document.getElementById('ruleCertDays').value) },
+      deploy: { enabled: document.getElementById('toggleDeploy').classList.contains('on'), days: parseInt(document.getElementById('ruleDeployDays').value) },
+      point: { enabled: document.getElementById('togglePoint').classList.contains('on'), days: parseInt(document.getElementById('rulePointDays').value) }
+    };
+    localStorage.setItem('volo_auto_rules', JSON.stringify(rules));
+  }
+
+  function loadSavedRules() {
+    try {
+      var rules = JSON.parse(localStorage.getItem('volo_auto_rules') || '{}');
+      if (rules.insp) {
+        if (!rules.insp.enabled) document.getElementById('toggleInsp').classList.remove('on');
+        document.getElementById('ruleInspDays').value = rules.insp.days || 60;
+      }
+      if (rules.cert) {
+        if (!rules.cert.enabled) document.getElementById('toggleCert').classList.remove('on');
+        document.getElementById('ruleCertDays').value = rules.cert.days || 30;
+      }
+      if (rules.deploy) {
+        if (!rules.deploy.enabled) document.getElementById('toggleDeploy').classList.remove('on');
+        document.getElementById('ruleDeployDays').value = rules.deploy.days || 7;
+      }
+      if (rules.point) {
+        if (rules.point.enabled) document.getElementById('togglePoint').classList.add('on');
+        else document.getElementById('togglePoint').classList.remove('on');
+        document.getElementById('rulePointDays').value = rules.point.days || 14;
+      }
+    } catch(e) {}
+  }
+
+  window.runAlertScan = function() {
+    saveRules();
+    var rules = JSON.parse(localStorage.getItem('volo_auto_rules') || '{}');
+    alertResults = [];
+    var now = Date.now();
+    var DAY = 86400000;
+
+    diag('Scan des alertes en cours...');
+
+    // Rule 1: Inspection overdue
+    if (rules.insp && rules.insp.enabled && typeof ITEMS !== 'undefined') {
+      var inspDays = rules.insp.days || 60;
+      ITEMS.forEach(function(item) {
+        if (item.inspDate) {
+          var parts = item.inspDate.split('/');
+          if (parts.length === 3) {
+            var inspDate = new Date(parts[2] + '-' + parts[1] + '-' + parts[0]);
+            var diffDays = Math.floor((now - inspDate.getTime()) / DAY);
+            if (diffDays > inspDays) {
+              alertResults.push({
+                type: 'inspection',
+                severity: diffDays > inspDays * 2 ? 'critical' : 'warning',
+                title: 'Inspection en retard: ' + item.name,
+                detail: item.id + ' — derniere inspection il y a ' + diffDays + ' jours (' + item.inspDate + ')',
+                itemId: item.id
+              });
+            }
+          }
+        } else if (item.etat !== 'Detruit') {
+          // No inspection date at all
+          alertResults.push({
+            type: 'inspection',
+            severity: 'warning',
+            title: 'Aucune date d\'inspection: ' + item.name,
+            detail: item.id + ' — aucune inspection enregistree',
+            itemId: item.id
+          });
+        }
+      });
+    }
+
+    // Rule 2: Certifications expiring
+    if (rules.cert && rules.cert.enabled && typeof PERSONNEL !== 'undefined' && typeof CERTS_LIST !== 'undefined') {
+      var certDays = rules.cert.days || 30;
+      PERSONNEL.forEach(function(pers) {
+        try {
+          var certs = JSON.parse(localStorage.getItem('volo_certs_' + pers.volo) || '{}');
+          CERTS_LIST.forEach(function(certDef) {
+            var dateStr = certs[certDef.id];
+            if (dateStr) {
+              var certDate = new Date(dateStr);
+              var expiryDate = new Date(certDate);
+              expiryDate.setMonth(expiryDate.getMonth() + (certDef.dur || 12));
+              var daysUntilExpiry = Math.floor((expiryDate.getTime() - now) / DAY);
+              if (daysUntilExpiry < 0) {
+                alertResults.push({
+                  type: 'certification',
+                  severity: 'critical',
+                  title: certDef.name + ' expire: ' + pers.name,
+                  detail: pers.volo + ' — expire depuis ' + Math.abs(daysUntilExpiry) + ' jours'
+                });
+              } else if (daysUntilExpiry <= certDays) {
+                alertResults.push({
+                  type: 'certification',
+                  severity: 'warning',
+                  title: certDef.name + ' expire bientot: ' + pers.name,
+                  detail: pers.volo + ' — expire dans ' + daysUntilExpiry + ' jours'
+                });
+              }
+            }
+          });
+        } catch(e) {}
+      });
+    }
+
+    // Rule 3: Items deployed too long
+    if (rules.deploy && rules.deploy.enabled) {
+      var deployDays = rules.deploy.days || 7;
+      try {
+        var history = JSON.parse(localStorage.getItem('volo_history') || '[]');
+        var activePickOns = {};
+        history.forEach(function(h) {
+          if (h.mode === 'PICK-ON' && !h.returned) {
+            var hDate = new Date(h.ts || h.date);
+            var diffD = Math.floor((now - hDate.getTime()) / DAY);
+            if (diffD > deployDays) {
+              var items = [];
+              try { items = JSON.parse(h.items || '[]'); } catch(e2) { items = h.items_array || []; }
+              alertResults.push({
+                type: 'deploy',
+                severity: diffD > deployDays * 2 ? 'critical' : 'warning',
+                title: 'Deploiement > ' + deployDays + 'j: ' + (h.dest || 'Inconnu'),
+                detail: (Array.isArray(items) ? items.length : 0) + ' items sortis depuis ' + diffD + ' jours par ' + (h.name || h.user || '?')
+              });
+            }
+          }
+        });
+      } catch(e) {}
+    }
+
+    // Rule 4: Personnel no pointage
+    if (rules.point && rules.point.enabled && typeof PERSONNEL !== 'undefined') {
+      var pointDays = rules.point.days || 14;
+      try {
+        var pointage = JSON.parse(localStorage.getItem('volo_pointage_history') || '[]');
+        var latestPointage = {};
+        pointage.forEach(function(p) {
+          var ts = new Date(p.ts || p.date).getTime();
+          if (!latestPointage[p.volo] || ts > latestPointage[p.volo]) {
+            latestPointage[p.volo] = ts;
+          }
+        });
+        PERSONNEL.filter(function(p) { return p.type === 'SAUVETEUR'; }).forEach(function(pers) {
+          var last = latestPointage[pers.volo];
+          if (!last) {
+            alertResults.push({
+              type: 'pointage',
+              severity: 'warning',
+              title: 'Aucun pointage: ' + pers.name,
+              detail: pers.volo + ' — aucun pointage enregistre'
+            });
+          } else {
+            var diffP = Math.floor((now - last) / DAY);
+            if (diffP > pointDays) {
+              alertResults.push({
+                type: 'pointage',
+                severity: 'warning',
+                title: 'Pointage ancien: ' + pers.name,
+                detail: pers.volo + ' — dernier pointage il y a ' + diffP + ' jours'
+              });
+            }
+          }
+        });
+      } catch(e) {}
+    }
+
+    // Sort by severity
+    alertResults.sort(function(a, b) {
+      var sev = { critical:0, warning:1 };
+      return (sev[a.severity] || 2) - (sev[b.severity] || 2);
+    });
+
+    diag('Scan termine: ' + alertResults.length + ' alertes detectees');
+
+    // Update badge
+    var badge = document.getElementById('alertsBadge');
+    if (alertResults.length > 0) {
+      badge.style.display = 'inline';
+      badge.textContent = alertResults.length;
+    } else {
+      badge.style.display = 'none';
+    }
+
+    renderAlerts();
+  };
+
+  function renderAlerts() {
+    var el = document.getElementById('alertResults');
+    if (alertResults.length === 0) {
+      el.innerHTML = '<div class="empty-state" style="padding:20px"><p style="color:var(--green)">Aucune alerte. Tout est conforme.</p></div>';
+      return;
+    }
+
+    // Group by type
+    var groups = {};
+    alertResults.forEach(function(a) {
+      if (!groups[a.type]) groups[a.type] = [];
+      groups[a.type].push(a);
+    });
+
+    var typeLabels = {
+      inspection: 'Inspections en retard',
+      certification: 'Certifications',
+      deploy: 'Deploiements prolonges',
+      pointage: 'Pointage manquant'
+    };
+
+    var html = '';
+    Object.keys(groups).forEach(function(type) {
+      var items = groups[type];
+      html += '<div class="section-title">' + (typeLabels[type] || type) + ' <span class="badge badge-' + (items.some(function(i){return i.severity==='critical';}) ? 'red' : 'yellow') + '">' + items.length + '</span></div>';
+      items.forEach(function(a) {
+        html += '<div class="alert-item ' + a.severity + '">';
+        html += '<div style="flex:1"><strong>' + escHtml(a.title) + '</strong><br><span style="font-size:11px;color:var(--blanc-dim)">' + escHtml(a.detail) + '</span></div>';
+        html += '<span class="badge badge-' + (a.severity === 'critical' ? 'red' : 'yellow') + '">' + (a.severity === 'critical' ? 'CRITIQUE' : 'ATTENTION') + '</span>';
+        html += '</div>';
+      });
+    });
+
+    el.innerHTML = html;
+  }
+
+  // ══════════════════════════════════════
+  //  TAB 3: AUTO PDF REPORTS
+  // ══════════════════════════════════════
+  window.generateReport = function(type) {
+    diag('Generation rapport PDF: ' + type);
+    showToast('Generation du rapport ' + type + '...', 'info');
+
+    try {
+      var jsPDF = window.jspdf.jsPDF;
+      var doc = new jsPDF('p', 'mm', 'a4');
+      var pageW = doc.internal.pageSize.getWidth();
+      var pageH = doc.internal.pageSize.getHeight();
+      var margin = 15;
+      var y = margin;
+
+      // Helper
+      function addPage() {
+        doc.addPage();
+        y = margin;
+        // Footer on each page
+        doc.setFontSize(8);
+        doc.setTextColor(100);
+        doc.text('VOLO CONSTRUCTION SST — Golden Eagles — Confidentiel', margin, pageH - 8);
+        doc.text('Page ' + doc.getNumberOfPages(), pageW - margin, pageH - 8, { align:'right' });
+      }
+
+      function checkPage(needed) {
+        if (y + needed > pageH - 20) addPage();
+      }
+
+      // Cover page
+      doc.setFillColor(4, 4, 10);
+      doc.rect(0, 0, pageW, pageH, 'F');
+
+      // Gold header bar
+      doc.setFillColor(201, 168, 76);
+      doc.rect(0, 0, pageW, 3, 'F');
+
+      // Logo placeholder
+      try {
+        if (typeof VOLO_LOGO_B64 !== 'undefined' && VOLO_LOGO_B64) {
+          doc.addImage(VOLO_LOGO_B64, 'PNG', pageW/2 - 20, 30, 40, 40);
+        }
+      } catch(e) {}
+
+      doc.setTextColor(201, 168, 76);
+      doc.setFontSize(24);
+      doc.text('VOLO CONSTRUCTION SST', pageW/2, 85, { align:'center' });
+
+      doc.setFontSize(14);
+      doc.setTextColor(235, 230, 223);
+      var reportTitles = {
+        weekly: 'Resume Inventaire Hebdomadaire',
+        monthly: 'Rapport Conformite Mensuel',
+        certs: 'Rapport Expirations Certifications',
+        deployed: 'Items Deployes en Cours'
+      };
+      doc.text(reportTitles[type] || 'Rapport', pageW/2, 95, { align:'center' });
+
+      doc.setFontSize(10);
+      doc.setTextColor(158, 154, 148);
+      doc.text('Genere le ' + new Date().toLocaleDateString('fr-CA') + ' a ' + new Date().toLocaleTimeString('fr-CA'), pageW/2, 105, { align:'center' });
+      doc.text('Golden Eagles — Estrie/Sherbrooke', pageW/2, 112, { align:'center' });
+
+      // Gold bottom bar on cover
+      doc.setFillColor(201, 168, 76);
+      doc.rect(0, pageH - 3, pageW, 3, 'F');
+
+      // Content pages
+      addPage();
+
+      if (type === 'weekly') {
+        generateWeeklyContent(doc, margin, pageW, pageH);
+      } else if (type === 'monthly') {
+        generateMonthlyContent(doc, margin, pageW, pageH);
+      } else if (type === 'certs') {
+        generateCertsContent(doc, margin, pageW, pageH);
+      } else if (type === 'deployed') {
+        generateDeployedContent(doc, margin, pageW, pageH);
+      }
+
+      // Save
+      var filename = 'VOLO_' + type.toUpperCase() + '_' + new Date().toISOString().slice(0,10) + '.pdf';
+      doc.save(filename);
+      diag('Rapport PDF genere: ' + filename);
+      showToast('Rapport genere: ' + filename, 'ok');
+
+      // Save to history
+      reportHistoryData.unshift({
+        type: type,
+        title: reportTitles[type],
+        filename: filename,
+        date: new Date().toISOString()
+      });
+      if (reportHistoryData.length > 30) reportHistoryData = reportHistoryData.slice(0, 30);
+      localStorage.setItem('volo_auto_report_history', JSON.stringify(reportHistoryData));
+
+      // Update meta
+      var metaEl = document.getElementById('report' + type.charAt(0).toUpperCase() + type.slice(1) + 'Meta');
+      if (metaEl) metaEl.textContent = 'Dernier: ' + new Date().toLocaleDateString('fr-CA');
+
+      renderReportHistory();
+
+    } catch(e) {
+      diag('Erreur generation PDF: ' + e.message);
+      showToast('Erreur PDF: ' + e.message, 'err');
+    }
+  };
+
+  function generateWeeklyContent(doc, margin, pageW, pageH) {
+    var items = typeof ITEMS !== 'undefined' ? ITEMS : [];
+    var y = margin;
+
+    doc.setTextColor(201, 168, 76);
+    doc.setFontSize(16);
+    doc.text('Resume Inventaire Hebdomadaire', margin, y);
+    y += 10;
+
+    // Stats
+    var stats = { bon:0, inspection:0, maintenance:0, sorti:0 };
+    items.forEach(function(i) {
+      var e = (i.etat || '').toLowerCase();
+      if (e === 'bon' || e === 'a surveiller') stats.bon++;
+      else if (e === 'inspection' || e === 'a inspecter') stats.inspection++;
+      else if (e === 'maintenance') stats.maintenance++;
+      else if (e === 'sorti' || e === 'deploye') stats.sorti++;
+      else stats.bon++;
+    });
+
+    doc.setFontSize(10);
+    doc.setTextColor(235, 230, 223);
+    doc.text('Total items: ' + items.length, margin, y); y += 6;
+    doc.text('Disponibles: ' + stats.bon, margin, y); y += 6;
+    doc.text('En inspection: ' + stats.inspection, margin, y); y += 6;
+    doc.text('En maintenance: ' + stats.maintenance, margin, y); y += 6;
+    doc.text('Deployes: ' + stats.sorti, margin, y); y += 12;
+
+    // Table by category
+    var catMap = {};
+    items.forEach(function(i) {
+      var cat = i.cat || 'Autre';
+      if (!catMap[cat]) catMap[cat] = { total:0, bon:0, insp:0, maint:0 };
+      catMap[cat].total++;
+      var e = (i.etat || '').toLowerCase();
+      if (e === 'bon' || e === 'a surveiller') catMap[cat].bon++;
+      else if (e === 'inspection' || e === 'a inspecter') catMap[cat].insp++;
+      else if (e === 'maintenance') catMap[cat].maint++;
+      else catMap[cat].bon++;
+    });
+
+    var tableData = Object.keys(catMap).sort().map(function(cat) {
+      var c = catMap[cat];
+      return [cat, String(c.total), String(c.bon), String(c.insp), String(c.maint)];
+    });
+
+    doc.autoTable({
+      startY: y,
+      head: [['Categorie', 'Total', 'Disponible', 'Inspection', 'Maintenance']],
+      body: tableData,
+      theme: 'grid',
+      styles: { fontSize:8, textColor:[235,230,223], fillColor:[10,10,18], lineColor:[26,26,42], lineWidth:0.2 },
+      headStyles: { fillColor:[201,168,76], textColor:[4,4,10], fontStyle:'bold' },
+      alternateRowStyles: { fillColor:[13,13,21] },
+      margin: { left:margin, right:margin }
+    });
+  }
+
+  function generateMonthlyContent(doc, margin, pageW, pageH) {
+    var items = typeof ITEMS !== 'undefined' ? ITEMS : [];
+    var personnel = typeof PERSONNEL !== 'undefined' ? PERSONNEL : [];
+    var y = margin;
+
+    doc.setTextColor(201, 168, 76);
+    doc.setFontSize(16);
+    doc.text('Rapport Conformite Mensuel', margin, y);
+    y += 10;
+
+    doc.setFontSize(10);
+    doc.setTextColor(235, 230, 223);
+    doc.text('Periode: ' + new Date().toLocaleDateString('fr-CA', {month:'long', year:'numeric'}), margin, y);
+    y += 8;
+
+    // Conformity items
+    var confItems = [
+      'Registre des equipements a jour',
+      'Inspections periodiques effectuees',
+      'Certifications du personnel valides',
+      'Fiches de donnees de securite disponibles',
+      'Equipements de protection individuelle conformes',
+      'Programme de prevention a jour',
+      'Formation SIMDUT completee',
+      'Premiers soins — trousse inspectee',
+      'Signalisation de securite en place',
+      'Registre d\'accidents a jour',
+      'Plan d\'evacuation affiche',
+      'Comite SST actif',
+      'Politique SST communiquee',
+      'Equipements de sauvetage inspectes'
+    ];
+
+    var confData = confItems.map(function(item, i) {
+      return [String(i+1), item, 'A verifier'];
+    });
+
+    doc.autoTable({
+      startY: y,
+      head: [['#', 'Element de conformite', 'Statut']],
+      body: confData,
+      theme: 'grid',
+      styles: { fontSize:8, textColor:[235,230,223], fillColor:[10,10,18], lineColor:[26,26,42], lineWidth:0.2 },
+      headStyles: { fillColor:[201,168,76], textColor:[4,4,10], fontStyle:'bold' },
+      alternateRowStyles: { fillColor:[13,13,21] },
+      margin: { left:margin, right:margin },
+      columnStyles: { 0:{cellWidth:10}, 2:{cellWidth:25} }
+    });
+
+    y = doc.lastAutoTable.finalY + 10;
+
+    doc.setTextColor(201, 168, 76);
+    doc.setFontSize(12);
+    doc.text('Statistiques', margin, y);
+    y += 8;
+
+    doc.setFontSize(10);
+    doc.setTextColor(235, 230, 223);
+    doc.text('Equipements totaux: ' + items.length, margin, y); y += 6;
+    doc.text('Personnel total: ' + personnel.length, margin, y); y += 6;
+    doc.text('Sauveteurs: ' + personnel.filter(function(p){return p.type==='SAUVETEUR';}).length, margin, y); y += 6;
+    doc.text('Surveillants: ' + personnel.filter(function(p){return p.type==='SURVEILLANT';}).length, margin, y); y += 6;
+    doc.text('Regions: ' + new Set(personnel.map(function(p){return p.region;})).size, margin, y);
+  }
+
+  function generateCertsContent(doc, margin, pageW, pageH) {
+    var personnel = typeof PERSONNEL !== 'undefined' ? PERSONNEL : [];
+    var certsList = typeof CERTS_LIST !== 'undefined' ? CERTS_LIST : [];
+    var sauveteurs = personnel.filter(function(p) { return p.type === 'SAUVETEUR'; });
+    var y = margin;
+
+    doc.setTextColor(201, 168, 76);
+    doc.setFontSize(16);
+    doc.text('Rapport Expirations Certifications', margin, y);
+    y += 10;
+
+    var now = Date.now();
+    var DAY = 86400000;
+    var tableData = [];
+    var expiredCount = 0;
+    var warningCount = 0;
+
+    sauveteurs.forEach(function(pers) {
+      try {
+        var certs = JSON.parse(localStorage.getItem('volo_certs_' + pers.volo) || '{}');
+        certsList.forEach(function(certDef) {
+          var dateStr = certs[certDef.id];
+          if (dateStr) {
+            var certDate = new Date(dateStr);
+            var expiryDate = new Date(certDate);
+            expiryDate.setMonth(expiryDate.getMonth() + (certDef.dur || 12));
+            var daysUntil = Math.floor((expiryDate.getTime() - now) / DAY);
+            var status = daysUntil < 0 ? 'EXPIRE' : daysUntil <= 30 ? 'ATTENTION' : 'OK';
+            if (status === 'EXPIRE') expiredCount++;
+            if (status === 'ATTENTION') warningCount++;
+            if (daysUntil <= 30) {
+              tableData.push([
+                pers.name, pers.volo, certDef.name,
+                expiryDate.toLocaleDateString('fr-CA'),
+                daysUntil < 0 ? 'Expire depuis ' + Math.abs(daysUntil) + 'j' : 'Dans ' + daysUntil + 'j',
+                status
+              ]);
+            }
+          }
+        });
+      } catch(e) {}
+    });
+
+    doc.setFontSize(10);
+    doc.setTextColor(235, 230, 223);
+    doc.text('Certifications expirees: ' + expiredCount, margin, y); y += 6;
+    doc.text('Certifications a renouveler (30j): ' + warningCount, margin, y); y += 10;
+
+    if (tableData.length > 0) {
+      doc.autoTable({
+        startY: y,
+        head: [['Nom', 'VOLO', 'Certification', 'Expiration', 'Delai', 'Statut']],
+        body: tableData,
+        theme: 'grid',
+        styles: { fontSize:7, textColor:[235,230,223], fillColor:[10,10,18], lineColor:[26,26,42], lineWidth:0.2 },
+        headStyles: { fillColor:[201,168,76], textColor:[4,4,10], fontStyle:'bold' },
+        alternateRowStyles: { fillColor:[13,13,21] },
+        margin: { left:margin, right:margin },
+        didParseCell: function(data) {
+          if (data.column.index === 5 && data.section === 'body') {
+            if (data.cell.raw === 'EXPIRE') {
+              data.cell.styles.textColor = [231, 76, 60];
+              data.cell.styles.fontStyle = 'bold';
+            } else if (data.cell.raw === 'ATTENTION') {
+              data.cell.styles.textColor = [240, 173, 78];
+            }
+          }
+        }
+      });
+    } else {
+      doc.text('Aucune certification proche de l\'expiration.', margin, y);
+    }
+  }
+
+  function generateDeployedContent(doc, margin, pageW, pageH) {
+    var y = margin;
+
+    doc.setTextColor(201, 168, 76);
+    doc.setFontSize(16);
+    doc.text('Items Deployes en Cours', margin, y);
+    y += 10;
+
+    var history = [];
+    try { history = JSON.parse(localStorage.getItem('volo_history') || '[]'); } catch(e) {}
+
+    var active = history.filter(function(h) { return h.mode === 'PICK-ON' && !h.returned; });
+    var now = Date.now();
+    var DAY = 86400000;
+
+    doc.setFontSize(10);
+    doc.setTextColor(235, 230, 223);
+    doc.text('Deploiements actifs: ' + active.length, margin, y);
+    y += 10;
+
+    if (active.length > 0) {
+      var tableData = active.map(function(h) {
+        var d = new Date(h.ts || h.date);
+        var days = Math.floor((now - d.getTime()) / DAY);
+        var itemCount = 0;
+        try { itemCount = JSON.parse(h.items || '[]').length; } catch(e2) { itemCount = (h.items_array || []).length; }
+        return [
+          d.toLocaleDateString('fr-CA'),
+          h.name || h.user || '?',
+          h.dest || 'Inconnu',
+          String(itemCount),
+          String(days) + 'j',
+          days > 7 ? 'PROLONGE' : 'OK'
+        ];
+      });
+
+      doc.autoTable({
+        startY: y,
+        head: [['Date', 'Operateur', 'Destination', 'Items', 'Duree', 'Statut']],
+        body: tableData,
+        theme: 'grid',
+        styles: { fontSize:8, textColor:[235,230,223], fillColor:[10,10,18], lineColor:[26,26,42], lineWidth:0.2 },
+        headStyles: { fillColor:[201,168,76], textColor:[4,4,10], fontStyle:'bold' },
+        alternateRowStyles: { fillColor:[13,13,21] },
+        margin: { left:margin, right:margin },
+        didParseCell: function(data) {
+          if (data.column.index === 5 && data.section === 'body') {
+            if (data.cell.raw === 'PROLONGE') {
+              data.cell.styles.textColor = [231, 76, 60];
+              data.cell.styles.fontStyle = 'bold';
+            }
+          }
+        }
+      });
+    } else {
+      doc.text('Aucun deploiement actif.', margin, y);
+    }
+  }
+
+  function renderReportHistory() {
+    var el = document.getElementById('reportHistory');
+    if (!reportHistoryData || reportHistoryData.length === 0) {
+      el.innerHTML = '<div class="empty-state"><p>Aucun rapport genere</p></div>';
+      return;
+    }
+
+    var typeLabels = {
+      weekly: 'Hebdomadaire',
+      monthly: 'Mensuel',
+      certs: 'Certifications',
+      deployed: 'Items deployes'
+    };
+
+    var html = '<div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Fichier</th></tr></thead><tbody>';
+    reportHistoryData.forEach(function(r) {
+      var d = new Date(r.date);
+      html += '<tr>';
+      html += '<td class="mono">' + d.toLocaleDateString('fr-CA') + ' ' + d.toLocaleTimeString('fr-CA') + '</td>';
+      html += '<td><span class="badge badge-gold">' + (typeLabels[r.type] || r.type) + '</span></td>';
+      html += '<td class="mono">' + escHtml(r.filename) + '</td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+    el.innerHTML = html;
+
+    // Update meta dates
+    ['weekly','monthly','certs','deployed'].forEach(function(t) {
+      var last = reportHistoryData.find(function(r) { return r.type === t; });
+      var metaKey = 'report' + t.charAt(0).toUpperCase() + t.slice(1) + 'Meta';
+      var metaEl = document.getElementById(metaKey);
+      if (metaEl && last) {
+        metaEl.textContent = 'Dernier: ' + new Date(last.date).toLocaleDateString('fr-CA');
+      }
+    });
+  }
+
+  // ══════════════════════════════════════
+  //  TAB 4: WEBHOOK MONITOR
+  // ══════════════════════════════════════
+  window.refreshWebhooks = function() {
+    // Read from localStorage webhook log
+    webhookLogs = [];
+    try {
+      var stored = JSON.parse(localStorage.getItem('volo_webhook_log') || '[]');
+      webhookLogs = stored;
+    } catch(e) {}
+
+    // Also check error monitor
+    try {
+      var errors = JSON.parse(localStorage.getItem('volo_error_log') || '[]');
+      errors.forEach(function(err) {
+        if (err.type === 'webhook' || (err.msg && err.msg.indexOf('webhook') !== -1)) {
+          webhookLogs.push({
+            ts: err.ts || err.date,
+            type: 'ERROR',
+            payload: err.msg || 'Erreur webhook',
+            status: 'error',
+            duration: '--'
+          });
+        }
+      });
+    } catch(e) {}
+
+    // Also scan history for webhook calls
+    try {
+      var hist = JSON.parse(localStorage.getItem('volo_history') || '[]');
+      hist.slice(-50).forEach(function(h) {
+        webhookLogs.push({
+          ts: h.ts || h.date,
+          type: h.mode || h.type || 'TRANSACTION',
+          payload: (h.name || h.user || '?') + ' — ' + (h.dest || h.lieu || ''),
+          status: h.webhookOk !== false ? 'ok' : 'error',
+          duration: h.webhookMs ? h.webhookMs + 'ms' : '--'
+        });
+      });
+    } catch(e) {}
+
+    // Sort by date desc
+    webhookLogs.sort(function(a, b) {
+      return new Date(b.ts || 0) - new Date(a.ts || 0);
+    });
+
+    // Stats 24h
+    var now = Date.now();
+    var DAY = 86400000;
+    var success24 = 0, errors24 = 0;
+    webhookLogs.forEach(function(w) {
+      var wTime = new Date(w.ts || 0).getTime();
+      if (now - wTime < DAY) {
+        if (w.status === 'ok') success24++;
+        else if (w.status === 'error') errors24++;
+      }
+    });
+
+    setEl('whSuccess', success24);
+    setEl('whErrors', errors24);
+    setEl('whTotal', webhookLogs.length);
+
+    renderWebhookTable();
+
+    // Offline queue
+    renderOfflineQueue();
+  };
+
+  function renderWebhookTable() {
+    var tbody = document.getElementById('webhookTableBody');
+    if (webhookLogs.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--blanc-dim);padding:30px">Aucun log webhook disponible</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = webhookLogs.slice(0, 50).map(function(w) {
+      var d = new Date(w.ts || 0);
+      var timeStr = d.toLocaleDateString('fr-CA') + ' ' + d.toLocaleTimeString('fr-CA');
+      var statusBadge = w.status === 'ok'
+        ? '<span class="badge badge-green">OK</span>'
+        : '<span class="badge badge-red">ERREUR</span>';
+
+      return '<tr>' +
+        '<td class="mono">' + timeStr + '</td>' +
+        '<td><span class="badge badge-gold">' + escHtml(w.type || '--') + '</span></td>' +
+        '<td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escHtml(w.payload || '--') + '</td>' +
+        '<td>' + statusBadge + '</td>' +
+        '<td class="mono">' + escHtml(w.duration || '--') + '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function renderOfflineQueue() {
+    var el = document.getElementById('offlineQueue');
+    var queue = [];
+    try { queue = JSON.parse(localStorage.getItem('volo_fb_queue') || '[]'); } catch(e) {}
+
+    if (queue.length === 0) {
+      el.innerHTML = '<div class="empty-state"><p>Aucun webhook en attente</p></div>';
+      return;
+    }
+
+    el.innerHTML = '<div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">' +
+      '<span class="badge badge-yellow">' + queue.length + ' en attente</span>' +
+      '<button class="btn btn-outline btn-sm" onclick="flushQueue()">Envoyer maintenant</button>' +
+      '</div>' +
+      queue.slice(0, 20).map(function(q) {
+        return '<div class="log-entry"><span class="log-time">' + (q.ts || '--') + '</span><span class="log-msg">' + escHtml(q.type || 'webhook') + '</span></div>';
+      }).join('');
+  }
+
+  window.flushQueue = function() {
+    try {
+      var queue = JSON.parse(localStorage.getItem('volo_fb_queue') || '[]');
+      if (queue.length === 0) { showToast('Queue vide', 'info'); return; }
+      // Attempt to send via VoloData if available
+      if (typeof VoloData !== 'undefined' && VoloData.flushQueue) {
+        VoloData.flushQueue();
+        showToast('Queue videe', 'ok');
+      } else {
+        showToast('VoloData non disponible', 'err');
+      }
+    } catch(e) {
+      showToast('Erreur: ' + e.message, 'err');
+    }
+  };
+
+  // ══════════════════════════════════════
+  //  TAB 5: FIREBASE HEALTH
+  // ══════════════════════════════════════
+  window.refreshHealth = function() {
+    diag('Rafraichissement Firebase Health...');
+
+    // Auth status
+    var authCard = document.getElementById('healthAuth');
+    if (window.firebaseAuth) {
+      var user = window.firebaseAuth.currentUser;
+      authCard.querySelector('.stat-value').textContent = user ? 'OK' : 'Anon';
+      authCard.className = 'stat-card ' + (user ? 'green' : 'yellow');
+    } else {
+      authCard.querySelector('.stat-value').textContent = 'OFF';
+      authCard.className = 'stat-card red';
+    }
+
+    // Firestore
+    var fsCard = document.getElementById('healthFirestore');
+    if (_fs()) {
+      fsCard.querySelector('.stat-value').textContent = 'OK';
+      fsCard.className = 'stat-card green';
+    } else {
+      fsCard.querySelector('.stat-value').textContent = 'OFF';
+      fsCard.className = 'stat-card red';
+    }
+
+    // RTDB
+    var rtdbCard = document.getElementById('healthRTDB');
+    if (_db()) {
+      rtdbCard.querySelector('.stat-value').textContent = 'OK';
+      rtdbCard.className = 'stat-card green';
+    } else {
+      rtdbCard.querySelector('.stat-value').textContent = 'OFF';
+      rtdbCard.className = 'stat-card red';
+    }
+
+    // Storage
+    var storCard = document.getElementById('healthStorage');
+    if (window.firebaseStorage) {
+      storCard.querySelector('.stat-value').textContent = 'OK';
+      storCard.className = 'stat-card green';
+    } else {
+      storCard.querySelector('.stat-value').textContent = 'OFF';
+      storCard.className = 'stat-card red';
+    }
+
+    // FCM
+    var fcmCard = document.getElementById('healthFCM');
+    if (window.firebaseMessaging) {
+      fcmCard.querySelector('.stat-value').textContent = 'OK';
+      fcmCard.className = 'stat-card green';
+    } else {
+      fcmCard.querySelector('.stat-value').textContent = 'OFF';
+      fcmCard.className = 'stat-card yellow';
+    }
+
+    // Firestore collections
+    refreshCollections();
+
+    // Quota info
+    refreshQuotas();
+  };
+
+  function refreshCollections() {
+    var el = document.getElementById('firestoreCollections');
+    if (!_enabled()) {
+      el.innerHTML = '<div class="empty-state"><p>Firestore non disponible</p></div>';
+      return;
+    }
+
+    el.innerHTML = '<div style="text-align:center;padding:20px"><span class="spinner"></span></div>';
+
+    var collections = ['items', 'personnel', 'caisses', 'transactions', 'pointages', 'urgences', 'photos', 'fcm_tokens', 'notifications'];
+    var promises = collections.map(function(col) {
+      return _fs().collection('orgs').doc(ORG).collection(col).get()
+        .then(function(snap) { return { name: col, count: snap.size }; })
+        .catch(function() { return { name: col, count: -1 }; });
+    });
+
+    Promise.all(promises).then(function(results) {
+      var html = '<div style="display:flex;flex-direction:column;gap:8px">';
+      results.forEach(function(r) {
+        var countStr = r.count === -1 ? '<span style="color:var(--red)">Erreur</span>' : '<span class="badge badge-gold">' + r.count + '</span>';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--noir);border-radius:6px">';
+        html += '<span style="font-family:\'JetBrains Mono\',monospace;font-size:12px">' + r.name + '</span>';
+        html += countStr;
+        html += '</div>';
+      });
+      html += '</div>';
+      el.innerHTML = html;
+
+      diag('Collections Firestore scannees: ' + results.filter(function(r){return r.count>=0;}).length + '/' + results.length + ' OK');
+    });
+  }
+
+  function refreshQuotas() {
+    // Read from VoloData circuit breaker localStorage
+    try {
+      var writeCount = parseInt(localStorage.getItem('volo_write_count') || '0', 10);
+      var writeDate = localStorage.getItem('volo_write_date');
+      var today = new Date().toISOString().slice(0, 10);
+
+      if (writeDate !== today) {
+        writeCount = 0;
+      }
+
+      var writePct = Math.min(100, Math.round((writeCount / 20000) * 100));
+      setEl('quotaWriteCount', writeCount.toLocaleString() + ' / 20,000');
+
+      var writeBar = document.getElementById('quotaWriteBar');
+      writeBar.style.width = writePct + '%';
+      writeBar.className = 'progress-fill ' + (writePct > 80 ? 'red' : writePct > 50 ? 'yellow' : 'green');
+
+      // Read count (estimated from session)
+      var readCount = parseInt(localStorage.getItem('volo_read_count') || '0', 10);
+      var readPct = Math.min(100, Math.round((readCount / 50000) * 100));
+      setEl('quotaReadCount', readCount.toLocaleString() + ' / 50,000');
+
+      var readBar = document.getElementById('quotaReadBar');
+      readBar.style.width = readPct + '%';
+
+      // Circuit breaker
+      var isOpen = writeCount >= 20000;
+      var circuitEl = document.getElementById('quotaCircuit');
+      circuitEl.textContent = isOpen ? 'OUVERT' : 'FERME';
+      circuitEl.style.color = isOpen ? 'var(--red)' : 'var(--green)';
+
+      // Persistence
+      var persistEl = document.getElementById('quotaPersist');
+      persistEl.textContent = _enabled() ? 'Active' : 'Inactive';
+      persistEl.style.color = _enabled() ? 'var(--green)' : 'var(--blanc-dim)';
+
+    } catch(e) {
+      diag('Erreur lecture quotas: ' + e.message);
+    }
+  }
+
+  // ══════════════════════════════════════
+  //  INIT sync log render
+  // ══════════════════════════════════════
+  renderSyncLog();
+
+})();
+</script>
+
+</body>
+</html>

@@ -1,38 +1,64 @@
-# VOLO SST V10.5 — Golden Eagles
+# VOLO SST V20.7 — Golden Eagles
 
 ---
 
 ## Projet
-Application de gestion SST (Santé-Sécurité au Travail) pour l'équipe de sauvetage technique "Golden Eagles" de VOLO Construction. Gère l'inventaire d'équipement, le pointage du personnel, les certifications, les gains automatiques et les urgences terrain.
+Application de gestion SST (Santé-Sécurité au Travail) pour l'équipe de sauvetage technique "Golden Eagles" de VOLO Construction. Gère l'inventaire d'équipement, le pointage du personnel, les certifications, les gains automatiques, les urgences terrain, le push notifications FCM, le tracking GPS géofencing, et les rapports CNESST avec IA.
 
 ---
 
 ## Stack Technique
 - **Frontend** : Vanilla HTML/CSS/JS — **PAS** de React, **PAS** de build tools
-- **Backend** : Make.com webhooks → Google Sheets
+- **Backend** : Make.com webhooks → Google Sheets + Firebase (dual-write)
+- **Firebase** : Auth + Firestore + Realtime DB + Storage + FCM (compat v9.23.0)
+- **IA** : Claude API (Anthropic) — analyse CNESST, plan de travail
 - **Déploiement** : Netlify drag & drop — **JAMAIS** Netlify CLI (brûle les crédits)
 - **Scanner QR** : `getUserMedia()` + `jsQR` (CDN jsdelivr) — **JAMAIS** Html5Qrcode (miroir iOS, swap cassé)
-- **Design** : Dark theme rescue — voir `DESIGN-SYSTEM-VOLO.md`
+- **Carte** : Leaflet.js + CartoDB dark tiles
+- **PDF** : jsPDF + jspdf-autotable (direct drawing, pas html2canvas)
+- **Design** : Dark theme rescue "Tactical Eagle Dark" — voir `DESIGN-SYSTEM-VOLO.md`
 
 ---
 
 ## Architecture Fichiers
 ```
-├── index.html                  # App principale (~675KB — inventaire, scan QR, transactions, usage tracker, gains)
-├── data.js                     # Données centralisées — 823 items (739 sauvetage + 5 réserve + 79 surveillant), 156 personnel, 80 caisses
+├── index.html                  # App principale (~8400 lignes — inventaire, scan QR, transactions, gains, FCM push)
+├── data.js                     # Données centralisées — 823 items, 156 personnel, 80 caisses, DESTINATIONS, DEPOTS, REMORQUES
 ├── caisses-stock.html          # Inventaire temps réel — KPIs, alertes, category tabs, destruction
 ├── qr.html                     # QR Inventaire — génération/impression QR (3 formats print)
-├── dashboard-superviseur.html  # Dashboard superviseur (Leaflet map, missions)
-├── pointage.html               # Module de pointage terrain
-├── plan-travail.html           # Plan de travail 6 étapes + IA (Claude API)
-├── agenda.html                 # Agenda équipe
+├── dashboard-superviseur.html  # Dashboard superviseur (Leaflet map, Firestore live, météo par site)
+├── pointage.html               # Module de pointage terrain (PIN → lieu → webhook)
+├── plan-travail.html           # Plan de travail 6 étapes + IA (Claude API proxy)
+├── agenda.html                 # Agenda équipe (~4000 lignes — chat Firebase, conflits, sparklines)
+├── rapport-cnesst.html         # ★ Rapport conformité CNESST (auto-fill + Claude IA + PDF A4 pro)
+├── tracker-chantier.html       # ★ Tracker GPS géofencing (Leaflet + watchPosition + auto-pointage)
 ├── presentation.html           # Page présentation VOLO
 ├── lexique.html                # Lexique équipements
+│
+├── firebase-config.js          # Firebase init (app, auth, firestore, database, storage, messaging)
+├── firebase-service.js         # Service layer Firebase (dual-write, FCM, Storage, onSnapshot)
+├── firebase-auth.js            # Auth helpers
+├── firebase-messaging-sw.js    # Service Worker FCM (background push notifications)
+├── volo-crypto.js              # Chiffrement données sensibles
+├── volo-network.js             # Helpers réseau + offline queue
+├── error-monitor.js            # Capture erreurs globales → localStorage + webhook
+├── logo.js                     # VOLO_LOGO_B64 (eagle_tactic.png en base64, partagé par tous les PDF)
+│
+├── sw.js                       # Service Worker principal (cache v20.7, 15+ assets)
+├── _headers                    # Headers Netlify (CSP — inclut unpkg, jsdelivr, anthropic, firebase)
+├── firestore.rules             # Règles sécurité Firestore
+├── firebase.json               # Config Firebase (functions source)
+├── functions/                  # Cloud Functions (sendPushNotification — Firestore trigger)
+│   ├── index.js                # onCreate /notifications → FCM multicast
+│   └── package.json            # Node 20, firebase-admin, firebase-functions
+├── scripts/                    # Scripts utilitaires Node.js
+│   ├── set-admin.js            # Set V0205 comme admin (Auth claims + Firestore)
+│   └── find-milone.js          # Liste Auth users
+│
 ├── eagle.mp3                   # Son cri d'aigle (succès transaction)
 ├── eagle_tactic.png            # Logo Golden Eagles
-├── _headers                    # Headers Netlify (CSP)
 ├── destroy_item.py             # Script destruction items (data.js + Excel)
-├── CLAUDE.md                   # Ce fichier
+├── CLAUDE.md                   # Ce fichier — LA BIBLE du projet
 ├── photos/                     # Photos équipements (PNG/JPEG)
 └── photos/team/                # Photos équipe (carousel accueil)
 ```
@@ -341,7 +367,7 @@ Fichier partagé `VOLO_LOGO_B64` (eagle_tactic.png en base64) chargé par toutes
 9. **TOUS** les PDF doivent être clean : pas de page blanche, logo visible, mise en page propre
 10. `SAC_COLORS` indexé par NOM du sac, pas par catKey
 11. **JAMAIS** de doublons d'items — source de vérité = XLSX V9 INVENTAIRE COMPLET (739 IDs)
-12. **JAMAIS** créer d'IDs CRD-xxx (doublons de COR-xxx) ni CHT-xxx (doublons de VET-xxx)
+12. Cordages = **CRD-001→012**, Chiennes = **CHT-001→006** — QR codes collés, ne JAMAIS renommer ces IDs
 13. Mousquetons Petzl → utiliser le nom du modèle : `"William"`, `"Vulcan"`, `"Bm'D"`, etc. (PAS "Mousqueton William", PAS "WILLIAM" en majuscules)
 14. Caisses surveillant (CSURV-xx) : **1 caisse par numéro physique** — ne pas splitter une même caisse en 2 entrées
 
@@ -469,11 +495,10 @@ Sources croisées : CSV Inspection (base), CSV Surveillant, XLSX V9 INVENTAIRE C
 - `SURV-050` — TYCHEM combinaison (Sac 21, qty 1)
 - `LNG-008` — Longe 10', orange, SL Tech
 - `SNG-034` — Sangle d'ancrage Hiigard 6' (serial 143900115)
-- `COR-013→018` — 6 cordages surplus sauvetage (Rouge 200'/400', Bleu 150'/600', Verte 300', Orange 300')
+- `CRD-001→012` — 12 cordages surplus sauvetage (IDs originaux, QR collés)
+- `CHT-001→006` — 6 chiennes de travail Nomex (IDs originaux, QR collés)
 
-### Doublons supprimés (19)
-- `CRD-001→012` — doublons exacts de COR-013→024 (mêmes serials, mêmes volo_ids)
-- `CHT-001→006` — doublons exacts de VET-017→022 (mêmes tailles)
+### Doublons supprimés (1)
 - `BTL-011` — XLSX V9 a 10 bouteilles, pas 11
 
 ### Caisses corrigées
@@ -586,4 +611,173 @@ Sources croisées : CSV Inspection (base), CSV Surveillant, XLSX V9 INVENTAIRE C
 
 ---
 
-*VOLO SST · Golden Eagles · Estrie/Sherbrooke · Milone Jonathan · V0205 · SAUV-JM-205*
+---
+
+## V20 Ajouts — Firebase Integration (2026-03-11)
+
+### Phase 1 : Dual-Write (Webhook + Firebase en parallèle)
+- Firebase = copie shadow, Make.com webhook = canal principal
+- Pattern fire & forget : `VoloData.xxx().catch(e => console.warn(e))`
+- PIN terrain (5555) INTACT — pas de Firebase Auth gate
+
+### Firebase Config (`firebase-config.js`)
+- CDN compat v9.23.0 : app, auth, firestore, database, storage, messaging
+- VAPID key pour FCM web push
+- `window.firebaseMessaging` init conditionnel
+
+### Firebase Service (`firebase-service.js`)
+- **FCM** : `requestNotificationPermission()`, `onForegroundMessage()`, `notifyUrgence()`, `notifyUrgencyAlert()`
+- **Storage** : `uploadPhotoBase64()`, `savePhotoMetadata()`, `uploadPhoto()` avec `_ensureAuth()`
+- **Listeners** : `onUrgencesChange()`, `onPointagesChange()`, `onPhotosChange()` (Firestore onSnapshot)
+- **CRUD** : `getItemsFromFirestore()`, `getCaissesFromFirestore()`, `initItems()`
+- Toutes les fonctions exposées dans l'objet public `VoloData`
+
+### Cloud Functions (`functions/index.js`)
+- `sendPushNotification` : Firestore onCreate trigger sur `/notifications/{notifId}`
+- Lit tokens FCM depuis `/fcm_tokens`, filtre par `targetRole` optionnel
+- Envoie via `messaging.sendEachForMulticast()`
+- Nettoie tokens invalides, marque notification comme envoyée
+- **Node 20**, firebase-admin ^11.11.0, firebase-functions ^4.5.0
+
+### Firestore Rules
+- `/fcm_tokens/{voloId}` : read/write si isAuth()
+- `/notifications/{docId}` : read + create si isAuth(), update si isAdmin()
+
+### FCM Background SW (`firebase-messaging-sw.js`)
+- Gère les push en arrière-plan (vibration, icon eagle, click → ouvre l'app)
+- importScripts firebase compat SDK
+
+### Dashboard Superviseur — Live Data
+- 3 listeners onSnapshot : urgences, pointages, photos
+- Sections live : `secLiveUrgences`, `secLivePointages` avec badges compteurs
+- `checkAuth()` reécrit : fallback `volo_last_volo` → `volo_pin`, AUTH_ROLES inclut ADMIN/CHEF
+- Auth V0205 : uid `n0QYtrL64EQhHqWBIxWaZ9HDL3g1` + `z02SmIflUrOYsGOhVznvgMkz1pL2`, custom claims admin
+
+### Dual-write dans index.html
+- `_completePinLogin()` : set `volo_last_volo` + FCM permission pour chefs
+- `sendUrgence()` : `VoloData.notifyUrgence(payload)`
+- `triggerUrgencyAlert()` : `VoloData.notifyUrgencyAlert(data)`
+- `submitSetupPhotos()` : `VoloData.uploadPhotoBase64()` + `savePhotoMetadata()` en parallèle du webhook
+
+---
+
+## V20 Ajouts — Rapport CNESST (`rapport-cnesst.html`) (2026-03-11)
+
+### Générateur de rapport conformité CNESST avec IA
+
+**UI (Dark Theme Eagle):**
+- Jauge circulaire SVG animée : score conformité 0-100%
+- 4 stat cards : Équipements / Personnel / Certifs OK / Alertes
+- 8 sections accordéon auto-fill depuis data.js + localStorage
+
+**Sections :**
+1. Identification (entreprise, NEQ, période, responsable auto-détecté)
+2. Comité SST (chefs d'équipe auto depuis PERSONNEL)
+3. Inventaire EPI (tableau par catégorie, statuts OK/Inspection/Maintenance)
+4. Certifications (matrice personnel × certifications, badges couleur)
+5. Incidents (registre depuis localStorage)
+6. Conformité CNESST (14 items cochables avec références légales LSST/RSST)
+7. Activité (stats PICK-ON/PICK-OFF + dernières transactions)
+8. Signatures (3 blocs : responsable SST, direction, représentant travailleurs)
+
+**Analyse IA (Claude API direct browser):**
+- Envoie toutes les données à Claude claude-sonnet-4-6
+- Header `anthropic-dangerous-direct-browser-access: true`
+- Clé API stockée dans `localStorage: volo_claude_api_key`
+- Retour JSON : score_estime, observations, risques, non_conformites, recommandations, plan_action
+- Résultats affichés en UI + intégrés dans le PDF
+
+**PDF A4 (jsPDF direct drawing + autoTable):**
+- Page couverture : fond noir, logo eagle, titre gold, badge score
+- Table des matières numérotée
+- Tables autoTable (headers gold/bleu/rouge)
+- Graphique donut : distribution équipements
+- Matrice certifications couleur
+- Section IA complète
+- Page signatures avec lignes
+- Watermark eagle filigrane
+- Footer confidentiel + date + page
+
+---
+
+## V20 Ajouts — Tracker Chantier GPS (`tracker-chantier.html`) (2026-03-11)
+
+### Géofencing automatique avec pointage GPS
+
+**Carte Leaflet dark :**
+- 7 chantiers pré-configurés (Kruger, Domtar ×3, Valero, Hydro-QC, Mégantic) avec lat/lng
+- Cercles gold pour zones de détection (rayon configurable 100m-1km, défaut 300m)
+- Point bleu = position utilisateur, marqueurs gold = chantiers
+- Clic sur chantier → flyTo zoom 15
+
+**Géofencing :**
+- `navigator.geolocation.watchPosition()` haute précision
+- Formule Haversine pour calcul de distance
+- Entrée dans zone → auto ARRIVÉE (toast, notification push, pointage webhook)
+- Sortie de zone → auto DÉPART avec durée calculée
+- `geoState.zoneState` persiste dans localStorage
+
+**Auto-pointage :**
+- Écrit dans `volo-ptg-history` et `volo-ptg-onsite` (compatible avec pointage.html)
+- Webhook POST `/api/webhook-pointage` (Make.com)
+- Firebase dual-write si `VoloData` disponible
+- Queue offline si pas de réseau
+- Champ `source: 'GEOFENCING'` pour distinguer des pointages manuels
+
+**UI :**
+- Barre de statut live (GPS actif/inactif/recherche + distance au site le plus proche)
+- Panel chantiers triés par distance, badges vert si dans la zone
+- Journal géofencing (entrées/sorties horodatées)
+- Panel "Sur site" (qui est où en ce moment)
+- Réglages : toggle auto-pointage, notifications, rayon, précision GPS
+- Modal "Ajouter chantier" avec bouton "Utiliser ma position"
+
+**localStorage :**
+- `volo-geo-sites` — liste des chantiers avec coordonnées
+- `volo-geo-log` — journal d'activité (max 200)
+- `volo-geo-zones` — état des zones (inside/since)
+- `volo-geo-settings` — réglages utilisateur
+- `volo-geo-wasTracking` — reprise auto du tracking
+
+---
+
+## V20 Ajouts — Items Scannés Toggle (2026-03-11)
+
+### Vue toggle dans renderScan() (index.html)
+- Variable `vueItemsMode` : 'liste' (défaut) ou 'groupe'
+- Fonction `setVueItems(mode)` → re-render
+- Boutons toggle : ⬛ (groupe) / ☰ (liste), actif surligné vert
+- **Mode liste** : chaque item sur une ligne (nom, ID orange, S/N monospace, caisse, catégorie, bouton ✕)
+- **Mode groupe** : vue groupée existante avec chips expandables
+- Max-height : 400px (liste) / 240px (groupe)
+
+---
+
+## V20 — CSP Headers (`_headers`)
+
+### connect-src mis à jour
+```
+unpkg.com cdn.jsdelivr.net cdnjs.cloudflare.com api.anthropic.com
+basemaps.cartocdn.com *.firebaseio.com wss://*.firebaseio.com
+*.googleapis.com *.firebaseapp.com *.cloudfunctions.net
+*.firebasestorage.app identitytoolkit.googleapis.com securetoken.googleapis.com
+```
+
+---
+
+## V20 — Service Worker (`sw.js`)
+- Cache : `volo-sst-v20.7`
+- ASSETS : 15+ fichiers incluant rapport-cnesst.html, tracker-chantier.html
+
+---
+
+## Accueil Chef — Boutons
+```
+[📢 ANNONCE]  [🚨 URGENCE]
+[💾 BACKUP]   [📥 RESTAURER]
+[📄 CNESST]   [📡 TRACKER GPS]
+```
+
+---
+
+*VOLO SST V20.7 · Golden Eagles · Estrie/Sherbrooke · Milone Jonathan · V0205 · Chef d'équipe · Admin Firebase*

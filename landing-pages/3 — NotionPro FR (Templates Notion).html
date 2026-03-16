@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NotionPro FR — Templates Notion Premium en Fran&ccedil;ais</title>
+    <meta name="description" content="Templates Notion premium 100% en fran&ccedil;ais. Dashboard freelance, gestion de projet, CRM, planificateur de contenu et second brain. Par Jonathan Milone.">
+    <meta name="keywords" content="templates notion fran&ccedil;ais, notion france, notion qu&eacute;bec, dashboard freelance notion, gestion projet notion, CRM notion, planificateur contenu notion">
+    <meta name="author" content="Jonathan Milone">
+    <meta property="og:title" content="NotionPro FR — Templates Notion en français">
+    <meta property="og:description" content="Templates Notion professionnels 100% en français. CRM, gestion projets, calendrier. À partir de 9,97$.">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="fr_CA">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": "NotionPro FR — Templates Notion Premium en Francais",
+      "description": "Templates Notion premium 100% en francais. Dashboard freelance, gestion de projet, CRM, planificateur de contenu et second brain.",
+      "brand": {"@type": "Brand", "name": "NotionPro FR"},
+      "author": {"@type": "Person", "name": "Jonathan Milone"},
+      "offers": {
+        "@type": "AggregateOffer",
+        "lowPrice": "9.97",
+        "highPrice": "29.97",
+        "priceCurrency": "CAD",
+        "offerCount": "3",
+        "availability": "https://schema.org/InStock"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "127"
+      },
+      "additionalType": "https://schema.org/SoftwareApplication",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web"
+    }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0A0A12;
+            --bg-card: #12121E;
+            --bg-card-hover: #1A1A2E;
+            --gold: #C9A84C;
+            --gold-light: #E0C872;
+            --gold-dim: #9A7F38;
+            --white: #EBE6DF;
+            --gray: #8B8B9E;
+            --gray-light: #B0B0C0;
+            --border: #1E1E30;
+            --notion-bg: #191919;
+            --notion-border: #2D2D2D;
+            --notion-tag-blue: #2F5A8F;
+            --notion-tag-green: #2B593F;
+            --notion-tag-purple: #492F72;
+            --notion-tag-orange: #7F4F24;
+            --notion-tag-red: #6E2B2B;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow: 0 4px 24px rgba(0,0,0,0.4);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--white);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4 { font-family: 'Oswald', sans-serif; font-weight: 600; letter-spacing: 0.02em; }
+
+        a { color: var(--gold); text-decoration: none; transition: color 0.2s; }
+        a:hover { color: var(--gold-light); }
+
+        .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+
+        /* ========== NAV ========== */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(10,10,18,0.92); backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px; height: 64px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .nav-brand {
+            font-family: 'Oswald', sans-serif; font-size: 1.25rem; font-weight: 700;
+            color: var(--white);
+        }
+        .nav-brand span { color: var(--gold); }
+        .nav-links { display: flex; gap: 28px; align-items: center; }
+        .nav-links a { color: var(--gray-light); font-size: 0.9rem; font-weight: 500; }
+        .nav-links a:hover { color: var(--gold); }
+        .nav-cta {
+            background: var(--gold); color: var(--bg); padding: 8px 20px;
+            border-radius: 6px; font-weight: 600; font-size: 0.85rem;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .nav-cta:hover { background: var(--gold-light); color: var(--bg); transform: translateY(-1px); }
+        .nav-mobile { display: none; background: none; border: none; cursor: pointer; }
+        .nav-mobile svg { width: 28px; height: 28px; stroke: var(--white); }
+
+        /* ========== HERO ========== */
+        .hero {
+            padding: 160px 0 100px; text-align: center;
+            background: radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 60%);
+            position: relative;
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.25);
+            padding: 6px 16px; border-radius: 50px; font-size: 0.8rem; color: var(--gold);
+            margin-bottom: 28px; font-weight: 500;
+        }
+        .hero-badge svg { width: 16px; height: 16px; }
+        .hero h1 {
+            font-size: clamp(2.4rem, 6vw, 4rem); line-height: 1.1;
+            margin-bottom: 20px; color: var(--white);
+        }
+        .hero h1 .gold { color: var(--gold); }
+        .hero p {
+            font-size: clamp(1rem, 2vw, 1.2rem); color: var(--gray-light);
+            max-width: 640px; margin: 0 auto 40px; line-height: 1.7;
+        }
+        .hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+        .btn-primary {
+            background: var(--gold); color: var(--bg); padding: 14px 36px;
+            border-radius: 8px; font-weight: 700; font-size: 1rem;
+            border: none; cursor: pointer; transition: all 0.25s;
+            font-family: 'Inter', sans-serif; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary:hover { background: var(--gold-light); color: var(--bg); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(201,168,76,0.3); }
+        .btn-secondary {
+            background: transparent; color: var(--white); padding: 14px 36px;
+            border-radius: 8px; font-weight: 600; font-size: 1rem;
+            border: 1px solid var(--border); cursor: pointer; transition: all 0.25s;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+        .hero-stats {
+            display: flex; justify-content: center; gap: 48px; margin-top: 60px;
+            padding-top: 40px; border-top: 1px solid var(--border);
+        }
+        .hero-stat { text-align: center; }
+        .hero-stat-num { font-family: 'Oswald', sans-serif; font-size: 1.8rem; color: var(--gold); font-weight: 700; }
+        .hero-stat-label { font-size: 0.8rem; color: var(--gray); margin-top: 4px; }
+
+        /* ========== SECTION COMMON ========== */
+        section { padding: 100px 0; }
+        .section-label {
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 3px; color: var(--gold); margin-bottom: 12px;
+        }
+        .section-title {
+            font-size: clamp(1.8rem, 4vw, 2.6rem); margin-bottom: 16px;
+            line-height: 1.15;
+        }
+        .section-subtitle {
+            font-size: 1.05rem; color: var(--gray-light); max-width: 600px;
+            line-height: 1.7;
+        }
+        .section-header { text-align: center; margin-bottom: 64px; }
+        .section-header .section-subtitle { margin: 0 auto; }
+
+        /* ========== WHY NOTION ========== */
+        .why-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+        }
+        .why-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 32px; transition: all 0.3s;
+        }
+        .why-card:hover { border-color: var(--gold-dim); transform: translateY(-4px); box-shadow: var(--shadow); }
+        .why-icon {
+            width: 48px; height: 48px; border-radius: 10px;
+            background: rgba(201,168,76,0.1); display: flex; align-items: center; justify-content: center;
+            margin-bottom: 20px;
+        }
+        .why-icon svg { width: 24px; height: 24px; stroke: var(--gold); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+        .why-card h3 { font-size: 1.15rem; margin-bottom: 10px; }
+        .why-card p { font-size: 0.9rem; color: var(--gray-light); line-height: 1.65; }
+
+        /* ========== TEMPLATES ========== */
+        .templates { background: linear-gradient(180deg, var(--bg) 0%, #0D0D18 100%); }
+        .template-item {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 64px;
+            align-items: center; margin-bottom: 80px;
+        }
+        .template-item:last-child { margin-bottom: 0; }
+        .template-item.reverse { direction: rtl; }
+        .template-item.reverse > * { direction: ltr; }
+        .template-info { }
+        .template-tag {
+            display: inline-block; padding: 4px 12px; border-radius: 50px;
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1.5px; margin-bottom: 16px;
+        }
+        .tag-blue { background: rgba(47,90,143,0.3); color: #6FA3E0; }
+        .tag-green { background: rgba(43,89,63,0.3); color: #6ECF8E; }
+        .tag-purple { background: rgba(73,47,114,0.3); color: #B688E8; }
+        .tag-orange { background: rgba(127,79,36,0.3); color: #E8A855; }
+        .tag-red { background: rgba(110,43,43,0.3); color: #E87070; }
+        .template-info h3 { font-size: 1.6rem; margin-bottom: 12px; }
+        .template-info > p { font-size: 0.95rem; color: var(--gray-light); margin-bottom: 20px; line-height: 1.7; }
+        .template-features { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+        .template-features li {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.9rem; color: var(--gray-light);
+        }
+        .template-features li svg { width: 18px; height: 18px; stroke: var(--gold); fill: none; stroke-width: 2; flex-shrink: 0; }
+        .template-price {
+            font-family: 'Oswald', sans-serif; font-size: 1.3rem;
+            color: var(--gold); margin-top: 20px;
+        }
+        .template-price span { font-size: 0.85rem; color: var(--gray); font-family: 'Inter', sans-serif; }
+
+        /* NOTION MOCKUP */
+        .notion-mockup {
+            background: var(--notion-bg); border: 1px solid var(--notion-border);
+            border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow);
+        }
+        .notion-titlebar {
+            display: flex; align-items: center; gap: 8px; padding: 12px 16px;
+            border-bottom: 1px solid var(--notion-border);
+        }
+        .notion-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .notion-dot.r { background: #E84040; }
+        .notion-dot.y { background: #E8A840; }
+        .notion-dot.g { background: #40C840; }
+        .notion-page-title {
+            margin-left: 8px; font-size: 0.8rem; color: #888;
+            font-family: 'Inter', sans-serif;
+        }
+        .notion-body { padding: 20px; }
+        .notion-h {
+            font-family: 'Inter', sans-serif; font-weight: 700;
+            font-size: 1.1rem; color: #E0E0E0; margin-bottom: 16px;
+        }
+
+        /* Notion property rows */
+        .notion-props { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+        .notion-prop {
+            display: flex; align-items: center; gap: 12px; font-size: 0.8rem;
+        }
+        .notion-prop-label { color: #666; width: 100px; flex-shrink: 0; }
+        .notion-prop-value { color: #CCC; }
+        .notion-tag-inline {
+            display: inline-block; padding: 2px 8px; border-radius: 4px;
+            font-size: 0.75rem; font-weight: 500;
+        }
+        .notion-tag-inline.blue { background: var(--notion-tag-blue); color: #A8C8F0; }
+        .notion-tag-inline.green { background: var(--notion-tag-green); color: #A8E8B8; }
+        .notion-tag-inline.purple { background: var(--notion-tag-purple); color: #C8A8F0; }
+        .notion-tag-inline.orange { background: var(--notion-tag-orange); color: #F0C888; }
+        .notion-progress-bar {
+            width: 120px; height: 6px; background: #2D2D2D; border-radius: 3px; overflow: hidden;
+        }
+        .notion-progress-fill { height: 100%; border-radius: 3px; background: var(--gold); }
+
+        /* Notion kanban */
+        .notion-kanban { display: flex; gap: 12px; }
+        .notion-kanban-col { flex: 1; min-width: 0; }
+        .notion-kanban-header {
+            font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 1px; color: #888; margin-bottom: 8px;
+            padding-bottom: 6px; border-bottom: 2px solid var(--notion-border);
+        }
+        .notion-kanban-card {
+            background: #1F1F1F; border: 1px solid #2A2A2A; border-radius: 6px;
+            padding: 10px; margin-bottom: 6px; font-size: 0.75rem; color: #CCC;
+        }
+        .notion-kanban-card .mini-tag {
+            display: inline-block; padding: 1px 6px; border-radius: 3px;
+            font-size: 0.65rem; margin-top: 4px;
+        }
+
+        /* Notion table */
+        .notion-table { width: 100%; border-collapse: collapse; }
+        .notion-table th {
+            text-align: left; font-size: 0.7rem; color: #666; font-weight: 500;
+            padding: 6px 8px; border-bottom: 1px solid var(--notion-border);
+        }
+        .notion-table td {
+            font-size: 0.78rem; color: #CCC; padding: 8px;
+            border-bottom: 1px solid #1E1E1E;
+        }
+
+        /* Notion calendar grid */
+        .notion-cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .notion-cal-day {
+            background: #1F1F1F; border-radius: 4px; padding: 6px 4px;
+            font-size: 0.65rem; color: #888; min-height: 48px; position: relative;
+        }
+        .notion-cal-day .cal-event {
+            display: block; background: var(--notion-tag-blue); color: #A8C8F0;
+            border-radius: 3px; padding: 1px 4px; font-size: 0.6rem; margin-top: 4px;
+        }
+        .notion-cal-day .cal-event.ev-green { background: var(--notion-tag-green); color: #A8E8B8; }
+        .notion-cal-day .cal-event.ev-purple { background: var(--notion-tag-purple); color: #C8A8F0; }
+
+        /* Notion brain nodes */
+        .notion-brain-nodes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .brain-node {
+            background: #1F1F1F; border: 1px solid #2A2A2A; border-radius: 8px;
+            padding: 8px 14px; font-size: 0.75rem; color: #CCC;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .brain-node .node-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+        }
+
+        /* ========== PRICING ========== */
+        .pricing { background: linear-gradient(180deg, #0D0D18 0%, var(--bg) 100%); }
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .pricing-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 36px; text-align: center;
+            position: relative; transition: all 0.3s;
+        }
+        .pricing-card:hover { border-color: var(--gold-dim); transform: translateY(-4px); }
+        .pricing-card.featured {
+            border-color: var(--gold); background: linear-gradient(180deg, rgba(201,168,76,0.06) 0%, var(--bg-card) 40%);
+        }
+        .pricing-card.featured::before {
+            content: 'POPULAIRE'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            background: var(--gold); color: var(--bg); padding: 4px 16px;
+            border-radius: 50px; font-size: 0.65rem; font-weight: 700; letter-spacing: 1.5px;
+        }
+        .pricing-name { font-family: 'Oswald', sans-serif; font-size: 1.2rem; margin-bottom: 8px; }
+        .pricing-desc { font-size: 0.85rem; color: var(--gray); margin-bottom: 24px; }
+        .pricing-amount {
+            font-family: 'Oswald', sans-serif; font-size: 3rem; font-weight: 700;
+            color: var(--gold); line-height: 1;
+        }
+        .pricing-amount sup { font-size: 1.2rem; vertical-align: super; }
+        .pricing-amount sub { font-size: 0.9rem; color: var(--gray); font-family: 'Inter', sans-serif; font-weight: 400; }
+        .pricing-period { font-size: 0.8rem; color: var(--gray); margin-bottom: 28px; }
+        .pricing-features { list-style: none; text-align: left; margin-bottom: 28px; }
+        .pricing-features li {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 0; font-size: 0.88rem; color: var(--gray-light);
+            border-bottom: 1px solid rgba(30,30,48,0.6);
+        }
+        .pricing-features li:last-child { border-bottom: none; }
+        .pricing-features li svg { width: 16px; height: 16px; stroke: var(--gold); fill: none; stroke-width: 2.5; flex-shrink: 0; }
+        .pricing-btn {
+            display: block; width: 100%; padding: 14px; border-radius: 8px;
+            font-weight: 700; font-size: 0.95rem; text-align: center;
+            transition: all 0.25s; cursor: pointer; border: none;
+            font-family: 'Inter', sans-serif;
+        }
+        .pricing-btn-outline {
+            background: transparent; border: 1px solid var(--border); color: var(--white);
+        }
+        .pricing-btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+        .pricing-btn-gold {
+            background: var(--gold); color: var(--bg);
+        }
+        .pricing-btn-gold:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(201,168,76,0.3); }
+
+        /* ========== TESTIMONIALS ========== */
+        .testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .testimonial-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 28px;
+        }
+        .testimonial-stars { color: var(--gold); font-size: 0.9rem; margin-bottom: 14px; letter-spacing: 2px; }
+        .testimonial-text { font-size: 0.9rem; color: var(--gray-light); line-height: 1.7; font-style: italic; margin-bottom: 18px; }
+        .testimonial-author { display: flex; align-items: center; gap: 12px; }
+        .testimonial-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.85rem; color: var(--bg);
+        }
+        .testimonial-name { font-weight: 600; font-size: 0.88rem; }
+        .testimonial-role { font-size: 0.75rem; color: var(--gray); }
+
+        /* ========== FAQ ========== */
+        .faq-list { max-width: 720px; margin: 0 auto; }
+        .faq-item {
+            border-bottom: 1px solid var(--border); overflow: hidden;
+        }
+        .faq-question {
+            width: 100%; background: none; border: none; color: var(--white);
+            font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 600;
+            padding: 20px 0; text-align: left; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: color 0.2s;
+        }
+        .faq-question:hover { color: var(--gold); }
+        .faq-question svg {
+            width: 20px; height: 20px; stroke: var(--gray); fill: none;
+            stroke-width: 2; transition: transform 0.3s, stroke 0.3s; flex-shrink: 0;
+        }
+        .faq-item.open .faq-question svg { transform: rotate(45deg); stroke: var(--gold); }
+        .faq-answer {
+            max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.35s ease;
+        }
+        .faq-item.open .faq-answer { max-height: 300px; padding-bottom: 20px; }
+        .faq-answer p { font-size: 0.9rem; color: var(--gray-light); line-height: 1.7; }
+
+        /* ========== CTA FINAL ========== */
+        .cta-final {
+            text-align: center; padding: 100px 0;
+            background: radial-gradient(ellipse at 50% 100%, rgba(201,168,76,0.06) 0%, transparent 60%);
+        }
+        .cta-final h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); margin-bottom: 16px; }
+        .cta-final p { color: var(--gray-light); margin-bottom: 32px; font-size: 1.05rem; }
+
+        /* ========== FOOTER ========== */
+        footer {
+            border-top: 1px solid var(--border); padding: 40px 0;
+            text-align: center;
+        }
+        .footer-brand {
+            font-family: 'Oswald', sans-serif; font-size: 1.1rem; font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .footer-brand span { color: var(--gold); }
+        footer p { font-size: 0.8rem; color: var(--gray); }
+        .footer-links { display: flex; justify-content: center; gap: 24px; margin-top: 16px; }
+        .footer-links a { font-size: 0.8rem; color: var(--gray); }
+        .footer-links a:hover { color: var(--gold); }
+
+        /* MOBILE NAV */
+        .nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px}
+        .nav-toggle svg{width:28px;height:28px;stroke:var(--gold);fill:none;stroke-width:2;stroke-linecap:round}
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 900px) {
+            .why-grid, .pricing-grid, .testimonials-grid { grid-template-columns: 1fr; max-width: 480px; margin-left: auto; margin-right: auto; }
+            .template-item, .template-item.reverse { grid-template-columns: 1fr; gap: 32px; direction: ltr; }
+            .template-item.reverse > * { direction: ltr; }
+            .hero-stats { gap: 24px; flex-wrap: wrap; }
+            .nav-toggle{display:block}
+            .nav-links{
+                display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;
+                flex-direction:column;align-items:center;justify-content:center;gap:32px;
+                background:rgba(10,10,18,.97);backdrop-filter:blur(16px);
+            }
+            .nav-links.open{display:flex}
+            .nav-links a{font-size:1.2rem}
+            .nav-links .nav-cta{margin:0}
+            .nav-close{position:absolute;top:20px;right:24px;background:none;border:none;cursor:pointer}
+            .nav-close svg{width:32px;height:32px;stroke:var(--gold);fill:none;stroke-width:2;stroke-linecap:round}
+            .nav-mobile { display: none; }
+            .notion-kanban { flex-direction: column; }
+        }
+        @media (max-width: 480px) {
+            section { padding: 64px 0; }
+            .hero { padding: 120px 0 64px; }
+            .hero-buttons { flex-direction: column; align-items: center; }
+            .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+            .notion-cal { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        /* ========== ANIMATIONS ========== */
+        .fade-up {
+            opacity: 0; transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .fade-up.visible { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+    <div class="nav-brand">Notion<span>Pro</span> FR</div>
+    <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.add('open')" aria-label="Menu">
+      <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="nav-links">
+      <button class="nav-close" onclick="this.parentElement.classList.remove('open')" aria-label="Fermer">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+        <a href="#templates">Templates</a>
+        <a href="#pricing">Tarifs</a>
+        <a href="#faq">FAQ</a>
+        <a href="#" class="nav-cta">Obtenir le Bundle</a>
+    </div>
+    <button class="nav-mobile" onclick="document.querySelector('.nav-links').style.display=document.querySelector('.nav-links').style.display==='flex'?'none':'flex'" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-badge fade-up">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26z"/></svg>
+            #1 Templates Notion en fran&ccedil;ais
+        </div>
+        <h1 class="fade-up">Vos templates Notion<br><span class="gold">premium en fran&ccedil;ais</span></h1>
+        <p class="fade-up">Des syst&egrave;mes Notion complets, con&ccedil;us pour les freelances, les &eacute;quipes et les entrepreneurs francophones. Plug &amp; play, beaux, et fonctionnels d&egrave;s la premi&egrave;re minute.</p>
+        <div class="hero-buttons fade-up">
+            <a href="#pricing" class="btn-primary">
+                Voir les tarifs
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+            <a href="#templates" class="btn-secondary">D&eacute;couvrir les templates</a>
+        </div>
+        <div class="hero-stats fade-up">
+            <div class="hero-stat">
+                <div class="hero-stat-num">5</div>
+                <div class="hero-stat-label">Templates premium</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-num">100%</div>
+                <div class="hero-stat-label">En fran&ccedil;ais</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-num">Plug &amp; Play</div>
+                <div class="hero-stat-label">Pr&ecirc;t en 2 minutes</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- WHY NOTION -->
+<section id="why">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-label fade-up">Pourquoi Notion?</div>
+            <h2 class="section-title fade-up">L'outil tout-en-un qui remplace<br>vos 10 apps</h2>
+            <p class="section-subtitle fade-up">Notion centralise vos projets, vos notes, votre CRM et votre gestion d'&eacute;quipe dans un seul espace. Mais partir de z&eacute;ro prend des heures. Nos templates vous font gagner des semaines.</p>
+        </div>
+        <div class="why-grid">
+            <div class="why-card fade-up">
+                <div class="why-icon">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                </div>
+                <h3>Gain de temps massif</h3>
+                <p>Chaque template repr&eacute;sente des dizaines d'heures de design et d'architecture. Dupliquez, personnalisez, c'est parti.</p>
+            </div>
+            <div class="why-card fade-up">
+                <div class="why-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                </div>
+                <h3>100% en fran&ccedil;ais</h3>
+                <p>Propri&eacute;t&eacute;s, formules, vues, boutons — tout est traduit et adapt&eacute;. Fini le Google Translate sur vos outils de travail.</p>
+            </div>
+            <div class="why-card fade-up">
+                <div class="why-icon">
+                    <svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                </div>
+                <h3>Design professionnel</h3>
+                <p>Interfaces soign&eacute;es avec ic&ocirc;nes, couleurs et mise en page pens&eacute;es pour la productivit&eacute; r&eacute;elle, pas juste l'esth&eacute;tique.</p>
+            </div>
+            <div class="why-card fade-up">
+                <div class="why-icon">
+                    <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                </div>
+                <h3>Desktop + mobile</h3>
+                <p>Tous les templates fonctionnent parfaitement sur ordinateur, tablette et t&eacute;l&eacute;phone. Votre syst&egrave;me vous suit partout.</p>
+            </div>
+            <div class="why-card fade-up">
+                <div class="why-icon">
+                    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <h3>Solo ou &eacute;quipe</h3>
+                <p>Freelance solo? Startup de 15? Chaque template s'adapte &agrave; votre r&eacute;alit&eacute; avec des vues et permissions flexibles.</p>
+            </div>
+            <div class="why-card fade-up">
+                <div class="why-icon">
+                    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <h3>Mises &agrave; jour incluses</h3>
+                <p>Avec le Bundle Complet, vous recevez toutes les futures am&eacute;liorations et nouveaux templates automatiquement.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- TEMPLATES -->
+<section class="templates" id="templates">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-label fade-up">Les 5 Templates</div>
+            <h2 class="section-title fade-up">Des syst&egrave;mes complets,<br>pas juste des pages vides</h2>
+            <p class="section-subtitle fade-up">Chaque template est un v&eacute;ritable syst&egrave;me avec bases de donn&eacute;es reli&eacute;es, formules automatis&eacute;es et vues multiples.</p>
+        </div>
+
+        <!-- Template 1: Dashboard Freelance -->
+        <div class="template-item fade-up">
+            <div class="template-info">
+                <span class="template-tag tag-blue">Freelance</span>
+                <h3>Dashboard Freelance Complet</h3>
+                <p>Votre cockpit de freelance : projets, revenus, clients, factures et objectifs dans un seul dashboard. Visualisez votre business en un coup d'oeil.</p>
+                <ul class="template-features">
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Suivi des revenus mensuels avec graphiques</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Gestion des projets actifs et pipeline</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Facturation et suivi des paiements</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Objectifs trimestriels avec progression</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Base clients reli&eacute;e aux projets</li>
+                </ul>
+                <div class="template-price">9.97$ <span>/ template seul</span></div>
+            </div>
+            <div class="notion-mockup">
+                <div class="notion-titlebar">
+                    <div class="notion-dot r"></div><div class="notion-dot y"></div><div class="notion-dot g"></div>
+                    <span class="notion-page-title">Dashboard Freelance</span>
+                </div>
+                <div class="notion-body">
+                    <div class="notion-h">Vue d'ensemble</div>
+                    <div class="notion-props">
+                        <div class="notion-prop">
+                            <span class="notion-prop-label">Revenus mars</span>
+                            <span class="notion-prop-value" style="color:var(--gold);font-weight:600;">4 850 $</span>
+                        </div>
+                        <div class="notion-prop">
+                            <span class="notion-prop-label">Projets actifs</span>
+                            <span class="notion-tag-inline blue">3 en cours</span>
+                        </div>
+                        <div class="notion-prop">
+                            <span class="notion-prop-label">Objectif Q1</span>
+                            <div class="notion-progress-bar"><div class="notion-progress-fill" style="width:72%"></div></div>
+                        </div>
+                        <div class="notion-prop">
+                            <span class="notion-prop-label">Factures</span>
+                            <span class="notion-tag-inline green">2 pay&eacute;es</span>
+                            <span class="notion-tag-inline orange">1 en attente</span>
+                        </div>
+                        <div class="notion-prop">
+                            <span class="notion-prop-label">Prochain RDV</span>
+                            <span class="notion-prop-value">14 mars &mdash; Appel client Tremblay</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Template 2: Gestion de Projet -->
+        <div class="template-item reverse fade-up">
+            <div class="template-info">
+                <span class="template-tag tag-green">Equipe</span>
+                <h3>Gestion de Projet &Eacute;quipe</h3>
+                <p>Kanban + timeline + assignation par membre. Le syst&egrave;me parfait pour g&eacute;rer vos projets en &eacute;quipe sans Asana ni Monday.</p>
+                <ul class="template-features">
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Vue Kanban avec statuts personnalis&eacute;s</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Timeline / Gantt int&eacute;gr&eacute;</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Assignation et charge par membre</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Sprints et jalons de projet</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Notes de r&eacute;union reli&eacute;es aux t&acirc;ches</li>
+                </ul>
+                <div class="template-price">9.97$ <span>/ template seul</span></div>
+            </div>
+            <div class="notion-mockup">
+                <div class="notion-titlebar">
+                    <div class="notion-dot r"></div><div class="notion-dot y"></div><div class="notion-dot g"></div>
+                    <span class="notion-page-title">Projet — Refonte Site Web</span>
+                </div>
+                <div class="notion-body">
+                    <div class="notion-h">Sprint 3 — Mars 2026</div>
+                    <div class="notion-kanban">
+                        <div class="notion-kanban-col">
+                            <div class="notion-kanban-header" style="border-color:#6B7280;">A faire</div>
+                            <div class="notion-kanban-card">Int&eacute;gration API paiement<span class="mini-tag" style="background:var(--notion-tag-purple);color:#C8A8F0;">Dev</span></div>
+                            <div class="notion-kanban-card">Tests mobiles<span class="mini-tag" style="background:var(--notion-tag-blue);color:#A8C8F0;">QA</span></div>
+                        </div>
+                        <div class="notion-kanban-col">
+                            <div class="notion-kanban-header" style="border-color:#F59E0B;">En cours</div>
+                            <div class="notion-kanban-card">Maquettes page d'accueil<span class="mini-tag" style="background:var(--notion-tag-orange);color:#F0C888;">Design</span></div>
+                            <div class="notion-kanban-card">Migration base donn&eacute;es<span class="mini-tag" style="background:var(--notion-tag-purple);color:#C8A8F0;">Dev</span></div>
+                        </div>
+                        <div class="notion-kanban-col">
+                            <div class="notion-kanban-header" style="border-color:#10B981;">Termin&eacute;</div>
+                            <div class="notion-kanban-card">Brief client valid&eacute;<span class="mini-tag" style="background:var(--notion-tag-green);color:#A8E8B8;">Gestion</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Template 3: CRM Simple -->
+        <div class="template-item fade-up">
+            <div class="template-info">
+                <span class="template-tag tag-purple">Ventes</span>
+                <h3>CRM Simple — Suivi Clients</h3>
+                <p>Pipeline de ventes visuel, fiches clients d&eacute;taill&eacute;es et suivi des interactions. Un CRM l&eacute;ger qui fait le travail sans la complexit&eacute; de HubSpot.</p>
+                <ul class="template-features">
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Pipeline de ventes en Kanban</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Fiches clients avec historique</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Suivi des relances automatique</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Valeur du pipeline en temps r&eacute;el</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Export et rapports mensuels</li>
+                </ul>
+                <div class="template-price">9.97$ <span>/ template seul</span></div>
+            </div>
+            <div class="notion-mockup">
+                <div class="notion-titlebar">
+                    <div class="notion-dot r"></div><div class="notion-dot y"></div><div class="notion-dot g"></div>
+                    <span class="notion-page-title">CRM — Pipeline</span>
+                </div>
+                <div class="notion-body">
+                    <div class="notion-h">Clients actifs</div>
+                    <table class="notion-table">
+                        <thead><tr><th>Client</th><th>Statut</th><th>Valeur</th><th>Relance</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td>Agence Cr&eacute;ative MTL</td>
+                                <td><span class="notion-tag-inline green">Gagn&eacute;</span></td>
+                                <td style="color:var(--gold);">8 500 $</td>
+                                <td>--</td>
+                            </tr>
+                            <tr>
+                                <td>Studio Graphique Lyon</td>
+                                <td><span class="notion-tag-inline orange">N&eacute;gociation</span></td>
+                                <td>3 200 $</td>
+                                <td style="color:#E87070;">Demain</td>
+                            </tr>
+                            <tr>
+                                <td>PME Constructions B&eacute;langer</td>
+                                <td><span class="notion-tag-inline blue">Prospect</span></td>
+                                <td>12 000 $</td>
+                                <td>15 mars</td>
+                            </tr>
+                            <tr>
+                                <td>Boutique &Eacute;co Dakar</td>
+                                <td><span class="notion-tag-inline purple">D&eacute;mo</span></td>
+                                <td>1 800 $</td>
+                                <td>18 mars</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Template 4: Planificateur de Contenu -->
+        <div class="template-item reverse fade-up">
+            <div class="template-info">
+                <span class="template-tag tag-orange">Contenu</span>
+                <h3>Planificateur de Contenu</h3>
+                <p>Calendrier &eacute;ditorial pour blog et r&eacute;seaux sociaux. Planifiez, r&eacute;digez et publiez sans oublier aucune &eacute;ch&eacute;ance.</p>
+                <ul class="template-features">
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Calendrier &eacute;ditorial visuel</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Cat&eacute;gories par plateforme</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Statuts de r&eacute;daction (id&eacute;e &rarr; publi&eacute;)</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Banque d'id&eacute;es reli&eacute;e</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> M&eacute;triques de performance</li>
+                </ul>
+                <div class="template-price">9.97$ <span>/ template seul</span></div>
+            </div>
+            <div class="notion-mockup">
+                <div class="notion-titlebar">
+                    <div class="notion-dot r"></div><div class="notion-dot y"></div><div class="notion-dot g"></div>
+                    <span class="notion-page-title">Calendrier &Eacute;ditorial</span>
+                </div>
+                <div class="notion-body">
+                    <div class="notion-h">Mars 2026</div>
+                    <div class="notion-cal">
+                        <div class="notion-cal-day">10</div>
+                        <div class="notion-cal-day">11<span class="cal-event">Article SEO</span></div>
+                        <div class="notion-cal-day">12</div>
+                        <div class="notion-cal-day">13<span class="cal-event ev-green">Post LinkedIn</span></div>
+                        <div class="notion-cal-day">14</div>
+                        <div class="notion-cal-day">15<span class="cal-event ev-purple">Newsletter</span></div>
+                        <div class="notion-cal-day">16</div>
+                        <div class="notion-cal-day">17<span class="cal-event">Reel Instagram</span></div>
+                        <div class="notion-cal-day">18</div>
+                        <div class="notion-cal-day">19<span class="cal-event ev-green">Article Blog</span></div>
+                        <div class="notion-cal-day">20</div>
+                        <div class="notion-cal-day">21</div>
+                        <div class="notion-cal-day">22<span class="cal-event ev-purple">Pin Pinterest</span></div>
+                        <div class="notion-cal-day">23</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Template 5: Second Brain -->
+        <div class="template-item fade-up">
+            <div class="template-info">
+                <span class="template-tag tag-red">Savoir</span>
+                <h3>Second Brain — Base de Connaissances</h3>
+                <p>Capturez, organisez et retrouvez toutes vos id&eacute;es, notes, articles et apprentissages. M&eacute;thode PARA adapt&eacute;e en fran&ccedil;ais.</p>
+                <ul class="template-features">
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Syst&egrave;me PARA (Projets, Domaines, Ressources, Archives)</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Capture rapide depuis n'importe o&ugrave;</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Tags et liens entre notes</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Tableau de bord lecture (livres, articles, podcasts)</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> R&eacute;visions espac&eacute;es int&eacute;gr&eacute;es</li>
+                </ul>
+                <div class="template-price">9.97$ <span>/ template seul</span></div>
+            </div>
+            <div class="notion-mockup">
+                <div class="notion-titlebar">
+                    <div class="notion-dot r"></div><div class="notion-dot y"></div><div class="notion-dot g"></div>
+                    <span class="notion-page-title">Second Brain</span>
+                </div>
+                <div class="notion-body">
+                    <div class="notion-h">Base de connaissances</div>
+                    <div class="notion-props" style="margin-bottom:8px;">
+                        <div class="notion-prop">
+                            <span class="notion-prop-label">Notes totales</span>
+                            <span class="notion-prop-value" style="color:var(--gold);">247</span>
+                        </div>
+                        <div class="notion-prop">
+                            <span class="notion-prop-label">Cat&eacute;gorie</span>
+                            <span class="notion-tag-inline blue">Projets</span>
+                            <span class="notion-tag-inline green">Domaines</span>
+                            <span class="notion-tag-inline purple">Ressources</span>
+                            <span class="notion-tag-inline orange">Archives</span>
+                        </div>
+                    </div>
+                    <div class="notion-brain-nodes">
+                        <div class="brain-node"><span class="node-dot" style="background:#6FA3E0;"></span>Marketing digital</div>
+                        <div class="brain-node"><span class="node-dot" style="background:#6ECF8E;"></span>Productivit&eacute;</div>
+                        <div class="brain-node"><span class="node-dot" style="background:#B688E8;"></span>D&eacute;veloppement web</div>
+                        <div class="brain-node"><span class="node-dot" style="background:#E8A855;"></span>Lectures Q1</div>
+                        <div class="brain-node"><span class="node-dot" style="background:#E87070;"></span>Id&eacute;es business</div>
+                        <div class="brain-node"><span class="node-dot" style="background:#6FA3E0;"></span>Design UX</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-label fade-up">Tarifs</div>
+            <h2 class="section-title fade-up">Choisissez votre formule</h2>
+            <p class="section-subtitle fade-up">Paiement unique, acc&egrave;s &agrave; vie. Pas d'abonnement, pas de frais cach&eacute;s.</p>
+        </div>
+        <div class="pricing-grid">
+            <!-- Template Unique -->
+            <div class="pricing-card fade-up">
+                <div class="pricing-name">Template Unique</div>
+                <div class="pricing-desc">1 template au choix</div>
+                <div class="pricing-amount">9<sup>.97$</sup></div>
+                <div class="pricing-period">Paiement unique</div>
+                <ul class="pricing-features">
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> 1 template premium</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> 100% en fran&ccedil;ais</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Guide de d&eacute;marrage</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Support par email</li>
+                </ul>
+                <a href="#" class="pricing-btn pricing-btn-outline">Choisir un template</a>
+            </div>
+            <!-- Pack Pro -->
+            <div class="pricing-card featured fade-up">
+                <div class="pricing-name">Pack Pro</div>
+                <div class="pricing-desc">3 templates au choix</div>
+                <div class="pricing-amount">19<sup>.97$</sup></div>
+                <div class="pricing-period">Paiement unique &mdash; Vous sauvez 33%</div>
+                <ul class="pricing-features">
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> 3 templates premium</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> 100% en fran&ccedil;ais</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Guides de d&eacute;marrage</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Support prioritaire</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Acc&egrave;s communaut&eacute;</li>
+                </ul>
+                <a href="#" class="pricing-btn pricing-btn-gold">Obtenir le Pack Pro</a>
+            </div>
+            <!-- Bundle Complet -->
+            <div class="pricing-card fade-up">
+                <div class="pricing-name">Bundle Complet</div>
+                <div class="pricing-desc">Les 5 templates + bonus</div>
+                <div class="pricing-amount">29<sup>.97$</sup></div>
+                <div class="pricing-period">Paiement unique &mdash; Meilleure valeur</div>
+                <ul class="pricing-features">
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> 5 templates premium</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Tutos vid&eacute;o inclus</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Mises &agrave; jour &agrave; vie</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Support VIP</li>
+                    <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Futurs templates offerts</li>
+                </ul>
+                <a href="#" class="pricing-btn pricing-btn-outline">Obtenir le Bundle</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-label fade-up">T&eacute;moignages</div>
+            <h2 class="section-title fade-up">Ce qu'en disent nos utilisateurs</h2>
+        </div>
+        <div class="testimonials-grid">
+            <div class="testimonial-card fade-up">
+                <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                <p class="testimonial-text">&laquo; Enfin des templates Notion en vrai fran&ccedil;ais ! J'ai configur&eacute; mon dashboard freelance en 10 minutes. Je voyais mes revenus, mes projets et mes relances d'un seul coup d'oeil. &raquo;</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">SL</div>
+                    <div>
+                        <div class="testimonial-name">Sophie L.</div>
+                        <div class="testimonial-role">Freelance UX &mdash; Paris</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card fade-up">
+                <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                <p class="testimonial-text">&laquo; On est pass&eacute;s de Trello + Google Sheets &agrave; un seul espace Notion pour toute l'&eacute;quipe. Le template gestion de projet a &eacute;t&eacute; adopt&eacute; en une journ&eacute;e. Impressionnant. &raquo;</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">MK</div>
+                    <div>
+                        <div class="testimonial-name">Marc K.</div>
+                        <div class="testimonial-role">Co-fondateur startup &mdash; Montr&eacute;al</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card fade-up">
+                <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                <p class="testimonial-text">&laquo; Le Second Brain a chang&eacute; ma fa&ccedil;on d'&eacute;tudier. Je retrouve mes notes de cours, mes r&eacute;sum&eacute;s de livres et mes id&eacute;es de m&eacute;moire en 2 clics. Le bundle vaut 10x son prix. &raquo;</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">AD</div>
+                    <div>
+                        <div class="testimonial-name">Aminata D.</div>
+                        <div class="testimonial-role">&Eacute;tudiante MBA &mdash; Dakar</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-label fade-up">FAQ</div>
+            <h2 class="section-title fade-up">Questions fr&eacute;quentes</h2>
+        </div>
+        <div class="faq-list">
+            <div class="faq-item fade-up">
+                <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                    Comment j'acc&egrave;de aux templates apr&egrave;s l'achat ?
+                    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <p>Apr&egrave;s votre achat, vous recevez un lien de duplication Notion par email. Un clic, et le template est copi&eacute; directement dans votre espace Notion. Aucune installation n&eacute;cessaire.</p>
+                </div>
+            </div>
+            <div class="faq-item fade-up">
+                <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                    J'ai besoin d'un compte Notion payant ?
+                    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <p>Non ! Tous nos templates fonctionnent avec le plan gratuit de Notion. Aucun abonnement suppl&eacute;mentaire n'est requis.</p>
+                </div>
+            </div>
+            <div class="faq-item fade-up">
+                <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                    Je peux personnaliser les templates ?
+                    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <p>Absolument. Chaque template est une copie dans votre espace — vous pouvez modifier les couleurs, ajouter des propri&eacute;t&eacute;s, cr&eacute;er de nouvelles vues et adapter la structure &agrave; vos besoins.</p>
+                </div>
+            </div>
+            <div class="faq-item fade-up">
+                <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                    C'est vraiment un paiement unique ?
+                    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <p>Oui, z&eacute;ro abonnement. Vous payez une fois et vous gardez le template pour toujours. Le Bundle Complet inclut aussi les futures mises &agrave; jour et nouveaux templates.</p>
+                </div>
+            </div>
+            <div class="faq-item fade-up">
+                <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                    Et si je ne suis pas satisfait ?
+                    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <p>Nous offrons un remboursement complet dans les 14 jours suivant l'achat, sans question. Votre satisfaction est notre priorit&eacute;.</p>
+                </div>
+            </div>
+            <div class="faq-item fade-up">
+                <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                    Les templates fonctionnent en fran&ccedil;ais de France ET du Qu&eacute;bec ?
+                    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+                <div class="faq-answer">
+                    <p>Oui ! Nous utilisons un fran&ccedil;ais professionnel et universel qui convient autant en France, au Qu&eacute;bec, en Belgique, en Suisse qu'en Afrique francophone.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-final">
+    <div class="container">
+        <h2 class="fade-up">Pr&ecirc;t &agrave; transformer<br>votre <span style="color:var(--gold);">productivit&eacute;</span> ?</h2>
+        <p class="fade-up">Rejoignez les freelances et &eacute;quipes qui ont d&eacute;j&agrave; adopt&eacute; nos templates Notion en fran&ccedil;ais.</p>
+        <div class="hero-buttons fade-up">
+            <a href="#pricing" class="btn-primary">
+                Voir les tarifs
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="container">
+        <div class="footer-brand">Notion<span>Pro</span> FR</div>
+        <p>&copy; 2026 Jonathan Milone. Tous droits r&eacute;serv&eacute;s.</p>
+        <div class="footer-links">
+            <a href="#">Conditions g&eacute;n&eacute;rales</a>
+            <a href="#">Politique de confidentialit&eacute;</a>
+            <a href="#">Contact</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+// Fade-up on scroll
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+        }
+    });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) {
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            var nl = document.querySelector('.nav-links'); if(nl) nl.classList.remove('open');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

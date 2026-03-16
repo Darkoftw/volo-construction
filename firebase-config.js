@@ -89,9 +89,21 @@
       window.firebaseStorage = firebase.storage();
     }
 
+    // Messaging / FCM (Push Notifications)
+    if (typeof firebase.messaging === 'function') {
+      try {
+        window.firebaseMessaging = firebase.messaging();
+        // VAPID key — générée depuis Firebase Console > Cloud Messaging > Web Push certificates
+        // À remplacer par la vraie clé VAPID de volo-sst-prod
+        window.VOLO_VAPID_KEY = 'BD4zd0ABIKs4STpmezoDpFBEw9QYfCwOIPOkpoEl9LauHohso7ONDGC0OVtPaqVsqcXQsSYthcLygpnRa0OeByo';
+      } catch(e) {
+        console.warn('[VOLO Firebase] Messaging init skipped:', e.message);
+      }
+    }
+
     window.VOLO_FIREBASE.enabled = true;
     console.log('[VOLO Firebase] Init OK — project:', firebaseConfig.projectId,
-      '| FS:', !!window.firebaseFS, '| RTDB:', !!window.firebaseDB);
+      '| FS:', !!window.firebaseFS, '| RTDB:', !!window.firebaseDB, '| MSG:', !!window.firebaseMessaging);
 
   } catch(e) {
     console.error('[VOLO Firebase] Init error:', e);

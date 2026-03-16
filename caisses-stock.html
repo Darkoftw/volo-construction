@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VOLO SST — Inventaire / Stockage Temps Réel</title>
+<meta name="view-transition" content="same-origin">
+<title>VOLO SST — Inventaire</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -12,18 +13,18 @@
    Full CSS vars, no Tailwind, same tokens as main app
    ============================================================ */
 :root{
-  --bg:#0C0608;--card:#1C1012;--card2:#231518;--card3:#2A1A1E;
-  --gold:#D4A017;--goldL:#E8C547;--goldD:#A67C10;
-  --rescue:#E65100;--rescueL:#FF6D00;--rescueD:#BF360C;
+  --bg:#04040A;--card:#12121A;--card2:#1A1A24;--card3:#22222E;
+  --gold:#C9A84C;--goldL:#E8C84A;--goldD:#9A8230;
+  --rescue:#D4650E;--rescueL:#E8811E;--rescueD:#B54D08;
   --red:#C0392B;--green:#27AE60;--orange:#E67E22;--blue:#3B82F6;
-  --txt:#F5F0EB;--muted:#C9BAA9;--border:#3A2428;
-  --card-hover:#2A1A1E;
-  --dispo:#27AE60;--sorti:#D4A017;--manquant:#C0392B;--inspect:#3B82F6;--destruct:#6B21A8;
+  --txt:#EBE6DF;--muted:#C9BAA9;--border:rgba(201,168,76,.15);
+  --card-hover:#22222E;
+  --dispo:#27AE60;--sorti:#C9A84C;--manquant:#C0392B;--inspect:#3B82F6;--destruct:#6B21A8;
 }
 html.light{
   --bg:#F0EBE3;--card:rgba(255,255,255,.97);--card2:rgba(244,238,230,.99);
-  --card3:#fff;--gold:#C2410C;--goldL:#EA580C;
-  --rescue:#D94A00;--rescueL:#EA580C;
+  --card3:#fff;--gold:#9A8230;--goldL:#B8A040;
+  --rescue:#D4650E;--rescueL:#E8811E;
   --txt:#1A0E10;--muted:#7B6B5E;--border:rgba(180,150,130,.35);
 }
 
@@ -32,6 +33,32 @@ html{scroll-behavior:smooth}
 body{
   background:var(--bg);color:var(--txt);
   font-family:'Inter',sans-serif;min-height:100vh;
+}
+@view-transition{navigation:auto}
+/* -- View Transitions -- */
+@keyframes vt-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes vt-fade-out{from{opacity:1}to{opacity:0}}
+@keyframes vt-slide-from-right{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes vt-slide-to-left{from{transform:translateX(0);opacity:1}to{transform:translateX(-30px);opacity:0}}
+@keyframes vt-slide-from-left{from{transform:translateX(-30px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes vt-slide-to-right{from{transform:translateX(0);opacity:1}to{transform:translateX(30px);opacity:0}}
+
+::view-transition-old(root){animation:.25s ease-out both vt-fade-out}
+::view-transition-new(root){animation:.25s ease-out both vt-fade-in}
+
+::view-transition-old(page-content){animation:.3s ease-out both vt-slide-to-left}
+::view-transition-new(page-content){animation:.3s ease-in both vt-slide-from-right}
+
+.header{view-transition-name:main-header}
+::view-transition-old(main-header){animation:.2s ease-out both vt-fade-out}
+::view-transition-new(main-header){animation:.2s ease-in both vt-fade-in}
+
+@media(prefers-reduced-motion:reduce){
+  ::view-transition-old(root),::view-transition-new(root),
+  ::view-transition-old(page-content),::view-transition-new(page-content),
+  ::view-transition-old(main-header),::view-transition-new(main-header){animation-duration:.01s}
+}
+body{
   overflow-x:hidden;
 }
 
@@ -46,9 +73,9 @@ body::after{
   top:-140px;left:50%;transform:translateX(-50%);
   width:1000px;height:700px;
   background:
-    radial-gradient(ellipse 55% 40% at 50% 20%,rgba(230,81,0,.18) 0%,transparent 70%),
-    radial-gradient(ellipse 35% 22% at 50% 8%,rgba(255,109,0,.1) 0%,transparent 65%),
-    radial-gradient(ellipse 70% 28% at 50% 0%,rgba(180,60,0,.06) 0%,transparent 80%);
+    radial-gradient(ellipse 55% 40% at 50% 20%,rgba(201,168,76,.14) 0%,transparent 70%),
+    radial-gradient(ellipse 35% 22% at 50% 8%,rgba(232,200,74,.08) 0%,transparent 65%),
+    radial-gradient(ellipse 70% 28% at 50% 0%,rgba(154,130,48,.06) 0%,transparent 80%);
   pointer-events:none;z-index:0;
   animation:aura-breathe 7s ease-in-out infinite;
 }
@@ -66,7 +93,7 @@ body::after{
 /* ---- SHIMMER TOP BAR ---- */
 .top-shimmer{
   position:fixed;top:0;left:0;right:0;height:2px;z-index:100;
-  background:linear-gradient(90deg,var(--rescueD),var(--rescue),var(--rescueL),var(--gold),var(--rescueL),var(--rescue),var(--rescueD));
+  background:linear-gradient(90deg,var(--goldD),var(--gold),var(--goldL),var(--gold),var(--goldL),var(--gold),var(--goldD));
   background-size:300% 100%;
   animation:shimmer 4s ease infinite;
 }
@@ -76,9 +103,9 @@ body::after{
 /* ---- HEADER ---- */
 .app-header{
   position:fixed;top:2px;left:0;right:0;z-index:90;
-  background:rgba(12,6,8,.92);backdrop-filter:blur(20px);
-  border-bottom:1px solid rgba(58,36,40,.7);
-  box-shadow:0 1px 40px rgba(230,81,0,.07);
+  background:rgba(4,4,10,.92);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(201,168,76,.12);
+  box-shadow:0 1px 40px rgba(201,168,76,.07);
 }
 .header-inner{
   max-width:900px;margin:0 auto;
@@ -87,7 +114,7 @@ body::after{
 }
 .header-left{display:flex;align-items:center;gap:10px}
 .back-btn{
-  width:36px;height:36px;border-radius:10px;
+  width:44px;height:44px;border-radius:10px;
   background:var(--card);border:1px solid var(--border);
   display:flex;align-items:center;justify-content:center;
   color:var(--muted);font-size:1rem;cursor:pointer;
@@ -96,15 +123,15 @@ body::after{
 .back-btn:hover{border-color:var(--gold);color:var(--gold)}
 .logo-ring{
   width:34px;height:34px;border-radius:50%;
-  border:2px solid var(--rescue);overflow:hidden;
-  box-shadow:0 0 12px rgba(230,81,0,.25);
+  border:1.5px solid rgba(201,168,76,.35);overflow:hidden;
+  box-shadow:0 0 12px rgba(201,168,76,.18);
   animation:float 3s ease-in-out infinite;
   flex-shrink:0;
 }
 .logo-ring img{width:100%;height:100%;object-fit:cover}
 .header-title{
   font-family:'Oswald',sans-serif;
-  font-size:.8rem;color:var(--rescue);
+  font-size:.8rem;color:var(--gold);
   letter-spacing:3px;
 }
 .header-sub{font-size:.65rem;color:var(--muted);letter-spacing:1.5px;margin-top:1px}
@@ -121,15 +148,15 @@ body::after{
 .theme-pill{
   position:fixed;bottom:20px;right:16px;z-index:200;
   display:flex;border-radius:20px;background:var(--card);
-  border:1px solid rgba(68,40,46,.55);overflow:hidden;
+  border:1px solid rgba(201,168,76,.55);overflow:hidden;
   box-shadow:0 4px 20px rgba(0,0,0,.4);
 }
 .theme-btn{
-  padding:7px 12px;font-size:.85rem;cursor:pointer;
+  padding:12px 16px;font-size:1rem;cursor:pointer;min-width:44px;min-height:44px;
   background:transparent;border:none;transition:background .2s;
 }
 .theme-btn:hover{background:rgba(212,160,23,.1)}
-.theme-btn.active{background:rgba(230,81,0,.15)}
+.theme-btn.active{background:rgba(201,168,76,.15)}
 
 /* ---- MAIN LAYOUT ---- */
 .main-wrap{
@@ -145,7 +172,7 @@ body::after{
 }
 .sec-title-line{
   height:1px;flex:1;
-  background:linear-gradient(to right,rgba(58,36,40,.8),transparent);
+  background:linear-gradient(to right,rgba(201,168,76,.8),transparent);
 }
 .sec-label{
   font-family:'Oswald',sans-serif;
@@ -196,7 +223,7 @@ body::after{
   display:flex;align-items:center;gap:8px;
   padding:8px 10px;border-radius:10px;cursor:pointer;
   border:1px solid var(--border);margin-bottom:4px;
-  background:rgba(12,6,8,.3);transition:all .2s;
+  background:rgba(4,4,10,.3);transition:all .2s;
 }
 .alert-item:hover{border-color:var(--gold);background:rgba(212,160,23,.04)}
 .alert-item-icon{font-size:1rem;flex-shrink:0}
@@ -226,15 +253,15 @@ body::after{
 }
 .cat-tab:hover{border-color:var(--gold);color:var(--txt)}
 .cat-tab.active{
-  background:linear-gradient(135deg,rgba(230,81,0,.15),rgba(212,160,23,.1));
-  border-color:var(--rescue);color:var(--goldL);font-weight:600;
+  background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(232,200,74,.08));
+  border-color:var(--gold);color:var(--goldL);font-weight:600;
 }
 .cat-tab-count{
   font-size:.55rem;padding:1px 5px;border-radius:6px;
   background:rgba(255,255,255,.06);font-weight:400;
 }
 .cat-tab.active .cat-tab-count{
-  background:rgba(230,81,0,.2);color:var(--rescue);
+  background:rgba(201,168,76,.2);color:var(--gold);
 }
 
 /* ---- SEARCH / FILTER BAR ---- */
@@ -264,11 +291,11 @@ body::after{
 .pill{
   padding:6px 12px;border-radius:20px;
   font-family:'Oswald',sans-serif;font-size:.62rem;letter-spacing:1px;
-  border:1px solid rgba(58,36,40,.6);background:transparent;
+  border:1px solid rgba(201,168,76,.6);background:transparent;
   color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap;
 }
 .pill:hover{background:rgba(212,160,23,.08);border-color:rgba(212,160,23,.3)}
-.pill.active{background:var(--rescue);border-color:var(--rescue);color:#fff}
+.pill.active{background:var(--gold);border-color:var(--gold);color:#04040A}
 
 .sort-select{
   padding:7px 28px 7px 10px;border-radius:10px;
@@ -285,17 +312,17 @@ body::after{
 /* ---- CATEGORY HEADER ---- */
 .cat-header{
   display:flex;align-items:center;justify-content:space-between;
-  padding:8px 12px;border-radius:10px;
-  background:rgba(28,16,18,.7);border:1px solid rgba(58,36,40,.5);
+  padding:10px 14px;border-radius:12px;
+  background:var(--card);border:1px solid var(--border);
   margin-bottom:8px;cursor:pointer;
   transition:all .2s;user-select:none;
 }
-.cat-header:hover{border-color:rgba(212,160,23,.25)}
-.cat-header-left{display:flex;align-items:center;gap:10px}
-.cat-icon{font-size:1.1rem}
+.cat-header:hover{border-color:rgba(201,168,76,.35);background:var(--card2)}
+.cat-header-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cat-icon{font-size:1.1rem;opacity:.7}
 .cat-name{
   font-family:'Oswald',sans-serif;
-  font-size:.72rem;letter-spacing:2px;color:var(--goldL);
+  font-size:.82rem;letter-spacing:1.5px;color:var(--txt);font-weight:500;
 }
 .cat-count{
   font-size:.65rem;font-family:'JetBrains Mono',monospace;
@@ -311,11 +338,11 @@ body::after{
   max-width:calc(100vw - 120px);
 }
 .caisse-items-summary span{
-  color:var(--rescue);font-weight:600;
+  color:var(--txt);font-weight:500;
   font-family:'JetBrains Mono',monospace;font-size:.58rem;
 }
 .cat-arrow{
-  font-size:.7rem;color:var(--gold);
+  font-size:.7rem;color:var(--muted);
   transition:transform .3s;
 }
 .cat-arrow.collapsed{transform:rotate(-90deg)}
@@ -325,7 +352,7 @@ body::after{
   display:block;
   margin-bottom:18px;
   padding:8px 12px;
-  background:rgba(28,16,18,.4);
+  background:rgba(18,18,26,.4);
   border:1px solid var(--border);
   border-radius:0 0 10px 10px;
   margin-top:-4px;
@@ -373,22 +400,22 @@ body::after{
 
 /* ---- EN SORTIE visual indicator ---- */
 .item-card.en-sortie{
-  border-color:rgba(230,81,0,.4);
-  background:rgba(230,81,0,.06);
+  border-color:rgba(201,168,76,.4);
+  background:rgba(201,168,76,.06);
 }
 .item-card.en-sortie::after{
   content:'EN SORTIE';
   position:absolute;top:6px;right:8px;
   font-family:'Oswald',sans-serif;font-size:.5rem;letter-spacing:1.2px;
   padding:2px 7px;border-radius:6px;
-  background:rgba(230,81,0,.2);color:var(--rescue);
+  background:rgba(201,168,76,.2);color:var(--gold);
   animation:pulse-badge 2s infinite;
 }
 /* ---- SAC CONTAINER CARDS (V10.2) ---- */
 .sac-container-card{position:relative}
 .sac-container-card::before{
   content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(230,81,0,.04) 0%,transparent 60%);
+  background:linear-gradient(135deg,rgba(201,168,76,.04) 0%,transparent 60%);
   pointer-events:none;border-radius:12px;
 }
 .sac-container-card:hover{
@@ -418,17 +445,17 @@ body::after{
 .item-group-expand .item-card{margin-bottom:6px}
 
 .cat-header.en-sortie-group{
-  border-color:var(--rescue) !important;
-  background:rgba(230,81,0,.1) !important;
-  box-shadow:0 0 12px rgba(230,81,0,.15);
+  border-color:var(--gold) !important;
+  background:rgba(201,168,76,.1) !important;
+  box-shadow:0 0 12px rgba(201,168,76,.15);
 }
 
 .item-left{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
 .item-icon{
   font-size:1.3rem;width:38px;height:38px;
-  background:rgba(58,36,40,.5);border-radius:10px;
+  background:rgba(201,168,76,.5);border-radius:10px;
   display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;border:1px solid rgba(68,40,46,.4);
+  flex-shrink:0;border:1px solid rgba(201,168,76,.4);
 }
 .item-info{min-width:0}
 .item-name{
@@ -441,7 +468,7 @@ body::after{
   font-size:.62rem;color:var(--gold);margin-top:2px;
 }
 .item-fab{
-  font-size:.62rem;color:var(--rescue);opacity:.8;
+  font-size:.62rem;color:var(--gold);opacity:.8;
   font-style:italic;margin-top:1px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
@@ -496,7 +523,7 @@ body::after{
   display:flex;align-items:center;justify-content:center;padding:16px;
 }
 .modal-box{
-  background:rgba(28,16,18,.97);
+  background:rgba(18,18,26,.97);
   border:1px solid rgba(212,160,23,.3);border-radius:18px;
   padding:24px;max-width:420px;width:100%;
   animation:modal-in .25s ease forwards;
@@ -511,7 +538,7 @@ body::after{
 }
 .modal-close{
   width:32px;height:32px;border-radius:8px;
-  background:rgba(58,36,40,.5);border:none;
+  background:rgba(201,168,76,.5);border:none;
   color:var(--muted);font-size:1.1rem;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   transition:all .2s;flex-shrink:0;
@@ -532,7 +559,7 @@ body::after{
 
 .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
 .detail-cell{
-  background:rgba(12,6,8,.5);border-radius:10px;
+  background:rgba(4,4,10,.5);border-radius:10px;
   padding:10px 12px;
 }
 .detail-cell-label{
@@ -548,7 +575,7 @@ body::after{
 /* ---- TIMELINE (historique) ---- */
 .history-item{
   display:flex;gap:12px;padding:10px 0;
-  border-bottom:1px solid rgba(58,36,40,.4);
+  border-bottom:1px solid rgba(201,168,76,.4);
 }
 .history-item:last-child{border:none}
 .history-dot{
@@ -564,14 +591,14 @@ body::after{
   z-index:200;
   display:flex;align-items:center;gap:8px;
   padding:12px 24px;border-radius:28px;
-  background:linear-gradient(135deg,var(--rescue),var(--rescueL));
-  border:none;color:#fff;cursor:pointer;
+  background:linear-gradient(135deg,var(--gold),var(--goldL));
+  border:none;color:#04040A;cursor:pointer;
   font-family:'Oswald',sans-serif;font-size:.75rem;letter-spacing:2px;
-  box-shadow:0 6px 24px rgba(230,81,0,.35);
+  box-shadow:0 6px 24px rgba(201,168,76,.35);
   transition:all .25s;
 }
 .fab:hover{
-  box-shadow:0 8px 32px rgba(230,81,0,.5);
+  box-shadow:0 8px 32px rgba(201,168,76,.5);
   transform:translateX(-50%) translateY(-2px);
 }
 .fab:active{transform:translateX(-50%) scale(.97)}
@@ -580,7 +607,7 @@ body::after{
 .toast-wrap{position:fixed;bottom:70px;right:14px;z-index:400;display:flex;flex-direction:column;gap:8px}
 .toast{
   padding:10px 16px;border-radius:12px;
-  background:rgba(28,16,18,.97);backdrop-filter:blur(16px);
+  background:rgba(18,18,26,.97);backdrop-filter:blur(16px);
   font-size:.82rem;font-weight:600;
   border:1px solid;
   box-shadow:0 4px 16px rgba(0,0,0,.4);
@@ -602,7 +629,7 @@ body::after{
 .qr-result-box{
   display:flex;flex-direction:column;align-items:center;gap:8px;
   padding:16px;border-radius:12px;
-  background:rgba(12,6,8,.6);border:1px solid var(--border);
+  background:rgba(4,4,10,.6);border:1px solid var(--border);
   margin-top:8px;
 }
 .qr-result-box .qr-label{
@@ -617,6 +644,48 @@ body::after{
 .d1{animation-delay:.05s}.d2{animation-delay:.1s}.d3{animation-delay:.15s}
 .d4{animation-delay:.2s}.d5{animation-delay:.25s}
 
+/* ---- POPOVER API ---- */
+[popover]{
+  background:var(--card,#0a0a0f);
+  border:1px solid var(--gold,#C9A84C);
+  color:var(--txt,#EBE6DF);
+  border-radius:12px;
+  padding:16px 18px;
+  max-width:320px;
+  box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 1px rgba(201,168,76,.1);
+  font-family:'Inter',sans-serif;
+  font-size:13px;
+  line-height:1.6;
+  margin:auto;
+}
+[popover]::backdrop{
+  background:rgba(4,4,10,.4);
+}
+[popover] .pop-title{
+  font-family:'Oswald',sans-serif;
+  font-size:13px;
+  letter-spacing:1.5px;
+  color:var(--gold,#C9A84C);
+  margin-bottom:8px;
+  display:flex;align-items:center;gap:8px;
+}
+[popover] .pop-title svg{flex-shrink:0}
+[popover] p{color:var(--muted,#C9BAA9);margin-bottom:6px}
+[popover] p:last-child{margin-bottom:0}
+[popover] .pop-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+[popover] .pop-legend-item{display:flex;align-items:center;gap:6px;font-size:12px}
+[popover] .pop-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.pop-trigger{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:32px;height:32px;border-radius:50%;
+  border:1px solid rgba(201,168,76,.25);background:rgba(201,168,76,.06);
+  color:var(--gold,#C9A84C);font-size:11px;font-weight:700;
+  cursor:pointer;transition:all .2s;flex-shrink:0;
+  font-family:'Inter',sans-serif;line-height:1;
+  padding:0;vertical-align:middle;
+}
+.pop-trigger:hover{background:rgba(201,168,76,.15);border-color:var(--gold)}
+
 /* ---- MOBILE ---- */
 @media(max-width:480px){
   .kpi-strip{grid-template-columns:repeat(2,1fr)}
@@ -625,6 +694,10 @@ body::after{
   .modal-status-bar{flex-direction:column}
   .modal-action-btn{min-width:unset}
   .hdr-stat{display:none}
+  .back-btn{width:44px;height:44px;font-size:1.2rem}
+  .pop-trigger{width:36px;height:36px;font-size:13px}
+  .caisse-kpi{grid-template-columns:repeat(3,1fr)}
+  .view-toggle-btn{padding:12px 8px;min-height:48px}
 }
 
 /* ═══════════════════════════════════════════
@@ -705,7 +778,7 @@ body::after{
 .cd-cat-group{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:12px;overflow:hidden}
 .cd-cat-header{padding:14px 18px;font-family:'Oswald',sans-serif;font-size:.8rem;letter-spacing:2px;color:var(--goldL);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
 .cd-cat-count{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted)}
-.cd-item-row{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid rgba(58,36,40,.3);transition:background .15s}
+.cd-item-row{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid rgba(201,168,76,.3);transition:background .15s}
 .cd-item-row:last-child{border-bottom:none}
 .cd-item-row:hover{background:rgba(212,160,23,.03)}
 .cd-item-info{flex:1;min-width:0}
@@ -744,7 +817,7 @@ body::after{
 .slide-up-anim{animation:slide-up-in .15s ease-out}
 
 /* Pulse badge */
-@keyframes pulse-orange{0%,100%{box-shadow:0 0 0 0 rgba(230,81,0,.4)}50%{box-shadow:0 0 8px 3px rgba(230,81,0,.2)}}
+@keyframes pulse-orange{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.4)}50%{box-shadow:0 0 8px 3px rgba(201,168,76,.2)}}
 .pulse-badge{animation:pulse-orange 1.5s ease infinite}
 
 /* Button tap — scale + ripple */
@@ -826,17 +899,14 @@ body::after{
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-<div id="pickOnActiveBanner"></div>
-<script>
-(function(){try{var h=JSON.parse(localStorage.getItem('volo_history')||'[]'),closed=new Set();h.forEach(function(tx){if(tx.statut==='ANNULÉ'||tx.statut==='RETOURNÉ')closed.add((tx.original_timestamp||tx.timestamp)+tx.sauveteur_id)});var active=h.filter(function(tx){return tx.statut==='ACTIF'&&tx.mode==='PICK-ON'&&!closed.has(tx.timestamp+tx.sauveteur_id)});if(active.length===0)return;var totalItems=active.reduce(function(n,tx){try{return n+JSON.parse(tx.items||'[]').length}catch(e){return n}},0);document.getElementById('pickOnActiveBanner').innerHTML='<div onclick="window.location.href=\'index.html\'" style="position:sticky;top:0;z-index:9999;padding:10px 16px;background:linear-gradient(135deg,rgba(230,81,0,.95),rgba(192,57,43,.9));color:#fff;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:2px solid #E65100"><span style="font-size:20px">⚠️</span><div style="flex:1"><div style="font-weight:800;font-size:13px;letter-spacing:1px;font-family:Oswald,sans-serif">PICK ON ACTIF — '+totalItems+' item'+(totalItems>1?'s':'')+' sorti'+(totalItems>1?'s':'')+'</div><div style="font-size:10px;opacity:.85">Toucher pour retourner au Pick-Off</div></div><span style="font-size:16px">→</span></div>';}catch(e){}})();
-</script>
-<script src="error-monitor.js"></script>
-<script src="data-inventory.js?v=19"></script>
-<script src="data-personnel-stub.js?v=19"></script>
-<script src="firebase-config.js"></script>
-<script src="firebase-service.js"></script>
-<script src="volo-network.js"></script>
-<script src="logo.js"></script>
+<script src="error-monitor.js?v=20"></script>
+<script src="data.js?v=20"></script>
+<script src="volo-icons.js?v=20"></script>
+<script src="firebase-config.js?v=20"></script>
+<script src="firebase-service.js?v=20"></script>
+<script src="volo-network.js?v=20"></script>
+<script src="logo.js?v=20"></script>
+<script src="king-logo.js"></script>
 <div class="top-shimmer"></div>
 
 <!-- HEADER -->
@@ -845,12 +915,13 @@ body::after{
     <div class="header-left">
       <a href="index.html" class="back-btn" title="Retour" aria-label="Retour à l'accueil">←</a>
       <div class="logo-ring">
-        <img src="eagle_tactic.png" alt="Golden Eagles" onerror="this.parentElement.innerHTML='🦅'">
+        <img src="eagle_tactic.png" alt="Golden Eagles" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.parentElement.innerHTML='GE'}">
       </div>
       <div>
-        <div class="header-title">INVENTAIRE / STOCKAGE TEMPS RÉEL</div>
-        <div class="header-sub">INVENTAIRE EN TEMPS RÉEL</div>
+        <div class="header-title">INVENTAIRE</div>
+        <div class="header-sub" id="hdr-live-count">Suivi en temps réel</div>
       </div>
+      <button class="pop-trigger" popovertarget="pop-status-legend" style="margin-left:8px">?</button>
     </div>
     <div class="header-right">
       <div class="hdr-stat">
@@ -867,6 +938,52 @@ body::after{
 <!-- TOAST -->
 <div class="toast-wrap" id="toastWrap"></div>
 
+<!-- ═══ POPOVER API — INFO POPOVERS ═══ -->
+<div id="pop-kpi-total" popover>
+  <div class="pop-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>INDICATEURS KPI</div>
+  <p>Ces indicateurs montrent l'etat en temps reel de tout l'inventaire Golden Eagles.</p>
+  <div class="pop-legend">
+    <div class="pop-legend-item"><span class="pop-legend-dot" style="background:var(--goldL)"></span> Total items actifs</div>
+    <div class="pop-legend-item"><span class="pop-legend-dot" style="background:var(--dispo)"></span> Disponibles au depot</div>
+    <div class="pop-legend-item"><span class="pop-legend-dot" style="background:var(--sorti)"></span> En sortie sur chantier</div>
+    <div class="pop-legend-item"><span class="pop-legend-dot" style="background:var(--manquant)"></span> Alertes a traiter</div>
+  </div>
+  <p style="margin-top:10px;font-size:11px;color:var(--muted)">Cliquer sur un KPI pour filtrer la liste par ce statut.</p>
+</div>
+
+<div id="pop-kpi-alertes" popover>
+  <div class="pop-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--manquant)" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>ALERTES</div>
+  <p>Les alertes incluent :</p>
+  <p style="padding-left:8px">- Items en inspection requise<br>- Items en maintenance<br>- Certifications expirees<br>- Items marques a surveiller<br>- Equipements manquants</p>
+  <p style="margin-top:8px;font-size:11px;color:var(--muted)">Cliquer pour ouvrir le panneau d'alertes detaille.</p>
+</div>
+
+<div id="pop-view-help" popover>
+  <div class="pop-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>MODES DE VUE</div>
+  <p><strong style="color:var(--gold)">ITEMS</strong> — Affiche chaque equipement individuellement avec son statut, sa couleur de tape et sa caisse d'origine. Filtrable par categorie et statut.</p>
+  <p><strong style="color:var(--gold)">CAISSES</strong> — Affiche les contenants (sacs, caisses, kits) avec leurs items regroupes. Vue ideale pour verifier le contenu d'un sac avant deploiement.</p>
+</div>
+
+<div id="pop-status-legend" popover>
+  <div class="pop-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>LEGENDE DES STATUTS</div>
+  <div class="pop-legend" style="flex-direction:column;gap:6px">
+    <div class="pop-legend-item"><span class="pop-legend-dot" style="background:var(--dispo)"></span> <strong>Disponible</strong> — Pret a etre deploye</div>
+    <div class="pop-legend-item"><span class="pop-legend-dot" style="background:var(--sorti)"></span> <strong>Sorti</strong> — Deploye sur un chantier</div>
+    <div class="pop-legend-item"><span class="pop-legend-dot" style="background:var(--inspect,#3B82F6)"></span> <strong>Inspection</strong> — Verification requise</div>
+    <div class="pop-legend-item"><span class="pop-legend-dot" style="background:var(--orange,#E67E22)"></span> <strong>Maintenance</strong> — En reparation</div>
+    <div class="pop-legend-item"><span class="pop-legend-dot" style="background:var(--destruct,#6B21A8)"></span> <strong>Destruction</strong> — Retire de service</div>
+  </div>
+  <p style="margin-top:10px;font-size:11px;color:var(--muted)">Cliquer sur un item pour voir ses details complets et changer son statut.</p>
+</div>
+
+<div id="pop-deployed-info" popover>
+  <div class="pop-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>ITEMS EN SORTIE</div>
+  <p>Les items en sortie sont actuellement deployes sur le terrain via une transaction PICK-ON.</p>
+  <p>Le bouton <strong style="color:var(--dispo)">TOUT DISPONIBLE</strong> remet tous les items a l'etat disponible en nettoyant l'historique des sorties.</p>
+  <p style="margin-top:8px;font-size:11px;color:var(--manquant)">Attention : cette action est irreversible et s'applique a tous les items sortis.</p>
+</div>
+<!-- ═══ END POPOVERS ═══ -->
+
 <!-- MODAL -->
 <div id="modalRoot"></div>
 
@@ -875,8 +992,9 @@ body::after{
 
   <!-- VIEW TOGGLE -->
   <div class="view-toggle slide-up d1" id="viewToggle">
-    <button class="view-toggle-btn active" id="vt-items" onclick="switchView('items')">📦 ITEMS</button>
-    <button class="view-toggle-btn" id="vt-caisses" onclick="switchView('caisses')">📋 CAISSES</button>
+    <button class="view-toggle-btn active" id="vt-items" onclick="switchView('items')">ITEMS</button>
+    <button class="view-toggle-btn" id="vt-caisses" onclick="switchView('caisses')">CAISSES</button>
+    <button class="pop-trigger" popovertarget="pop-view-help" style="margin-left:4px">?</button>
   </div>
 
   <!-- ═══ ITEMS VIEW (existing) ═══ -->
@@ -886,7 +1004,7 @@ body::after{
   <div class="kpi-strip slide-up d1" id="kpiStrip">
     <div class="kpi-card" onclick="setFilter('tous',document.querySelector('[data-f=tous]'))" style="cursor:pointer">
       <div class="kpi-num" id="kpi-total" style="color:var(--goldL)">—</div>
-      <div class="kpi-label">TOTAL</div>
+      <div class="kpi-label">TOTAL <button class="pop-trigger" popovertarget="pop-kpi-total" style="margin-left:4px" onclick="event.stopPropagation()">?</button></div>
     </div>
     <div class="kpi-card" onclick="setFilter('disponible',document.querySelector('[data-f=disponible]'))" style="cursor:pointer">
       <div class="kpi-num" id="kpi-dispo" style="color:var(--dispo)">—</div>
@@ -898,15 +1016,15 @@ body::after{
     </div>
     <div class="kpi-card" onclick="toggleAlertPanel()" style="cursor:pointer">
       <div class="kpi-num" id="kpi-alert" style="color:var(--manquant)">—</div>
-      <div class="kpi-label">ALERTES</div>
+      <div class="kpi-label">ALERTES <button class="pop-trigger" popovertarget="pop-kpi-alertes" style="margin-left:4px" onclick="event.stopPropagation()">?</button></div>
     </div>
   </div>
 
   <!-- DEPLOYED BANNER + RESET BUTTON -->
-  <div id="deployedBanner" class="slide-up d1" style="display:none;margin-bottom:12px;background:rgba(230,81,0,.1);border:1px solid rgba(230,81,0,.3);border-radius:12px;padding:14px 16px">
+  <div id="deployedBanner" class="slide-up d1" style="display:none;margin-bottom:12px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);border-radius:12px;padding:14px 16px">
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
       <div>
-        <div style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;color:var(--rescue)">📤 ITEMS EN SORTIE</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;color:var(--gold)">ITEMS EN SORTIE <button class="pop-trigger" popovertarget="pop-deployed-info" style="margin-left:6px" onclick="event.stopPropagation()">?</button></div>
         <div style="font-size:12px;color:var(--muted);margin-top:2px"><span id="deployedCount">0</span> items marqués déployés dans l'historique</div>
       </div>
       <button onclick="resetAllDeployed()" style="padding:10px 20px;border-radius:10px;border:1px solid rgba(39,174,96,.4);background:rgba(39,174,96,.15);color:var(--dispo);font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;cursor:pointer;transition:all .2s;white-space:nowrap" onmouseover="this.style.background='rgba(39,174,96,.3)'" onmouseout="this.style.background='rgba(39,174,96,.15)'">TOUT DISPONIBLE</button>
@@ -919,12 +1037,12 @@ body::after{
   <!-- CATEGORY TABS -->
   <div class="cat-tabs slide-up d2" id="catTabs">
     <button class="cat-tab active" data-tab="tous" onclick="setCatTab('tous',this)">TOUS <span class="cat-tab-count" id="tab-count-tous"></span></button>
-    <button class="cat-tab" data-tab="sac" onclick="setCatTab('sac',this)">🎒 SACS <span class="cat-tab-count" id="tab-count-sac"></span></button>
-    <button class="cat-tab" data-tab="caisse" onclick="setCatTab('caisse',this)">📦 CAISSES <span class="cat-tab-count" id="tab-count-caisse"></span></button>
-    <button class="cat-tab" data-tab="surplus" onclick="setCatTab('surplus',this)">🗃️ SURPLUS <span class="cat-tab-count" id="tab-count-surplus"></span></button>
-    <button class="cat-tab" data-tab="kit" onclick="setCatTab('kit',this)">🪢 KITS <span class="cat-tab-count" id="tab-count-kit"></span></button>
-    <button class="cat-tab" data-tab="autre" onclick="setCatTab('autre',this)">🔧 AUTRE <span class="cat-tab-count" id="tab-count-autre"></span></button>
-    <button class="cat-tab" data-tab="surv" onclick="setCatTab('surv',this)">👷 SURVEILLANT <span class="cat-tab-count" id="tab-count-surv"></span></button>
+    <button class="cat-tab" data-tab="sac" onclick="setCatTab('sac',this)">SACS <span class="cat-tab-count" id="tab-count-sac"></span></button>
+    <button class="cat-tab" data-tab="caisse" onclick="setCatTab('caisse',this)">CAISSES <span class="cat-tab-count" id="tab-count-caisse"></span></button>
+    <button class="cat-tab" data-tab="surplus" onclick="setCatTab('surplus',this)">SURPLUS <span class="cat-tab-count" id="tab-count-surplus"></span></button>
+    <button class="cat-tab" data-tab="kit" onclick="setCatTab('kit',this)">KITS <span class="cat-tab-count" id="tab-count-kit"></span></button>
+    <button class="cat-tab" data-tab="autre" onclick="setCatTab('autre',this)">AUTRE <span class="cat-tab-count" id="tab-count-autre"></span></button>
+    <button class="cat-tab" data-tab="surv" onclick="setCatTab('surv',this)">SURVEILLANT <span class="cat-tab-count" id="tab-count-surv"></span></button>
   </div>
 
   <!-- FILTER BAR -->
@@ -947,16 +1065,16 @@ body::after{
   </div>
   <div class="filter-pills slide-up d2" id="filterPills">
     <button class="pill active" data-f="tous" onclick="setFilter('tous',this)">TOUS</button>
-    <button class="pill" data-f="disponible" onclick="setFilter('disponible',this)">✅ DISPO</button>
-    <button class="pill" data-f="sorti" onclick="setFilter('sorti',this)">📤 SORTIS</button>
-    <button class="pill" data-f="inspection" onclick="setFilter('inspection',this)">🔍 INSPECTION</button>
-    <button class="pill" data-f="manquant" onclick="setFilter('manquant',this)">🚨 MANQUANT</button>
+    <button class="pill" data-f="disponible" onclick="setFilter('disponible',this)">DISPO</button>
+    <button class="pill" data-f="sorti" onclick="setFilter('sorti',this)">SORTIS</button>
+    <button class="pill" data-f="inspection" onclick="setFilter('inspection',this)">INSPECTION</button>
+    <button class="pill" data-f="manquant" onclick="setFilter('manquant',this)">MANQUANT</button>
   </div>
 
   <!-- DESTROYED ITEMS BANNER -->
   <div id="destroyedBanner" style="display:none;margin:12px 16px 0;padding:12px 14px;background:rgba(107,33,168,.08);border:1px solid rgba(107,33,168,.3);border-radius:12px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <div style="font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:2px;color:var(--destruct)">☠️ ITEMS DÉTRUITS</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:2px;color:var(--destruct)">ITEMS DÉTRUITS</div>
       <div style="display:flex;gap:6px">
         <button onclick="exportDestroyedList()" style="padding:4px 10px;border-radius:6px;background:rgba(107,33,168,.15);border:1px solid rgba(107,33,168,.3);color:var(--destruct);font-family:'Oswald',sans-serif;font-size:.55rem;letter-spacing:1px;cursor:pointer">EXPORTER</button>
       </div>
@@ -969,7 +1087,7 @@ body::after{
 
   <!-- EMPTY STATE -->
   <div id="emptyState" class="empty-state slide-up d4" style="display:none">
-    <div style="font-size:2.5rem;margin-bottom:10px">📦</div>
+    <div style="font-size:2.5rem;margin-bottom:10px">CHARGEMENT...</div>
     <div style="font-family:'Oswald',sans-serif;color:var(--gold);letter-spacing:2px;font-size:.85rem;margin-bottom:6px">AUCUN RÉSULTAT</div>
     <div style="font-size:.78rem;color:var(--muted)">Aucun item ne correspond à votre recherche</div>
   </div>
@@ -996,8 +1114,8 @@ body::after{
 
 <!-- THEME PILL -->
 <div class="theme-pill">
-  <button class="theme-btn active" id="btnDark" onclick="setTheme('dark')" aria-label="Mode sombre">🌙</button>
-  <button class="theme-btn" id="btnLight" onclick="setTheme('light')" aria-label="Mode clair">☀️</button>
+  <button class="theme-btn active" id="btnDark" onclick="setTheme('dark')" aria-label="Mode sombre"></button>
+  <button class="theme-btn" id="btnLight" onclick="setTheme('light')" aria-label="Mode clair"></button>
 </div>
 
 <script>
@@ -1006,8 +1124,18 @@ body::after{
 //  Vanilla JS, no frameworks
 // ================================================================
 
-// COULEUR_HEX déclaré dans data-inventory.js — ne pas re-déclarer ici
+// COULEUR_HEX déclaré dans data.js — ne pas re-déclarer ici
 function escapeHtml(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
+function pluralizeName(name, count) {
+  if (!name || count <= 1) return name;
+  const words = ['Poulie','Sangle','Longe','Protecteur','Prussik','Plaque','Dégaine'];
+  for (const w of words) {
+    if (name.startsWith(w + ' ') || name === w) {
+      return name.replace(w, w + 's');
+    }
+  }
+  return name;
+}
 function safeGetLS(k){try{return localStorage.getItem(k);}catch(e){return null;}}
 function safeSetLS(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 
@@ -1070,6 +1198,10 @@ function toast(msg,type='gold'){
 // Mapping etat → status pour l'UI
 // ITEMS, CAISSES, GROUPS sont définis dans data.js (chargé via <script src>)
 
+// Safe icon rendering — uses volo-icons.js SVG if available, falls back to text key
+function _icon(item){return typeof getItemIcon==='function'?getItemIcon(item,24,true):(item&&item.icon?item.icon:'');}
+function _iconKey(key){if(typeof getIconByKey!=='function')return key||'';var resolved=key;if(typeof EMOJI_TO_KEY!=='undefined'&&EMOJI_TO_KEY[key])resolved=EMOJI_TO_KEY[key];return getIconByKey(resolved,24,true);}
+
 function etatToStatus(etat){
   if(!etat) return 'disponible';
   const e = etat.toLowerCase();
@@ -1129,7 +1261,7 @@ function buildUIItems(){
       id: i.id,
       name: i.name,
       cat: i.cat,
-      icon: i.icon || '📦',
+      icon: _icon(i),
       status,
       etat: i.etat || 'Bon',
       desc: i.desc || '',
@@ -1186,12 +1318,18 @@ function getStatusLabel(s){
 function updateKPIs(items){
   // KPI counts use ALL items (not filtered) for a global view
   const all = UI_ITEMS;
-  document.getElementById('kpi-total').textContent = all.length;
-  document.getElementById('kpi-dispo').textContent = all.filter(i=>i.status==='disponible').length;
-  document.getElementById('kpi-sorti').textContent = all.filter(i=>i.status==='sorti').length;
+  const totalCount = all.length;
+  const dispoCount = all.filter(i=>i.status==='disponible').length;
+  const sortiCount = all.filter(i=>i.status==='sorti').length;
+  document.getElementById('kpi-total').textContent = totalCount;
+  document.getElementById('kpi-dispo').textContent = dispoCount;
+  document.getElementById('kpi-sorti').textContent = sortiCount;
   const alertGroups = getAlertItems(all);
   const alertCount = alertGroups.reduce((s,g)=>s+g.items.length,0);
   document.getElementById('kpi-alert').textContent = alertCount;
+  // Live count in header
+  const lc = document.getElementById('hdr-live-count');
+  if(lc) lc.textContent = sortiCount > 0 ? sortiCount + ' item' + (sortiCount>1?'s':'') + ' en circulation' : totalCount + ' items — tout disponible';
   window._lastAlertGroups = alertGroups;
   window._lastAlertCount = alertCount;
   // Auto-refresh panel if open
@@ -1207,7 +1345,7 @@ function getAlertItems(items){
   // 1. MANQUANT — signalé manquant via incidents ou statut
   const manquants = items.filter(i=>i.status==='manquant');
   if(manquants.length) groups.push({
-    key:'manquant', title:'MANQUANT', icon:'🚨',
+    key:'manquant', title:'MANQUANT', icon:'!',
     color:'var(--manquant)', bg:'rgba(192,57,43,.12)',
     desc:'Items signalés manquants lors d\'un pick-off ou manuellement',
     items: manquants.map(i=>({...i, reason:'Signalé manquant', reasonDetail:i.since?'Depuis '+i.since:''}))
@@ -1216,7 +1354,7 @@ function getAlertItems(items){
   // 2. INSPECTION REQUISE — statut inspection (skip MSQ/PAL/SAC)
   const inspections = items.filter(i=>i.status==='inspection'&&itemRequiresInspection(i));
   if(inspections.length) groups.push({
-    key:'inspection', title:'INSPECTION REQUISE', icon:'🔍',
+    key:'inspection', title:'INSPECTION REQUISE', icon:'?',
     color:'var(--inspect)', bg:'rgba(59,130,246,.12)',
     desc:'Items nécessitant une inspection avant remise en service',
     items: inspections.map(i=>({...i, reason:'Inspection requise', reasonDetail:i.etat||''}))
@@ -1230,7 +1368,7 @@ function getAlertItems(items){
     return dt && dt.getTime() < now.getTime();
   });
   if(expired.length) groups.push({
-    key:'expired', title:'EXPIRÉ', icon:'⛔',
+    key:'expired', title:'EXPIRÉ', icon:'X',
     color:'var(--manquant)', bg:'rgba(192,57,43,.08)',
     desc:'Certification/inspection expirée — retrait immédiat requis',
     items: expired.map(i=>({...i, reason:'Expiré', reasonDetail:'EXP '+i.expiry}))
@@ -1246,7 +1384,7 @@ function getAlertItems(items){
     return days >= 0 && days < 90;
   });
   if(expSoon.length) groups.push({
-    key:'expSoon', title:'EXPIRATION PROCHE', icon:'⚠️',
+    key:'expSoon', title:'EXPIRATION PROCHE', icon:'!',
     color:'var(--orange)', bg:'rgba(230,126,34,.08)',
     desc:'Expiration dans moins de 90 jours — planifier remplacement',
     items: expSoon.map(i=>{
@@ -1259,8 +1397,8 @@ function getAlertItems(items){
   // 5. EN SORTIE > 24H — sorti depuis plus d'un jour
   const overdue = items.filter(i=>i.status==='sorti'&&isOverdue(i.since));
   if(overdue.length) groups.push({
-    key:'overdue', title:'SORTIE > 24H', icon:'📤',
-    color:'var(--rescue)', bg:'rgba(230,81,0,.08)',
+    key:'overdue', title:'SORTIE > 24H', icon:'>',
+    color:'var(--rescue)', bg:'rgba(201,168,76,.08)',
     desc:'Items en sortie depuis plus de 24h — retour à confirmer',
     items: overdue.map(i=>({...i, reason:'Sortie > 24h', reasonDetail:'Depuis '+timeSince(i.since)+' par '+(i.assignee||'?')}))
   });
@@ -1275,7 +1413,7 @@ function getAlertItems(items){
     return e.includes('usur');
   });
   if(degraded.length) groups.push({
-    key:'degraded', title:'ÉTAT À SURVEILLER', icon:'👁️',
+    key:'degraded', title:'ÉTAT À SURVEILLER', icon:'o',
     color:'var(--gold)', bg:'rgba(212,160,23,.08)',
     desc:'Items avec usure notée lors de la dernière inspection',
     items: degraded.map(i=>({...i, reason:i.etat, reasonDetail:i.inspBy?'Insp: '+i.inspBy+(i.inspDate?' • '+i.inspDate:''):''}))
@@ -1303,7 +1441,7 @@ function buildAlertPanel(){
   if(!totalCount){
     panel.innerHTML = `
     <div class="alert-panel" style="text-align:center;padding:30px 16px">
-      <div style="font-size:2rem;margin-bottom:8px">✅</div>
+      <div style="font-size:2rem;margin-bottom:8px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
       <div style="font-family:'Oswald',sans-serif;font-size:.85rem;letter-spacing:2px;color:var(--dispo)">AUCUNE ALERTE</div>
       <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Tout l'inventaire est en ordre</div>
     </div>`;
@@ -1317,7 +1455,7 @@ function buildAlertPanel(){
         <div style="font-family:'Oswald',sans-serif;font-size:.9rem;letter-spacing:2px;color:var(--manquant)">DÉTAIL DES ALERTES</div>
         <div style="font-size:.7rem;color:var(--muted);margin-top:2px">${totalCount} item${totalCount>1?'s':''} nécessitant attention</div>
       </div>
-      <button onclick="document.getElementById('alertPanel').style.display='none'" style="width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;font-size:.8rem;display:flex;align-items:center;justify-content:center" aria-label="Fermer le panneau d'alertes">✕</button>
+      <button onclick="document.getElementById('alertPanel').style.display='none'" style="width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;font-size:.8rem;display:flex;align-items:center;justify-content:center" aria-label="Fermer le panneau d'alertes">X</button>
     </div>
 
     <!-- Summary bar -->
@@ -1335,7 +1473,7 @@ function buildAlertPanel(){
       <div style="font-size:.65rem;color:var(--muted);margin-bottom:8px;padding-left:2px">${g.desc}</div>
       ${g.items.map(i=>`
       <div class="alert-item" onclick="openItemModal('${i.id}')">
-        <div class="alert-item-icon">${i.icon}</div>
+        <div class="alert-item-icon">${_icon(i)}</div>
         <div class="alert-item-info">
           <div class="alert-item-name">${i.name}</div>
           <div class="alert-item-detail">${i.id}${i.serial?' • '+i.serial.substring(0,18):''}${i.caisse_nom?' • <span style="color:var(--rescue)">'+i.caisse_nom+'</span>':''}</div>
@@ -1424,7 +1562,7 @@ function applyFilters(){
   });
 
   updateKPIs(list);
-  renderItems(list, sort);
+  renderItems(list, sort, q);
 }
 
 // Helper: descriptive caisse label — "Caisse 16 — Masque + Lunettes + Gants"
@@ -1488,11 +1626,11 @@ function resetAllDeployed(){
   root.innerHTML = `<div style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" onclick="closeModal()">
     <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:400px;width:100%" onclick="event.stopPropagation()">
       <div style="text-align:center;margin-bottom:16px">
-        <div style="font-size:40px;margin-bottom:8px">✅</div>
+        <div style="font-size:40px;margin-bottom:8px"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
         <div style="font-family:'Oswald',sans-serif;font-size:18px;color:var(--dispo);letter-spacing:2px">TOUT REMETTRE DISPONIBLE</div>
       </div>
       <div style="background:var(--bg);border-radius:10px;padding:12px;margin-bottom:16px;text-align:center">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:var(--rescue)">${total}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:var(--gold)">${total}</div>
         <div style="font-size:12px;color:var(--muted);margin-top:4px">items seront remis disponibles</div>
       </div>
       <div style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:16px">Nettoie l'historique de déploiement et remet tous les items à DISPONIBLE.</div>
@@ -1628,7 +1766,7 @@ function getCaisseStatus(caisseId){
 }
 
 // ---- RENDER ----
-function renderItems(list, sort='caisse'){
+function renderItems(list, sort='caisse', searchQuery=''){
   const container = document.getElementById('itemsContainer');
   const empty = document.getElementById('emptyState');
 
@@ -1638,6 +1776,14 @@ function renderItems(list, sort='caisse'){
     return;
   }
   empty.style.display='none';
+
+  // Search results total banner
+  const _searchBanner = searchQuery ? `<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;margin:0 0 12px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);border-radius:10px;font-family:'Oswald',sans-serif;letter-spacing:1px">
+    <span style="font-size:1.3rem">&#128270;</span>
+    <span style="font-size:1.05rem;color:var(--gold);font-weight:700">${list.length} r&eacute;sultat${list.length>1?'s':''}</span>
+    <span style="font-size:.85rem;color:var(--muted)">pour</span>
+    <span style="font-size:.95rem;color:var(--txt);font-family:'JetBrains Mono',monospace;background:rgba(255,255,255,.06);padding:2px 10px;border-radius:6px">&ldquo;${escapeHtml(searchQuery)}&rdquo;</span>
+  </div>` : '';
 
   if(sort === 'caisse' && currentFilter === 'tous'){
     // Group items by their caisse_id — each caisse gets its own block
@@ -1680,7 +1826,7 @@ function renderItems(list, sort='caisse'){
     });
 
     // Add type divider headers between groups of different types
-    const typeLabels = {sac:'🎒 SACS', caisse:'📦 CAISSES', surplus:'🗃️ SURPLUS', kit:'🪢 KITS', autre:'🔧 AUTRE', surv:'👷 SURVEILLANT'};
+    const typeLabels = {sac:'SACS', caisse:'CAISSES', surplus:'SURPLUS', kit:'KITS', autre:'AUTRE', surv:'SURVEILLANT'};
     let lastType = '';
     let html = sortedEntries.map(([cid, data])=>{
       const c = data.caisse;
@@ -1689,11 +1835,11 @@ function renderItems(list, sort='caisse'){
       if(thisType !== lastType){
         // Count total items for this type
         const typeTotal = sortedEntries.filter(function(e){return getTypeKey(e[1].caisse)===thisType}).reduce(function(s,e){return s+e[1].items.length},0);
-        divider = `<div style="padding:10px 16px 6px;font-family:'Oswald',sans-serif;font-size:.85rem;letter-spacing:2px;color:var(--gold);border-bottom:1px solid var(--border);margin:12px 0 8px;display:flex;align-items:center;gap:10px">${typeLabels[thisType]||thisType.toUpperCase()} <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">${typeTotal} items</span></div>`;
+        divider = `<div style="padding:14px 16px 8px;font-family:'Oswald',sans-serif;font-size:.75rem;letter-spacing:3px;color:var(--muted);margin:16px 0 8px;display:flex;align-items:center;gap:10px">${typeLabels[thisType]||thisType.toUpperCase()} <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold);font-weight:600">${typeTotal} items</span><span style="flex:1;height:1px;background:var(--border)"></span></div>`;
         lastType = thisType;
       }
       const displayName = c ? (c.nom||c.name||cid) : cid;
-      const icon = c ? (c.icon||'📦') : '📦';
+      const icon = c ? _iconKey(c.icon) : '';
       const cStatus = getCaisseStatus(cid);
       const enMission = cStatus && cStatus.statut === 'en_mission';
       const enSortie = enMission || isCaisseEnSortie(cid);
@@ -1703,7 +1849,7 @@ function renderItems(list, sort='caisse'){
       const sortiCount = data.items.filter(i=>i.status==='sorti').length;
       const _scName = c?(c.nom||c.name||''):'';
       const _sc = (typeof SAC_COLORS!=='undefined') ? (SAC_COLORS[_scName]||SAC_COLORS[catKey]) : null;
-      const _sacBadge = _sc ? `<span style="display:inline-block;background:${_sc.hex};color:#000;font-weight:700;font-size:10px;padding:2px 8px;border-radius:10px;">● ${_sc.name}</span>` : '';
+      const _sacBadge = _sc ? `<span style="display:inline-block;background:${_sc.hex};color:#000;font-weight:700;font-size:10px;padding:2px 8px;border-radius:10px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:currentColor;margin-right:3px"></span>${_sc.name}</span>` : '';
       const _sacBorderStyle = _sc ? `border-left:4px solid ${_sc.hex};` : '';
       return divider + `
       <div class="cat-block" data-cat="${catKey}" style="${_sacBorderStyle}">
@@ -1711,14 +1857,14 @@ function renderItems(list, sort='caisse'){
           <div class="cat-header-left" style="flex-wrap:wrap;gap:4px">
             <span class="cat-icon">${icon}</span>
             <span class="cat-name">${escapeHtml(displayName).toUpperCase()}</span>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#fff;background:${_sc?_sc.hex:'var(--rescue)'};padding:2px 8px;border-radius:6px">${data.items.length}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:${_sc?'#fff':'var(--muted)'};background:${_sc?_sc.hex:'rgba(255,255,255,.08)'};padding:2px 8px;border-radius:6px">${data.items.length}</span>
             ${_sacBadge}
-            ${sortiCount?`<span style="font-size:.55rem;padding:2px 8px;border-radius:10px;background:rgba(230,81,0,.15);color:var(--rescue);font-family:'Oswald',sans-serif;letter-spacing:1px">${sortiCount} sorti${sortiCount>1?'s':''}</span>`:''}
-            ${enSortie&&!sortiCount?`<span style="font-size:.55rem;padding:2px 8px;border-radius:10px;background:rgba(230,81,0,.25);color:var(--rescue);font-family:'Oswald',sans-serif;letter-spacing:1px;animation:pulse-badge 2s infinite">📤 EN SORTIE</span>`:''}
-            ${alertCount?`<span style="font-size:.55rem;padding:2px 7px;border-radius:10px;background:rgba(192,57,43,.2);color:var(--manquant);font-family:'Oswald',sans-serif;letter-spacing:1px">⚠ ${alertCount}</span>`:''}
-            <button onclick="event.stopPropagation();printCaissePDF('${cid}')" style="font-size:.55rem;padding:3px 10px;border-radius:10px;background:rgba(249,115,22,.12);color:var(--rescue);border:1px solid rgba(249,115,22,.3);cursor:pointer;font-family:'Oswald',sans-serif;letter-spacing:1px;transition:all .2s" onmouseover="this.style.background='rgba(249,115,22,.25)'" onmouseout="this.style.background='rgba(249,115,22,.12)'">📄 PDF</button>
+            ${sortiCount?`<span style="font-size:.55rem;padding:2px 8px;border-radius:10px;background:rgba(201,168,76,.15);color:var(--gold);font-family:'Oswald',sans-serif;letter-spacing:1px">${sortiCount} sorti${sortiCount>1?'s':''}</span>`:''}
+            ${enSortie&&!sortiCount?`<span style="font-size:.55rem;padding:2px 8px;border-radius:10px;background:rgba(201,168,76,.25);color:var(--gold);font-family:'Oswald',sans-serif;letter-spacing:1px;animation:pulse-badge 2s infinite">EN SORTIE</span>`:''}
+            ${alertCount?`<span style="font-size:.55rem;padding:2px 7px;border-radius:10px;background:rgba(192,57,43,.2);color:var(--manquant);font-family:'Oswald',sans-serif;letter-spacing:1px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4650E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> ${alertCount}</span>`:''}
+            <button onclick="event.stopPropagation();openPrintSac('${cid}')" style="font-size:.7rem;padding:8px 14px;min-height:36px;border-radius:10px;background:rgba(201,168,76,.12);color:var(--gold);border:1px solid rgba(201,168,76,.3);cursor:pointer;font-family:'Oswald',sans-serif;letter-spacing:1px;transition:all .2s" onmouseover="this.style.background='rgba(201,168,76,.25)'" onmouseout="this.style.background='rgba(201,168,76,.12)'">PDF</button>
           </div>
-          <span class="cat-arrow ${collapsed?'collapsed':''}">▼</span>
+          <span class="cat-arrow ${collapsed?'collapsed':''}"><span style="font-size:10px;color:var(--muted)">&darr;</span></span>
         </div>
         <div style="padding:2px 16px 6px 40px;font-size:.6rem;color:var(--muted);font-family:'JetBrains Mono',monospace;line-height:1.4;opacity:.75">${getCaisseItemsSummary(c||{})}</div>
         <div class="items-grid ${collapsed?'collapsed':''}">
@@ -1733,28 +1879,28 @@ function renderItems(list, sort='caisse'){
       <div class="cat-block" data-cat="caisse_NONE">
         <div class="cat-header" onclick="toggleCatByBlock(this)">
           <div class="cat-header-left">
-            <span class="cat-icon">📋</span>
+            <span class="cat-icon">LISTE</span>
             <span class="cat-name">ITEMS SANS CAISSE</span>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:800;color:#fff;background:var(--muted);padding:3px 10px;border-radius:8px">${noCaisse.length}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--muted);background:rgba(255,255,255,.08);padding:2px 8px;border-radius:6px">${noCaisse.length}</span>
           </div>
-          <span class="cat-arrow ${collapsed?'collapsed':''}">▼</span>
+          <span class="cat-arrow ${collapsed?'collapsed':''}"><span style="font-size:10px;color:var(--muted)">&darr;</span></span>
         </div>
         <div class="items-grid ${collapsed?'collapsed':''}">
           ${renderGroupedItems(noCaisse)}
         </div>
       </div>`;
     }
-    container.innerHTML = html;
+    container.innerHTML = _searchBanner + html;
 
   } else if(sort === 'cat' && currentFilter === 'tous'){
     // Group by category
     const cats = {};
     list.forEach(i=>{
-      if(!cats[i.cat]) cats[i.cat]={items:[],icon:i.icon};
+      if(!cats[i.cat]) cats[i.cat]={items:[],icon:_icon(i)};
       cats[i.cat].items.push(i);
     });
 
-    container.innerHTML = Object.entries(cats).map(([cat, data])=>{
+    container.innerHTML = _searchBanner + Object.entries(cats).map(([cat, data])=>{
       const collapsed = !expandedCats.has(cat.replace(/"/g,'&quot;'));
       const alertCount = data.items.filter(i=>i.status==='manquant'||i.status==='inspection'||i.status==='destruction').length;
       return `
@@ -1763,10 +1909,10 @@ function renderItems(list, sort='caisse'){
           <div class="cat-header-left">
             <span class="cat-icon">${data.icon}</span>
             <span class="cat-name">${escapeHtml(cat).toUpperCase()}</span>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:800;color:#fff;background:var(--rescue);padding:3px 10px;border-radius:8px">${data.items.length}</span>
-            ${alertCount?`<span style="font-size:.6rem;padding:2px 7px;border-radius:10px;background:rgba(192,57,43,.2);color:var(--manquant);font-family:'Oswald',sans-serif;letter-spacing:1px">⚠ ${alertCount}</span>`:''}
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--muted);background:rgba(255,255,255,.08);padding:2px 8px;border-radius:6px">${data.items.length}</span>
+            ${alertCount?`<span style="font-size:.6rem;padding:2px 7px;border-radius:10px;background:rgba(192,57,43,.2);color:var(--manquant);font-family:'Oswald',sans-serif;letter-spacing:1px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4650E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> ${alertCount}</span>`:''}
           </div>
-          <span class="cat-arrow ${collapsed?'collapsed':''}">▼</span>
+          <span class="cat-arrow ${collapsed?'collapsed':''}"><span style="font-size:10px;color:var(--muted)">&darr;</span></span>
         </div>
         <div class="items-grid ${collapsed?'collapsed':''}">
           ${renderGroupedItems(data.items)}
@@ -1785,21 +1931,21 @@ function renderItems(list, sort='caisse'){
     const fEntries = Object.entries(fGroups).sort((a,b)=>a[0].localeCompare(b[0]));
     if(fEntries.length <= 1){
       // Single group or very few — just flat render
-      container.innerHTML = `<div class="items-grid">${renderGroupedItems(list)}</div>`;
+      container.innerHTML = _searchBanner + `<div class="items-grid">${renderGroupedItems(list)}</div>`;
     } else {
-      container.innerHTML = fEntries.map(([grpName, grpItems])=>{
+      container.innerHTML = _searchBanner + fEntries.map(([grpName, grpItems])=>{
         const catKey = 'filt_'+grpName;
         const collapsed = !expandedCats.has(catKey);
-        const icon = grpItems[0] ? grpItems[0].icon : '📦';
+        const icon = grpItems[0] ? _icon(grpItems[0]) : '';
         return `
         <div class="cat-block" data-cat="${catKey.replace(/"/g,'&quot;')}">
           <div class="cat-header" onclick="toggleCatByBlock(this)">
             <div class="cat-header-left">
               <span class="cat-icon">${icon}</span>
               <span class="cat-name">${escapeHtml(grpName).toUpperCase()}</span>
-              <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:800;color:#fff;background:var(--rescue);padding:3px 10px;border-radius:8px">${grpItems.length}</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:800;color:#04040A;background:var(--gold);padding:3px 10px;border-radius:8px">${grpItems.length}</span>
             </div>
-            <span class="cat-arrow ${collapsed?'collapsed':''}">▼</span>
+            <span class="cat-arrow ${collapsed?'collapsed':''}"><span style="font-size:10px;color:var(--muted)">&darr;</span></span>
           </div>
           <div class="items-grid ${collapsed?'collapsed':''}">
             ${renderGroupedItems(grpItems)}
@@ -1811,12 +1957,14 @@ function renderItems(list, sort='caisse'){
 }
 
 // Parse flexible date formats from data.js (e.g. "2026-05", "2027", "05/2026", "2026-05-15")
-// Items qui NE nécessitent PAS d'inspection (mousquetons, palans, sacs contenant)
+// Items qui NÉCESSITENT une inspection annuelle (PPE safety-critical seulement)
+// Harnais, longes, cordages, descendeurs, absorbeurs/ASAP
+// EXCLUT: mousquetons (Vulcan/Bm'D/William), bunkers, sangles d'ancrage, crampons, palans, sacs, prussiks, etc.
+const INSPECT_PREFIXES = new Set(['HAR','LNG','COR','CRD','DES','ASP']);
 function itemRequiresInspection(item){
   if(!item||!item.id)return false;
   const prefix=item.id.split('-')[0];
-  if(prefix==='MSQ'||prefix==='PAL'||prefix==='SAC')return false;
-  return true;
+  return INSPECT_PREFIXES.has(prefix);
 }
 
 function parseExpDate(d){
@@ -1903,14 +2051,14 @@ function renderGroupedItems(items){
     const sid = 'sac_'+sac.id.replace(/[^a-zA-Z0-9_-]/g,'');
     const couleurHex = sac.couleur ? COULEUR_HEX[sac.couleur] : null;
     const couleurDot = couleurHex ? '<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:'+couleurHex+';flex-shrink:0" title="'+escapeHtml(sac.couleur)+'"></span>' : '';
-    const sacBorder = couleurHex ? 'border-left:4px solid '+couleurHex+';' : 'border-left:4px solid var(--rescue);';
+    const sacBorder = couleurHex ? 'border-left:4px solid '+couleurHex+';' : 'border-left:4px solid var(--gold);';
     const statusBadge = '<span class="status-badge s-'+sac.status+'">'+getStatusLabel(sac.status)+'</span>';
 
     html += '<div style="margin-bottom:8px">';
     // SAC header card — clickable to expand children
     html += '<div class="sac-container-card" style="'+sacBorder+'display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden" onclick="toggleSacContainer(\''+sid+'\',event)">';
     html += '<div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1">';
-    html += '<div style="font-size:1.4rem;width:42px;height:42px;background:rgba(58,36,40,.5);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(68,40,46,.4)">'+sac.icon+'</div>';
+    html += '<div style="font-size:1.4rem;width:42px;height:42px;background:rgba(201,168,76,.5);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(201,168,76,.4)">'+_icon(sac)+'</div>';
     html += '<div style="min-width:0">';
     html += '<div style="font-size:.88rem;font-weight:700;color:var(--txt);display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+escapeHtml(sac.name)+' '+couleurDot+'</div>';
     html += '<div style="font-family:\'JetBrains Mono\',monospace;font-size:.6rem;color:var(--gold);margin-top:2px">'+escapeHtml(sac.id)+(sac.fab?' \u2022 '+escapeHtml(sac.fab):'')+'</div>';
@@ -1919,7 +2067,7 @@ function renderGroupedItems(items){
     html += '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">';
     html += statusBadge;
     html += '<span class="group-badge" style="font-size:14px;min-width:36px">'+(children.length+1)+'</span>';
-    html += '<span style="font-size:16px;color:var(--muted);transition:transform .2s" id="'+sid+'_arrow">▸</span>';
+    html += '<span style="font-size:16px;color:var(--muted);transition:transform .2s" id="'+sid+'_arrow">&rsaquo;</span>';
     html += '</div>';
     html += '</div>';
 
@@ -1927,7 +2075,7 @@ function renderGroupedItems(items){
     html += '<div id="'+sid+'" style="display:none;padding:6px 0 2px 16px;border-left:2px solid var(--border);margin-left:20px;margin-top:4px">';
     // Action buttons for the SAC itself
     html += '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">';
-    html += '<button onclick="event.stopPropagation();openItemModal(\''+sac.id+'\')" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--txt);font-family:Oswald,sans-serif;font-size:.6rem;letter-spacing:1px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor=\'var(--gold)\'" onmouseout="this.style.borderColor=\'var(--border)\'">📋 DÉTAILS SAC</button>';
+    html += '<button onclick="event.stopPropagation();openItemModal(\''+sac.id+'\')" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--txt);font-family:Oswald,sans-serif;font-size:.6rem;letter-spacing:1px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor=\'var(--gold)\'" onmouseout="this.style.borderColor=\'var(--border)\'">DÉTAILS SAC</button>';
     html += '</div>';
     // Render children with grouping (identical items inside the sac get ×N)
     const childGroups = {};
@@ -1947,11 +2095,11 @@ function renderGroupedItems(items){
         html += '<div style="margin-bottom:4px">';
         html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer" onclick="toggleGroup(\''+cgid+'\',event)">';
         html += '<div style="display:flex;align-items:center;gap:8px">';
-        html += '<span style="font-size:1rem">'+cfirst.icon+'</span>';
-        html += '<span style="font-family:Oswald,sans-serif;font-size:.75rem;letter-spacing:1px;color:var(--txt)">'+cDot+escapeHtml(cfirst.name)+'</span>';
+        html += '<span style="font-size:1rem">'+_icon(cfirst)+'</span>';
+        html += '<span style="font-family:Oswald,sans-serif;font-size:.75rem;letter-spacing:1px;color:var(--txt)">'+cDot+escapeHtml(pluralizeName(cfirst.name, cgrp.length))+'</span>';
         html += '<span class="group-badge">&times;'+cgrp.length+'</span>';
         html += '</div>';
-        html += '<span style="font-size:14px;color:var(--muted)" id="'+cgid+'_arrow">▸</span>';
+        html += '<span style="font-size:14px;color:var(--muted)" id="'+cgid+'_arrow">&rsaquo;</span>';
         html += '</div>';
         html += '<div id="'+cgid+'" style="display:none;padding:4px 0 4px 20px">';
         html += cgrp.map(ci=>renderItemCard(ci)).join('');
@@ -1979,11 +2127,11 @@ function renderGroupedItems(items){
       html += '<div style="margin-bottom:4px">';
       html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer" onclick="toggleGroup(\''+gid+'\',event)">';
       html += '<div style="display:flex;align-items:center;gap:8px">';
-      html += '<span style="font-size:1rem">'+first.icon+'</span>';
-      html += '<span style="font-family:Oswald,sans-serif;font-size:.75rem;letter-spacing:1px;color:var(--txt)">'+dot+escapeHtml(first.name)+'</span>';
+      html += '<span style="font-size:1rem">'+_icon(first)+'</span>';
+      html += '<span style="font-family:Oswald,sans-serif;font-size:.75rem;letter-spacing:1px;color:var(--txt)">'+dot+escapeHtml(pluralizeName(first.name, grp.length))+'</span>';
       html += '<span class="group-badge">&times;'+grp.length+'</span>';
       html += '</div>';
-      html += '<span style="font-size:14px;color:var(--muted)" id="'+gid+'_arrow">▸</span>';
+      html += '<span style="font-size:14px;color:var(--muted)" id="'+gid+'_arrow">&rsaquo;</span>';
       html += '</div>';
       html += '<div id="'+gid+'" style="display:none;padding:4px 0 4px 20px">';
       html += grp.map(i=>renderItemCard(i)).join('');
@@ -2008,7 +2156,7 @@ function toggleSacContainer(sacId, e){
   const isHidden = el.style.display === 'none';
   el.style.display = isHidden ? 'block' : 'none';
   if(arrow){
-    arrow.textContent = isHidden ? '▾' : '▸';
+    arrow.textContent = isHidden ? '&darr;' : '&rsaquo;';
   }
 }
 
@@ -2038,12 +2186,12 @@ function renderItemCard(i){
   return `
   <div class="item-card s-${i.status}${deployed?' en-sortie':''}" style="${sacBorder}" onclick="openItemModal('${i.id}')">
     <div class="item-left">
-      <div class="item-icon">${i.icon}</div>
+      <div class="item-icon">${_icon(i)}</div>
       <div class="item-info">
         <div class="item-name">${escapeHtml(i.name)}${couleurDot}</div>
         <div class="item-id">${escapeHtml(i.id)}${i.serial?' \u2022 <span style="color:var(--muted);font-size:.58rem">'+escapeHtml(i.serial.substring(0,15))+'</span>':''}</div>
         ${i.fab?'<div class="item-fab">'+escapeHtml(i.fab)+'</div>':''}
-        <div class="item-sub">${i.assignee||i.location||(i.caisse_nom?'<span style="color:var(--rescue);opacity:.7">'+i.caisse_nom+'</span>':'\u2014 D\u00e9p\u00f4t')}</div>
+        <div class="item-sub">${i.assignee||i.location||(i.caisse_nom?'<span style="color:var(--gold);opacity:.7">'+i.caisse_nom+'</span>':'\u2014 D\u00e9p\u00f4t')}</div>
         <div class="item-dates">
           ${i.expiry&&itemRequiresInspection(i)?'<span class="item-date '+expCls+'">'+getExpLabel(i.expiry)+'</span>':''}
           ${i.inspDate&&itemRequiresInspection(i)?'<span class="item-date insp">INSP '+i.inspDate+'</span>':''}
@@ -2100,10 +2248,10 @@ function openItemModal(id){
   const over = item.status==='sorti' && isOverdue(item.since);
 
   const statusActions = [
-    {s:'disponible', label:'✅ DISPO', bg:'rgba(39,174,96,.18)', border:'rgba(39,174,96,.4)', color:'var(--dispo)'},
-    {s:'sorti',      label:'📤 SORTI', bg:'rgba(212,160,23,.18)', border:'rgba(212,160,23,.4)', color:'var(--sorti)'},
-    {s:'inspection', label:'🔍 INSPECTER', bg:'rgba(59,130,246,.18)', border:'rgba(59,130,246,.4)', color:'var(--inspect)'},
-    {s:'manquant',   label:'🚨 MANQUANT', bg:'rgba(192,57,43,.18)', border:'rgba(192,57,43,.4)', color:'var(--manquant)'},
+    {s:'disponible', label:'DISPO', bg:'rgba(39,174,96,.18)', border:'rgba(39,174,96,.4)', color:'var(--dispo)'},
+    {s:'sorti',      label:'SORTI', bg:'rgba(212,160,23,.18)', border:'rgba(212,160,23,.4)', color:'var(--sorti)'},
+    {s:'inspection', label:'INSPECTER', bg:'rgba(59,130,246,.18)', border:'rgba(59,130,246,.4)', color:'var(--inspect)'},
+    {s:'manquant',   label:'MANQUANT', bg:'rgba(192,57,43,.18)', border:'rgba(192,57,43,.4)', color:'var(--manquant)'},
   ];
 
   document.getElementById('modalRoot').innerHTML = `
@@ -2112,15 +2260,15 @@ function openItemModal(id){
       <div class="modal-header">
         <div>
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-            <span style="font-size:1.6rem">${item.icon}</span>
+            <span style="font-size:1.6rem">${_icon(item)}</span>
             <div>
               <div style="font-family:'Oswald',sans-serif;font-size:1rem;letter-spacing:1px;color:var(--goldL)">${escapeHtml(item.name)}${item.couleur&&COULEUR_HEX[item.couleur]?`<span class="color-dot" style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${COULEUR_HEX[item.couleur]};margin-left:8px;vertical-align:middle;" title="${escapeHtml(item.couleur)}"></span>`:''}</div>
               <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--gold);margin-top:1px">${escapeHtml(item.id)}</div>
             </div>
           </div>
-          ${over?'<div style="font-size:.7rem;color:var(--manquant);font-weight:600;margin-top:4px">⚠️ DÉPASSEMENT +24H — Retour requis</div>':''}
+          ${over?'<div style="font-size:.7rem;color:var(--manquant);font-weight:600;margin-top:4px">DÉPASSEMENT +24H — Retour requis</div>':''}
         </div>
-        <button class="modal-close" onclick="closeModal()" aria-label="Fermer">✕</button>
+        <button class="modal-close" onclick="closeModal()" aria-label="Fermer">X</button>
       </div>
 
       <!-- STATUS ACTIONS -->
@@ -2137,7 +2285,7 @@ function openItemModal(id){
         const caisseNom=item.caisse_nom||item.caisse_id;
         return caisseItems.length>1?`
       <div style="margin-top:10px;padding:10px 12px;background:rgba(212,160,23,.08);border:1px solid rgba(212,160,23,.2);border-radius:10px">
-        <div style="font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:2px;color:var(--gold);margin-bottom:8px">📦 APPLIQUER À TOUT : ${escapeHtml(caisseNom).toUpperCase()} (${caisseItems.length} items)</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:2px;color:var(--gold);margin-bottom:8px">APPLIQUER À TOUT : ${escapeHtml(caisseNom).toUpperCase()} (${caisseItems.length} items)</div>
         <div style="display:flex;flex-wrap:wrap;gap:6px">
           ${statusActions.map(a=>`<button onclick="changeCaisseStatus('${item.caisse_id}','${a.s}')" style="flex:1;min-width:70px;padding:8px 6px;border-radius:8px;border:1px solid ${a.border};background:${a.bg};color:${a.color};font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:1px;cursor:pointer;transition:all .2s" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">${a.label} ×${caisseItems.length}</button>`).join('')}
         </div>
@@ -2201,17 +2349,17 @@ function openItemModal(id){
         <div style="display:flex;gap:8px">
           <input id="assignInput" type="text" placeholder="Nom du sauveteur..."
             value="${item.assignee||''}"
-            style="flex:1;padding:8px 12px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.8rem;outline:none"
+            style="flex:1;padding:8px 12px;background:rgba(4,4,10,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.8rem;outline:none"
             onfocus="this.style.borderColor='rgba(212,160,23,.45)'"
             onblur="this.style.borderColor='var(--border)'">
           <input id="destInput" type="text" placeholder="Destination..."
             value="${item.location||''}"
-            style="flex:1;padding:8px 12px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.8rem;outline:none"
-            onfocus="this.style.borderColor='rgba(230,81,0,.45)'"
+            style="flex:1;padding:8px 12px;background:rgba(4,4,10,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.8rem;outline:none"
+            onfocus="this.style.borderColor='rgba(201,168,76,.5)'"
             onblur="this.style.borderColor='var(--border)'">
           <button onclick="assignItem('${id}')"
-            style="padding:8px 14px;border-radius:9px;background:linear-gradient(135deg,var(--rescue),var(--rescueL));border:none;color:#fff;font-family:'Oswald',sans-serif;font-size:.65rem;letter-spacing:1px;cursor:pointer;white-space:nowrap">
-            ✓ ASSIGNER
+            style="padding:8px 14px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--goldL));border:none;color:#04040A;font-family:'Oswald',sans-serif;font-size:.65rem;letter-spacing:1px;cursor:pointer;white-space:nowrap">
+            OK ASSIGNER
           </button>
         </div>
       </div>
@@ -2237,18 +2385,18 @@ function openItemModal(id){
       <div id="destroySection-${item.id}" style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px">
         <button onclick="document.getElementById('destroyConfirm-${item.id}').style.display='block';this.style.display='none'"
           style="width:100%;padding:10px;border-radius:10px;background:rgba(107,33,168,.1);border:1px solid rgba(107,33,168,.3);color:var(--destruct);font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:2px;cursor:pointer">
-          ☠️ DÉTRUIRE CET ITEM
+          DÉTRUIRE CET ITEM
         </button>
         <div id="destroyConfirm-${item.id}" style="display:none;margin-top:8px;padding:12px;background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.4);border-radius:12px;text-align:center">
           <div style="font-family:'Oswald',sans-serif;font-size:.8rem;color:var(--manquant);letter-spacing:1px;margin-bottom:4px">CONFIRMER LA DESTRUCTION</div>
           <div style="font-size:.7rem;color:var(--muted);margin-bottom:8px">${item.name} (${item.id}) sera retiré de l'inventaire</div>
           <textarea id="destroyNote-${item.id}" rows="2" placeholder="Raison (expiré, brisé, perdu...)"
-            style="width:100%;margin-bottom:10px;padding:8px 10px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-family:Inter,sans-serif;font-size:.75rem;resize:none"></textarea>
+            style="width:100%;margin-bottom:10px;padding:8px 10px;background:rgba(4,4,10,.6);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-family:Inter,sans-serif;font-size:.75rem;resize:none"></textarea>
           <div style="display:flex;gap:8px">
             <button onclick="document.getElementById('destroyConfirm-${item.id}').style.display='none';document.querySelector('#destroySection-${item.id}>button').style.display='block'"
               style="flex:1;padding:8px;border-radius:8px;background:var(--card);border:1px solid var(--border);color:var(--muted);font-family:'Oswald',sans-serif;font-size:.65rem;letter-spacing:1px;cursor:pointer">ANNULER</button>
             <button onclick="destroyItem('${item.id}')"
-              style="flex:1;padding:8px;border-radius:8px;background:linear-gradient(135deg,#C0392B,#7B1A00);border:none;color:#fff;font-family:'Oswald',sans-serif;font-size:.65rem;letter-spacing:1px;cursor:pointer">☠️ CONFIRMER</button>
+              style="flex:1;padding:8px;border-radius:8px;background:linear-gradient(135deg,#C0392B,#7B1A00);border:none;color:#fff;font-family:'Oswald',sans-serif;font-size:.65rem;letter-spacing:1px;cursor:pointer">CONFIRMER DESTRUCTION</button>
           </div>
         </div>
       </div>
@@ -2341,54 +2489,54 @@ function openAddModal(){
     <div class="modal-box">
       <div class="modal-header">
         <div>
-          <div style="font-family:'Oswald',sans-serif;font-size:.95rem;letter-spacing:2px;color:var(--rescue)">➕ NOUVEL ITEM</div>
+          <div style="font-family:'Oswald',sans-serif;font-size:.95rem;letter-spacing:2px;color:var(--gold)">NOUVEL ITEM</div>
           <div style="font-size:.72rem;color:var(--muted);margin-top:3px">Ajouter un équipement au stock avec QR auto</div>
         </div>
-        <button class="modal-close" onclick="closeModal()" aria-label="Fermer">✕</button>
+        <button class="modal-close" onclick="closeModal()" aria-label="Fermer">X</button>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px">
         <div>
           <label style="font-size:.6rem;letter-spacing:1.5px;color:var(--muted);font-family:'Oswald',sans-serif;display:block;margin-bottom:4px">NOM *</label>
           <input id="add-name" type="text" placeholder="Nom de l'item"
-            style="width:100%;padding:9px 12px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.82rem;outline:none">
+            style="width:100%;padding:9px 12px;background:rgba(4,4,10,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.82rem;outline:none">
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <div>
             <label style="font-size:.6rem;letter-spacing:1.5px;color:var(--muted);font-family:'Oswald',sans-serif;display:block;margin-bottom:4px">ID (AUTO)</label>
             <input id="add-id" type="text" value="${autoId}"
-              style="width:100%;padding:9px 12px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:.78rem;outline:none">
+              style="width:100%;padding:9px 12px;background:rgba(4,4,10,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:.78rem;outline:none">
           </div>
           <div>
             <label style="font-size:.6rem;letter-spacing:1.5px;color:var(--muted);font-family:'Oswald',sans-serif;display:block;margin-bottom:4px">ICÔNE</label>
-            <input id="add-icon" type="text" value="📦" maxlength="2"
-              style="width:100%;padding:9px 12px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:1.1rem;outline:none;text-align:center">
+            <input id="add-icon" type="text" value="" maxlength="2"
+              style="width:100%;padding:9px 12px;background:rgba(4,4,10,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:1.1rem;outline:none;text-align:center">
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <div>
             <label style="font-size:.6rem;letter-spacing:1.5px;color:var(--muted);font-family:'Oswald',sans-serif;display:block;margin-bottom:4px">CATÉGORIE</label>
             <select id="add-cat" onchange="document.getElementById('add-cat-custom').style.display=this.value==='__new__'?'block':'none'"
-              style="width:100%;padding:9px 12px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.82rem;outline:none;-webkit-appearance:none">
+              style="width:100%;padding:9px 12px;background:rgba(4,4,10,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.82rem;outline:none;-webkit-appearance:none">
               ${cats.map(c=>`<option value="${c.replace(/"/g,'&quot;')}">${c}</option>`).join('')}
-              <option value="__new__">➕ Nouvelle catégorie...</option>
+              <option value="__new__">Nouvelle catégorie...</option>
             </select>
-            <input id="add-cat-custom" placeholder="Nom catégorie..." style="display:none;width:100%;padding:8px 12px;margin-top:6px;background:rgba(12,6,8,.6);border:1px solid var(--rescue);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.82rem;outline:none">
+            <input id="add-cat-custom" placeholder="Nom catégorie..." style="display:none;width:100%;padding:8px 12px;margin-top:6px;background:rgba(4,4,10,.6);border:1px solid var(--gold);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.82rem;outline:none">
           </div>
           <div>
             <label style="font-size:.6rem;letter-spacing:1.5px;color:var(--muted);font-family:'Oswald',sans-serif;display:block;margin-bottom:4px">CAISSE / GROUPE</label>
             <select id="add-caisse"
-              style="width:100%;padding:9px 12px;background:rgba(12,6,8,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.82rem;outline:none;-webkit-appearance:none">
-              <option value="">— Aucune —</option>
-              ${caisses.map(c=>`<option value="${c.id}">${c.icon||'📦'} ${c.nom||c.name||c.id} (${(c.items_contenus||[]).length})</option>`).join('')}
+              style="width:100%;padding:9px 12px;background:rgba(4,4,10,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.82rem;outline:none;-webkit-appearance:none">
+              <option value="">-- Aucune --</option>
+              ${caisses.map(c=>`<option value="${c.id}">${c.icon||''} ${c.nom||c.name||c.id} (${(c.items_contenus||[]).length})</option>`).join('')}
             </select>
           </div>
         </div>
         <button onclick="submitAddItem()"
           style="width:100%;padding:13px;border-radius:12px;
-            background:linear-gradient(135deg,var(--rescue),var(--rescueL));
-            border:none;color:#fff;font-family:'Oswald',sans-serif;
+            background:linear-gradient(135deg,var(--gold),var(--goldL));
+            border:none;color:#04040A;font-family:'Oswald',sans-serif;
             font-size:.78rem;letter-spacing:2px;cursor:pointer;margin-top:4px">
-          ✓ AJOUTER AU STOCK
+          OK AJOUTER AU STOCK
         </button>
         <div id="add-qr-result" style="display:none"></div>
       </div>
@@ -2400,7 +2548,7 @@ function submitAddItem(){
   const name = document.getElementById('add-name').value.trim();
   const id = document.getElementById('add-id').value.trim();
   const catSel = document.getElementById('add-cat').value;
-  const icon = document.getElementById('add-icon').value.trim()||'📦';
+  const icon = document.getElementById('add-icon').value.trim()||'';
   const caisseId = document.getElementById('add-caisse').value;
 
   if(!name){toast('Nom requis','red');return;}
@@ -2445,7 +2593,7 @@ function submitAddItem(){
         text: id,
         width: 140,
         height: 140,
-        colorDark: '#0C0608',
+        colorDark: '#04040A',
         colorLight: '#FFFFFF',
         correctLevel: QRCode.CorrectLevel.M
       });
@@ -2484,7 +2632,7 @@ function destroyItem(id){
   closeModal();
   UI_ITEMS=buildUIItems();
   applyFilters();
-  toast('☠️ '+id+' marqué pour destruction','red');
+  toast(id+' marqué pour destruction','red');
 }
 function undoDestroy(id){
   let destroyed=getDestroyedIds();
@@ -2492,7 +2640,17 @@ function undoDestroy(id){
   safeSetLS('volo_destroyed',JSON.stringify(destroyed));
   UI_ITEMS=buildUIItems();
   applyFilters();
-  toast('↩️ '+id+' restauré','green');
+  toast(id+' restauré','green');
+}
+function openPrintSac(caisseId){
+  // Dynamic: find caisse by id, use its nom for sac print page
+  const caisse=CAISSES.find(c=>c.id===caisseId);
+  if(caisse&&(caisse.type==='sac'||caisse.type==='kit')){
+    window.open('inventaire-sac.html?sac='+encodeURIComponent(caisse.nom),'_blank');
+    return;
+  }
+  // Fallback: old PDF for non-sac/kit caisses
+  printCaissePDF(caisseId);
 }
 function printCaissePDF(caisseId){
   const caisse = CAISSES.find(c=>c.id===caisseId);
@@ -2501,13 +2659,13 @@ function printCaissePDF(caisseId){
   const itemIds = caisse.items_contenus||caisse.items||[];
   const items = itemIds.map(id=>ITEMS.find(i=>i.id===id)).filter(Boolean);
   const nom = caisse.nom||caisse.name||caisse.id;
-  const icon = caisse.icon||'📦';
+  const icon = _iconKey(caisse.icon);
   const now = new Date();
   const dateStr = now.toLocaleDateString('fr-CA',{year:'numeric',month:'long',day:'numeric'});
   const timeStr = now.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'});
   const sacColor = (typeof SAC_COLORS!=='undefined') ? SAC_COLORS[nom] : null;
 
-  const V={bg:'#0A0F1A',panel:'#111827',orange:'#F97316',green:'#10B981',yellow:'#F59E0B',red:'#EF4444',gold:'#D4A017',muted:'#94A3B8',txt:'#E2E8F0',blue:'#3B82F6',border:'rgba(249,115,22,.15)'};
+  const V={bg:'#04040A',panel:'#12121A',orange:'#D4650E',green:'#10B981',yellow:'#F59E0B',red:'#EF4444',gold:'#C9A84C',muted:'#94A3B8',txt:'#EBE6DF',blue:'#3B82F6',border:'rgba(201,168,76,.15)'};
   const esc=s=>s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const accentColor=sacColor?sacColor.hex:V.orange;
 
@@ -2515,14 +2673,14 @@ function printCaissePDF(caisseId){
   const byName={};
   items.forEach(it=>{
     const n=it.name||it.id;
-    if(!byName[n]){byName[n]={name:n,icon:it.icon||'📦',cat:it.cat||'Autre',count:0,ids:[],etat:it.etat,couleur:it.couleur};}
+    if(!byName[n]){byName[n]={name:n,icon:_icon(it),cat:it.cat||'Autre',count:0,ids:[],etat:it.etat,couleur:it.couleur};}
     byName[n].count++;
     byName[n].ids.push(it.id);
   });
   // Group by category
   const cats={};
   Object.values(byName).forEach(g=>{
-    if(!cats[g.cat])cats[g.cat]={rows:[],icon:g.icon,totalItems:0};
+    if(!cats[g.cat])cats[g.cat]={rows:[],icon:g.icon||'',totalItems:0};
     cats[g.cat].rows.push(g);
     cats[g.cat].totalItems+=g.count;
   });
@@ -2539,7 +2697,7 @@ function printCaissePDF(caisseId){
   html+=`<div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,${accentColor},${V.gold},${accentColor})"></div>`;
   html+=`<div style="display:flex;justify-content:space-between;align-items:flex-start">`;
   html+=`<div>`;
-  html+=`<div style="margin-bottom:6px"><img src="${typeof VOLO_LOGO_B64!=='undefined'?VOLO_LOGO_B64:'eagle_tactic.png'}" style="width:50px;height:50px;border-radius:50%;border:2px solid rgba(212,160,23,.4)" /></div>`;
+  html+=`<div style="margin-bottom:6px"><img src="${typeof VOLO_LOGO_B64!=='undefined'?VOLO_LOGO_B64:'eagle_tactic.png'}" style="width:50px;height:50px;border-radius:50%;border:2px solid rgba(201,168,76,.35)" /></div>`;
   html+=`<div style="font-size:10px;color:${V.muted};letter-spacing:3px;font-weight:600">VOLO CONSTRUCTION SST — GOLDEN EAGLES</div>`;
   html+=`<div style="font-family:Oswald,sans-serif;font-size:30px;font-weight:700;color:${accentColor};letter-spacing:3px;margin-top:4px">${icon} ${esc(nom).toUpperCase()}</div>`;
   html+=`<div style="font-size:11px;color:${V.gold};margin-top:4px;letter-spacing:1px">Contenu du sac — ${esc(dateStr)}</div>`;
@@ -2684,7 +2842,7 @@ UI_ITEMS = buildUIItems();
 localStorage.removeItem('volo_cat_collapsed');
 if(!UI_ITEMS.length){
   document.getElementById('emptyState').style.display='block';
-  document.getElementById('emptyState').innerHTML='<div style="font-size:2rem;margin-bottom:10px">⚠️</div><div style="font-family:\'Oswald\',sans-serif;color:var(--manquant);letter-spacing:2px;font-size:.85rem;margin-bottom:6px">DATA.JS NON CHARGÉ</div><div style="font-size:.78rem;color:var(--muted)">Vérifier que data.js est dans le même dossier</div>';
+  document.getElementById('emptyState').innerHTML='<div style="font-size:1.5rem;margin-bottom:10px;font-weight:bold">!</div><div style="font-family:\'Oswald\',sans-serif;color:var(--manquant);letter-spacing:2px;font-size:.85rem;margin-bottom:6px">DATA.JS NON CHARGÉ</div><div style="font-size:.78rem;color:var(--muted)">Vérifier que data.js est dans le même dossier</div>';
 }
 updateTabCounts();
 // Show destroyed items banner with notes
@@ -2702,7 +2860,7 @@ updateTabCounts();
         '<div>'+
           '<span style="font-family:JetBrains Mono,monospace;font-size:.65rem;color:var(--destruct)">'+id+'</span>'+
           (info.name?' <span style="font-size:.65rem;color:var(--muted)">'+escapeHtml(info.name)+'</span>':'')+
-          (info.note?'<div style="font-size:.6rem;color:var(--muted);margin-top:1px">📝 '+escapeHtml(info.note)+'</div>':'')+
+          (info.note?'<div style="font-size:.6rem;color:var(--muted);margin-top:1px">NOTE: '+escapeHtml(info.note)+'</div>':'')+
           (info.date?'<div style="font-size:.55rem;color:rgba(255,255,255,.3)">'+escapeHtml(info.date)+(info.by?' — '+escapeHtml(info.by):'')+'</div>':'')+
         '</div>'+
         '<button onclick="undoDestroy(\''+id+'\')" style="padding:3px 8px;border-radius:4px;background:rgba(39,174,96,.12);border:1px solid rgba(39,174,96,.25);color:var(--dispo);font-size:.55rem;cursor:pointer;font-family:Oswald,sans-serif;letter-spacing:1px;flex-shrink:0">RESTAURER</button>'+
@@ -2743,23 +2901,13 @@ document.title='VOLO SST — V10.5 Inventaire';
 //  JOB 2 — STRUCTURE DE DONNÉES SOLIDE + FIREBASE
 // ================================================================
 
-// Firebase init (same config as agenda.html)
+// Firebase init — config loaded via firebase-config.js
 let firebaseDB = null;
 let _fbListeners = [];
 try {
-  const fbConfig = {
-    apiKey: "AIzaSyPlaceholder",
-    authDomain: "volo-sst.firebaseapp.com",
-    databaseURL: "https://volo-sst-default-rtdb.firebaseio.com",
-    projectId: "volo-sst",
-    storageBucket: "volo-sst.appspot.com",
-    messagingSenderId: "000000000000",
-    appId: "1:000000000000:web:placeholder"
-  };
-  if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-    firebase.initializeApp(fbConfig);
+  if (typeof firebase !== 'undefined' && !firebase.apps.length && typeof FIREBASE_CONFIG !== 'undefined') {
+    firebase.initializeApp(FIREBASE_CONFIG);
     firebaseDB = firebase.database();
-    // Firebase inventaire: init OK
   } else if (typeof firebase !== 'undefined' && firebase.apps.length) {
     firebaseDB = firebase.database();
   }
@@ -2859,7 +3007,7 @@ function buildEnrichedCaisses() {
         etat: st.etat || 'BON',
         dateVerif: st.dateVerif || (raw ? raw.inspDate : null),
         notes: st.notes || (raw ? raw.notes : ''),
-        icon: raw ? raw.icon : '📦',
+        icon: raw ? _icon(raw) : '',
         fab: raw ? raw.fab : '',
         serial: raw ? raw.serial : '',
         couleur: raw ? raw.couleur : ''
@@ -2889,7 +3037,7 @@ function buildEnrichedCaisses() {
     return {
       id: c.id,
       nom: c.nom,
-      icon: c.icon || '📦',
+      icon: _iconKey(c.icon),
       type: c.type || 'autre',
       region: region,
       responsable: respName,
@@ -3080,7 +3228,7 @@ function renderCaisseList() {
   if (!filtered.length) {
     document.getElementById('caisseList').innerHTML = `
       <div style="text-align:center;padding:40px;color:var(--muted)">
-        <div style="font-size:2rem;margin-bottom:10px">📋</div>
+        <div style="font-size:2rem;margin-bottom:10px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></div>
         <div style="font-family:'Oswald',sans-serif;letter-spacing:2px;font-size:.8rem">AUCUNE CAISSE</div>
       </div>`;
     return;
@@ -3101,12 +3249,12 @@ function renderCaisseList() {
         <div class="caisse-card-info">
           <div class="caisse-card-nom"><span class="cc-icon">${c.icon}</span> ${escapeHtml(c.nom)}</div>
           <div class="caisse-card-meta">
-            <span>📍 ${escapeHtml(c.region)}</span>
-            <span>👤 ${escapeHtml(respLabel)}</span>
+            <span>LIEU: ${escapeHtml(c.region)}</span>
+            <span>RESP: ${escapeHtml(respLabel)}</span>
             <span style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted)">${c.id}</span>
           </div>
         </div>
-        <span class="cc-badge ${s}">${c.statut === 'OK' ? '🟢' : c.statut === 'ATTENTION' ? '🟡' : '🔴'} ${c.statut}</span>
+        <span class="cc-badge ${s}">${c.statut === 'OK' ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22C55E;margin-right:3px"></span>' : c.statut === 'ATTENTION' ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#EAB308;margin-right:3px"></span>' : '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#EF4444;margin-right:3px"></span>'} ${c.statut}</span>
       </div>
       <div class="caisse-card-stats">
         <div class="cc-stat"><strong>${totalItems}</strong> items</div>
@@ -3116,7 +3264,7 @@ function renderCaisseList() {
       </div>
       <div class="cc-dates">
         <span>Dernière insp: ${c.dateInspection ? fmtDateFR(c.dateInspection) : '—'}</span>
-        <span class="${overdueClass}">Prochaine: ${c.prochainInspection ? fmtDateFR(c.prochainInspection) : '—'}${overdueClass ? ' ⚠️ EN RETARD' : ''}</span>
+        <span class="${overdueClass}">Prochaine: ${c.prochainInspection ? fmtDateFR(c.prochainInspection) : '—'}${overdueClass ? '  EN RETARD' : ''}</span>
       </div>
     </div>`;
   }).join('');
@@ -3169,10 +3317,10 @@ function openCaisseDetail(caisseId) {
     <div class="cd-header">
       <div class="cd-header-top">
         <div>
-          <div class="cd-title">${c.icon} ${escapeHtml(c.nom)} <span class="cc-badge ${c.statut.toLowerCase()}">${c.statut === 'OK' ? '🟢' : c.statut === 'ATTENTION' ? '🟡' : '🔴'} ${c.statut}</span></div>
+          <div class="cd-title">${c.icon} ${escapeHtml(c.nom)} <span class="cc-badge ${c.statut.toLowerCase()}">${c.statut === 'OK' ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22C55E;margin-right:3px"></span>' : c.statut === 'ATTENTION' ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#EAB308;margin-right:3px"></span>' : '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#EF4444;margin-right:3px"></span>'} ${c.statut}</span></div>
           <div class="cd-meta">
-            <span>📍 ${escapeHtml(c.region)}</span>
-            <span>👤 ${escapeHtml(respLabel)}</span>
+            <span>LIEU: ${escapeHtml(c.region)}</span>
+            <span>RESP: ${escapeHtml(respLabel)}</span>
             <span style="font-family:'JetBrains Mono',monospace">${c.id}</span>
             <span>${c.items.length} items</span>
           </div>
@@ -3180,10 +3328,10 @@ function openCaisseDetail(caisseId) {
         <div class="cd-actions">
           <button class="cd-action-btn" onclick="backToCaisseList()">← RETOUR</button>
           ${isChef ? `
-            <button class="cd-action-btn" onclick="editCaisse('${c.id}')">✏️ MODIFIER</button>
-            <button class="cd-action-btn danger" onclick="deleteCaisse('${c.id}')" aria-label="Supprimer la caisse">🗑</button>
+            <button class="cd-action-btn" onclick="editCaisse('${c.id}')">MODIFIER</button>
+            <button class="cd-action-btn danger" onclick="deleteCaisse('${c.id}')" aria-label="Supprimer la caisse"></button>
           ` : ''}
-          <button class="cd-action-btn" onclick="generateRapport('${c.id}')">📄 RAPPORT</button>
+          <button class="cd-action-btn" onclick="generateRapport('${c.id}')">RAPPORT</button>
         </div>
       </div>
     </div>
@@ -3196,10 +3344,10 @@ function openCaisseDetail(caisseId) {
         </div>
         <div class="cd-insp-item">
           <div class="label">PROCHAINE INSPECTION</div>
-          <div class="value${overdueClass}">${c.prochainInspection ? fmtDateFR(c.prochainInspection) : '—'}${overdueClass ? ' ⚠️ EN RETARD' : ''}</div>
+          <div class="value${overdueClass}">${c.prochainInspection ? fmtDateFR(c.prochainInspection) : '—'}${overdueClass ? '  EN RETARD' : ''}</div>
         </div>
       </div>
-      <button class="cd-insp-btn" onclick="markInspected('${c.id}')">✅ MARQUER INSPECTÉ</button>
+      <button class="cd-insp-btn" onclick="markInspected('${c.id}')">MARQUER INSPECTÉ</button>
     </div>
   `;
 
@@ -3216,7 +3364,7 @@ function openCaisseDetail(caisseId) {
         </div>
         ${items.map(it => {
           const etatClass = it.etat === 'BON' ? 'bon' : it.etat === 'USURE' ? 'usure' : it.etat === 'DEFECTUEUX' ? 'defectueux' : 'manquant';
-          const etatLabel = it.etat === 'BON' ? '✅ BON' : it.etat === 'USURE' ? '⚠️ USURE' : it.etat === 'DEFECTUEUX' ? '🔴 DÉFECTUEUX' : '❌ MANQUANT';
+          const etatLabel = it.etat === 'BON' ? 'BON' : it.etat === 'USURE' ? 'USURE' : it.etat === 'DEFECTUEUX' ? 'DÉFECTUEUX' : 'MANQUANT';
           const dateVerif = it.dateVerif ? fmtDateFR(it.dateVerif) : '';
           const notesDisplay = it.notes || '+ note';
           const couleurDot = it.couleur && COULEUR_HEX[it.couleur] ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${COULEUR_HEX[it.couleur]}"></span>` : '';
@@ -3366,7 +3514,7 @@ function deleteCaisse(caisseId) {
   modalRoot.innerHTML = `
     <div class="modal-bg" onclick="closeModal()" style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center">
       <div onclick="event.stopPropagation()" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:380px;width:90%;text-align:center;z-index:201">
-        <div style="font-size:2rem;margin-bottom:8px">⚠️</div>
+        <div style="font-size:1.5rem;margin-bottom:8px;font-weight:bold">!</div>
         <div style="font-family:'Oswald',sans-serif;font-size:.9rem;letter-spacing:2px;color:var(--red);margin-bottom:12px">SUPPRIMER CETTE CAISSE ?</div>
         <div style="font-size:.78rem;color:var(--muted);margin-bottom:16px">Cette action marquera la caisse comme supprimée. Les items seront conservés.</div>
         <div style="display:flex;gap:8px;justify-content:center">
@@ -3422,7 +3570,7 @@ function generateRapport(caisseId) {
     lines.push('');
     lines.push(`[${cat}]`);
     cats[cat].forEach(it => {
-      const etatIcon = it.etat === 'BON' ? '✅' : it.etat === 'USURE' ? '⚠️' : it.etat === 'DEFECTUEUX' ? '🔴' : '❌';
+      const etatIcon = it.etat === 'BON' ? '[OK]' : it.etat === 'USURE' ? '[!]' : it.etat === 'DEFECTUEUX' ? '[X]' : '[-]';
       lines.push(`  ${etatIcon} ${it.nom}${it.quantite > 1 ? ' ×' + it.quantite : ''} — ${it.etat}${it.notes ? ' [' + it.notes + ']' : ''}`);
     });
   });
@@ -3441,13 +3589,13 @@ function generateRapport(caisseId) {
     <div class="modal-bg" onclick="closeModal()" style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center">
       <div onclick="event.stopPropagation()" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:600px;width:95%;z-index:201">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div style="font-family:'Oswald',sans-serif;font-size:.85rem;letter-spacing:2px;color:var(--goldL)">📄 RAPPORT — ${escapeHtml(c.nom)}</div>
-          <button onclick="closeModal()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer" aria-label="Fermer le rapport">✕</button>
+          <div style="font-family:'Oswald',sans-serif;font-size:.85rem;letter-spacing:2px;color:var(--goldL)">RAPPORT — ${escapeHtml(c.nom)}</div>
+          <button onclick="closeModal()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer" aria-label="Fermer le rapport">X</button>
         </div>
         <div class="rapport-content" id="rapportContent">${escapeHtml(rapportText)}</div>
         <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end;flex-wrap:wrap">
-          <button onclick="_copyRapport()" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(212,160,23,.4);background:rgba(212,160,23,.1);color:var(--gold);font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:1px;cursor:pointer">📋 COPIER</button>
-          <button onclick="_emailRapport('${caisseId}')" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(59,130,246,.4);background:rgba(59,130,246,.1);color:var(--blue);font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:1px;cursor:pointer">📧 EMAIL</button>
+          <button onclick="_copyRapport()" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(212,160,23,.4);background:rgba(212,160,23,.1);color:var(--gold);font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:1px;cursor:pointer">COPIER</button>
+          <button onclick="_emailRapport('${caisseId}')" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(59,130,246,.4);background:rgba(59,130,246,.1);color:var(--blue);font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:1px;cursor:pointer">EMAIL</button>
         </div>
       </div>
     </div>`;
@@ -3482,6 +3630,24 @@ function _emailRapport(caisseId) {
 })();
 
 </script>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}</script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}
+// -- View Transitions -- smooth navigation --
+(function(){
+  var mainContent = document.querySelector("#app") || document.querySelector(".screen") || document.querySelector("main") || document.body.firstElementChild;
+  if(mainContent) mainContent.style.viewTransitionName = "page-content";
+
+  document.addEventListener("click", function(e){
+    var link = e.target.closest("a[href]");
+    if(!link) return;
+    var href = link.getAttribute("href");
+    if(!href || href.startsWith("#") || href.startsWith("http") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
+    if(!document.startViewTransition) return;
+    e.preventDefault();
+    document.startViewTransition(function(){
+      window.location.href = href;
+    });
+  });
+})();
+</script>
 </body>
 </html>

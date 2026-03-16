@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="view-transition" content="same-origin">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>VOLO SST — ASAT Analyse de Sécurité</title>
+<link rel="icon" href="eagle_tactic.png">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   VOLO SST — ASAT Reference Guide
+   Design: Tactical Eagle Dark
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  --bg: #0C0608;
+  --card: #151015;
+  --card2: #1A141A;
+  --txt: #F5F0EB;
+  --muted: #8A8A9A;
+  --rescue: #E65100;
+  --gold: #C9A84C;
+  --green: #27AE60;
+  --red: #C0392B;
+  --blue: #3B82F6;
+  --purple: #8B5CF6;
+  --border: rgba(201,168,76,.15);
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--txt);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+input, select, textarea { font-size: 16px !important; }
+
+/* ═══ VIEW TRANSITIONS ═══ */
+@view-transition { navigation: auto }
+@keyframes vt-fade-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes vt-fade-out { from { opacity: 1 } to { opacity: 0 } }
+::view-transition-old(root) { animation: .25s ease-out both vt-fade-out }
+::view-transition-new(root) { animation: .25s ease-out both vt-fade-in }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .01s }
+}
+
+/* ═══ TOP BAR ═══ */
+.top-bar {
+  position: sticky; top: 0; z-index: 100;
+  background: linear-gradient(180deg, var(--bg) 0%, rgba(12,6,8,.95) 100%);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px; padding-top: calc(12px + env(safe-area-inset-top, 0px));
+  display: flex; align-items: center; gap: 12px;
+}
+.top-bar img {
+  width: 36px; height: 36px; border-radius: 50%;
+  object-fit: cover; border: 1.5px solid var(--gold);
+}
+.top-bar h1 {
+  font-family: 'Oswald', sans-serif; font-size: 14px;
+  letter-spacing: 2px; color: var(--gold); flex: 1;
+  line-height: 1.3;
+}
+.top-bar h1 span { display: block; font-size: 11px; color: var(--muted); letter-spacing: 1px; font-weight: 400; }
+.btn-back {
+  background: rgba(201,168,76,.06); border: 1px solid rgba(201,168,76,.15);
+  border-radius: var(--radius-sm); color: var(--gold);
+  padding: 8px 14px; font-size: 12px; font-family: 'Oswald', sans-serif;
+  letter-spacing: 1px; cursor: pointer; text-decoration: none;
+  display: flex; align-items: center; gap: 4px;
+  transition: all .2s; min-height: 48px;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-back:hover { background: rgba(201,168,76,.12); border-color: rgba(201,168,76,.3); }
+
+/* ═══ HERO ═══ */
+.hero {
+  text-align: center; padding: 32px 20px 24px;
+  background: linear-gradient(180deg, rgba(230,81,0,.08) 0%, rgba(201,168,76,.04) 50%, transparent 100%);
+}
+.hero-icon {
+  width: 64px; height: 64px; margin: 0 auto 16px;
+  background: linear-gradient(135deg, rgba(230,81,0,.2), rgba(201,168,76,.15));
+  border: 2px solid rgba(230,81,0,.3); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+}
+.hero h2 {
+  font-family: 'Oswald', sans-serif; font-size: 22px;
+  letter-spacing: 4px; color: var(--gold); margin-bottom: 6px;
+}
+.hero p { color: var(--muted); font-size: 13px; line-height: 1.5; max-width: 400px; margin: 0 auto; }
+
+/* ═══ SEARCH BAR ═══ */
+.search-wrap {
+  padding: 0 16px; margin-bottom: 16px;
+}
+.search-input {
+  width: 100%; padding: 12px 16px 12px 42px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--txt);
+  font-family: 'Inter', sans-serif; font-size: 14px; outline: none;
+  transition: border-color .2s;
+}
+.search-input:focus { border-color: var(--gold); }
+.search-input::placeholder { color: var(--muted); }
+.search-wrap { position: relative; }
+.search-icon {
+  position: absolute; left: 30px; top: 50%; transform: translateY(-50%);
+  color: var(--muted); pointer-events: none; font-size: 16px;
+}
+
+/* ═══ SECTIONS (ACCORDION) ═══ */
+.section {
+  margin: 0 12px 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color .3s;
+}
+.section:hover { border-color: rgba(201,168,76,.25); }
+.section.highlight { border-color: var(--gold); }
+
+.sec-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .2s; min-height: 56px;
+  user-select: none;
+}
+.sec-head:active { background: rgba(201,168,76,.04); }
+
+.sec-num {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), #9A7A2E);
+  color: var(--bg); font-family: 'Oswald', sans-serif;
+  font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.sec-num.rescue { background: linear-gradient(135deg, var(--rescue), #B34000); }
+.sec-num.green { background: linear-gradient(135deg, var(--green), #1E8A4C); }
+.sec-num.blue { background: linear-gradient(135deg, var(--blue), #2563EB); }
+.sec-num.purple { background: linear-gradient(135deg, var(--purple), #7C3AED); }
+.sec-num.red { background: linear-gradient(135deg, var(--red), #922B20); }
+
+.sec-title {
+  flex: 1; font-family: 'Oswald', sans-serif;
+  font-size: 14px; letter-spacing: 1.5px; color: var(--txt);
+}
+.sec-chevron {
+  color: var(--muted); font-size: 12px;
+  transition: transform .3s; flex-shrink: 0;
+}
+.sec-chevron.open { transform: rotate(180deg); }
+
+.sec-body {
+  max-height: 0; overflow: hidden;
+  transition: max-height .4s cubic-bezier(.4,0,.2,1), padding .3s;
+  padding: 0 16px;
+}
+.sec-body.open {
+  max-height: 5000px; padding: 0 16px 16px;
+}
+
+/* ═══ CONTENT CARDS ═══ */
+.info-card {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px; margin-bottom: 10px;
+}
+.info-card h4 {
+  font-family: 'Oswald', sans-serif; font-size: 13px;
+  letter-spacing: 1px; color: var(--gold); margin-bottom: 8px;
+}
+.info-card p, .info-card li {
+  font-size: 13px; color: var(--muted); line-height: 1.6;
+}
+.info-card ul { padding-left: 18px; }
+.info-card li { margin-bottom: 4px; }
+
+/* ═══ TASK TYPE TABS ═══ */
+.task-tabs {
+  display: flex; gap: 6px; overflow-x: auto;
+  padding: 0 0 12px; -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.task-tabs::-webkit-scrollbar { display: none; }
+.task-tab {
+  padding: 8px 14px; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--card2);
+  color: var(--muted); font-size: 11px; font-family: 'Oswald', sans-serif;
+  letter-spacing: 1px; cursor: pointer; transition: all .2s;
+  white-space: nowrap; min-height: 48px;
+  display: flex; align-items: center; gap: 6px;
+  -webkit-tap-highlight-color: transparent;
+}
+.task-tab.active { border-color: var(--rescue); color: var(--rescue); background: rgba(230,81,0,.08); }
+.task-tab:not(.active):hover { border-color: rgba(201,168,76,.3); }
+
+.task-panel { display: none; }
+.task-panel.active { display: block; }
+
+.danger-list { list-style: none; padding: 0; }
+.danger-list li {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 8px 0; border-bottom: 1px solid rgba(201,168,76,.06);
+  font-size: 13px; color: var(--txt); line-height: 1.5;
+}
+.danger-list li:last-child { border-bottom: none; }
+.danger-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--red); margin-top: 6px; flex-shrink: 0;
+}
+.danger-dot.green { background: var(--green); }
+.danger-dot.blue { background: var(--blue); }
+.danger-dot.gold { background: var(--gold); }
+
+.ref-tag {
+  display: inline-block; padding: 2px 8px;
+  background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.2);
+  border-radius: 4px; font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--blue); margin: 2px 2px 2px 0;
+}
+
+.epi-tag {
+  display: inline-block; padding: 3px 10px;
+  background: rgba(39,174,96,.08); border: 1px solid rgba(39,174,96,.2);
+  border-radius: 4px; font-size: 12px; color: var(--green); margin: 2px;
+}
+
+/* ═══ RISK MATRIX ═══ */
+.matrix-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 8px; }
+.risk-matrix {
+  border-collapse: collapse; width: 100%; min-width: 340px;
+  font-size: 12px; font-family: 'Inter', sans-serif;
+}
+.risk-matrix th, .risk-matrix td {
+  padding: 10px 6px; text-align: center;
+  border: 1px solid rgba(201,168,76,.1);
+}
+.risk-matrix th {
+  font-family: 'Oswald', sans-serif; letter-spacing: 1px;
+  font-size: 11px; color: var(--gold); background: var(--card2);
+}
+.risk-matrix th:first-child { text-align: left; min-width: 100px; }
+.risk-matrix td { cursor: pointer; transition: all .2s; border-radius: 2px; font-weight: 600; }
+.risk-matrix td:hover { transform: scale(1.05); box-shadow: 0 0 12px rgba(0,0,0,.4); }
+.risk-matrix td:first-child {
+  font-family: 'Oswald', sans-serif; font-size: 11px;
+  letter-spacing: 1px; color: var(--muted); text-align: left;
+  cursor: default; background: var(--card2);
+}
+.risk-matrix td:first-child:hover { transform: none; box-shadow: none; }
+
+.r-low { background: rgba(39,174,96,.15); color: var(--green); }
+.r-mod { background: rgba(201,168,76,.15); color: var(--gold); }
+.r-high { background: rgba(230,81,0,.15); color: var(--rescue); }
+.r-crit { background: rgba(192,57,43,.2); color: var(--red); }
+
+.matrix-legend {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  margin-top: 12px; font-size: 12px;
+}
+.matrix-legend span {
+  display: flex; align-items: center; gap: 6px;
+}
+.legend-dot {
+  width: 12px; height: 12px; border-radius: 3px;
+}
+
+.matrix-detail {
+  margin-top: 12px; padding: 14px;
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 10px; display: none;
+}
+.matrix-detail.show { display: block; }
+.matrix-detail h4 {
+  font-family: 'Oswald', sans-serif; font-size: 13px;
+  letter-spacing: 1px; margin-bottom: 8px;
+}
+.matrix-detail p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+/* ═══ CONTROLS PYRAMID ═══ */
+.pyramid {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 4px; margin: 16px 0;
+}
+.pyramid-level {
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; padding: 12px 16px;
+  border-radius: var(--radius-sm); font-size: 12px;
+  font-family: 'Oswald', sans-serif; letter-spacing: 1px;
+  cursor: pointer; transition: all .2s; min-height: 48px;
+  -webkit-tap-highlight-color: transparent;
+}
+.pyramid-level:hover { transform: scale(1.02); }
+.pyr-1 { width: 55%; background: rgba(39,174,96,.15); border: 1px solid rgba(39,174,96,.25); color: var(--green); }
+.pyr-2 { width: 63%; background: rgba(59,130,246,.12); border: 1px solid rgba(59,130,246,.2); color: var(--blue); }
+.pyr-3 { width: 71%; background: rgba(201,168,76,.12); border: 1px solid rgba(201,168,76,.2); color: var(--gold); }
+.pyr-4 { width: 80%; background: rgba(230,81,0,.1); border: 1px solid rgba(230,81,0,.2); color: var(--rescue); }
+.pyr-5 { width: 90%; background: rgba(192,57,43,.1); border: 1px solid rgba(192,57,43,.2); color: var(--red); }
+
+.pyr-detail {
+  margin-top: 12px; padding: 14px;
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 10px; display: none;
+}
+.pyr-detail.show { display: block; }
+.pyr-detail h4 {
+  font-family: 'Oswald', sans-serif; font-size: 13px;
+  letter-spacing: 1px; margin-bottom: 8px;
+}
+.pyr-detail p, .pyr-detail li {
+  font-size: 13px; color: var(--muted); line-height: 1.6;
+}
+.pyr-detail ul { padding-left: 18px; margin-top: 6px; }
+
+/* ═══ ARTICLES LIST ═══ */
+.article-group-title {
+  font-family: 'Oswald', sans-serif; font-size: 12px;
+  letter-spacing: 2px; color: var(--muted); margin: 16px 0 8px;
+  padding-left: 4px;
+}
+.article-item {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 10px; margin-bottom: 6px; overflow: hidden;
+  transition: border-color .2s;
+}
+.article-item:hover { border-color: rgba(201,168,76,.25); }
+.article-item.hidden { display: none; }
+.article-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; min-height: 48px;
+}
+.article-num {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  font-weight: 600; color: var(--blue);
+  background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.15);
+  padding: 3px 8px; border-radius: 4px; white-space: nowrap;
+}
+.article-summary {
+  flex: 1; font-size: 12px; color: var(--txt); line-height: 1.4;
+}
+.article-chevron {
+  color: var(--muted); font-size: 10px; transition: transform .3s; flex-shrink: 0;
+}
+.article-chevron.open { transform: rotate(180deg); }
+.article-body {
+  max-height: 0; overflow: hidden; transition: max-height .3s ease;
+  padding: 0 14px;
+}
+.article-body.open {
+  max-height: 500px; padding: 0 14px 12px;
+}
+.article-body p {
+  font-size: 12px; color: var(--muted); line-height: 1.6;
+  border-top: 1px solid rgba(201,168,76,.06); padding-top: 8px;
+}
+
+/* ═══ TIPS ═══ */
+.tip-card {
+  background: var(--card2); border-left: 3px solid var(--green);
+  border-radius: 0 10px 10px 0; padding: 12px 14px; margin-bottom: 8px;
+}
+.tip-card.warning { border-left-color: var(--rescue); }
+.tip-card.info { border-left-color: var(--blue); }
+.tip-card h4 {
+  font-family: 'Oswald', sans-serif; font-size: 12px;
+  letter-spacing: 1px; margin-bottom: 4px;
+}
+.tip-card p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* ═══ FOOTER ═══ */
+.footer {
+  text-align: center; padding: 24px 16px 32px;
+  font-size: 11px; color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 1px;
+}
+
+/* ═══ SCROLL TO TOP ═══ */
+.scroll-top {
+  position: fixed; bottom: 20px; right: 16px; z-index: 999;
+  width: 46px; height: 46px; border-radius: 50%;
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--gold); font-size: 18px; cursor: pointer;
+  display: none; align-items: center; justify-content: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,.5);
+  transition: all .2s; -webkit-tap-highlight-color: transparent;
+}
+.scroll-top:hover { background: rgba(201,168,76,.1); border-color: var(--gold); }
+.scroll-top.show { display: flex; }
+
+/* ═══ UTILITIES ═══ */
+.text-gold { color: var(--gold); }
+.text-rescue { color: var(--rescue); }
+.text-green { color: var(--green); }
+.text-red { color: var(--red); }
+.text-blue { color: var(--blue); }
+.text-muted { color: var(--muted); }
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mb-8 { margin-bottom: 8px; }
+.fw-600 { font-weight: 600; }
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+@media (min-width: 600px) {
+  .section { margin: 0 24px 12px; }
+  .search-wrap { padding: 0 24px; }
+  .hero h2 { font-size: 28px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ TOP BAR ═══ -->
+<div class="top-bar">
+  <a href="index.html" class="btn-back">&#8592; RETOUR</a>
+  <img src="eagle_tactic.png" alt="Eagle" onerror="this.style.display='none'">
+  <h1>ASAT — ANALYSE DE SÉCURITÉ
+    <span>GUIDE DE RÉFÉRENCE TERRAIN</span>
+  </h1>
+</div>
+
+<!-- ═══ HERO ═══ -->
+<div class="hero">
+  <div class="hero-icon">&#128737;</div>
+  <h2>ASAT</h2>
+  <p>Analyse de Sécurité Avant Travaux — Guide de référence rapide pour le terrain. Consultez avant de remplir vos formulaires papier.</p>
+</div>
+
+<!-- ═══ SEARCH ═══ -->
+<div class="search-wrap">
+  <span class="search-icon">&#128269;</span>
+  <input type="text" class="search-input" id="globalSearch" placeholder="Rechercher un risque, article, mesure...">
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 1: QU'EST-CE QU'UNE ASAT?
+     ═══════════════════════════════════════════════════════════ -->
+<div class="section" data-section="1">
+  <div class="sec-head" onclick="toggleSection(this)">
+    <div class="sec-num">1</div>
+    <div class="sec-title">QU'EST-CE QU'UNE ASAT?</div>
+    <div class="sec-chevron">&#9660;</div>
+  </div>
+  <div class="sec-body">
+    <div class="info-card">
+      <h4>DÉFINITION</h4>
+      <p>L'<strong class="text-gold">Analyse de Sécurité Avant Travaux (ASAT)</strong> est un processus systématique d'identification des dangers et d'évaluation des risques réalisé <strong>avant le début de chaque tâche</strong> sur un chantier. C'est la base de la prévention terrain.</p>
+    </div>
+    <div class="info-card">
+      <h4>QUAND REMPLIR UNE ASAT?</h4>
+      <ul>
+        <li><strong class="text-rescue">Chaque jour</strong> — au début de chaque quart de travail</li>
+        <li><strong class="text-rescue">Chaque nouvelle tâche</strong> — changement d'activité ou de méthode</li>
+        <li><strong class="text-rescue">Changement de conditions</strong> — météo, personnel, équipement, environnement</li>
+        <li><strong class="text-rescue">Après un incident</strong> — réévaluation obligatoire avant reprise</li>
+        <li><strong class="text-rescue">Nouvel équipement</strong> — introduction de matériel non évalué</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h4>QUI REMPLIT L'ASAT?</h4>
+      <ul>
+        <li><strong class="text-green">L'équipe de travail</strong> — tous les travailleurs impliqués participent</li>
+        <li><strong class="text-green">Le superviseur</strong> — révise, approuve et signe</li>
+        <li><strong class="text-green">Le sauveteur</strong> — valide les mesures d'urgence et EPI</li>
+      </ul>
+      <p class="mt-8 text-muted" style="font-size:12px">L'ASAT n'est PAS un formulaire rempli seul dans un bureau — c'est un exercice d'équipe, sur le terrain, devant la tâche.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 2: SECTIONS DU FORMULAIRE
+     ═══════════════════════════════════════════════════════════ -->
+<div class="section" data-section="2">
+  <div class="sec-head" onclick="toggleSection(this)">
+    <div class="sec-num rescue">2</div>
+    <div class="sec-title">SECTIONS DU FORMULAIRE</div>
+    <div class="sec-chevron">&#9660;</div>
+  </div>
+  <div class="sec-body">
+
+    <div class="info-card">
+      <h4>A — DATE, LIEU, SUPERVISEUR, ÉQUIPE</h4>
+      <ul>
+        <li>Date et heure du début des travaux</li>
+        <li>Lieu précis (usine, secteur, bâtiment, étage)</li>
+        <li>Nom du superviseur responsable</li>
+        <li>Liste complète des membres de l'équipe présents</li>
+        <li>Numéro de projet / contrat si applicable</li>
+      </ul>
+    </div>
+
+    <div class="info-card">
+      <h4>B — DESCRIPTION DE LA TÂCHE</h4>
+      <ul>
+        <li>Description claire et détaillée de la tâche à exécuter</li>
+        <li>Méthode de travail prévue (étape par étape)</li>
+        <li>Durée estimée des travaux</li>
+        <li>Équipements et outils nécessaires</li>
+      </ul>
+      <p class="mt-8 text-muted" style="font-size:12px">Soyez spécifique : "Installation de 3 ancrages au toit du bâtiment B, secteur 4, hauteur 12m" plutôt que "travaux en hauteur".</p>
+    </div>
+
+    <div class="info-card">
+      <h4>C — IDENTIFICATION DES DANGERS</h4>
+      <p class="mb-8">Passer en revue systématiquement chaque catégorie :</p>
+      <ul>
+        <li><strong class="text-red">Chutes</strong> — hauteur, ouvertures, surfaces glissantes</li>
+        <li><strong class="text-red">Écrasement</strong> — charges suspendues, équipements mobiles</li>
+        <li><strong class="text-red">Électricité</strong> — lignes, panneaux, équipements sous tension</li>
+        <li><strong class="text-red">Chimique</strong> — gaz, vapeurs, poussières, produits SIMDUT</li>
+        <li><strong class="text-red">Thermique</strong> — surfaces chaudes, soudure, flammes</li>
+        <li><strong class="text-red">Biologique</strong> — moisissures, eaux contaminées</li>
+        <li><strong class="text-red">Ergonomique</strong> — postures, efforts répétitifs, charges</li>
+        <li><strong class="text-red">Bruit</strong> — machines, outils pneumatiques</li>
+        <li><strong class="text-red">Espace clos</strong> — atmosphère, accès limité</li>
+        <li><strong class="text-red">Météo</strong> — foudre, vent, chaleur, froid extrême</li>
+      </ul>
+    </div>
+
+    <div class="info-card">
+      <h4>D — ÉVALUATION DES RISQUES</h4>
+      <p>Pour chaque danger identifié, évaluer :</p>
+      <ul>
+        <li><strong class="text-gold">Probabilité</strong> — chance que l'événement se produise (1-5)</li>
+        <li><strong class="text-gold">Gravité</strong> — conséquence si l'événement se produit (1-5)</li>
+        <li><strong class="text-gold">Risque = Probabilité × Gravité</strong> — voir matrice Section 4</li>
+      </ul>
+    </div>
+
+    <div class="info-card">
+      <h4>E — MESURES DE CONTRÔLE</h4>
+      <p>Appliquer la hiérarchie des contrôles (voir Section 5) :</p>
+      <ul>
+        <li><strong class="text-green">Élimination</strong> — supprimer le danger</li>
+        <li><strong class="text-blue">Substitution</strong> — remplacer par moins dangereux</li>
+        <li><strong class="text-gold">Ingénierie</strong> — isoler les travailleurs du danger</li>
+        <li><strong class="text-rescue">Administrative</strong> — procédures, formation, signalisation</li>
+        <li><strong class="text-red">EPI</strong> — protection individuelle (dernier recours)</li>
+      </ul>
+    </div>
+
+    <div class="info-card">
+      <h4>F — ÉQUIPEMENTS REQUIS</h4>
+      <ul>
+        <li>EPI individuels : casque, lunettes, gants, harnais, protections auditives</li>
+        <li>Équipements collectifs : garde-corps, ventilation, éclairage</li>
+        <li>Outils spécifiques et leur état d'inspection</li>
+        <li>Équipements de sauvetage / urgence requis sur place</li>
+      </ul>
+    </div>
+
+    <div class="info-card">
+      <h4>G — SIGNATURES ET VALIDATION</h4>
+      <ul>
+        <li>Signature de <strong>tous les travailleurs</strong> de l'équipe (preuve de participation)</li>
+        <li>Signature du <strong>superviseur</strong> (approbation des mesures)</li>
+        <li>Heure de la revue et du début des travaux</li>
+        <li>Conservation du document sur le lieu de travail pendant toute la durée des travaux</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 3: RISQUES PAR TYPE DE TÂCHE
+     ═══════════════════════════════════════════════════════════ -->
+<div class="section" data-section="3">
+  <div class="sec-head" onclick="toggleSection(this)">
+    <div class="sec-num blue">3</div>
+    <div class="sec-title">RISQUES PAR TYPE DE TÂCHE</div>
+    <div class="sec-chevron">&#9660;</div>
+  </div>
+  <div class="sec-body">
+
+    <div class="task-tabs" id="taskTabs">
+      <button class="task-tab active" data-task="hauteur" onclick="switchTask(this)">&#9650; HAUTEUR</button>
+      <button class="task-tab" data-task="clos" onclick="switchTask(this)">&#9673; ESPACE CLOS</button>
+      <button class="task-tab" data-task="levage" onclick="switchTask(this)">&#9881; LEVAGE</button>
+      <button class="task-tab" data-task="electrique" onclick="switchTask(this)">&#9889; ÉLECTRIQUE</button>
+      <button class="task-tab" data-task="excavation" onclick="switchTask(this)">&#9874; EXCAVATION</button>
+      <button class="task-tab" data-task="chaud" onclick="switchTask(this)">&#128293; TRAVAIL À CHAUD</button>
+    </div>
+
+    <!-- HAUTEUR -->
+    <div class="task-panel active" id="task-hauteur">
+      <div class="info-card">
+        <h4 class="text-rescue">DANGERS TYPIQUES</h4>
+        <ul class="danger-list">
+          <li><span class="danger-dot"></span>Chute de hauteur (>3m = protection obligatoire)</li>
+          <li><span class="danger-dot"></span>Chute d'objets sur les travailleurs en contrebas</li>
+          <li><span class="danger-dot"></span>Effondrement d'échafaudage ou plateforme</li>
+          <li><span class="danger-dot"></span>Conditions météo : vent >40km/h, glace, pluie</li>
+          <li><span class="danger-dot"></span>Effet pendulaire lors d'une chute avec harnais</li>
+          <li><span class="danger-dot"></span>Traumatisme de suspension (syndrome du harnais)</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h4 class="text-green">MESURES DE CONTRÔLE</h4>
+        <ul class="danger-list">
+          <li><span class="danger-dot green"></span>Garde-corps conformes sur tout le périmètre</li>
+          <li><span class="danger-dot green"></span>Système antichute : harnais + longe + ancrage testé</li>
+          <li><span class="danger-dot green"></span>Filet de sécurité si garde-corps impossible</li>
+          <li><span class="danger-dot green"></span>Zone de restriction balisée en contrebas</li>
+          <li><span class="danger-dot green"></span>Inspection quotidienne des équipements</li>
+          <li><span class="danger-dot green"></span>Plan de sauvetage en hauteur disponible</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h4 class="text-blue">EPI REQUIS</h4>
+        <div>
+          <span class="epi-tag">Casque avec jugulaire</span>
+          <span class="epi-tag">Harnais intégral</span>
+          <span class="epi-tag">Longe antichute</span>
+          <span class="epi-tag">Ancrage certifié</span>
+          <span class="epi-tag">Bottes antidérapantes</span>
+          <span class="epi-tag">Lunettes de sécurité</span>
+        </div>
+      </div>
+      <div class="info-card">
+        <h4 class="text-gold">ARTICLES CNESST</h4>
+        <div>
+          <span class="ref-tag">RSST 33.1</span>
+          <span class="ref-tag">RSST 33.2</span>
+          <span class="ref-tag">RSST 33.3</span>
+          <span class="ref-tag">RSST 33.5</span>
+          <span class="ref-tag">RSST 347</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ESPACE CLOS -->
+    <div class="task-panel" id="task-clos">
+      <div class="info-card">
+        <h4 class="text-rescue">DANGERS TYPIQUES</h4>
+        <ul class="danger-list">
+          <li><span class="danger-dot"></span>Atmosphère toxique (H2S, CO, SO2)</li>
+          <li><span class="danger-dot"></span>Déficience en oxygène (<19.5%) ou enrichissement (>23%)</li>
+          <li><span class="danger-dot"></span>Atmosphère explosive (LIE >10%)</li>
+          <li><span class="danger-dot"></span>Ensevelissement par matière en vrac</li>
+          <li><span class="danger-dot"></span>Noyade (accumulation liquides)</li>
+          <li><span class="danger-dot"></span>Pièges mécaniques (agitateurs, vis sans fin)</li>
+          <li><span class="danger-dot"></span>Choc thermique (vapeur, surfaces chaudes)</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h4 class="text-green">MESURES DE CONTRÔLE</h4>
+        <ul class="danger-list">
+          <li><span class="danger-dot green"></span>Permis d'entrée en espace clos obligatoire</li>
+          <li><span class="danger-dot green"></span>Test atmosphérique AVANT et CONTINU (4 gaz)</li>
+          <li><span class="danger-dot green"></span>Ventilation mécanique forcée</li>
+          <li><span class="danger-dot green"></span>Cadenassage de TOUTES les sources d'énergie</li>
+          <li><span class="danger-dot green"></span>Surveillant en permanence à l'entrée</li>
+          <li><span class="danger-dot green"></span>Procédure de sauvetage écrite et testée</li>
+          <li><span class="danger-dot green"></span>Communication constante (radio ou visuelle)</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h4 class="text-blue">EPI REQUIS</h4>
+        <div>
+          <span class="epi-tag">Détecteur 4 gaz calibré</span>
+          <span class="epi-tag">Harnais intégral</span>
+          <span class="epi-tag">Ligne de vie</span>
+          <span class="epi-tag">APRA (si requis)</span>
+          <span class="epi-tag">Radio communication</span>
+          <span class="epi-tag">Trépied de sauvetage</span>
+          <span class="epi-tag">Éclairage antidéflagrant</span>
+        </div>
+      </div>
+      <div class="info-card">
+        <h4 class="text-gold">ARTICLES CNESST</h4>
+        <div>
+          <span class="ref-tag">RSST 298</span>
+          <span class="ref-tag">RSST 299</span>
+          <span class="ref-tag">RSST 300</span>
+          <span class="ref-tag">RSST 301</span>
+          <span class="ref-tag">RSST 302</span>
+          <span class="ref-tag">RSST 304</span>
+          <span class="ref-tag">RSST 306</span>
+          <span class="ref-tag">RSST 308</span>
+          <span class="ref-tag">RSST 310</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEVAGE -->
+    <div class="task-panel" id="task-levage">
+      <div class="info-card">
+        <h4 class="text-rescue">DANGERS TYPIQUES</h4>
+        <ul class="danger-list">
+          <li><span class="danger-dot"></span>Écrasement par charge en mouvement</li>
+          <li><span class="danger-dot"></span>Basculement de grue ou d'équipement de levage</li>
+          <li><span class="danger-dot"></span>Rupture d'élingue, câble ou accessoire de gréage</li>
+          <li><span class="danger-dot"></span>Surcharge de la capacité nominale</li>
+          <li><span class="danger-dot"></span>Contact avec lignes électriques aériennes</li>
+          <li><span class="danger-dot"></span>Fouettement de câble sous tension</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h4 class="text-green">MESURES DE CONTRÔLE</h4>
+        <ul class="danger-list">
+          <li><span class="danger-dot green"></span>Plan de levage pour charges critiques (>80% capacité)</li>
+          <li><span class="danger-dot green"></span>Vérification des tableaux de charge</li>
+          <li><span class="danger-dot green"></span>Inspection des élingues et accessoires avant utilisation</li>
+          <li><span class="danger-dot green"></span>Signaleur désigné avec communication radio</li>
+          <li><span class="danger-dot green"></span>Zone d'exclusion balisée sous la charge</li>
+          <li><span class="danger-dot green"></span>Maintien distance sécuritaire des lignes électriques</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h4 class="text-blue">EPI REQUIS</h4>
+        <div>
+          <span class="epi-tag">Casque de sécurité</span>
+          <span class="epi-tag">Bottes à cap d'acier</span>
+          <span class="epi-tag">Gants de manutention</span>
+          <span class="epi-tag">Lunettes de sécurité</span>
+          <span class="epi-tag">Dossard haute visibilité</span>
+          <span class="epi-tag">Radio communication</span>
+        </div>
+      </div>
+      <div class="info-card">
+        <h4 class="text-gold">ARTICLES CNESST</h4>
+        <div>
+          <span class="ref-tag">RSST 254</span>
+          <span class="ref-tag">RSST 255</span>
+          <span class="ref-tag">RSST 261</span>
+          <span class="ref-tag">RSST 268</span>
+          <span class="ref-tag">CSC 3.10</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÉLECTRIQUE -->
+    <div class="task-panel" id="task-electrique">
+      <div class="info-card">
+        <h4 class="text-rescue">DANGERS TYPIQUES</h4>
+        <ul class="danger-list">
+          <li><span class="danger-dot"></span>Électrocution par contact direct ou indirect</li>
+          <li><span class="danger-dot"></span>Arc électrique (flash arc) — brûlures graves</li>
+          <li><span class="danger-dot"></span>Explosion due à atmosphère combustible</li>
+          <li><span class="danger-dot"></span>Chute causée par choc électrique</li>
+          <li><span class="danger-dot"></span>Incendie d'origine électrique</li>
+          <li><span class="danger-dot"></span>Énergie résiduelle après cadenassage incomplet</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h4 class="text-green">MESURES DE CONTRÔLE</h4>
+        <ul class="danger-list">
+          <li><span class="danger-dot green"></span>Cadenassage complet (LOTO) — vérification zéro énergie</li>
+          <li><span class="danger-dot green"></span>Étude arc flash et limites d'approche</li>
+          <li><span class="danger-dot green"></span>Utilisation d'outils isolés certifiés 1000V</li>
+          <li><span class="danger-dot green"></span>Tapis et gants isolants classe appropriée</li>
+          <li><span class="danger-dot green"></span>Détecteur de tension AVANT tout travail</li>
+          <li><span class="danger-dot green"></span>Formation spécifique travaux électriques</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h4 class="text-blue">EPI REQUIS</h4>
+        <div>
+          <span class="epi-tag">Combinaison arc flash (cal/cm2)</span>
+          <span class="epi-tag">Gants isolants + surprotecteurs</span>
+          <span class="epi-tag">Visière anti-arc</span>
+          <span class="epi-tag">Bottes diélectriques</span>
+          <span class="epi-tag">Tapis isolant</span>
+          <span class="epi-tag">Détecteur de tension</span>
+        </div>
+      </div>
+      <div class="info-card">
+        <h4 class="text-gold">ARTICLES CNESST</h4>
+        <div>
+          <span class="ref-tag">RSST 188.1</span>
+          <span class="ref-tag">RSST 188.2</span>
+          <span class="ref-tag">RSST 188.6</span>
+          <span class="ref-tag">RSST 188.7</span>
+          <span class="ref-tag">RSST 188.9</span>
+          <span class="ref-tag">RSST 188.13</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXCAVATION -->
+    <div class="task-panel" id="task-excavation">
+      <div class="info-card">
+        <h4 class="text-rescue">DANGERS TYPIQUES</h4>
+        <ul class="danger-list">
+          <li><span class="danger-dot"></span>Effondrement des parois de la tranchée</li>
+          <li><span class="danger-dot"></span>Ensevelissement (1 m3 de terre = ~1.5 tonne)</li>
+          <li><span class="danger-dot"></span>Bris de services enfouis (gaz, électricité, eau)</li>
+          <li><span class="danger-dot"></span>Accumulation de gaz dans la tranchée</li>
+          <li><span class="danger-dot"></span>Chute dans l'excavation</li>
+          <li><span class="danger-dot"></span>Vibrations affaiblissant les parois</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h4 class="text-green">MESURES DE CONTRÔLE</h4>
+        <ul class="danger-list">
+          <li><span class="danger-dot green"></span>Étançonnement ou talutage selon la profondeur</li>
+          <li><span class="danger-dot green"></span>Info-Excavation (demande de localisation) obligatoire</li>
+          <li><span class="danger-dot green"></span>Blindage pour tranchées >1.2m</li>
+          <li><span class="danger-dot green"></span>Échelle d'accès à moins de 8m de tout travailleur</li>
+          <li><span class="danger-dot green"></span>Garde-corps périmétriques</li>
+          <li><span class="danger-dot green"></span>Matériaux excavés à min. 1.2m du bord</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h4 class="text-blue">EPI REQUIS</h4>
+        <div>
+          <span class="epi-tag">Casque de sécurité</span>
+          <span class="epi-tag">Bottes à cap d'acier</span>
+          <span class="epi-tag">Dossard haute visibilité</span>
+          <span class="epi-tag">Détecteur 4 gaz</span>
+          <span class="epi-tag">Harnais (si >3m)</span>
+        </div>
+      </div>
+      <div class="info-card">
+        <h4 class="text-gold">ARTICLES CNESST</h4>
+        <div>
+          <span class="ref-tag">CSC 3.15.3</span>
+          <span class="ref-tag">CSC 3.15.4</span>
+          <span class="ref-tag">CSC 3.15.5</span>
+          <span class="ref-tag">RSST 3.2</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRAVAIL À CHAUD -->
+    <div class="task-panel" id="task-chaud">
+      <div class="info-card">
+        <h4 class="text-rescue">DANGERS TYPIQUES</h4>
+        <ul class="danger-list">
+          <li><span class="danger-dot"></span>Incendie par projection d'étincelles ou métal en fusion</li>
+          <li><span class="danger-dot"></span>Explosion en présence de vapeurs inflammables</li>
+          <li><span class="danger-dot"></span>Brûlures (contact, rayonnement, projections)</li>
+          <li><span class="danger-dot"></span>Fumées de soudage toxiques (zinc, plomb, manganèse)</li>
+          <li><span class="danger-dot"></span>Rayonnement UV/IR (lésions oculaires)</li>
+          <li><span class="danger-dot"></span>Incendie retardé (matériaux combustibles à proximité)</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h4 class="text-green">MESURES DE CONTRÔLE</h4>
+        <ul class="danger-list">
+          <li><span class="danger-dot green"></span>Permis de travail à chaud obligatoire</li>
+          <li><span class="danger-dot green"></span>Retrait ou protection des combustibles dans un rayon de 11m</li>
+          <li><span class="danger-dot green"></span>Surveillant incendie pendant ET 60 min après les travaux</li>
+          <li><span class="danger-dot green"></span>Extincteur approprié à portée de main</li>
+          <li><span class="danger-dot green"></span>Ventilation adéquate (extraction des fumées)</li>
+          <li><span class="danger-dot green"></span>Test d'explosimètre si atmosphère suspecte</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h4 class="text-blue">EPI REQUIS</h4>
+        <div>
+          <span class="epi-tag">Masque de soudeur (teinte appropriée)</span>
+          <span class="epi-tag">Vêtements ignifuges</span>
+          <span class="epi-tag">Gants de soudeur</span>
+          <span class="epi-tag">Tablier cuir</span>
+          <span class="epi-tag">Bottes de sécurité</span>
+          <span class="epi-tag">Protection respiratoire</span>
+        </div>
+      </div>
+      <div class="info-card">
+        <h4 class="text-gold">ARTICLES CNESST</h4>
+        <div>
+          <span class="ref-tag">RSST 121</span>
+          <span class="ref-tag">RSST 122</span>
+          <span class="ref-tag">RSST 123</span>
+          <span class="ref-tag">CSC 3.23</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 4: MATRICE DE RISQUES
+     ═══════════════════════════════════════════════════════════ -->
+<div class="section" data-section="4">
+  <div class="sec-head" onclick="toggleSection(this)">
+    <div class="sec-num green">4</div>
+    <div class="sec-title">MATRICE DE RISQUES 5×5</div>
+    <div class="sec-chevron">&#9660;</div>
+  </div>
+  <div class="sec-body">
+
+    <div class="info-card" style="padding:8px">
+      <p class="text-muted" style="font-size:12px;text-align:center;margin-bottom:8px">
+        <strong class="text-gold">RISQUE = PROBABILITÉ × GRAVITÉ</strong> — Cliquez une cellule pour voir les actions recommandées
+      </p>
+      <div class="matrix-wrap">
+        <table class="risk-matrix" id="riskMatrix">
+          <thead>
+            <tr>
+              <th></th>
+              <th>NÉGLI&shy;GEABLE<br><span style="font-family:'Inter';font-weight:400;font-size:10px;color:var(--muted)">1</span></th>
+              <th>MINEURE<br><span style="font-family:'Inter';font-weight:400;font-size:10px;color:var(--muted)">2</span></th>
+              <th>MODÉRÉE<br><span style="font-family:'Inter';font-weight:400;font-size:10px;color:var(--muted)">3</span></th>
+              <th>MAJEURE<br><span style="font-family:'Inter';font-weight:400;font-size:10px;color:var(--muted)">4</span></th>
+              <th>CATA&shy;STROPHIQUE<br><span style="font-family:'Inter';font-weight:400;font-size:10px;color:var(--muted)">5</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>PRESQUE CERTAIN (5)</td>
+              <td class="r-mod" onclick="showMatrixDetail(5,1,5)">5</td>
+              <td class="r-high" onclick="showMatrixDetail(5,2,10)">10</td>
+              <td class="r-high" onclick="showMatrixDetail(5,3,15)">15</td>
+              <td class="r-crit" onclick="showMatrixDetail(5,4,20)">20</td>
+              <td class="r-crit" onclick="showMatrixDetail(5,5,25)">25</td>
+            </tr>
+            <tr>
+              <td>PROBABLE (4)</td>
+              <td class="r-low" onclick="showMatrixDetail(4,1,4)">4</td>
+              <td class="r-mod" onclick="showMatrixDetail(4,2,8)">8</td>
+              <td class="r-high" onclick="showMatrixDetail(4,3,12)">12</td>
+              <td class="r-high" onclick="showMatrixDetail(4,4,16)">16</td>
+              <td class="r-crit" onclick="showMatrixDetail(4,5,20)">20</td>
+            </tr>
+            <tr>
+              <td>POSSIBLE (3)</td>
+              <td class="r-low" onclick="showMatrixDetail(3,1,3)">3</td>
+              <td class="r-mod" onclick="showMatrixDetail(3,2,6)">6</td>
+              <td class="r-mod" onclick="showMatrixDetail(3,3,9)">9</td>
+              <td class="r-high" onclick="showMatrixDetail(3,4,12)">12</td>
+              <td class="r-high" onclick="showMatrixDetail(3,5,15)">15</td>
+            </tr>
+            <tr>
+              <td>IMPROBABLE (2)</td>
+              <td class="r-low" onclick="showMatrixDetail(2,1,2)">2</td>
+              <td class="r-low" onclick="showMatrixDetail(2,2,4)">4</td>
+              <td class="r-mod" onclick="showMatrixDetail(2,3,6)">6</td>
+              <td class="r-mod" onclick="showMatrixDetail(2,4,8)">8</td>
+              <td class="r-high" onclick="showMatrixDetail(2,5,10)">10</td>
+            </tr>
+            <tr>
+              <td>RARE (1)</td>
+              <td class="r-low" onclick="showMatrixDetail(1,1,1)">1</td>
+              <td class="r-low" onclick="showMatrixDetail(1,2,2)">2</td>
+              <td class="r-low" onclick="showMatrixDetail(1,3,3)">3</td>
+              <td class="r-mod" onclick="showMatrixDetail(1,4,4)">4</td>
+              <td class="r-mod" onclick="showMatrixDetail(1,5,5)">5</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="matrix-legend">
+        <span><span class="legend-dot" style="background:rgba(39,174,96,.4)"></span><span class="text-green">1-4 Acceptable</span></span>
+        <span><span class="legend-dot" style="background:rgba(201,168,76,.4)"></span><span class="text-gold">5-9 Modéré</span></span>
+        <span><span class="legend-dot" style="background:rgba(230,81,0,.4)"></span><span class="text-rescue">10-16 Élevé</span></span>
+        <span><span class="legend-dot" style="background:rgba(192,57,43,.4)"></span><span class="text-red">17-25 Critique</span></span>
+      </div>
+    </div>
+
+    <div class="matrix-detail" id="matrixDetail">
+      <h4 id="matrixDetailTitle" class="text-gold"></h4>
+      <p id="matrixDetailText"></p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 5: HIÉRARCHIE DES CONTRÔLES
+     ═══════════════════════════════════════════════════════════ -->
+<div class="section" data-section="5">
+  <div class="sec-head" onclick="toggleSection(this)">
+    <div class="sec-num purple">5</div>
+    <div class="sec-title">HIÉRARCHIE DES CONTRÔLES</div>
+    <div class="sec-chevron">&#9660;</div>
+  </div>
+  <div class="sec-body">
+
+    <p class="text-muted mb-8" style="font-size:12px;text-align:center">
+      Du plus efficace (haut) au moins efficace (bas) — Cliquez pour les détails
+    </p>
+
+    <div class="pyramid">
+      <div class="pyramid-level pyr-1" onclick="showPyrDetail(0)">1. ÉLIMINATION</div>
+      <div class="pyramid-level pyr-2" onclick="showPyrDetail(1)">2. SUBSTITUTION</div>
+      <div class="pyramid-level pyr-3" onclick="showPyrDetail(2)">3. INGÉNIERIE</div>
+      <div class="pyramid-level pyr-4" onclick="showPyrDetail(3)">4. ADMINISTRATIVE</div>
+      <div class="pyramid-level pyr-5" onclick="showPyrDetail(4)">5. EPI (DERNIER RECOURS)</div>
+    </div>
+
+    <div class="pyr-detail" id="pyrDetail">
+      <h4 id="pyrDetailTitle"></h4>
+      <p id="pyrDetailText"></p>
+      <ul id="pyrDetailList"></ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 6: ARTICLES CNESST PERTINENTS
+     ═══════════════════════════════════════════════════════════ -->
+<div class="section" data-section="6">
+  <div class="sec-head" onclick="toggleSection(this)">
+    <div class="sec-num red">6</div>
+    <div class="sec-title">ARTICLES CNESST PERTINENTS</div>
+    <div class="sec-chevron">&#9660;</div>
+  </div>
+  <div class="sec-body">
+    <div class="search-wrap" style="padding:0;margin-bottom:12px">
+      <span class="search-icon" style="left:14px">&#128269;</span>
+      <input type="text" class="search-input" id="articleSearch" placeholder="Filtrer les articles..." style="padding-left:38px">
+    </div>
+    <div id="articlesContainer"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 7: CONSEILS TERRAIN
+     ═══════════════════════════════════════════════════════════ -->
+<div class="section" data-section="7">
+  <div class="sec-head" onclick="toggleSection(this)">
+    <div class="sec-num">7</div>
+    <div class="sec-title">CONSEILS TERRAIN</div>
+    <div class="sec-chevron">&#9660;</div>
+  </div>
+  <div class="sec-body">
+
+    <div class="tip-card">
+      <h4 class="text-green">REMPLIR L'ASAT EFFICACEMENT</h4>
+      <p>Faites-le sur le terrain, devant la tâche, avec toute l'équipe. Prenez 10-15 minutes max. Utilisez un langage simple et spécifique. Identifiez au minimum 3 dangers par tâche.</p>
+    </div>
+
+    <div class="tip-card">
+      <h4 class="text-green">IMPLIQUER TOUT LE MONDE</h4>
+      <p>Chaque travailleur doit s'exprimer. Les nouveaux et les sous-traitants ont souvent un regard frais sur les dangers. Un silence n'est pas un accord — posez des questions directes.</p>
+    </div>
+
+    <div class="tip-card">
+      <h4 class="text-green">ÊTRE SPÉCIFIQUE</h4>
+      <p>Au lieu de "risque de chute", écrivez "risque de chute de 8m depuis le toit du bâtiment B par l'ouverture non protégée au nord-est". Plus c'est précis, plus les mesures seront adaptées.</p>
+    </div>
+
+    <div class="tip-card warning">
+      <h4 class="text-rescue">ERREURS COURANTES À ÉVITER</h4>
+      <p>Copier-coller l'ASAT d'hier sans réévaluer. Oublier les dangers environnementaux (météo, bruit, chaleur). Ne pas mettre à jour après un changement de conditions. Remplir seul au bureau au lieu d'en équipe sur le terrain.</p>
+    </div>
+
+    <div class="tip-card warning">
+      <h4 class="text-rescue">NE PAS BANALISER</h4>
+      <p>"On fait ça tout le temps" n'est PAS une analyse de risque. La routine est le plus grand facteur d'accident. Chaque jour est différent — conditions, fatigue, météo, équipement.</p>
+    </div>
+
+    <div class="tip-card info">
+      <h4 class="text-blue">CE QUE L'INSPECTEUR VÉRIFIE</h4>
+      <p>Que l'ASAT est datée et signée par tous. Que les dangers identifiés correspondent aux conditions réelles. Que les mesures de contrôle sont en place et fonctionnelles. Que les EPI sont portés et en bon état. Que le document est accessible sur le lieu de travail.</p>
+    </div>
+
+    <div class="tip-card info">
+      <h4 class="text-blue">EN CAS DE DOUTE</h4>
+      <p>En cas de doute sur un danger ou une mesure de contrôle, <strong>arrêtez les travaux</strong>. Consultez le superviseur, le sauveteur ou le responsable SST. Le droit de refus (LSST art. 12) protège le travailleur.</p>
+    </div>
+
+    <div class="tip-card">
+      <h4 class="text-green">CONSERVATION</h4>
+      <p>L'ASAT doit rester disponible sur le lieu de travail pendant toute la durée des travaux. Conservez une copie pour vos dossiers. En cas d'accident, l'ASAT est un document clé pour l'enquête.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<div class="footer">
+  VOLO SST — GOLDEN EAGLES<br>
+  GUIDE ASAT v1.0
+</div>
+
+<!-- ═══ SCROLL TO TOP ═══ -->
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8593;</button>
+
+<!-- ═══ SCRIPTS ═══ -->
+<script src="data.js"></script>
+<script src="cnesst-reglements.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   VOLO SST — ASAT Reference Guide — Scripts
+   ═══════════════════════════════════════════════════════════ */
+
+// ═══ ACCORDION TOGGLE ═══
+function toggleSection(headEl) {
+  const body = headEl.nextElementSibling;
+  const chev = headEl.querySelector('.sec-chevron');
+  const isOpen = body.classList.contains('open');
+
+  if (isOpen) {
+    body.classList.remove('open');
+    chev.classList.remove('open');
+  } else {
+    body.classList.add('open');
+    chev.classList.add('open');
+  }
+}
+
+// ═══ TASK TABS (Section 3) ═══
+function switchTask(btn) {
+  const taskId = btn.dataset.task;
+  document.querySelectorAll('.task-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.task-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  const panel = document.getElementById('task-' + taskId);
+  if (panel) panel.classList.add('active');
+}
+
+// ═══ RISK MATRIX DETAIL ═══
+const MATRIX_ACTIONS = {
+  low: {
+    title: 'RISQUE ACCEPTABLE (1-4)',
+    text: 'Risque acceptable avec les mesures en place. Maintenir la surveillance. Documenter dans l\'ASAT. Aucune action supplémentaire requise sauf si les conditions changent.'
+  },
+  mod: {
+    title: 'RISQUE MODÉRÉ (5-9)',
+    text: 'Mesures de contrôle additionnelles recommandées. Surveiller activement. Réduire l\'exposition si possible. Réévaluer si les conditions changent. Documenter les mesures prises.'
+  },
+  high: {
+    title: 'RISQUE ÉLEVÉ (10-16)',
+    text: 'Mesures de contrôle obligatoires avant de commencer. Approbation du superviseur requise. Plan de sauvetage en place. Surveillance continue. Réévaluation périodique obligatoire.'
+  },
+  crit: {
+    title: 'RISQUE CRITIQUE (17-25)',
+    text: 'ARRÊT DES TRAVAUX. Réévaluation complète de la méthode de travail. Approbation de la direction requise. Envisager l\'élimination ou la substitution du danger. Ne PAS procéder sans réduction significative du risque.'
+  }
+};
+
+function showMatrixDetail(prob, grav, score) {
+  const el = document.getElementById('matrixDetail');
+  const title = document.getElementById('matrixDetailTitle');
+  const text = document.getElementById('matrixDetailText');
+
+  let level;
+  if (score <= 4) level = 'low';
+  else if (score <= 9) level = 'mod';
+  else if (score <= 16) level = 'high';
+  else level = 'crit';
+
+  const info = MATRIX_ACTIONS[level];
+  const colors = { low: 'var(--green)', mod: 'var(--gold)', high: 'var(--rescue)', crit: 'var(--red)' };
+
+  title.textContent = 'SCORE ' + score + ' — ' + info.title;
+  title.style.color = colors[level];
+  text.textContent = info.text;
+  el.classList.add('show');
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ═══ CONTROLS PYRAMID DETAIL ═══
+const PYRAMID_DATA = [
+  {
+    title: '1. ÉLIMINATION — SUPPRIMER LE DANGER',
+    color: 'var(--green)',
+    text: 'Le moyen le plus efficace. Supprimer complètement la source du danger.',
+    items: [
+      'Modifier le design pour éliminer le travail en hauteur',
+      'Retirer les substances dangereuses du processus',
+      'Automatiser la tâche dangereuse',
+      'Préfabriquer au sol plutôt qu\'en hauteur'
+    ]
+  },
+  {
+    title: '2. SUBSTITUTION — REMPLACER PAR MOINS DANGEREUX',
+    color: 'var(--blue)',
+    text: 'Remplacer un matériau, un processus ou un équipement par un équivalent moins dangereux.',
+    items: [
+      'Remplacer un solvant toxique par un solvant à base d\'eau',
+      'Utiliser un échafaudage au lieu d\'une échelle',
+      'Remplacer la peinture au plomb par une alternative sans plomb',
+      'Utiliser des boulons au lieu de la soudure quand possible'
+    ]
+  },
+  {
+    title: '3. INGÉNIERIE — ISOLER LES PERSONNES DU DANGER',
+    color: 'var(--gold)',
+    text: 'Mettre en place des barrières physiques ou des modifications techniques entre le travailleur et le danger.',
+    items: [
+      'Installer des garde-corps permanents',
+      'Mettre en place une ventilation par extraction locale',
+      'Ajouter des protecteurs de machines',
+      'Installer des systèmes de détection automatique',
+      'Insonoriser les équipements bruyants'
+    ]
+  },
+  {
+    title: '4. ADMINISTRATIVE — CHANGER LA FAÇON DE TRAVAILLER',
+    color: 'var(--rescue)',
+    text: 'Modifier l\'organisation du travail, la formation et les procédures.',
+    items: [
+      'Formation et certification des travailleurs',
+      'Procédures de travail écrites et affichées',
+      'Rotation des tâches pour limiter l\'exposition',
+      'Signalisation et balisage des zones dangereuses',
+      'Supervision accrue',
+      'Permis de travail spécifiques'
+    ]
+  },
+  {
+    title: '5. EPI — ÉQUIPEMENT DE PROTECTION INDIVIDUELLE',
+    color: 'var(--red)',
+    text: 'Dernier recours. L\'EPI ne supprime PAS le danger — il protège le travailleur SI tout le reste échoue.',
+    items: [
+      'Casque, lunettes, gants, bottes de sécurité',
+      'Harnais et système antichute',
+      'Protection respiratoire (masque, APRA)',
+      'Protection auditive (bouchons, coquilles)',
+      'Vêtements de protection (ignifuge, chimique)',
+      'L\'EPI doit être inspecté, ajusté et porté correctement'
+    ]
+  }
+];
+
+function showPyrDetail(index) {
+  const data = PYRAMID_DATA[index];
+  const el = document.getElementById('pyrDetail');
+  const title = document.getElementById('pyrDetailTitle');
+  const text = document.getElementById('pyrDetailText');
+  const list = document.getElementById('pyrDetailList');
+
+  title.textContent = data.title;
+  title.style.color = data.color;
+  text.textContent = data.text;
+  list.innerHTML = data.items.map(i => '<li>' + i + '</li>').join('');
+
+  el.classList.add('show');
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ═══ CNESST ARTICLES (Section 6) ═══
+const ARTICLE_GROUPS = [
+  {
+    label: 'CHUTES & TRAVAIL EN HAUTEUR',
+    source: 'RSST',
+    key: 'chutes'
+  },
+  {
+    label: 'ESPACE CLOS',
+    source: 'RSST',
+    key: 'espaces_clos'
+  },
+  {
+    label: 'CADENASSAGE & ÉNERGIE',
+    source: 'RSST',
+    key: 'cadenassage'
+  },
+  {
+    label: 'EPI — ÉQUIPEMENT DE PROTECTION',
+    source: 'RSST',
+    key: 'epi'
+  },
+  {
+    label: 'OBLIGATIONS EMPLOYEUR (LSST)',
+    source: 'LSST',
+    key: 'obligations_employeur'
+  },
+  {
+    label: 'EPI (LSST)',
+    source: 'LSST',
+    key: 'epi'
+  },
+  {
+    label: 'FORMATION (LSST)',
+    source: 'LSST',
+    key: 'formation'
+  },
+  {
+    label: 'DROIT DE REFUS (LSST)',
+    source: 'LSST',
+    key: 'droit_refus'
+  },
+  {
+    label: 'COMITÉ SST (LSST)',
+    source: 'LSST',
+    key: 'comite_sst'
+  }
+];
+
+function renderArticles() {
+  const container = document.getElementById('articlesContainer');
+  if (!container) return;
+
+  let html = '';
+  const regs = (typeof CNESST_REGLEMENTS !== 'undefined') ? CNESST_REGLEMENTS : null;
+
+  if (!regs) {
+    html = '<p class="text-muted" style="text-align:center;padding:20px;font-size:13px">Chargement des articles CNESST... (cnesst-reglements.js requis)</p>';
+    container.innerHTML = html;
+    return;
+  }
+
+  ARTICLE_GROUPS.forEach(function(group) {
+    const source = regs[group.source];
+    if (!source || !source[group.key]) return;
+
+    const articles = source[group.key];
+    if (!articles.length) return;
+
+    html += '<div class="article-group-title">' + group.label + '</div>';
+
+    articles.forEach(function(art, i) {
+      const uid = group.source + '_' + group.key + '_' + i;
+      html += '<div class="article-item" data-search="' + (group.source + ' ' + art.art + ' ' + art.resume).toLowerCase() + '">';
+      html += '  <div class="article-head" onclick="toggleArticle(this)">';
+      html += '    <span class="article-num">' + group.source + ' ' + art.art + '</span>';
+      html += '    <span class="article-summary">' + truncate(art.resume, 80) + '</span>';
+      html += '    <span class="article-chevron">&#9660;</span>';
+      html += '  </div>';
+      html += '  <div class="article-body">';
+      html += '    <p>' + art.resume + '</p>';
+      html += '  </div>';
+      html += '</div>';
+    });
+  });
+
+  container.innerHTML = html;
+}
+
+function truncate(str, max) {
+  if (!str) return '';
+  return str.length > max ? str.substring(0, max) + '...' : str;
+}
+
+function toggleArticle(headEl) {
+  const body = headEl.nextElementSibling;
+  const chev = headEl.querySelector('.article-chevron');
+  const isOpen = body.classList.contains('open');
+
+  if (isOpen) {
+    body.classList.remove('open');
+    chev.classList.remove('open');
+  } else {
+    body.classList.add('open');
+    chev.classList.add('open');
+  }
+}
+
+// ═══ ARTICLE FILTER ═══
+function filterArticles(query) {
+  const q = query.toLowerCase().trim();
+  const items = document.querySelectorAll('.article-item');
+  const groups = document.querySelectorAll('.article-group-title');
+
+  items.forEach(function(item) {
+    const data = item.dataset.search || '';
+    if (!q || data.includes(q)) {
+      item.classList.remove('hidden');
+    } else {
+      item.classList.add('hidden');
+    }
+  });
+
+  // Hide empty group titles
+  groups.forEach(function(title) {
+    let next = title.nextElementSibling;
+    let hasVisible = false;
+    while (next && next.classList.contains('article-item')) {
+      if (!next.classList.contains('hidden')) hasVisible = true;
+      next = next.nextElementSibling;
+    }
+    title.style.display = hasVisible ? '' : 'none';
+  });
+}
+
+// ═══ GLOBAL SEARCH ═══
+function globalSearch(query) {
+  const q = query.toLowerCase().trim();
+  if (!q) {
+    document.querySelectorAll('.section').forEach(s => {
+      s.style.display = '';
+      s.classList.remove('highlight');
+    });
+    filterArticles('');
+    return;
+  }
+
+  document.querySelectorAll('.section').forEach(function(section) {
+    const text = section.textContent.toLowerCase();
+    if (text.includes(q)) {
+      section.style.display = '';
+      section.classList.add('highlight');
+    } else {
+      section.style.display = 'none';
+      section.classList.remove('highlight');
+    }
+  });
+
+  filterArticles(q);
+}
+
+// ═══ SCROLL TO TOP BUTTON ═══
+function handleScroll() {
+  const btn = document.getElementById('scrollTop');
+  if (window.scrollY > 400) {
+    btn.classList.add('show');
+  } else {
+    btn.classList.remove('show');
+  }
+}
+
+// ═══ INIT ═══
+document.addEventListener('DOMContentLoaded', function() {
+  // Render CNESST articles
+  renderArticles();
+
+  // Search listeners
+  var globalSearchEl = document.getElementById('globalSearch');
+  if (globalSearchEl) {
+    globalSearchEl.addEventListener('input', function() {
+      globalSearch(this.value);
+    });
+  }
+
+  var articleSearchEl = document.getElementById('articleSearch');
+  if (articleSearchEl) {
+    articleSearchEl.addEventListener('input', function() {
+      filterArticles(this.value);
+    });
+  }
+
+  // Scroll listener
+  window.addEventListener('scroll', handleScroll, { passive: true });
+
+  // Open section 1 by default
+  var firstHead = document.querySelector('.section[data-section="1"] .sec-head');
+  if (firstHead) toggleSection(firstHead);
+});
+</script>
+</body>
+</html>

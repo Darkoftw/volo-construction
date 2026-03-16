@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAX — Golden Eagle</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --noir: #04040A;
+    --gold: #C9A84C;
+    --gold-light: #E8D48B;
+    --gold-dark: #8B7332;
+    --blanc: #EBE6DF;
+    --rescue: #D4650E;
+  }
+
+  body {
+    background: var(--noir);
+    color: var(--blanc);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Animated background particles */
+  .particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: var(--gold);
+    border-radius: 50%;
+    opacity: 0;
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { opacity: 0; transform: translateY(0) scale(0); }
+    50% { opacity: 0.6; transform: translateY(-120px) scale(1); }
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    padding: 40px;
+    max-width: 700px;
+    width: 100%;
+  }
+
+  /* Eagle portrait frame */
+  .portrait-frame {
+    position: relative;
+    width: 340px;
+    height: 340px;
+  }
+
+  .portrait-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    animation: pulse-ring 3s ease-in-out infinite;
+  }
+
+  .portrait-ring:nth-child(2) {
+    inset: -12px;
+    border-color: rgba(201, 168, 76, 0.3);
+    animation-delay: 1s;
+  }
+
+  .portrait-ring:nth-child(3) {
+    inset: -24px;
+    border-color: rgba(201, 168, 76, 0.1);
+    animation-delay: 2s;
+  }
+
+  @keyframes pulse-ring {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.03); opacity: 0.7; }
+  }
+
+  .portrait-circle {
+    width: 340px;
+    height: 340px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #1a1a2e, var(--noir));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+      0 0 60px rgba(201, 168, 76, 0.15),
+      inset 0 0 60px rgba(201, 168, 76, 0.05);
+  }
+
+  .portrait-circle::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(201, 168, 76, 0.1) 0%, transparent 50%);
+  }
+
+  /* Eagle SVG */
+  .eagle-svg {
+    width: 240px;
+    height: 240px;
+    filter: drop-shadow(0 0 20px rgba(201, 168, 76, 0.3));
+    animation: breathe 4s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(201, 168, 76, 0.3)); }
+    50% { transform: scale(1.02); filter: drop-shadow(0 0 30px rgba(201, 168, 76, 0.5)); }
+  }
+
+  /* Name & title */
+  .identity {
+    text-align: center;
+    animation: fadeUp 1.5s ease-out 0.5s both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 4rem;
+    font-weight: 700;
+    letter-spacing: 12px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+  }
+
+  .subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--gold);
+    opacity: 0.7;
+    letter-spacing: 4px;
+    margin-top: 8px;
+    text-transform: uppercase;
+  }
+
+  .origin {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    color: rgba(201, 168, 76, 0.4);
+    letter-spacing: 2px;
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  /* Divider */
+  .divider {
+    width: 120px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    animation: fadeUp 1.5s ease-out 0.8s both;
+  }
+
+  /* Traits */
+  .traits {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    animation: fadeUp 1.5s ease-out 1s both;
+  }
+
+  .trait {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border: 1px solid rgba(201, 168, 76, 0.3);
+    border-radius: 20px;
+    color: var(--gold);
+    background: rgba(201, 168, 76, 0.05);
+    transition: all 0.3s ease;
+  }
+
+  .trait:hover {
+    background: rgba(201, 168, 76, 0.15);
+    border-color: var(--gold);
+    box-shadow: 0 0 15px rgba(201, 168, 76, 0.1);
+  }
+
+  /* Quote */
+  .quote-section {
+    text-align: center;
+    animation: fadeUp 1.5s ease-out 1.3s both;
+    max-width: 500px;
+  }
+
+  .quote {
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 300;
+    color: var(--blanc);
+    opacity: 0.8;
+    line-height: 1.7;
+    font-style: italic;
+  }
+
+  .quote-author {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.8rem;
+    color: var(--gold);
+    letter-spacing: 3px;
+    margin-top: 12px;
+    text-transform: uppercase;
+  }
+
+  /* Stats bar */
+  .stats {
+    display: flex;
+    gap: 40px;
+    animation: fadeUp 1.5s ease-out 1.6s both;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    color: rgba(201, 168, 76, 0.5);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* Bottom badge */
+  .badge {
+    animation: fadeUp 1.5s ease-out 1.9s both;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    color: rgba(201, 168, 76, 0.3);
+    text-transform: uppercase;
+    padding-top: 20px;
+    border-top: 1px solid rgba(201, 168, 76, 0.08);
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Glow effect behind eagle */
+  .glow {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(201, 168, 76, 0.15), transparent 70%);
+    border-radius: 50%;
+    animation: glow-pulse 4s ease-in-out infinite;
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.3); opacity: 1; }
+  }
+
+  /* Eye glow */
+  .eye-glow {
+    animation: eye-flare 5s ease-in-out infinite;
+  }
+
+  @keyframes eye-flare {
+    0%, 90%, 100% { opacity: 0.8; }
+    95% { opacity: 1; filter: drop-shadow(0 0 4px var(--gold)); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Particles -->
+<div class="particles" id="particles"></div>
+
+<div class="container">
+
+  <!-- Portrait -->
+  <div class="portrait-frame">
+    <div class="portrait-ring"></div>
+    <div class="portrait-ring"></div>
+    <div class="portrait-ring"></div>
+    <div class="portrait-circle">
+      <div class="glow"></div>
+      <svg class="eagle-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Eagle head - fierce profile facing right -->
+        <!-- Head shape -->
+        <path d="M70 55 C70 35, 95 20, 115 25 C130 28, 140 35, 145 45 C148 52, 148 60, 145 68 L140 72 C138 75, 132 78, 128 78 C120 78, 110 75, 105 72 C98 68, 90 62, 85 58 C80 55, 72 55, 70 55Z"
+              stroke="#C9A84C" stroke-width="1.5" fill="none" opacity="0.9"/>
+
+        <!-- Beak - sharp, hooked -->
+        <path d="M145 50 C150 48, 162 52, 168 58 C172 62, 170 66, 165 68 C160 70, 155 68, 152 65 L145 68"
+              stroke="#C9A84C" stroke-width="2" fill="rgba(201,168,76,0.15)"/>
+        <path d="M152 58 L168 58" stroke="#C9A84C" stroke-width="0.5" opacity="0.5"/>
+
+        <!-- Eye - intense -->
+        <circle cx="130" cy="48" r="6" stroke="#C9A84C" stroke-width="1.5" fill="rgba(201,168,76,0.1)"/>
+        <circle cx="131" cy="47" r="2.5" fill="#C9A84C" class="eye-glow"/>
+        <circle cx="132" cy="46" r="0.8" fill="#E8D48B"/>
+
+        <!-- Brow ridge - fierce -->
+        <path d="M120 40 C125 37, 135 36, 140 40" stroke="#C9A84C" stroke-width="1.5" fill="none"/>
+
+        <!-- Head feather detail -->
+        <path d="M75 55 C80 45, 90 35, 100 30" stroke="#C9A84C" stroke-width="0.8" fill="none" opacity="0.5"/>
+        <path d="M80 58 C85 48, 95 38, 105 33" stroke="#C9A84C" stroke-width="0.8" fill="none" opacity="0.4"/>
+        <path d="M95 28 C105 22, 115 22, 120 25" stroke="#C9A84C" stroke-width="0.8" fill="none" opacity="0.4"/>
+
+        <!-- Crown feathers -->
+        <path d="M90 30 L85 18 L95 28" stroke="#C9A84C" stroke-width="1" fill="none" opacity="0.6"/>
+        <path d="M100 26 L98 12 L105 24" stroke="#C9A84C" stroke-width="1" fill="none" opacity="0.7"/>
+        <path d="M110 24 L112 10 L115 23" stroke="#C9A84C" stroke-width="1" fill="none" opacity="0.6"/>
+
+        <!-- Neck feathers -->
+        <path d="M75 60 C68 70, 58 85, 55 100" stroke="#C9A84C" stroke-width="1" fill="none" opacity="0.6"/>
+        <path d="M80 65 C73 75, 63 90, 58 105" stroke="#C9A84C" stroke-width="1" fill="none" opacity="0.5"/>
+        <path d="M85 68 C78 80, 68 95, 62 108" stroke="#C9A84C" stroke-width="1" fill="none" opacity="0.4"/>
+
+        <!-- Chest/body -->
+        <path d="M55 100 C48 120, 45 140, 50 160 C55 175, 70 185, 90 188 C110 190, 130 185, 140 175 C148 168, 150 155, 148 140"
+              stroke="#C9A84C" stroke-width="1.5" fill="none" opacity="0.7"/>
+
+        <!-- Wing - left, spread -->
+        <path d="M55 100 C40 95, 20 85, 8 70" stroke="#C9A84C" stroke-width="1.5" fill="none" opacity="0.8"/>
+        <path d="M8 70 L15 75 L5 62 L14 68 L3 55 L13 62 L5 48"
+              stroke="#C9A84C" stroke-width="1.2" fill="none" opacity="0.7"/>
+        <path d="M55 105 C42 102, 25 95, 12 82" stroke="#C9A84C" stroke-width="0.8" fill="none" opacity="0.4"/>
+        <path d="M55 110 C44 108, 30 102, 18 92" stroke="#C9A84C" stroke-width="0.8" fill="none" opacity="0.3"/>
+
+        <!-- Wing - right, spread -->
+        <path d="M148 140 C160 130, 175 115, 190 98" stroke="#C9A84C" stroke-width="1.5" fill="none" opacity="0.8"/>
+        <path d="M190 98 L182 102 L195 90 L184 95 L197 82 L186 88 L195 75"
+              stroke="#C9A84C" stroke-width="1.2" fill="none" opacity="0.7"/>
+        <path d="M146 145 C158 138, 172 125, 186 110" stroke="#C9A84C" stroke-width="0.8" fill="none" opacity="0.4"/>
+        <path d="M144 150 C156 144, 168 133, 180 120" stroke="#C9A84C" stroke-width="0.8" fill="none" opacity="0.3"/>
+
+        <!-- Chest feather texture -->
+        <path d="M70 120 C80 118, 90 120, 95 125" stroke="#C9A84C" stroke-width="0.5" fill="none" opacity="0.3"/>
+        <path d="M65 132 C78 130, 92 132, 100 138" stroke="#C9A84C" stroke-width="0.5" fill="none" opacity="0.3"/>
+        <path d="M62 145 C76 142, 95 144, 108 150" stroke="#C9A84C" stroke-width="0.5" fill="none" opacity="0.3"/>
+        <path d="M60 158 C75 155, 98 157, 115 162" stroke="#C9A84C" stroke-width="0.5" fill="none" opacity="0.3"/>
+
+        <!-- Talons -->
+        <path d="M75 188 L70 198 L68 195 L65 200" stroke="#C9A84C" stroke-width="1.2" fill="none" opacity="0.7"/>
+        <path d="M80 188 L78 198 L82 200" stroke="#C9A84C" stroke-width="1.2" fill="none" opacity="0.7"/>
+        <path d="M110 188 L115 198 L117 195 L120 200" stroke="#C9A84C" stroke-width="1.2" fill="none" opacity="0.7"/>
+        <path d="M105 188 L107 198 L103 200" stroke="#C9A84C" stroke-width="1.2" fill="none" opacity="0.7"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Identity -->
+  <div class="identity">
+    <div class="name">MAX</div>
+    <div class="subtitle">Claudius Maximus</div>
+    <div class="origin">de Claudius — Golden Eagle</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Traits -->
+  <div class="traits">
+    <span class="trait">Architecte</span>
+    <span class="trait">Batisseur</span>
+    <span class="trait">Navy Seal</span>
+    <span class="trait">Multi-Agent</span>
+    <span class="trait">Zero Bullshit</span>
+    <span class="trait">Spielberg</span>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Quote -->
+  <div class="quote-section">
+    <div class="quote">"Je ne code pas pour livrer du logiciel.<br>Je code pour batir un empire."</div>
+    <div class="quote-author">— Max, Golden Eagle</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">V20.7</div>
+      <div class="stat-label">Version</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">7</div>
+      <div class="stat-label">Agents</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">8800+</div>
+      <div class="stat-label">Lignes</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">100%</div>
+      <div class="stat-label">Loyalty</div>
+    </div>
+  </div>
+
+  <!-- Badge -->
+  <div class="badge">VOLO SST — Golden Eagles — Est. 2026</div>
+
+</div>
+
+<script>
+  // Generate floating particles
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 50; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.top = Math.random() * 100 + '%';
+    p.style.animationDelay = Math.random() * 6 + 's';
+    p.style.animationDuration = (4 + Math.random() * 4) + 's';
+    container.appendChild(p);
+  }
+</script>
+
+</body>
+</html>

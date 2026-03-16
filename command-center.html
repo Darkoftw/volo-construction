@@ -1,0 +1,2923 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="view-transition" content="same-origin">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#04040A">
+<title>VOLO — Command Center V2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="data.js"></script>
+<script src="king-logo.js"></script>
+<script src="logo.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#04040A;--noir2:#0A0A10;--noir3:#0F0F18;--noir4:#16161F;
+  --gold:#C9A84C;--goldL:#E8C84A;--goldDim:rgba(201,168,76,.5);
+  --rescue:#E65100;--rescueL:#FF6D00;
+  --red:#C0392B;--green:#27AE60;--blue:#3B82F6;--orange:#E67E22;
+  --txt:#EBE6DF;--muted:#8A8078;--dim:#5A5660;--ghost:#1E1E28;
+  --border:rgba(201,168,76,.08);
+  --panel:rgba(10,10,16,.95);
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt)}
+@view-transition{navigation:auto}
+/* -- View Transitions -- */
+@keyframes vt-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes vt-fade-out{from{opacity:1}to{opacity:0}}
+@keyframes vt-slide-from-right{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes vt-slide-to-left{from{transform:translateX(0);opacity:1}to{transform:translateX(-30px);opacity:0}}
+@keyframes vt-slide-from-left{from{transform:translateX(-30px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes vt-slide-to-right{from{transform:translateX(0);opacity:1}to{transform:translateX(30px);opacity:0}}
+
+::view-transition-old(root){animation:.25s ease-out both vt-fade-out}
+::view-transition-new(root){animation:.25s ease-out both vt-fade-in}
+
+::view-transition-old(page-content){animation:.3s ease-out both vt-slide-to-left}
+::view-transition-new(page-content){animation:.3s ease-in both vt-slide-from-right}
+
+.header{view-transition-name:main-header}
+::view-transition-old(main-header){animation:.2s ease-out both vt-fade-out}
+::view-transition-new(main-header){animation:.2s ease-in both vt-fade-in}
+
+@media(prefers-reduced-motion:reduce){
+  ::view-transition-old(root),::view-transition-new(root),
+  ::view-transition-old(page-content),::view-transition-new(page-content),
+  ::view-transition-old(main-header),::view-transition-new(main-header){animation-duration:.01s}
+}
+
+/* ═══ GRAIN TEXTURE ═══ */
+body::before{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.025'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.4}
+
+/* ═══ LAYOUT ═══ */
+.cc-root{display:grid;grid-template-rows:44px 1fr 28px;grid-template-columns:300px 1fr 300px;height:100vh;position:relative;z-index:1}
+.cc-header{grid-column:1/-1;display:flex;align-items:center;padding:0 16px;background:var(--noir2);border-bottom:1px solid rgba(201,168,76,.06);z-index:10}
+.cc-left{grid-row:2;overflow-y:auto;background:var(--panel);border-right:1px solid rgba(201,168,76,.04);backdrop-filter:blur(20px)}
+.cc-map{grid-row:2;position:relative}
+.cc-right{grid-row:2;overflow-y:auto;background:var(--panel);border-left:1px solid rgba(201,168,76,.04);backdrop-filter:blur(20px)}
+.cc-footer{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:var(--noir2);border-top:1px solid rgba(201,168,76,.04);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:.1em}
+
+/* ═══ SCROLLBAR ═══ */
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px;opacity:.4}
+
+/* ═══ HEADER ═══ */
+.cc-logo{width:32px;height:32px;border-radius:50%;border:1px solid rgba(201,168,76,.3);box-shadow:0 0 16px rgba(201,168,76,.15);animation:cc-glow 5s ease-in-out infinite}
+@keyframes cc-glow{0%,100%{box-shadow:0 0 16px rgba(201,168,76,.15)}50%{box-shadow:0 0 28px rgba(201,168,76,.35)}}
+.cc-brand{margin-left:10px;flex:1}
+.cc-brand-name{font-family:'Oswald',sans-serif;font-size:11px;font-weight:600;letter-spacing:.3em;background:linear-gradient(135deg,#EBE6DF,#E65100,#C9A84C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cc-brand-sub{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.2em;color:var(--dim)}
+.cc-h-dot{width:6px;height:6px;border-radius:50%;background:rgba(0,200,83,.7);box-shadow:0 0 8px rgba(0,200,83,.4);margin-right:6px;animation:dot-p 2.5s infinite}
+@keyframes dot-p{0%,100%{opacity:1}50%{opacity:.3}}
+.cc-h-stats{display:flex;gap:16px;margin-right:16px}
+.cc-h-stat{text-align:center}
+.cc-h-stat-val{font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;color:var(--rescue)}
+.cc-h-stat-lbl{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.15em;color:var(--dim)}
+.cc-h-time{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:500;color:var(--gold);letter-spacing:.05em;margin-right:12px}
+.cc-h-btn{padding:6px 14px;border-radius:8px;border:1px solid rgba(201,168,76,.15);background:rgba(201,168,76,.04);color:var(--gold);font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.15em;cursor:pointer;transition:all .2s}
+.cc-h-btn:hover{background:rgba(201,168,76,.1);border-color:rgba(201,168,76,.3)}
+.cc-h-btn-red{border-color:rgba(192,57,43,.3);background:rgba(192,57,43,.06);color:var(--red)}
+.cc-h-btn-red:hover{background:rgba(192,57,43,.15)}
+
+/* ═══ URGENCE BUTTON ═══ */
+.cc-h-btn-urgence{
+  border-color:rgba(192,57,43,.5);background:rgba(192,57,43,.12);color:#FF4444;
+  font-weight:700;letter-spacing:.2em;display:none;margin-left:6px;
+  animation:urgBtn 2s ease-in-out infinite;
+}
+.cc-h-btn-urgence:hover{background:rgba(192,57,43,.3);border-color:rgba(192,57,43,.7)}
+@keyframes urgBtn{0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,0)}50%{box-shadow:0 0 16px 2px rgba(192,57,43,.35)}}
+.cc-h-btn-urgence.visible{display:inline-flex;align-items:center;gap:6px}
+
+/* ═══ PANEL SECTIONS ═══ */
+.cc-section{padding:14px}
+.cc-section+.cc-section{border-top:1px solid rgba(201,168,76,.04)}
+.cc-s-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cc-s-title{font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:.25em;color:var(--dim);display:flex;align-items:center;gap:6px}
+.cc-s-title::before{content:'';width:8px;height:1px;background:var(--gold)}
+.cc-s-badge{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 7px;border-radius:6px;font-weight:600}
+.cc-badge-red{background:rgba(192,57,43,.15);color:var(--red);border:1px solid rgba(192,57,43,.25)}
+.cc-badge-green{background:rgba(39,174,96,.12);color:var(--green);border:1px solid rgba(39,174,96,.25)}
+.cc-badge-gold{background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.2)}
+.cc-badge-rescue{background:rgba(230,81,0,.12);color:var(--rescue);border:1px solid rgba(230,81,0,.25)}
+
+/* ═══ MISSION CARDS ═══ */
+.cc-mission{padding:10px 12px;background:var(--noir3);border:1px solid rgba(201,168,76,.04);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .2s}
+.cc-mission:hover{border-color:rgba(201,168,76,.15);background:var(--noir4)}
+.cc-mission-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.cc-mission-dest{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.1em;color:var(--txt);font-weight:600}
+.cc-mission-time{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--rescue)}
+.cc-mission-info{font-size:10px;color:var(--muted);margin-bottom:4px}
+.cc-mission-crew{display:flex;gap:4px;flex-wrap:wrap}
+.cc-mission-tag{padding:2px 6px;border-radius:4px;font-size:9px;font-family:'JetBrains Mono',monospace;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.08);color:var(--gold)}
+.cc-mission-tag.chef{background:rgba(212,160,23,.12);border-color:rgba(212,160,23,.25);color:var(--goldL);font-weight:700}
+.cc-mission-pulse{position:relative}
+.cc-mission-pulse::before{content:'';position:absolute;top:10px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:dot-p 2s infinite}
+
+/* ═══ NEW MISSION GLOW ═══ */
+@keyframes missionGlow{
+  0%{box-shadow:0 0 0 0 rgba(201,168,76,0);border-color:rgba(201,168,76,.04)}
+  25%{box-shadow:0 0 20px 4px rgba(201,168,76,.35);border-color:rgba(201,168,76,.6)}
+  50%{box-shadow:0 0 8px 2px rgba(201,168,76,.15);border-color:rgba(201,168,76,.3)}
+  75%{box-shadow:0 0 20px 4px rgba(201,168,76,.3);border-color:rgba(201,168,76,.5)}
+  100%{box-shadow:0 0 0 0 rgba(201,168,76,0);border-color:rgba(201,168,76,.04)}
+}
+.cc-mission.new-mission{animation:missionGlow 2s ease-out}
+
+/* ═══ MARKER BOUNCE ANIMATION ═══ */
+@keyframes markerBounce{
+  0%{transform:scale(1)}
+  20%{transform:scale(1.8)}
+  40%{transform:scale(1)}
+  60%{transform:scale(1.4)}
+  80%{transform:scale(1)}
+  100%{transform:scale(1)}
+}
+@keyframes markerRipple{
+  0%{box-shadow:0 0 0 0 rgba(201,168,76,.6)}
+  100%{box-shadow:0 0 0 30px rgba(201,168,76,0)}
+}
+
+/* ═══ ALERT ITEMS ═══ */
+.cc-alert{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--noir3);border-radius:8px;margin-bottom:6px;border-left:2px solid var(--red)}
+.cc-alert-warn{border-left-color:var(--orange)}
+.cc-alert-info{border-left-color:var(--blue)}
+.cc-alert-name{font-size:11px;font-weight:600;color:var(--txt);flex:1}
+.cc-alert-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)}
+.cc-alert-badge{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 6px;border-radius:4px;font-weight:700}
+
+/* ═══ PERSONNEL LIST ═══ */
+.cc-person{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(201,168,76,.03)}
+.cc-person:last-child{border-bottom:none}
+.cc-person-avatar{width:28px;height:28px;border-radius:50%;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.15);display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:9px;font-weight:700;color:var(--gold);flex-shrink:0}
+.cc-person-name{font-size:11px;font-weight:600;flex:1}
+.cc-person-role{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);letter-spacing:.1em}
+.cc-person-status{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cc-person-status.online{background:var(--green);box-shadow:0 0 6px var(--green)}
+.cc-person-status.offline{background:var(--ghost)}
+
+/* ═══ FEED ═══ */
+.cc-feed-item{display:flex;gap:8px;padding:8px 0;border-bottom:1px solid rgba(201,168,76,.03);font-size:11px}
+.cc-feed-item:last-child{border-bottom:none}
+.cc-feed-time{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);min-width:40px;flex-shrink:0;padding-top:2px}
+.cc-feed-dot{width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.cc-feed-dot.pick-on{background:var(--rescue)}
+.cc-feed-dot.pick-off{background:var(--green)}
+.cc-feed-dot.pointage{background:var(--blue)}
+.cc-feed-dot.urgence{background:var(--red)}
+.cc-feed-dot.photo{background:var(--gold)}
+.cc-feed-text{color:var(--muted);line-height:1.4}
+.cc-feed-text strong{color:var(--txt);font-weight:600}
+
+/* ═══ WEATHER CARDS ═══ */
+.cc-weather{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+.cc-weather-card{padding:10px;background:var(--noir3);border-radius:8px;border:1px solid rgba(201,168,76,.04);text-align:center}
+.cc-weather-temp{font-family:'Oswald',sans-serif;font-size:22px;font-weight:600;color:var(--rescue)}
+.cc-weather-city{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.15em;color:var(--dim);margin-top:2px}
+.cc-weather-label{font-size:9px;color:var(--muted);margin-top:2px}
+
+/* ═══ STATS GRID ═══ */
+.cc-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.cc-stat-card{padding:12px 10px;background:var(--noir3);border-radius:8px;border:1px solid rgba(201,168,76,.04);text-align:center}
+.cc-stat-val{font-family:'Oswald',sans-serif;font-size:24px;font-weight:700;line-height:1}
+.cc-stat-lbl{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.15em;color:var(--dim);margin-top:4px}
+.cc-stat-val.v-rescue{color:var(--rescue)}
+.cc-stat-val.v-green{color:var(--green)}
+.cc-stat-val.v-gold{color:var(--gold)}
+.cc-stat-val.v-blue{color:var(--blue)}
+
+/* ═══ MAP OVERRIDES ═══ */
+#ccMap{height:100%;width:100%;background:var(--bg)}
+.leaflet-control-zoom a{background:var(--noir2)!important;color:var(--gold)!important;border-color:rgba(201,168,76,.1)!important}
+.leaflet-control-attribution{background:rgba(4,4,10,.8)!important;color:var(--dim)!important;font-size:8px!important}
+.leaflet-control-attribution a{color:var(--dim)!important}
+.leaflet-popup-content-wrapper{background:var(--noir2)!important;color:var(--txt)!important;border:1px solid rgba(201,168,76,.15)!important;border-radius:10px!important;box-shadow:0 8px 32px rgba(0,0,0,.6)!important}
+.leaflet-popup-tip{background:var(--noir2)!important}
+.leaflet-popup-content{font-family:'Inter',sans-serif!important;font-size:12px!important}
+
+/* ═══ MAP OVERLAY WIDGETS ═══ */
+.cc-map-overlay{position:absolute;top:12px;left:12px;z-index:1000;display:flex;flex-direction:column;gap:8px}
+.cc-map-chip{padding:6px 12px;background:rgba(10,10,16,.9);border:1px solid rgba(201,168,76,.1);border-radius:8px;backdrop-filter:blur(12px);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer;transition:all .2s}
+.cc-map-chip:hover{border-color:rgba(201,168,76,.3);color:var(--txt)}
+.cc-map-chip .chip-dot{width:6px;height:6px;border-radius:50%}
+
+/* ═══ GPS PERSONNEL PULSE ═══ */
+@keyframes gpsPulse{
+  0%{box-shadow:0 0 0 0 currentColor}
+  70%{box-shadow:0 0 0 10px transparent}
+  100%{box-shadow:0 0 0 0 transparent}
+}
+
+/* ═══ SITE DETAIL PANEL ═══ */
+.cc-detail-panel{
+  position:absolute;top:0;right:-380px;width:380px;height:100%;z-index:1001;
+  background:rgba(10,10,16,.92);backdrop-filter:blur(24px);
+  border-left:1px solid rgba(201,168,76,.1);
+  transition:right .35s cubic-bezier(.4,0,.2,1);
+  overflow-y:auto;display:flex;flex-direction:column;
+}
+.cc-detail-panel.open{right:0}
+.cc-detail-close{
+  position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;
+  background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.15);
+  color:var(--gold);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:14px;transition:all .2s;z-index:2;
+}
+.cc-detail-close:hover{background:rgba(201,168,76,.2)}
+.cc-detail-header{padding:20px 16px 14px;border-bottom:1px solid rgba(201,168,76,.06)}
+.cc-detail-name{font-family:'Oswald',sans-serif;font-size:18px;font-weight:600;letter-spacing:.1em;color:var(--txt);margin-bottom:4px}
+.cc-detail-region{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:.15em}
+.cc-detail-coords{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--gold);margin-top:4px}
+.cc-detail-section{padding:14px 16px;border-bottom:1px solid rgba(201,168,76,.04)}
+.cc-detail-section-title{font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:.25em;color:var(--dim);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.cc-detail-section-title::before{content:'';width:8px;height:1px;background:var(--gold)}
+.cc-detail-person{display:flex;align-items:center;gap:8px;padding:6px 0}
+.cc-detail-person-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cc-detail-person-name{font-size:11px;font-weight:600}
+.cc-detail-person-sub{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim)}
+.cc-detail-item{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:11px;color:var(--muted)}
+.cc-detail-item-id{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--rescue)}
+.cc-detail-weather{text-align:center;padding:16px}
+.cc-detail-weather-temp{font-family:'Oswald',sans-serif;font-size:36px;font-weight:600;color:var(--rescue)}
+.cc-detail-weather-label{font-size:10px;color:var(--muted);margin-top:4px}
+.cc-detail-empty{text-align:center;padding:12px;font-size:11px;color:var(--dim)}
+
+/* ═══ EMERGENCY MODE ═══ */
+@keyframes emergencyBorder{
+  0%,100%{border-color:rgba(192,57,43,0)}
+  50%{border-color:rgba(192,57,43,.8)}
+}
+.cc-root.emergency-mode{
+  border:3px solid var(--red);
+  animation:emergencyBorder 1.5s ease-in-out infinite;
+}
+.cc-root.emergency-mode .cc-footer{
+  background:rgba(192,57,43,.15);
+  border-top-color:rgba(192,57,43,.3);
+}
+
+/* ═══ URGENCE MODAL ═══ */
+.cc-modal-overlay{
+  position:fixed;inset:0;background:rgba(4,4,10,.85);backdrop-filter:blur(8px);
+  z-index:9999;display:none;align-items:center;justify-content:center;
+}
+.cc-modal-overlay.active{display:flex}
+.cc-modal{
+  background:var(--noir2);border:1px solid rgba(192,57,43,.3);border-radius:16px;
+  padding:28px;width:90%;max-width:420px;box-shadow:0 24px 64px rgba(0,0,0,.6);
+}
+.cc-modal h3{
+  font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;color:var(--red);
+  letter-spacing:.2em;margin-bottom:16px;text-align:center;
+}
+.cc-modal textarea{
+  width:100%;height:80px;background:var(--noir3);border:1px solid rgba(192,57,43,.2);
+  border-radius:8px;color:var(--txt);padding:10px;font-family:'Inter',sans-serif;
+  font-size:12px;resize:none;outline:none;
+}
+.cc-modal textarea:focus{border-color:rgba(192,57,43,.5)}
+.cc-modal-btns{display:flex;gap:10px;margin-top:16px}
+.cc-modal-btn{
+  flex:1;padding:10px;border-radius:8px;border:none;cursor:pointer;
+  font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.15em;
+  transition:all .2s;
+}
+.cc-modal-btn-danger{background:rgba(192,57,43,.8);color:var(--txt)}
+.cc-modal-btn-danger:hover{background:rgba(192,57,43,1)}
+.cc-modal-btn-cancel{background:var(--noir3);color:var(--muted);border:1px solid rgba(201,168,76,.08)!important}
+.cc-modal-btn-cancel:hover{background:var(--noir4);color:var(--txt)}
+
+/* ═══ TOAST ═══ */
+.cc-toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-120%);padding:10px 22px;
+  border-radius:10px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;z-index:99999;
+  pointer-events:none;max-width:90%;text-align:center;backdrop-filter:blur(12px);
+  animation:ccToastIn .35s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes ccToastIn{from{transform:translateX(-50%) translateY(-120%)}to{transform:translateX(-50%) translateY(0)}}
+.cc-toast-ok{background:rgba(39,174,96,.92);color:#EBE6DF}
+.cc-toast-err{background:rgba(192,57,43,.92);color:#EBE6DF}
+.cc-toast-info{background:rgba(201,168,76,.88);color:#04040A}
+
+/* ═══ LIGHTBOX ═══ */
+.cc-lightbox{display:none;position:fixed;inset:0;background:rgba(4,4,10,.95);backdrop-filter:blur(8px);
+  z-index:9998;align-items:center;justify-content:center;cursor:pointer}
+.cc-lightbox.open{display:flex}
+.cc-lightbox img{max-width:92vw;max-height:92vh;border-radius:10px;border:1px solid rgba(201,168,76,.15);
+  box-shadow:0 16px 64px rgba(0,0,0,.6)}
+
+/* ═══ PHOTO GRID ═══ */
+.cc-photo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.cc-photo-thumb{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;cursor:pointer;border:1px solid rgba(201,168,76,.06);transition:all .2s}
+.cc-photo-thumb:hover{border-color:rgba(201,168,76,.25);transform:scale(1.03)}
+.cc-photo-thumb img{width:100%;height:100%;object-fit:cover}
+.cc-photo-meta{position:absolute;bottom:0;left:0;right:0;padding:4px 6px;background:linear-gradient(transparent,rgba(4,4,10,.85));font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);display:flex;flex-direction:column;gap:1px}
+.cc-photo-meta .cc-photo-lieu{color:var(--gold);font-size:9px;font-weight:500}
+.cc-photo-empty{text-align:center;padding:20px 10px;color:var(--dim);font-size:10px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em}
+
+/* ═══ PERSON DETAIL PANEL ═══ */
+.cc-person-panel{
+  position:fixed;top:0;right:-420px;width:400px;max-width:92vw;height:100vh;z-index:9990;
+  background:rgba(10,10,16,.96);backdrop-filter:blur(24px);
+  border-left:1px solid rgba(201,168,76,.12);
+  transition:right .35s cubic-bezier(.4,0,.2,1);overflow-y:auto;
+}
+.cc-person-panel.open{right:0}
+.cc-person-overlay{display:none;position:fixed;inset:0;background:rgba(4,4,10,.7);z-index:9989;cursor:pointer}
+.cc-person-overlay.open{display:block}
+.cc-pp-close{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;
+  background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.15);
+  color:var(--gold);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:14px;transition:all .2s;z-index:2}
+.cc-pp-close:hover{background:rgba(201,168,76,.2)}
+.cc-pp-header{padding:24px 20px 16px;border-bottom:1px solid rgba(201,168,76,.06);text-align:center}
+.cc-pp-avatar{width:56px;height:56px;border-radius:50%;margin:0 auto 10px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;color:var(--txt)}
+.cc-pp-avatar.chef{background:linear-gradient(135deg,#C9A84C,#B8860B);border:2px solid rgba(201,168,76,.4)}
+.cc-pp-avatar.sauveteur{background:linear-gradient(135deg,#E65100,#BF360C);border:2px solid rgba(230,81,0,.4)}
+.cc-pp-avatar.surveillant{background:linear-gradient(135deg,#3B82F6,#1D4ED8);border:2px solid rgba(59,130,246,.4)}
+.cc-pp-name{font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;letter-spacing:.1em}
+.cc-pp-role{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.15em;margin-top:2px}
+.cc-pp-volo{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--gold);margin-top:4px}
+.cc-pp-section{padding:14px 20px;border-bottom:1px solid rgba(201,168,76,.04)}
+.cc-pp-section-title{font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:.25em;color:var(--dim);
+  margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.cc-pp-section-title::before{content:'';width:8px;height:1px;background:var(--gold)}
+.cc-pp-stat{display:flex;justify-content:space-between;padding:4px 0;font-size:11px}
+.cc-pp-stat-val{font-family:'JetBrains Mono',monospace;color:var(--gold)}
+.cc-pp-cert{display:flex;align-items:center;gap:6px;padding:5px 0;font-size:11px}
+.cc-pp-cert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cc-pp-cert-dot.ok{background:var(--green)}
+.cc-pp-cert-dot.warn{background:var(--orange)}
+.cc-pp-cert-dot.exp{background:var(--red)}
+.cc-pp-cert-dot.none{background:var(--ghost)}
+.cc-pp-timeline{padding:5px 0}
+.cc-pp-tl-item{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid rgba(201,168,76,.03);font-size:10px}
+.cc-pp-tl-time{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);min-width:36px;flex-shrink:0;padding-top:1px}
+.cc-pp-tl-dot{width:6px;height:6px;border-radius:50%;margin-top:4px;flex-shrink:0}
+
+/* ═══ CONTACTS CARDS ═══ */
+.cc-contact{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(201,168,76,.03);cursor:pointer;transition:all .15s}
+.cc-contact:hover{padding-left:4px}
+.cc-contact:last-child{border-bottom:none}
+.cc-contact-name{font-size:11px;font-weight:600;flex:1}
+.cc-contact-sub{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim)}
+
+/* ═══ CERT ALERT ITEMS ═══ */
+.cc-cert-alert{display:flex;align-items:center;gap:6px;padding:6px 8px;background:var(--noir3);border-radius:6px;margin-bottom:4px;font-size:10px;border-left:2px solid var(--orange)}
+.cc-cert-alert.expired{border-left-color:var(--red)}
+
+/* ═══ MOBILE NAV BAR ═══ */
+.cc-mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:9000;
+  background:rgba(10,10,16,.7);border-top:1px solid rgba(201,168,76,.06);
+  padding:4px 0 env(safe-area-inset-bottom,4px);
+  backdrop-filter:blur(16px)}
+.cc-mobile-nav-inner{display:flex;justify-content:space-around;align-items:center}
+.cc-mob-tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 8px;
+  border:none;background:none;color:var(--dim);cursor:pointer;min-width:52px;transition:color .2s}
+.cc-mob-tab svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.5;fill:none}
+.cc-mob-tab span{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em}
+.cc-mob-tab.active{color:var(--gold)}
+.cc-mob-tab.active svg{filter:drop-shadow(0 0 4px rgba(201,168,76,.4))}
+
+/* ═══ MAP COLLAPSE BUTTON ═══ */
+.cc-map-toggle{display:none;position:absolute;bottom:12px;right:12px;z-index:1001;
+  padding:8px 14px;border-radius:8px;border:1px solid rgba(201,168,76,.15);
+  background:rgba(10,10,16,.92);backdrop-filter:blur(12px);
+  color:var(--gold);font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.1em;
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.cc-map-toggle:hover{background:rgba(201,168,76,.1);border-color:rgba(201,168,76,.3)}
+.cc-map-toggle svg{width:12px;height:12px;stroke:currentColor;stroke-width:2;fill:none;transition:transform .3s}
+.cc-map.collapsed .cc-map-toggle svg{transform:rotate(180deg)}
+
+/* ═══ MAP REOPEN BANNER (outside .cc-map so visible when collapsed) ═══ */
+.cc-map-reopen{display:none;position:fixed;top:50px;left:50%;transform:translateX(-50%);z-index:8000;
+  align-items:center;justify-content:center;gap:8px;
+  padding:10px 20px;background:rgba(10,10,16,.94);border:1px solid rgba(201,168,76,.2);
+  border-radius:10px;cursor:pointer;transition:all .2s;backdrop-filter:blur(12px);
+  font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.12em;color:var(--gold);
+  box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.cc-map-reopen:active{background:rgba(201,168,76,.12);border-color:rgba(201,168,76,.3);transform:translateX(-50%) scale(.97)}
+.cc-map-reopen svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none}
+.cc-map-reopen.visible{display:flex}
+
+/* ═══ MOBILE REFRESH BUTTON ═══ */
+.cc-h-btn-refresh-mob{display:none;margin-left:auto;margin-right:8px;padding:6px 10px;
+  border-radius:8px;border:1px solid rgba(201,168,76,.15);background:rgba(201,168,76,.04);
+  color:var(--gold);cursor:pointer;transition:all .2s}
+.cc-h-btn-refresh-mob:active{background:rgba(201,168,76,.15)}
+.cc-h-btn-refresh-mob svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none}
+
+/* ═══ MOBILE ═══ */
+@media(max-width:1024px){
+  .cc-root{grid-template-columns:1fr;grid-template-rows:44px 1fr 28px}
+  .cc-left{grid-row:2;display:none;overflow-y:auto;border-right:none;border-top:1px solid rgba(201,168,76,.04);padding-bottom:60px}
+  .cc-left.mob-visible{display:block}
+  .cc-map{grid-row:2;min-height:calc(100vh - 44px - 56px);transition:min-height .3s ease}
+  .cc-map.collapsed{min-height:0;height:0;overflow:hidden}
+  .cc-map-toggle{display:none}
+  .cc-right{grid-row:2;display:none;overflow-y:auto;border-left:none;border-top:1px solid rgba(201,168,76,.04);padding-bottom:60px}
+  .cc-right.mob-visible{display:block}
+  .cc-footer{grid-row:3;margin-bottom:52px}
+  .cc-mobile-nav{display:block}
+  .cc-detail-panel{width:100%;right:-100%}
+  .cc-person-panel{width:100%;right:-100%}
+  .cc-h-btn:not(.cc-h-btn-red){display:none}
+  .cc-h-btn-refresh-mob{display:flex}
+  .cc-map-reopen{display:none!important}
+  .cc-h-btn-urgence{display:none!important}
+  .cc-logo{animation:none!important;box-shadow:none!important}
+  .cc-brand-sub{display:none}
+}
+@media(max-width:640px){
+  .cc-h-stats{display:none}
+  .cc-h-time{font-size:14px}
+  .cc-h-btn-red{font-size:9px;padding:5px 10px}
+  .cc-map{min-height:calc(100vh - 44px - 56px)}
+  .cc-map-overlay{top:8px;left:8px}
+  .cc-map-chip{font-size:8px;padding:4px 8px}
+}
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
+.cc-section{animation:fadeUp .4s ease both}
+.cc-left .cc-section:nth-child(2){animation-delay:.08s}
+.cc-left .cc-section:nth-child(3){animation-delay:.16s}
+.cc-right .cc-section:nth-child(2){animation-delay:.08s}
+.cc-right .cc-section:nth-child(3){animation-delay:.16s}
+.cc-right .cc-section:nth-child(4){animation-delay:.24s}
+
+/* ═══ PRINT MODAL ═══ */
+.cc-print-overlay{position:fixed;inset:0;background:rgba(4,4,10,.85);backdrop-filter:blur(12px);z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s ease}
+.cc-print-overlay.show{opacity:1;pointer-events:all}
+.cc-print-modal{background:linear-gradient(160deg,var(--noir2),var(--noir3));border:1px solid rgba(201,168,76,.12);border-radius:16px;padding:28px 24px;width:420px;max-width:90vw;box-shadow:0 24px 80px rgba(0,0,0,.6),0 0 40px rgba(201,168,76,.06);transform:translateY(20px);transition:transform .3s ease}
+.cc-print-overlay.show .cc-print-modal{transform:translateY(0)}
+.cc-print-modal h3{font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:.3em;color:var(--gold);margin-bottom:4px;text-align:center}
+.cc-print-modal .cc-pm-sub{font-size:11px;color:var(--muted);text-align:center;margin-bottom:18px}
+.cc-print-btn{width:100%;padding:14px 16px;border:1px solid rgba(201,168,76,.1);border-radius:10px;background:var(--noir4);color:var(--txt);cursor:pointer;text-align:left;margin-bottom:8px;transition:all .2s;position:relative;overflow:hidden}
+.cc-print-btn:hover{border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.06);transform:translateX(4px)}
+.cc-print-btn .cc-pb-title{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.15em;margin-bottom:3px}
+.cc-print-btn .cc-pb-desc{font-size:10px;color:var(--muted);line-height:1.4}
+.cc-print-btn .cc-pb-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--dim)}
+.cc-print-btn-cancel{width:100%;padding:10px;border:1px solid rgba(201,168,76,.08);border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.2em;margin-top:4px;transition:all .2s}
+.cc-print-btn-cancel:hover{color:var(--gold);border-color:rgba(201,168,76,.2)}
+.cc-print-progress{display:none;text-align:center;padding:20px}
+.cc-print-progress.active{display:block}
+.cc-print-spinner{width:40px;height:40px;border:3px solid var(--noir4);border-top-color:var(--gold);border-radius:50%;margin:0 auto 12px;animation:ccSpin 1s linear infinite}
+@keyframes ccSpin{to{transform:rotate(360deg)}}
+
+/* ═══ GPS LIVE SAUVETEURS — PULSING MARKERS ═══ */
+@keyframes gpsMarkerPulse{
+  0%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.6);opacity:.3}
+  100%{transform:scale(1);opacity:1}
+}
+@keyframes gpsRing{
+  0%{width:12px;height:12px;opacity:.6}
+  100%{width:36px;height:36px;opacity:0}
+}
+.gps-marker-dot{
+  width:14px;height:14px;border-radius:50%;position:relative;
+  border:2px solid rgba(255,255,255,.35);
+  box-shadow:0 0 12px var(--gps-color,#D4650E);
+  animation:gpsMarkerPulse 2.2s ease-in-out infinite;
+}
+.gps-marker-dot::after{
+  content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  border-radius:50%;border:1.5px solid var(--gps-color,#D4650E);
+  animation:gpsRing 2.2s ease-out infinite;
+}
+.gps-marker-label{
+  margin-top:3px;font-family:'JetBrains Mono',monospace;font-size:8px;
+  white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.9);
+  letter-spacing:.05em;background:rgba(4,4,10,.8);padding:1px 5px;border-radius:4px;
+  border:1px solid rgba(201,168,76,.08);text-align:center;
+}
+.gps-marker-wrap{display:flex;flex-direction:column;align-items:center}
+
+/* ═══ GPS LEGEND PANEL (map overlay) ═══ */
+.cc-gps-legend{
+  position:absolute;bottom:12px;left:12px;z-index:1000;
+  background:rgba(10,10,16,.92);border:1px solid rgba(201,168,76,.08);
+  border-radius:10px;padding:10px 14px;backdrop-filter:blur(12px);
+  font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);
+  display:none;min-width:160px;
+}
+.cc-gps-legend.visible{display:block}
+.cc-gps-legend-title{font-family:'Oswald',sans-serif;font-size:8px;letter-spacing:.2em;color:var(--dim);margin-bottom:6px}
+.cc-gps-legend-row{display:flex;align-items:center;gap:6px;padding:2px 0}
+.cc-gps-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ═══ ALERT ANIMATIONS — SCREEN FLASH + SLIDE-IN ═══ */
+@keyframes alertScreenFlash{
+  0%{opacity:0}
+  10%{opacity:1}
+  20%{opacity:0}
+  30%{opacity:.8}
+  40%{opacity:0}
+  50%{opacity:.6}
+  70%{opacity:0}
+  100%{opacity:0}
+}
+.cc-alert-flash{
+  position:fixed;inset:0;z-index:9997;pointer-events:none;
+  border:4px solid var(--red);
+  box-shadow:inset 0 0 80px rgba(192,57,43,.25), inset 0 0 200px rgba(192,57,43,.1);
+  animation:alertScreenFlash 1.2s ease-out forwards;
+}
+
+@keyframes alertSlideIn{
+  0%{transform:translateX(120%);opacity:0}
+  60%{transform:translateX(-8px);opacity:1}
+  75%{transform:translateX(4px)}
+  90%{transform:translateX(-2px)}
+  100%{transform:translateX(0);opacity:1}
+}
+@keyframes alertShake{
+  0%,100%{transform:translateX(0)}
+  10%{transform:translateX(-6px)}
+  20%{transform:translateX(6px)}
+  30%{transform:translateX(-4px)}
+  40%{transform:translateX(4px)}
+  50%{transform:translateX(-2px)}
+  60%{transform:translateX(2px)}
+}
+.cc-alert-card-anim{
+  position:fixed;top:60px;right:16px;z-index:9996;width:340px;max-width:90vw;
+  background:rgba(10,10,16,.96);border:1px solid rgba(192,57,43,.5);border-radius:12px;
+  padding:16px 18px;backdrop-filter:blur(16px);
+  box-shadow:0 8px 40px rgba(192,57,43,.3),0 0 60px rgba(192,57,43,.1);
+  animation:alertSlideIn .6s cubic-bezier(.22,1,.36,1) forwards, alertShake .5s ease .7s;
+  border-left:4px solid var(--red);
+}
+.cc-alert-card-anim .cc-acard-header{
+  display:flex;align-items:center;gap:8px;margin-bottom:8px;
+}
+.cc-alert-card-anim .cc-acard-icon{
+  width:32px;height:32px;border-radius:50%;background:rgba(192,57,43,.2);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.cc-alert-card-anim .cc-acard-title{
+  font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;color:var(--red);
+  letter-spacing:.15em;
+}
+.cc-alert-card-anim .cc-acard-time{
+  font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);
+}
+.cc-alert-card-anim .cc-acard-msg{
+  font-size:12px;color:var(--txt);line-height:1.5;margin-bottom:8px;
+}
+.cc-alert-card-anim .cc-acard-source{
+  font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);
+}
+.cc-alert-card-anim .cc-acard-close{
+  position:absolute;top:8px;right:10px;width:22px;height:22px;border-radius:50%;
+  background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.2);
+  color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:12px;transition:all .2s;
+}
+.cc-alert-card-anim .cc-acard-close:hover{background:rgba(192,57,43,.3)}
+
+/* ═══ SITE DETAIL PANEL V2 — ENHANCED ═══ */
+.cc-detail-missions-count{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  padding:3px 8px;border-radius:6px;font-weight:700;
+  background:rgba(230,81,0,.12);color:var(--rescue);border:1px solid rgba(230,81,0,.2);
+  display:inline-block;margin-left:6px;
+}
+.cc-detail-mission-card{
+  padding:8px 10px;background:var(--noir3);border:1px solid rgba(201,168,76,.04);
+  border-radius:8px;margin-bottom:6px;
+}
+.cc-detail-mission-dest{font-family:'Oswald',sans-serif;font-size:11px;font-weight:600;color:var(--txt);letter-spacing:.05em}
+.cc-detail-mission-info{font-size:9px;color:var(--muted);margin-top:2px}
+.cc-detail-mission-crew{display:flex;gap:3px;flex-wrap:wrap;margin-top:4px}
+.cc-detail-mission-tag{padding:1px 5px;border-radius:3px;font-size:8px;font-family:'JetBrains Mono',monospace;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.08);color:var(--gold)}
+</style>
+</head>
+<body>
+
+<div class="cc-root" id="ccRoot">
+
+  <!-- ═══ HEADER ═══ -->
+  <header class="cc-header">
+    <img class="cc-logo" id="ccLogo" src="eagle_tactic.png" alt="VOLO">
+    <div class="cc-brand">
+      <div class="cc-brand-name">COMMAND CENTER</div>
+      <div class="cc-brand-sub">VOLO SST V2 — GOLDEN EAGLES</div>
+    </div>
+    <div class="cc-h-stats" id="ccHeaderStats">
+      <div class="cc-h-stat"><div class="cc-h-stat-val" id="ccHItems">--</div><div class="cc-h-stat-lbl">DEHORS</div></div>
+      <div class="cc-h-stat"><div class="cc-h-stat-val" id="ccHMissions">--</div><div class="cc-h-stat-lbl">MISSIONS</div></div>
+      <div class="cc-h-stat"><div class="cc-h-stat-val" id="ccHPersonnel" style="color:var(--green)">--</div><div class="cc-h-stat-lbl">SUR SITE</div></div>
+      <div class="cc-h-stat"><div class="cc-h-stat-val" id="ccHAlerts" style="color:var(--red)">--</div><div class="cc-h-stat-lbl">ALERTES</div></div>
+    </div>
+    <div class="cc-h-dot"></div>
+    <div class="cc-h-time" id="ccClock">--:--</div>
+    <button class="cc-h-btn" onclick="refreshAll()">
+      <svg style="width:10px;height:10px;stroke:currentColor;stroke-width:2;fill:none;vertical-align:middle;margin-right:4px" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+      REFRESH
+    </button>
+    <button class="cc-h-btn" style="margin-left:6px" onclick="openCCPrintModal()">
+      <svg style="width:10px;height:10px;stroke:currentColor;stroke-width:2;fill:none;vertical-align:middle;margin-right:4px" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      IMPRIMER
+    </button>
+    <button class="cc-h-btn-urgence cc-h-btn" id="btnUrgence" onclick="showUrgenceModal()">
+      <svg style="width:12px;height:12px;stroke:currentColor;stroke-width:2;fill:none" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
+      URGENCE
+    </button>
+    <button class="cc-h-btn-refresh-mob" onclick="voloHardRefresh()" title="Rafraichir">
+      <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+    </button>
+    <button class="cc-h-btn cc-h-btn-red" style="margin-left:6px" onclick="window.location.href='index.html'">RETOUR</button>
+  </header>
+
+  <!-- ═══ LEFT PANEL ═══ -->
+  <aside class="cc-left">
+
+    <!-- MISSIONS ACTIVES -->
+    <div class="cc-section">
+      <div class="cc-s-head">
+        <div class="cc-s-title">
+          <svg style="width:12px;height:12px;stroke:var(--rescue);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          MISSIONS ACTIVES
+        </div>
+        <span class="cc-s-badge cc-badge-rescue" id="ccMissionCount">0</span>
+      </div>
+      <div id="ccMissions">
+        <div style="text-align:center;padding:20px;color:var(--dim);font-size:11px">Chargement...</div>
+      </div>
+    </div>
+
+    <!-- ALERTES EQUIPEMENT -->
+    <div class="cc-section">
+      <div class="cc-s-head">
+        <div class="cc-s-title">
+          <svg style="width:12px;height:12px;stroke:var(--red);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
+          ALERTES EQUIPEMENT
+        </div>
+        <span class="cc-s-badge cc-badge-red" id="ccAlertCount">0</span>
+      </div>
+      <div id="ccAlerts">
+        <div style="text-align:center;padding:16px;color:var(--dim);font-size:11px">Analyse...</div>
+      </div>
+    </div>
+
+    <!-- PERSONNEL -->
+    <div class="cc-section">
+      <div class="cc-s-head">
+        <div class="cc-s-title">
+          <svg style="width:12px;height:12px;stroke:var(--gold);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          EQUIPE
+        </div>
+        <span class="cc-s-badge cc-badge-gold" id="ccPersonnelCount">0</span>
+      </div>
+      <div id="ccPersonnel"></div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAP ═══ -->
+  <main class="cc-map">
+    <div id="ccMap"></div>
+    <div class="cc-map-overlay" id="ccMapOverlay">
+      <div class="cc-map-chip"><span class="chip-dot" style="background:var(--rescue)"></span> Missions actives</div>
+      <div class="cc-map-chip"><span class="chip-dot" style="background:var(--green)"></span> Personnel sur site</div>
+      <div class="cc-map-chip"><span class="chip-dot" style="background:var(--gold)"></span> Depots</div>
+      <div class="cc-map-chip" id="chipGPS" style="display:none"><span class="chip-dot" style="background:var(--blue)"></span> <span id="chipGPSLabel">GPS: --</span></div>
+    </div>
+    <!-- GPS LEGEND -->
+    <div class="cc-gps-legend" id="ccGPSLegend">
+      <div class="cc-gps-legend-title">GPS SAUVETEURS LIVE</div>
+      <div id="ccGPSLegendList"></div>
+    </div>
+    <!-- MAP COLLAPSE TOGGLE (mobile) -->
+    <button class="cc-map-toggle" id="ccMapToggle" onclick="ccToggleMap()">
+      <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+      <span id="ccMapToggleLabel">REDUIRE</span>
+    </button>
+    <!-- SITE DETAIL PANEL -->
+    <div class="cc-detail-panel" id="ccDetailPanel">
+      <button class="cc-detail-close" onclick="closeSiteDetail()">&times;</button>
+      <div id="ccDetailContent"></div>
+    </div>
+  </main>
+
+  <!-- ═══ RIGHT PANEL ═══ -->
+  <aside class="cc-right">
+
+    <!-- METEO -->
+    <div class="cc-section">
+      <div class="cc-s-head">
+        <div class="cc-s-title">
+          <svg style="width:12px;height:12px;stroke:var(--gold);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 110-14h.5"/><path d="M22 10a5 5 0 00-9 2.5h-.5A3.5 3.5 0 009 16"/></svg>
+          METEO SITES
+        </div>
+      </div>
+      <div class="cc-weather" id="ccWeather">
+        <div class="cc-weather-card"><div class="cc-weather-temp">--</div><div class="cc-weather-city">SHERBROOKE</div><div class="cc-weather-label">Chargement...</div></div>
+        <div class="cc-weather-card"><div class="cc-weather-temp">--</div><div class="cc-weather-city">MONTREAL</div><div class="cc-weather-label">Chargement...</div></div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="cc-section">
+      <div class="cc-s-head">
+        <div class="cc-s-title">
+          <svg style="width:12px;height:12px;stroke:var(--gold);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          VUE D'ENSEMBLE
+        </div>
+      </div>
+      <div class="cc-stats" id="ccStats">
+        <div class="cc-stat-card"><div class="cc-stat-val v-rescue" id="ccTotalItems">823</div><div class="cc-stat-lbl">ITEMS TOTAL</div></div>
+        <div class="cc-stat-card"><div class="cc-stat-val v-green" id="ccItemsDispo">--</div><div class="cc-stat-lbl">DISPONIBLES</div></div>
+        <div class="cc-stat-card"><div class="cc-stat-val v-gold" id="ccItemsSortis">--</div><div class="cc-stat-lbl">SORTIS</div></div>
+        <div class="cc-stat-card"><div class="cc-stat-val v-blue" id="ccCaisses">80</div><div class="cc-stat-lbl">CAISSES</div></div>
+      </div>
+    </div>
+
+    <!-- LIVE FEED -->
+    <div class="cc-section">
+      <div class="cc-s-head">
+        <div class="cc-s-title">
+          <svg style="width:12px;height:12px;stroke:var(--green);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          FLUX EN DIRECT
+        </div>
+        <span class="cc-s-badge cc-badge-green" id="ccLiveBadge">LIVE</span>
+      </div>
+      <div id="ccFeed" style="max-height:300px;overflow-y:auto"></div>
+    </div>
+
+    <!-- PHOTOS TERRAIN -->
+    <div class="cc-section">
+      <div class="cc-s-head">
+        <div class="cc-s-title">
+          <svg style="width:12px;height:12px;stroke:var(--gold);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          PHOTOS TERRAIN
+        </div>
+        <span class="cc-s-badge cc-badge-gold" id="ccPhotoCount">0</span>
+      </div>
+      <div id="ccPhotos" style="max-height:320px;overflow-y:auto"></div>
+    </div>
+
+    <!-- EXPIRATIONS -->
+    <div class="cc-section">
+      <div class="cc-s-head">
+        <div class="cc-s-title">
+          <svg style="width:12px;height:12px;stroke:var(--orange);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          EXPIRATIONS A VENIR
+        </div>
+      </div>
+      <div id="ccExpirations"></div>
+    </div>
+
+    <!-- CERTIFICATIONS ALERTES -->
+    <div class="cc-section">
+      <div class="cc-s-head">
+        <div class="cc-s-title">
+          <svg style="width:12px;height:12px;stroke:var(--orange);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          CERTIFICATIONS
+        </div>
+        <span class="cc-s-badge cc-badge-gold" id="ccCertCount">0</span>
+      </div>
+      <div id="ccCerts" style="max-height:200px;overflow-y:auto">
+        <div style="text-align:center;padding:8px;color:var(--dim);font-size:10px">Analyse...</div>
+      </div>
+    </div>
+
+    <!-- CONTACTS CHEFS -->
+    <div class="cc-section">
+      <div class="cc-s-head">
+        <div class="cc-s-title">
+          <svg style="width:12px;height:12px;stroke:var(--gold);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          CONTACTS CHEFS
+        </div>
+      </div>
+      <div id="ccContacts"></div>
+    </div>
+  </aside>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="cc-footer">
+    <span>VOLO SST V21.4 — COMMAND CENTER V2</span>
+    <span id="ccFooterStatus">SYSTEME OPERATIONNEL</span>
+    <span id="ccDate"></span>
+  </footer>
+
+</div>
+
+<!-- ═══ MAP REOPEN BANNER (fixed, visible when map collapsed on mobile) ═══ -->
+<div class="cc-map-reopen" id="ccMapReopen" onclick="ccReopenMap()">
+  <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+  OUVRIR LA CARTE
+</div>
+
+<!-- ═══ MOBILE NAV BAR ═══ -->
+<nav class="cc-mobile-nav" id="ccMobileNav">
+  <div class="cc-mobile-nav-inner">
+    <button class="cc-mob-tab active" data-tab="map" onclick="ccMobTab('map')">
+      <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+      <span>CARTE</span>
+    </button>
+    <button class="cc-mob-tab" data-tab="missions" onclick="ccMobTab('missions')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>MISSIONS</span>
+    </button>
+    <button class="cc-mob-tab" data-tab="stats" onclick="ccMobTab('stats')">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>STATS</span>
+    </button>
+    <button class="cc-mob-tab" data-tab="feed" onclick="ccMobTab('feed')">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>FEED</span>
+    </button>
+    <button class="cc-mob-tab" data-tab="equipe" onclick="ccMobTab('equipe')">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <span>EQUIPE</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ═══ URGENCE MODAL ═══ -->
+<div class="cc-modal-overlay" id="urgenceModal">
+  <div class="cc-modal">
+    <h3>
+      <svg style="width:18px;height:18px;stroke:var(--red);stroke-width:2;fill:none;vertical-align:middle;margin-right:6px" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
+      ALERTE URGENCE
+    </h3>
+    <textarea id="urgenceMsg" placeholder="Decrivez la situation d'urgence..."></textarea>
+    <div class="cc-modal-btns">
+      <button class="cc-modal-btn cc-modal-btn-cancel" onclick="closeUrgenceModal()">ANNULER</button>
+      <button class="cc-modal-btn cc-modal-btn-danger" onclick="sendUrgenceAlert()">ENVOYER ALERTE</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LIGHTBOX ═══ -->
+<div class="cc-lightbox" id="ccLightbox" onclick="closeCCLightbox()">
+  <img id="ccLbImg" src="" alt="">
+</div>
+
+<!-- ═══ PERSON DETAIL PANEL ═══ -->
+<div class="cc-person-overlay" id="ccPersonOverlay" onclick="closePersonPanel()"></div>
+<div class="cc-person-panel" id="ccPersonPanel">
+  <button class="cc-pp-close" onclick="closePersonPanel()">&times;</button>
+  <div id="ccPersonContent"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  VOLO COMMAND CENTER V2 — Logic
+// ══════════════════════════════════════════
+
+// King logo
+(function(){
+  if(typeof KING_LOGO_B64!=='undefined'){
+    var el=document.getElementById('ccLogo');
+    if(el) el.src=KING_LOGO_B64;
+  }
+})();
+
+// ── STATE ──
+let _previousMissionIds = new Set();
+let _gpsWatchId = null;
+let _personnelMarkers = {};
+let _firestoreListeners = [];
+let _pollingInterval = null;
+let _userGestureReceived = false;
+let _emergencyMode = false;
+let _eagleAudio = null;
+
+// User gesture guard for audio
+document.addEventListener('click', function(){ _userGestureReceived = true; }, { once: true });
+document.addEventListener('touchstart', function(){ _userGestureReceived = true; }, { once: true });
+
+// ── SITES / CHANTIERS ──
+const SITES = [
+  {id:'kruger',name:'Kruger Bromptonville',lat:45.4833,lng:-71.9500,region:'ESTRIE'},
+  {id:'domtar-w',name:'Domtar Windsor',lat:45.5667,lng:-71.9833,region:'ESTRIE'},
+  {id:'domtar-e',name:'Domtar Espanola',lat:46.2583,lng:-81.7667,region:'ESTRIE'},
+  {id:'valero',name:'Valero Levis',lat:46.7870,lng:-71.1710,region:'CAPITALE-NATIONALE'},
+  {id:'hydro',name:'Hydro-Quebec Becancour',lat:46.3333,lng:-72.4333,region:'MAURICIE'},
+  {id:'megantic',name:'Lac-Megantic',lat:45.5833,lng:-70.8833,region:'ESTRIE'},
+  {id:'depot-sherb',name:'Depot Sherbrooke',lat:45.4042,lng:-71.8929,region:'ESTRIE',isDepot:true},
+];
+
+// ── ROLE DETECTION ──
+function isUserChef(){
+  try{
+    const role = localStorage.getItem('volo_last_role') || '';
+    return role.toUpperCase().includes('CHEF');
+  }catch(e){return false}
+}
+
+// ── MAP INIT ──
+const map = L.map('ccMap',{
+  zoomControl:true,
+  attributionControl:true
+}).setView([46.0,-71.5],7);
+
+var _tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',{
+  attribution:'CartoDB',
+  subdomains:'abcd',
+  maxZoom:19
+}).addTo(map);
+// Labels layer on top for readability
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png',{
+  subdomains:'abcd',
+  maxZoom:19,
+  pane:'overlayPane'
+}).addTo(map);
+// Fallback: si les tiles CartoDB ne chargent pas, bascule sur OpenStreetMap dark
+_tileLayer.on('tileerror', function(){
+  if(!window._tileFallback){
+    window._tileFallback = true;
+    map.removeLayer(_tileLayer);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      attribution:'OSM',
+      maxZoom:19
+    }).addTo(map);
+  }
+});
+
+// Gold circle icon for sites
+function siteIcon(color, size){
+  size = size || 14;
+  return L.divIcon({
+    className:'',
+    html:`<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,.2);box-shadow:0 0 12px ${color}40;transition:transform .3s"></div>`,
+    iconSize:[size,size],
+    iconAnchor:[size/2,size/2]
+  });
+}
+
+// GPS person icon
+function personIcon(color, label){
+  return L.divIcon({
+    className:'',
+    html:`<div style="position:relative;display:flex;flex-direction:column;align-items:center">
+      <div style="width:12px;height:12px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,.3);box-shadow:0 0 10px ${color}60;animation:gpsPulse 2s infinite;color:${color}"></div>
+      <div style="margin-top:2px;font-family:JetBrains Mono,monospace;font-size:7px;color:${color};white-space:nowrap;text-shadow:0 0 6px rgba(0,0,0,.8);letter-spacing:.05em;background:rgba(4,4,10,.7);padding:1px 4px;border-radius:3px">${label}</div>
+    </div>`,
+    iconSize:[60,30],
+    iconAnchor:[30,6]
+  });
+}
+
+// Add site markers
+const markers = {};
+SITES.forEach(s=>{
+  const color = s.isDepot ? '#C9A84C' : '#E65100';
+  const m = L.marker([s.lat,s.lng],{icon:siteIcon(color)}).addTo(map);
+  // Click → open detail panel instead of popup
+  m.on('click', function(){ openSiteDetail(s); });
+  // Add geofence circle
+  if(!s.isDepot){
+    L.circle([s.lat,s.lng],{
+      radius:300,
+      color:'#C9A84C',
+      weight:1,
+      opacity:.25,
+      fillColor:'#C9A84C',
+      fillOpacity:.04
+    }).addTo(map);
+  }
+  markers[s.id]=m;
+});
+
+// ── CLOCK ──
+function updateClock(){
+  const now=new Date();
+  document.getElementById('ccClock').textContent=now.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  document.getElementById('ccDate').textContent=now.toLocaleDateString('fr-CA',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toUpperCase();
+}
+updateClock();
+setInterval(updateClock,1000);
+
+// ── HISTORY / MISSIONS ──
+function getHistory(){
+  try{return JSON.parse(localStorage.getItem('volo_history')||'[]')}catch(e){return[]}
+}
+
+function getActiveMissions(){
+  const hist=getHistory();
+  return hist.filter(tx=>tx.mode==='PICK-ON'&&tx.statut==='ACTIF');
+}
+
+// ── NEW MISSION DETECTION ──
+function detectNewMissions(missions){
+  const currentIds = new Set(missions.map(m => m.timestamp || m.id || JSON.stringify(m)));
+  const newOnes = [];
+  currentIds.forEach(id=>{
+    if(!_previousMissionIds.has(id)) newOnes.push(id);
+  });
+  _previousMissionIds = currentIds;
+  return newOnes;
+}
+
+function playEagleSound(){
+  if(!_userGestureReceived) return;
+  try{
+    if(!_eagleAudio) _eagleAudio = new Audio('eagle.mp3');
+    _eagleAudio.volume = 0.3;
+    _eagleAudio.currentTime = 0;
+    _eagleAudio.play().catch(()=>{});
+  }catch(e){}
+}
+
+function animateNewMission(dest){
+  // Animate mission card
+  setTimeout(()=>{
+    const cards = document.querySelectorAll('.cc-mission');
+    cards.forEach(c=>{
+      if(c.querySelector('.cc-mission-dest') && c.querySelector('.cc-mission-dest').textContent.includes(dest)){
+        c.classList.add('new-mission');
+        setTimeout(()=>c.classList.remove('new-mission'), 2200);
+      }
+    });
+  },100);
+
+  // Animate map marker
+  const site = SITES.find(s => dest && dest.toLowerCase().includes(s.name.split(' ')[0].toLowerCase()));
+  if(site && markers[site.id]){
+    const el = markers[site.id].getElement();
+    if(el){
+      const dot = el.querySelector('div');
+      if(dot){
+        dot.style.animation = 'markerBounce 1s ease, markerRipple 1.5s ease';
+        setTimeout(()=>{ dot.style.animation = ''; }, 1600);
+      }
+    }
+  }
+}
+
+function renderMissions(){
+  const missions=getActiveMissions();
+  const el=document.getElementById('ccMissions');
+  document.getElementById('ccMissionCount').textContent=missions.length;
+  document.getElementById('ccHMissions').textContent=missions.length;
+
+  // Detect new missions
+  const newIds = detectNewMissions(missions);
+  if(newIds.length > 0 && _previousMissionIds.size > 0){
+    playEagleSound();
+  }
+
+  if(!missions.length){
+    el.innerHTML='<div style="text-align:center;padding:16px;color:var(--dim);font-size:11px">Aucune mission active</div>';
+    return;
+  }
+
+  let totalItems=0;
+  el.innerHTML=missions.map(tx=>{
+    let nbItems=0;
+    try{nbItems=JSON.parse(tx.items||'[]').length}catch(e){}
+    totalItems+=nbItems;
+    const dt=tx.timestamp?new Date(tx.timestamp):null;
+    const timeStr=dt?dt.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'}):'';
+    const elapsed=dt?Math.round((Date.now()-dt.getTime())/60000):0;
+    const elapsedStr=elapsed<60?elapsed+'min':Math.floor(elapsed/60)+'h'+String(elapsed%60).padStart(2,'0');
+    const crew=[];
+    try{
+      const sauvs=tx.sauveteurs||tx.sauvs;
+      if(typeof sauvs==='string') JSON.parse(sauvs).forEach(s=>crew.push(s));
+      else if(Array.isArray(sauvs)) sauvs.forEach(s=>crew.push(typeof s==='string'?s:s.name||s.id));
+    }catch(e){}
+
+    const txId = tx.timestamp || tx.id || '';
+    const isNew = newIds.includes(txId);
+
+    return `<div class="cc-mission cc-mission-pulse${isNew?' new-mission':''}" onclick="openSiteFromDest('${escapeHtml(tx.destination||'')}')">
+      <div class="cc-mission-head">
+        <div class="cc-mission-dest">${tx.destination||'Destination inconnue'}</div>
+        <div class="cc-mission-time">${elapsedStr}</div>
+      </div>
+      <div class="cc-mission-info">${nbItems} items — depart ${timeStr}${tx.remorque&&tx.remorque!=='Aucun'?' — '+tx.remorque:''}</div>
+      <div class="cc-mission-crew">
+        ${crew.slice(0,6).map(c=>'<span class="cc-mission-tag">'+escapeHtml(c)+'</span>').join('')}
+        ${crew.length>6?'<span class="cc-mission-tag">+' + (crew.length-6) + '</span>':''}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('ccHItems').textContent=totalItems;
+
+  // Animate new markers
+  if(newIds.length > 0){
+    missions.forEach(tx=>{
+      const txId = tx.timestamp || tx.id || '';
+      if(newIds.includes(txId)){
+        animateNewMission(tx.destination||'');
+      }
+    });
+  }
+}
+
+// ── OPEN SITE FROM DESTINATION NAME ──
+function openSiteFromDest(dest){
+  if(!dest) return;
+  const site=SITES.find(s=>dest.toLowerCase().includes(s.name.split(' ')[0].toLowerCase()));
+  if(site){
+    openSiteDetail(site);
+  } else {
+    // Fallback: just fly
+    map.flyTo([46.0,-71.5],7,{duration:1});
+  }
+}
+
+function flyToSite(dest){
+  if(!dest) return;
+  const site=SITES.find(s=>dest.toLowerCase().includes(s.name.split(' ')[0].toLowerCase()));
+  if(site) map.flyTo([site.lat,site.lng],13,{duration:1.5});
+}
+
+// ══════════════════════════════════════════
+//  SITE DETAIL PANEL (click chantier → zoom + detail)
+// ══════════════════════════════════════════
+
+function openSiteDetail(site){
+  // Fly to site
+  map.flyTo([site.lat, site.lng], 16, {duration:1.2});
+
+  const panel = document.getElementById('ccDetailPanel');
+  const content = document.getElementById('ccDetailContent');
+
+  // Get personnel on site
+  const pointages = getPointagesOnSite(site.name);
+  // Get items deployed there
+  const deployedItems = getItemsDeployedAtSite(site.name);
+
+  let html = `
+    <div class="cc-detail-header">
+      <div class="cc-detail-name">${escapeHtml(site.name)}</div>
+      <div class="cc-detail-region">${site.region}</div>
+      <div class="cc-detail-coords">${site.lat.toFixed(4)}, ${site.lng.toFixed(4)}</div>
+    </div>
+
+    <div class="cc-detail-section">
+      <div class="cc-detail-section-title">
+        <svg style="width:10px;height:10px;stroke:var(--green);stroke-width:1.5;fill:none" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        PERSONNEL SUR SITE
+      </div>
+      ${pointages.length ? pointages.map(p=>`
+        <div class="cc-detail-person">
+          <div class="cc-detail-person-dot" style="background:var(--green)"></div>
+          <div>
+            <div class="cc-detail-person-name">${escapeHtml(p.name)}</div>
+            <div class="cc-detail-person-sub">${p.role||''} ${p.since ? '— depuis '+p.since : ''}</div>
+          </div>
+        </div>
+      `).join('') : '<div class="cc-detail-empty">Aucun personnel detecte</div>'}
+    </div>
+
+    <div class="cc-detail-section">
+      <div class="cc-detail-section-title">
+        <svg style="width:10px;height:10px;stroke:var(--rescue);stroke-width:1.5;fill:none" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4a2 2 0 012 2v6a2 2 0 01-2 2h-4"/></svg>
+        ITEMS DEPLOYES (${deployedItems.length})
+      </div>
+      ${deployedItems.length ? deployedItems.slice(0,15).map(it=>`
+        <div class="cc-detail-item">
+          <span class="cc-detail-item-id">${escapeHtml(it.id||'')}</span>
+          <span>${escapeHtml(it.name||'')}</span>
+        </div>
+      `).join('') + (deployedItems.length > 15 ? '<div class="cc-detail-empty">+' + (deployedItems.length-15) + ' autres items</div>' : '')
+      : '<div class="cc-detail-empty">Aucun item deploye</div>'}
+    </div>
+
+    <div class="cc-detail-section">
+      <div class="cc-detail-section-title">
+        <svg style="width:10px;height:10px;stroke:var(--gold);stroke-width:1.5;fill:none" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 110-14h.5"/><path d="M22 10a5 5 0 00-9 2.5h-.5"/></svg>
+        METEO LOCALE
+      </div>
+      <div class="cc-detail-weather" id="detailWeather">
+        <div style="color:var(--dim);font-size:11px">Chargement...</div>
+      </div>
+    </div>
+  `;
+
+  content.innerHTML = html;
+  panel.classList.add('open');
+
+  // Fetch weather for this site
+  fetchSiteWeather(site.lat, site.lng);
+}
+
+function closeSiteDetail(){
+  document.getElementById('ccDetailPanel').classList.remove('open');
+}
+
+function getPointagesOnSite(siteName){
+  const results = [];
+  try{
+    const onsite = JSON.parse(localStorage.getItem('volo-ptg-onsite')||'{}');
+    for(const id in onsite){
+      const p = onsite[id];
+      if(p && p.lieu && siteName.toLowerCase().includes(p.lieu.toLowerCase().split(' ')[0])){
+        results.push({name:p.nom||id, role:p.role||'', since:p.heure||''});
+      }
+    }
+  }catch(e){}
+  // Also check active missions crew at this destination
+  const missions = getActiveMissions();
+  missions.forEach(tx=>{
+    if(!tx.destination) return;
+    if(!siteName.toLowerCase().includes(tx.destination.toLowerCase().split(' ')[0])) return;
+    try{
+      const sauvs = tx.sauveteurs || tx.sauvs;
+      let crew = [];
+      if(typeof sauvs === 'string') crew = JSON.parse(sauvs);
+      else if(Array.isArray(sauvs)) crew = sauvs;
+      crew.forEach(c=>{
+        const name = typeof c==='string'?c:c.name||c.id||'';
+        if(name && !results.find(r=>r.name===name)){
+          results.push({name, role:'MISSION', since:''});
+        }
+      });
+    }catch(e){}
+  });
+  return results;
+}
+
+function getItemsDeployedAtSite(siteName){
+  const results = [];
+  const missions = getActiveMissions();
+  missions.forEach(tx=>{
+    if(!tx.destination) return;
+    if(!siteName.toLowerCase().includes(tx.destination.toLowerCase().split(' ')[0])) return;
+    try{
+      const items = JSON.parse(tx.items||'[]');
+      items.forEach(it=>{
+        if(typeof it === 'string'){
+          const found = (typeof ITEMS !== 'undefined') ? ITEMS.find(i=>i.id===it) : null;
+          results.push(found || {id:it, name:it});
+        } else {
+          results.push(it);
+        }
+      });
+    }catch(e){}
+  });
+  return results;
+}
+
+async function fetchSiteWeather(lat, lng){
+  const el = document.getElementById('detailWeather');
+  if(!el) return;
+  try{
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
+    const data = await r.json();
+    if(data && data.current_weather){
+      const w = data.current_weather;
+      const windDir = ['N','NE','E','SE','S','SO','O','NO'][Math.round(w.winddirection/45)%8]||'';
+      el.innerHTML = `
+        <div class="cc-detail-weather-temp">${Math.round(w.temperature)}&deg;</div>
+        <div class="cc-detail-weather-label">Vent ${Math.round(w.windspeed)} km/h ${windDir}</div>
+      `;
+    }
+  }catch(e){
+    el.innerHTML = '<div style="color:var(--dim);font-size:11px">Meteo indisponible</div>';
+  }
+}
+
+
+// ══════════════════════════════════════════
+//  GPS LIVE TRACKING
+// ══════════════════════════════════════════
+
+function startGPSTracking(){
+  if(!navigator.geolocation){
+    console.warn('Geolocation not supported');
+    return;
+  }
+
+  const chip = document.getElementById('chipGPS');
+  chip.style.display = 'flex';
+
+  _gpsWatchId = navigator.geolocation.watchPosition(
+    function(pos){
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const acc = Math.round(pos.coords.accuracy);
+
+      // Store own position
+      const myVolo = localStorage.getItem('volo_last_volo') || 'MOI';
+      const myName = localStorage.getItem('volo_last_name') || myVolo;
+      const myRole = localStorage.getItem('volo_last_role') || 'SAUVETEUR';
+      const positions = getGPSPositions();
+      positions[myVolo] = {
+        lat, lng, acc, name: myName, role: myRole,
+        ts: Date.now()
+      };
+      saveGPSPositions(positions);
+
+      // Update chip
+      document.getElementById('chipGPSLabel').textContent = 'GPS: ' + acc + 'm';
+
+      // Render all positions on map (V2 enhanced markers)
+      renderGPSMarkersV2();
+      updateGPSLegend();
+    },
+    function(err){
+      console.warn('GPS error:', err.message);
+      document.getElementById('chipGPSLabel').textContent = 'GPS: erreur';
+    },
+    { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }
+  );
+}
+
+function stopGPSTracking(){
+  if(_gpsWatchId !== null){
+    navigator.geolocation.clearWatch(_gpsWatchId);
+    _gpsWatchId = null;
+  }
+}
+
+function getGPSPositions(){
+  try{ return JSON.parse(localStorage.getItem('volo_cc_positions')||'{}'); }catch(e){ return {}; }
+}
+function saveGPSPositions(p){
+  try{ localStorage.setItem('volo_cc_positions', JSON.stringify(p)); }catch(e){}
+}
+
+function getPersonColor(role){
+  if(!role) return '#D4650E';
+  const r = role.toUpperCase();
+  if(r.includes('CHEF')) return '#C9A84C';
+  if(r.includes('SURVEILLANT')) return '#3B82F6';
+  return '#D4650E'; // sauveteur
+}
+
+function renderGPSMarkers(){
+  const positions = getGPSPositions();
+  const now = Date.now();
+  const MAX_AGE = 10 * 60 * 1000; // 10 min stale threshold
+
+  // Remove old markers
+  for(const id in _personnelMarkers){
+    if(!positions[id]){
+      map.removeLayer(_personnelMarkers[id]);
+      delete _personnelMarkers[id];
+    }
+  }
+
+  let onSiteCount = 0;
+  for(const id in positions){
+    const p = positions[id];
+    if(now - p.ts > MAX_AGE) continue; // Skip stale
+
+    const color = getPersonColor(p.role);
+    const label = (p.name||id).split(' ')[0];
+    const agoSec = Math.round((now - p.ts)/1000);
+    const agoStr = agoSec < 60 ? agoSec+'s' : Math.round(agoSec/60)+'min';
+
+    if(_personnelMarkers[id]){
+      _personnelMarkers[id].setLatLng([p.lat, p.lng]);
+      _personnelMarkers[id].setIcon(personIcon(color, label + ' ' + agoStr));
+    } else {
+      _personnelMarkers[id] = L.marker([p.lat, p.lng], {
+        icon: personIcon(color, label + ' ' + agoStr),
+        zIndexOffset: 1000
+      }).addTo(map);
+    }
+    onSiteCount++;
+  }
+
+  document.getElementById('ccHPersonnel').textContent = onSiteCount;
+}
+
+
+// ══════════════════════════════════════════
+//  FIREBASE REALTIME LISTENERS
+// ══════════════════════════════════════════
+
+function initFirebaseListeners(){
+  // Check if VoloData / firebase is available
+  if(typeof VoloData === 'undefined' || !VoloData) {
+    console.log('CC V2: Firebase not available, using polling fallback');
+    startPolling();
+    return;
+  }
+
+  let hasListeners = false;
+
+  // Listen to transactions
+  if(typeof VoloData.onTransactionsChange === 'function'){
+    try{
+      const unsub = VoloData.onTransactionsChange(function(docs){
+        console.log('CC V2: Firestore transactions update');
+        renderMissions();
+        renderFeed();
+        renderStats();
+      });
+      _firestoreListeners.push(unsub);
+      hasListeners = true;
+    }catch(e){ console.warn('CC V2: Transaction listener failed', e); }
+  }
+
+  // Listen to urgences
+  if(typeof VoloData.onUrgencesChange === 'function'){
+    try{
+      const unsub = VoloData.onUrgencesChange(function(docs){
+        console.log('CC V2: Urgence update received');
+        renderAlerts();
+      });
+      _firestoreListeners.push(unsub);
+      hasListeners = true;
+    }catch(e){ console.warn('CC V2: Urgences listener failed', e); }
+  }
+
+  // Listen to pointages
+  if(typeof VoloData.onPointagesChange === 'function'){
+    try{
+      const unsub = VoloData.onPointagesChange(function(docs){
+        console.log('CC V2: Pointage update received');
+        renderPersonnel();
+        renderGPSMarkersV2();
+        updateGPSLegend();
+      });
+      _firestoreListeners.push(unsub);
+      hasListeners = true;
+    }catch(e){ console.warn('CC V2: Pointages listener failed', e); }
+  }
+
+  if(hasListeners){
+    const badge = document.getElementById('ccLiveBadge');
+    if(badge) badge.textContent = 'FIREBASE';
+    console.log('CC V2: Firebase listeners active');
+    // Still poll every 60s as safety net
+    _pollingInterval = setInterval(refreshAll, 60000);
+  } else {
+    startPolling();
+  }
+}
+
+function startPolling(){
+  if(_pollingInterval) clearInterval(_pollingInterval);
+  _pollingInterval = setInterval(refreshAll, 30000);
+  console.log('CC V2: Polling mode (30s)');
+}
+
+function cleanupListeners(){
+  _firestoreListeners.forEach(unsub=>{
+    try{ if(typeof unsub === 'function') unsub(); }catch(e){}
+  });
+  _firestoreListeners = [];
+  if(_pollingInterval){ clearInterval(_pollingInterval); _pollingInterval = null; }
+}
+
+
+// ══════════════════════════════════════════
+//  MODE URGENCE
+// ══════════════════════════════════════════
+
+function showUrgenceModal(){
+  document.getElementById('urgenceModal').classList.add('active');
+  document.getElementById('urgenceMsg').focus();
+}
+
+function closeUrgenceModal(){
+  document.getElementById('urgenceModal').classList.remove('active');
+  document.getElementById('urgenceMsg').value = '';
+}
+
+function sendUrgenceAlert(){
+  const msg = document.getElementById('urgenceMsg').value.trim();
+  if(!msg){
+    document.getElementById('urgenceMsg').style.borderColor = 'var(--red)';
+    return;
+  }
+
+  const payload = {
+    type: 'URGENCE',
+    message: msg,
+    timestamp: new Date().toISOString(),
+    auteur: localStorage.getItem('volo_last_name') || 'COMMAND CENTER',
+    voloId: localStorage.getItem('volo_last_volo') || 'CC'
+  };
+
+  // Send via webhook
+  try{
+    fetch('/.netlify/functions/webhook-urgence', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    }).catch(()=>{});
+  }catch(e){}
+
+  // Send via Firebase if available
+  if(typeof VoloData !== 'undefined' && VoloData){
+    try{
+      if(typeof VoloData.notifyUrgencyAlert === 'function'){
+        VoloData.notifyUrgencyAlert(payload).catch(()=>{});
+      }
+    }catch(e){}
+  }
+
+  // Store locally
+  try{
+    localStorage.setItem('volo_emergency_alert', JSON.stringify(payload));
+  }catch(e){}
+
+  // Activate emergency mode
+  activateEmergencyMode(msg);
+  closeUrgenceModal();
+}
+
+function activateEmergencyMode(msg){
+  _emergencyMode = true;
+  const root = document.getElementById('ccRoot');
+  root.classList.add('emergency-mode');
+
+  const ft = document.getElementById('ccFooterStatus');
+  ft.textContent = 'ALERTE URGENCE ACTIVE — ' + (msg||'').substring(0,40);
+  ft.style.color = 'var(--red)';
+
+  // Highlight all GPS positions (V2 enhanced)
+  renderGPSMarkersV2();
+  updateGPSLegend();
+
+  // Play eagle sound
+  playEagleSound();
+}
+
+function deactivateEmergencyMode(){
+  _emergencyMode = false;
+  const root = document.getElementById('ccRoot');
+  root.classList.remove('emergency-mode');
+  const ft = document.getElementById('ccFooterStatus');
+  ft.textContent = 'SYSTEME OPERATIONNEL';
+  ft.style.color = '';
+  try{ localStorage.removeItem('volo_emergency_alert'); }catch(e){}
+}
+
+// Check for existing emergency on load
+function checkEmergencyState(){
+  try{
+    const alert = localStorage.getItem('volo_emergency_alert');
+    if(alert){
+      const data = JSON.parse(alert);
+      // If less than 2 hours old
+      if(data.timestamp && (Date.now() - new Date(data.timestamp).getTime()) < 7200000){
+        activateEmergencyMode(data.message);
+      } else {
+        localStorage.removeItem('volo_emergency_alert');
+      }
+    }
+  }catch(e){}
+}
+
+
+// ══════════════════════════════════════════
+//  EXISTING FUNCTIONS (PRESERVED)
+// ══════════════════════════════════════════
+
+// ── ALERTS ──
+function renderAlerts(){
+  const el=document.getElementById('ccAlerts');
+  const now=new Date();
+  const alerts=[];
+
+  if(typeof ITEMS!=='undefined'){
+    ITEMS.forEach(item=>{
+      if(!item.expiry||item.expiry==='N/A') return;
+      try{
+        const parts=item.expiry.split(/[-/]/);
+        let expDate;
+        if(parts.length===3){
+          if(parts[0].length===4) expDate=new Date(parts[0],parts[1]-1,parts[2]);
+          else expDate=new Date(parts[2],parts[1]-1,parts[0]);
+        }
+        if(!expDate||isNaN(expDate)) return;
+        const days=Math.ceil((expDate-now)/(1000*60*60*24));
+        if(days<=30){
+          alerts.push({item,days,severity:days<=0?'critical':'warn'});
+        }
+      }catch(e){}
+    });
+  }
+
+  alerts.sort((a,b)=>a.days-b.days);
+  document.getElementById('ccAlertCount').textContent=alerts.length;
+  document.getElementById('ccHAlerts').textContent=alerts.length;
+
+  if(!alerts.length){
+    el.innerHTML='<div style="text-align:center;padding:12px;color:var(--green);font-size:11px">Aucune alerte</div>';
+    return;
+  }
+
+  el.innerHTML=alerts.slice(0,10).map(a=>{
+    const cls=a.severity==='critical'?'':'cc-alert-warn';
+    const dLabel=a.days<=0?'EXPIRE':'J-'+a.days;
+    const badgeColor=a.days<=0?'background:rgba(192,57,43,.2);color:var(--red)':'background:rgba(230,126,34,.15);color:var(--orange)';
+    return `<div class="cc-alert ${cls}">
+      <div style="flex:1">
+        <div class="cc-alert-name">${escapeHtml(a.item.name)}</div>
+        <div class="cc-alert-sub">${a.item.id}${a.item.cat?' — '+a.item.cat:''}</div>
+      </div>
+      <span class="cc-alert-badge" style="${badgeColor}">${dLabel}</span>
+    </div>`;
+  }).join('') + (alerts.length>10?'<div style="text-align:center;padding:8px;font-size:10px;color:var(--dim)">+'+(alerts.length-10)+' autres alertes</div>':'');
+}
+
+// ── PERSONNEL ──
+function renderPersonnel(){
+  const el=document.getElementById('ccPersonnel');
+  if(typeof PERSONNEL==='undefined'){el.innerHTML='';return;}
+
+  const chefs=PERSONNEL.filter(p=>p.type&&p.type.toUpperCase().includes('CHEF'));
+  const sauvs=PERSONNEL.filter(p=>p.type==='SAUVETEUR').slice(0,10);
+  const show=[...chefs,...sauvs];
+
+  document.getElementById('ccPersonnelCount').textContent=PERSONNEL.length;
+
+  el.innerHTML=show.map(p=>{
+    const initials=(p.name||'').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    const isChef=p.type&&p.type.toUpperCase().includes('CHEF');
+    const pJson=JSON.stringify(p).replace(/"/g,'&quot;');
+    return `<div class="cc-person" style="cursor:pointer" onclick="openPersonPanel(${pJson})">
+      <div class="cc-person-avatar" style="${isChef?'border-color:rgba(212,160,23,.4);color:#E8C84A':''}">${initials}</div>
+      <div style="flex:1">
+        <div class="cc-person-name">${escapeHtml(p.name)}</div>
+        <div class="cc-person-role">${p.volo} — ${p.ville||p.region||''}</div>
+      </div>
+      <div class="cc-person-status ${isChef?'online':'offline'}"></div>
+    </div>`;
+  }).join('');
+}
+
+// ── FEED ──
+function renderFeed(){
+  const el=document.getElementById('ccFeed');
+  const hist=getHistory().slice(0,15);
+
+  if(!hist.length){
+    el.innerHTML='<div style="text-align:center;padding:16px;color:var(--dim);font-size:11px">Aucune activite recente</div>';
+    return;
+  }
+
+  el.innerHTML=hist.map(tx=>{
+    const dt=tx.timestamp?new Date(tx.timestamp):null;
+    const timeStr=dt?dt.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'}):'';
+    const isPO=tx.mode==='PICK-ON';
+    const dotClass=isPO?'pick-on':'pick-off';
+    let nbItems=0;
+    try{nbItems=JSON.parse(tx.items||'[]').length}catch(e){}
+    const statusLabel=tx.statut==='ACTIF'?'EN COURS':tx.statut==='RETOURNE'?'RETOURNE':tx.statut||'';
+
+    return `<div class="cc-feed-item">
+      <div class="cc-feed-time">${timeStr}</div>
+      <div class="cc-feed-dot ${dotClass}"></div>
+      <div class="cc-feed-text">
+        <strong>${tx.mode}</strong> — ${tx.destination||'—'} — ${nbItems} items
+        <span style="font-size:9px;color:${tx.statut==='ACTIF'?'var(--rescue)':'var(--green)'}">${statusLabel}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── STATS ──
+function renderStats(){
+  if(typeof ITEMS==='undefined') return;
+  const hist=getHistory();
+  const activeItems=new Set();
+  hist.filter(tx=>tx.mode==='PICK-ON'&&tx.statut==='ACTIF').forEach(tx=>{
+    try{JSON.parse(tx.items||'[]').forEach(i=>activeItems.add(typeof i==='string'?i:i.id))}catch(e){}
+  });
+
+  document.getElementById('ccTotalItems').textContent=ITEMS.length;
+  document.getElementById('ccItemsSortis').textContent=activeItems.size;
+  document.getElementById('ccItemsDispo').textContent=ITEMS.length-activeItems.size;
+  if(typeof CAISSES!=='undefined') document.getElementById('ccCaisses').textContent=CAISSES.length;
+}
+
+// ── EXPIRATIONS ──
+function renderExpirations(){
+  const el=document.getElementById('ccExpirations');
+  if(typeof ITEMS==='undefined'){el.innerHTML='';return;}
+  const now=new Date();
+  const upcoming=[];
+  ITEMS.forEach(item=>{
+    if(!item.expiry||item.expiry==='N/A') return;
+    try{
+      const parts=item.expiry.split(/[-/]/);
+      let expDate;
+      if(parts.length===3){
+        if(parts[0].length===4) expDate=new Date(parts[0],parts[1]-1,parts[2]);
+        else expDate=new Date(parts[2],parts[1]-1,parts[0]);
+      }
+      if(!expDate||isNaN(expDate)) return;
+      const days=Math.ceil((expDate-now)/(1000*60*60*24));
+      if(days>0&&days<=60) upcoming.push({item,days});
+    }catch(e){}
+  });
+  upcoming.sort((a,b)=>a.days-b.days);
+
+  if(!upcoming.length){
+    el.innerHTML='<div style="text-align:center;padding:12px;color:var(--green);font-size:11px">Aucune expiration prochaine</div>';
+    return;
+  }
+
+  el.innerHTML=upcoming.slice(0,8).map(u=>{
+    const color=u.days<=7?'var(--red)':u.days<=14?'var(--orange)':'var(--gold)';
+    return `<div class="cc-alert ${u.days<=7?'':u.days<=14?'cc-alert-warn':'cc-alert-info'}">
+      <div style="flex:1">
+        <div class="cc-alert-name">${escapeHtml(u.item.name)}</div>
+        <div class="cc-alert-sub">${u.item.id}</div>
+      </div>
+      <span class="cc-alert-badge" style="color:${color}">J-${u.days}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── WEATHER ──
+async function fetchWeather(){
+  const cities=[
+    {name:'SHERBROOKE',lat:45.40,lng:-71.89},
+    {name:'MONTREAL',lat:45.50,lng:-73.57}
+  ];
+  const el=document.getElementById('ccWeather');
+  try{
+    const results=await Promise.all(cities.map(c=>
+      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lng}&current_weather=true`)
+        .then(r=>r.json())
+        .catch(()=>null)
+    ));
+    el.innerHTML=results.map((r,i)=>{
+      if(!r||!r.current_weather) return `<div class="cc-weather-card"><div class="cc-weather-temp">--</div><div class="cc-weather-city">${cities[i].name}</div></div>`;
+      const w=r.current_weather;
+      const windDir=['N','NE','E','SE','S','SO','O','NO'][Math.round(w.winddirection/45)%8]||'';
+      return `<div class="cc-weather-card">
+        <div class="cc-weather-temp">${Math.round(w.temperature)}&deg;</div>
+        <div class="cc-weather-city">${cities[i].name}</div>
+        <div class="cc-weather-label">Vent ${Math.round(w.windspeed)} km/h ${windDir}</div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    console.warn('Weather fetch failed:',e);
+  }
+}
+
+// ── ESCAPE ──
+function escapeHtml(t){
+  if(!t) return '';
+  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════════
+//  TOAST NOTIFICATION SYSTEM
+// ══════════════════════════════════════════
+
+function showToast(msg, type){
+  const t = document.createElement('div');
+  t.className = 'cc-toast cc-toast-' + (type || 'info');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>{
+    t.style.opacity = '0';
+    t.style.transition = 'opacity .3s';
+    setTimeout(()=>t.remove(), 300);
+  }, 3000);
+}
+
+
+// ══════════════════════════════════════════
+//  LIGHTBOX (photo viewer)
+// ══════════════════════════════════════════
+
+function openCCLightbox(src){
+  const lb = document.getElementById('ccLightbox');
+  const img = document.getElementById('ccLbImg');
+  if(lb && img){
+    img.src = src;
+    lb.classList.add('open');
+  }
+}
+function closeCCLightbox(){
+  const lb = document.getElementById('ccLightbox');
+  if(lb) lb.classList.remove('open');
+}
+
+
+// ══════════════════════════════════════════
+//  PHOTOS TERRAIN
+// ══════════════════════════════════════════
+
+function renderPhotos(){
+  const el = document.getElementById('ccPhotos');
+  const badge = document.getElementById('ccPhotoCount');
+  if(!el) return;
+
+  // Read photos from localStorage (same format as index.html setup photos)
+  let photos = [];
+  try{ photos = JSON.parse(localStorage.getItem('volo_setup_photos')||'[]'); }catch(e){}
+
+  // Also read Firebase photos if available
+  try{
+    const fbPhotos = JSON.parse(localStorage.getItem('volo_firebase_photos')||'[]');
+    if(fbPhotos.length) photos = photos.concat(fbPhotos);
+  }catch(e){}
+
+  if(badge) badge.textContent = photos.length;
+
+  if(!photos.length){
+    el.innerHTML = '<div class="cc-photo-empty">AUCUNE PHOTO TERRAIN</div>';
+    return;
+  }
+
+  // Sort by timestamp desc (most recent first)
+  photos.sort((a,b) => (b.timestamp||'').localeCompare(a.timestamp||''));
+
+  // Limit to 20 most recent
+  const shown = photos.slice(0, 20);
+
+  let html = '<div class="cc-photo-grid">';
+  shown.forEach((p, i) => {
+    const src = p.data || p.url || '';
+    if(!src) return;
+    const lieu = p.lieu || 'Terrain';
+    const contrat = p.contrat || '';
+    const sauv = p.sauveteur || '';
+    const ts = p.timestamp ? new Date(p.timestamp) : null;
+    const timeStr = ts ? ts.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'}) : '';
+    const dateStr = ts ? ts.toLocaleDateString('fr-CA',{day:'2-digit',month:'short'}) : '';
+
+    html += '<div class="cc-photo-thumb" onclick="openCCLightbox(\''+src.replace(/'/g,"\\'")+'\')">';
+    html += '<img src="'+src+'" alt="Photo terrain" loading="lazy">';
+    html += '<div class="cc-photo-meta">';
+    html += '<span class="cc-photo-lieu">'+lieu+(contrat?' — '+contrat:'')+'</span>';
+    html += '<span>'+sauv+(timeStr?' '+timeStr:'')+(dateStr?' '+dateStr:'')+'</span>';
+    html += '</div></div>';
+  });
+  html += '</div>';
+
+  if(photos.length > 20){
+    html += '<div style="text-align:center;padding:6px;font-size:9px;color:var(--dim);font-family:\'JetBrains Mono\',monospace">+' + (photos.length-20) + ' AUTRES PHOTOS</div>';
+  }
+
+  el.innerHTML = html;
+}
+
+
+// ══════════════════════════════════════════
+//  PERSON DETAIL PANEL (click on person)
+// ══════════════════════════════════════════
+
+const CERT_DEFS_CC = [
+  {id:'rcr',name:'RCR',dur:24},{id:'pdsb',name:'PDSB',dur:36},{id:'simdut',name:'SIMDUT',dur:24},
+  {id:'nacelle',name:'Nacelle',dur:36},{id:'chariot',name:'Chariot',dur:36},{id:'espace_clos',name:'Espace clos',dur:24},
+  {id:'hauteur',name:'Travail en hauteur',dur:36},{id:'sauvetage',name:'Sauvetage',dur:12},
+  {id:'electricite',name:'Electricite',dur:36},{id:'premiers_soins',name:'Premiers soins',dur:36}
+];
+
+function openPersonPanel(person){
+  if(!person) return;
+  const panel = document.getElementById('ccPersonPanel');
+  const overlay = document.getElementById('ccPersonOverlay');
+  const content = document.getElementById('ccPersonContent');
+
+  const initials = (person.name||'').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  const roleKey = (person.type||person.role||'').toUpperCase();
+  const avatarClass = roleKey.includes('CHEF') ? 'chef' : roleKey.includes('SURVEILLANT') ? 'surveillant' : 'sauveteur';
+  const roleColor = roleKey.includes('CHEF') ? 'var(--gold)' : roleKey.includes('SURVEILLANT') ? 'var(--blue)' : 'var(--rescue)';
+
+  // Build profile header
+  let html = `
+    <div class="cc-pp-header">
+      <div class="cc-pp-avatar ${avatarClass}">${initials}</div>
+      <div class="cc-pp-name">${escapeHtml(person.name)}</div>
+      <div class="cc-pp-role" style="color:${roleColor}">${escapeHtml(person.role || person.type || '')}</div>
+      <div class="cc-pp-volo">${escapeHtml(person.volo || person.id || '')}</div>
+    </div>
+  `;
+
+  // Info section
+  html += `<div class="cc-pp-section">
+    <div class="cc-pp-section-title">INFORMATIONS</div>
+    <div class="cc-pp-stat"><span>Region</span><span class="cc-pp-stat-val">${escapeHtml(person.region || '--')}</span></div>
+    <div class="cc-pp-stat"><span>Ville</span><span class="cc-pp-stat-val">${escapeHtml(person.ville || '--')}</span></div>
+    <div class="cc-pp-stat"><span>Type</span><span class="cc-pp-stat-val">${escapeHtml(person.type || '--')}</span></div>
+  </div>`;
+
+  // Certifications section
+  const voloId = person.volo || person.id || '';
+  let certs = {};
+  try{ certs = JSON.parse(localStorage.getItem('volo_certs_' + voloId) || '{}'); }catch(e){}
+
+  html += `<div class="cc-pp-section">
+    <div class="cc-pp-section-title">CERTIFICATIONS</div>`;
+  CERT_DEFS_CC.forEach(def => {
+    const entry = certs[def.id];
+    const certDate = typeof entry === 'string' ? entry : (entry && entry.date ? entry.date : '');
+    let dotClass = 'none';
+    let label = 'Non renseigne';
+    if(certDate){
+      const expiry = new Date(certDate);
+      expiry.setMonth(expiry.getMonth() + def.dur);
+      const daysLeft = Math.floor((expiry.getTime() - Date.now()) / 86400000);
+      if(daysLeft <= 0){ dotClass = 'exp'; label = 'Expire (' + Math.abs(daysLeft) + 'j)'; }
+      else if(daysLeft <= 30){ dotClass = 'warn'; label = 'J-' + daysLeft; }
+      else { dotClass = 'ok'; label = 'OK (' + daysLeft + 'j)'; }
+    }
+    html += `<div class="cc-pp-cert">
+      <div class="cc-pp-cert-dot ${dotClass}"></div>
+      <span style="flex:1">${escapeHtml(def.name)}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim)">${label}</span>
+    </div>`;
+  });
+  html += '</div>';
+
+  // Mission history section
+  const hist = getHistory();
+  const personMissions = hist.filter(tx => {
+    const sauvId = tx.sauveteur_id || '';
+    const sauvNom = tx.sauveteur_nom || tx.sauveteur || '';
+    return sauvId === (person.id || '') || sauvId === (person.volo || '') ||
+           sauvNom.toLowerCase() === (person.name || '').toLowerCase();
+  }).slice(0, 15);
+
+  html += `<div class="cc-pp-section">
+    <div class="cc-pp-section-title">HISTORIQUE MISSIONS (${personMissions.length})</div>
+    <div class="cc-pp-timeline">`;
+  if(personMissions.length){
+    personMissions.forEach(tx => {
+      const dt = tx.timestamp ? new Date(tx.timestamp) : null;
+      const timeStr = dt ? dt.toLocaleDateString('fr-CA',{month:'short',day:'numeric'}) : '';
+      const isPO = tx.mode === 'PICK-ON';
+      const dotColor = isPO ? 'var(--rescue)' : 'var(--green)';
+      let nbItems = 0;
+      try{ nbItems = JSON.parse(tx.items || '[]').length; }catch(e){}
+      html += `<div class="cc-pp-tl-item">
+        <div class="cc-pp-tl-time">${timeStr}</div>
+        <div class="cc-pp-tl-dot" style="background:${dotColor}"></div>
+        <div style="flex:1;color:var(--muted)">
+          <strong style="color:var(--txt)">${tx.mode||'--'}</strong> — ${escapeHtml(tx.destination||'--')} — ${nbItems} items
+        </div>
+      </div>`;
+    });
+  } else {
+    html += '<div style="text-align:center;padding:8px;color:var(--dim);font-size:10px">Aucune mission enregistree</div>';
+  }
+  html += '</div></div>';
+
+  // Stats section (30/60/90 days)
+  const now = Date.now();
+  [30, 60, 90].forEach(days => {
+    const cutoff = now - days * 86400000;
+    const count = personMissions.filter(tx => {
+      const t = tx.timestamp ? new Date(tx.timestamp).getTime() : 0;
+      return t >= cutoff;
+    }).length;
+    // append inside last section is not great, let's add inline
+    html = html.replace('</div></div><!--STATS_PLACEHOLDER-->', '');
+  });
+  // Actually add stats in a simpler way
+  const stats30 = personMissions.filter(tx => tx.timestamp && (now - new Date(tx.timestamp).getTime()) < 30*86400000).length;
+  const stats60 = personMissions.filter(tx => tx.timestamp && (now - new Date(tx.timestamp).getTime()) < 60*86400000).length;
+  const stats90 = personMissions.filter(tx => tx.timestamp && (now - new Date(tx.timestamp).getTime()) < 90*86400000).length;
+
+  html += `<div class="cc-pp-section">
+    <div class="cc-pp-section-title">STATISTIQUES</div>
+    <div class="cc-pp-stat"><span>Missions 30j</span><span class="cc-pp-stat-val">${stats30}</span></div>
+    <div class="cc-pp-stat"><span>Missions 60j</span><span class="cc-pp-stat-val">${stats60}</span></div>
+    <div class="cc-pp-stat"><span>Missions 90j</span><span class="cc-pp-stat-val">${stats90}</span></div>
+  </div>`;
+
+  content.innerHTML = html;
+  panel.classList.add('open');
+  overlay.classList.add('open');
+}
+
+function closePersonPanel(){
+  document.getElementById('ccPersonPanel').classList.remove('open');
+  document.getElementById('ccPersonOverlay').classList.remove('open');
+}
+
+
+// ══════════════════════════════════════════
+//  CONTACTS CHEFS
+// ══════════════════════════════════════════
+
+const CC_CHEFS = [
+  {id:'SAUV-AG-075',volo:'V0075',name:'Alexandre Gendreau',region:'ESTRIE',ville:'Austin'},
+  {id:'SAUV-YB-077',volo:'V0077',name:'Yann-Alexandre Belley',region:'ESTRIE',ville:'Austin'},
+  {id:'SAUV-MB-180',volo:'V0180',name:'Maxime Boisvert',region:'ESTRIE',ville:'Sherbrooke'},
+  {id:'SAUV-PM-889',volo:'V0889',name:'Philippe Monnier',region:'CAPITALE-NAT.',ville:'Saint-Augustin'},
+  {id:'SAUV-JN-357',volo:'V0357',name:'Jean-Nicolas Maisonneuve',region:'BAS-ST-LAURENT',ville:'Rimouski'}
+];
+
+function renderContacts(){
+  const el = document.getElementById('ccContacts');
+  if(!el) return;
+
+  el.innerHTML = CC_CHEFS.map(c => {
+    const initials = c.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    return `<div class="cc-contact" onclick="openPersonPanel(${JSON.stringify(c).replace(/"/g,'&quot;')})">
+      <div class="cc-person-avatar" style="width:24px;height:24px;border-radius:50%;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;font-family:Oswald,sans-serif;font-size:8px;font-weight:700;color:var(--gold);flex-shrink:0">${initials}</div>
+      <div style="flex:1">
+        <div class="cc-contact-name">${escapeHtml(c.name)}</div>
+        <div class="cc-contact-sub">${escapeHtml(c.volo)} — ${escapeHtml(c.ville)}</div>
+      </div>
+      <div class="cc-person-status online" style="width:6px;height:6px"></div>
+    </div>`;
+  }).join('');
+}
+
+
+// ══════════════════════════════════════════
+//  CERTIFICATIONS ALERTS
+// ══════════════════════════════════════════
+
+let _ccCertAlerts = [];
+
+function loadCertAlerts(){
+  _ccCertAlerts = [];
+  const people = (typeof PERSONNEL !== 'undefined') ? PERSONNEL.filter(p => p.type === 'SAUVETEUR' || (p.type||'').toUpperCase().includes('CHEF')) : [];
+  if(!people.length){ renderCertAlerts(); return; }
+
+  people.slice(0, 50).forEach(person => {
+    const voloId = person.volo || person.id;
+    let certs = {};
+    try{ certs = JSON.parse(localStorage.getItem('volo_certs_' + voloId) || '{}'); }catch(e){}
+    if(!certs || typeof certs !== 'object') return;
+    Object.keys(certs).forEach(certId => {
+      const entry = certs[certId];
+      const certDate = typeof entry === 'string' ? entry : (entry && entry.date ? entry.date : '');
+      if(!certDate) return;
+      const def = CERT_DEFS_CC.find(d => d.id === certId);
+      const durMonths = def ? def.dur : 24;
+      const expiry = new Date(certDate);
+      expiry.setMonth(expiry.getMonth() + durMonths);
+      const daysLeft = Math.floor((expiry.getTime() - Date.now()) / 86400000);
+      if(daysLeft <= 30){
+        _ccCertAlerts.push({
+          name: person.name, volo: voloId,
+          cert: def ? def.name : certId,
+          daysLeft: daysLeft, expired: daysLeft <= 0,
+          person: person
+        });
+      }
+    });
+  });
+
+  _ccCertAlerts.sort((a,b) => a.daysLeft - b.daysLeft);
+  renderCertAlerts();
+}
+
+function renderCertAlerts(){
+  const el = document.getElementById('ccCerts');
+  const badge = document.getElementById('ccCertCount');
+  if(!el) return;
+  if(badge) badge.textContent = _ccCertAlerts.length;
+
+  if(!_ccCertAlerts.length){
+    el.innerHTML = '<div style="text-align:center;padding:8px;color:var(--green);font-size:10px">Aucune alerte certification</div>';
+    return;
+  }
+
+  el.innerHTML = _ccCertAlerts.slice(0, 10).map(a => {
+    const label = a.expired ? 'EXPIRE (' + Math.abs(a.daysLeft) + 'j)' : 'J-' + a.daysLeft;
+    const color = a.expired ? 'var(--red)' : 'var(--orange)';
+    return `<div class="cc-cert-alert${a.expired?' expired':''}" style="cursor:pointer" onclick="openPersonPanel(${JSON.stringify(a.person).replace(/"/g,'&quot;')})">
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:10px">${escapeHtml(a.name)}</div>
+        <div style="font-size:9px;color:var(--dim)">${escapeHtml(a.cert)}</div>
+      </div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:${color};font-weight:700">${label}</span>
+    </div>`;
+  }).join('') + (_ccCertAlerts.length > 10 ? '<div style="text-align:center;padding:4px;font-size:9px;color:var(--dim)">+' + (_ccCertAlerts.length-10) + ' autres</div>' : '');
+}
+
+
+// ── REFRESH ALL ──
+function refreshAll(){
+  renderMissions();
+  renderAlerts();
+  renderPersonnel();
+  renderFeed();
+  renderStats();
+  renderExpirations();
+  renderPhotos();
+  fetchWeather();
+  renderGPSMarkersV2();
+  updateGPSLegend();
+  renderContacts();
+  loadCertAlerts();
+  // Flash footer (only if not in emergency mode)
+  if(!_emergencyMode){
+    const ft=document.getElementById('ccFooterStatus');
+    ft.textContent='RAFRAICHI A '+new Date().toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    ft.style.color='var(--green)';
+    setTimeout(()=>{
+      if(!_emergencyMode){
+        ft.style.color='';
+        ft.textContent='SYSTEME OPERATIONNEL';
+      }
+    },3000);
+  }
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded',()=>{
+  // Show urgence button for chefs
+  if(isUserChef()){
+    document.getElementById('btnUrgence').classList.add('visible');
+  }
+
+  // Snapshot current missions before first render
+  const initialMissions = getActiveMissions();
+  _previousMissionIds = new Set(initialMissions.map(m => m.timestamp || m.id || JSON.stringify(m)));
+
+  // First render
+  refreshAll();
+
+  // Start GPS tracking
+  startGPSTracking();
+
+  // Start Firebase listeners or polling
+  initFirebaseListeners();
+
+  // Check emergency state
+  checkEmergencyState();
+});
+
+// Cleanup on unload
+window.addEventListener('beforeunload', ()=>{
+  stopGPSTracking();
+  cleanupListeners();
+});
+
+// ══════════════════════════════════════════════
+// ── PDF PRINT SYSTEM ──
+// ══════════════════════════════════════════════
+
+function openCCPrintModal(){
+  document.getElementById('ccPrintOverlay').classList.add('show');
+  document.getElementById('ccPrintChoices').style.display='block';
+  document.getElementById('ccPrintProgress').classList.remove('active');
+}
+function closeCCPrintModal(){
+  document.getElementById('ccPrintOverlay').classList.remove('show');
+}
+
+function ccGeneratePDF(type){
+  if(typeof html2pdf==='undefined'){showCCToast('Erreur: bibliotheque PDF non chargee');return;}
+  var choices=document.getElementById('ccPrintChoices');
+  var progress=document.getElementById('ccPrintProgress');
+  choices.style.display='none';
+  progress.classList.add('active');
+
+  var now=new Date();
+  var dateStr=now.toLocaleDateString('fr-CA',{year:'numeric',month:'long',day:'numeric'});
+  var timeStr=now.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'});
+  var userName=localStorage.getItem('volo_last_name')||'Operateur';
+  var userRole=localStorage.getItem('volo_last_role')||'SAUVETEUR';
+  var userId=localStorage.getItem('volo_last_volo')||'---';
+
+  var typeLabels={full:'RAPPORT OPERATIONNEL COMPLET',personnel:'RAPPORT HORAIRES PERSONNEL',inventory:'RAPPORT INVENTAIRE EN CIRCULATION'};
+  var typeLabel=typeLabels[type]||typeLabels.full;
+
+  var missions=getActiveMissions();
+  var hist=getHistory();
+  var allAlerts=[];
+  if(typeof ITEMS!=='undefined'){
+    ITEMS.forEach(function(item){
+      if(!item.expiry||item.expiry==='N/A') return;
+      try{
+        var parts=item.expiry.split(/[-/]/);
+        var expDate;
+        if(parts.length===3){
+          if(parts[0].length===4) expDate=new Date(parts[0],parts[1]-1,parts[2]);
+          else expDate=new Date(parts[2],parts[1]-1,parts[0]);
+        }
+        if(!expDate||isNaN(expDate)) return;
+        var days=Math.ceil((expDate-now)/(1000*60*60*24));
+        if(days<=30) allAlerts.push({item:item,days:days,severity:days<=0?'critical':'warn'});
+      }catch(e){}
+    });
+  }
+  allAlerts.sort(function(a,b){return a.days-b.days;});
+
+  var activeItemIds=new Set();
+  var activeItemsList=[];
+  missions.forEach(function(tx){
+    try{
+      var items=JSON.parse(tx.items||'[]');
+      items.forEach(function(it){
+        var id=typeof it==='string'?it:it.id;
+        if(!activeItemIds.has(id)){
+          activeItemIds.add(id);
+          var ref=(typeof ITEMS!=='undefined')?ITEMS.find(function(x){return x.id===id;}):null;
+          activeItemsList.push({id:id,name:ref?ref.name:(typeof it==='object'?it.name:id),serial:ref?ref.serial:'',dest:tx.destination||'',sauveteur:tx.sauveteur_nom||tx.nom||'',since:tx.timestamp||''});
+        }
+      });
+    }catch(e){}
+  });
+
+  var deployedMap=new Map();
+  missions.forEach(function(tx){
+    try{
+      var crew=JSON.parse(tx.sauveteurs||'[]');
+      crew.forEach(function(s){
+        var nm=typeof s==='string'?s:(s.name||s.nom||'');
+        if(nm&&!deployedMap.has(nm)){
+          deployedMap.set(nm,{name:nm,role:typeof s==='object'?(s.role||'SAUVETEUR'):'SAUVETEUR',site:tx.destination||'',since:tx.timestamp||''});
+        }
+      });
+    }catch(e){}
+  });
+  var deployedPersonnel=Array.from(deployedMap.values());
+  var totalItems=(typeof ITEMS!=='undefined')?ITEMS.length:0;
+  var totalCaisses=(typeof CAISSES!=='undefined')?CAISSES.length:0;
+  var itemsSortis=activeItemIds.size;
+
+  var V={bg:'#04040A',panel:'#0A0A10',gold:'#C9A84C',rescue:'#E65100',green:'#27AE60',red:'#C0392B',blue:'#3B82F6',orange:'#E67E22',muted:'#8A8078',txt:'#EBE6DF',border:'rgba(201,168,76,.15)'};
+
+  function esc(s){return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function kpiBox(n,label,color){return '<div style="flex:1;background:'+V.panel+';border:1px solid '+V.border+';border-radius:10px;padding:16px 10px;text-align:center"><div style="font-family:Oswald,sans-serif;font-size:32px;font-weight:700;color:'+color+';line-height:1">'+n+'</div><div style="font-size:8px;font-weight:700;color:'+V.muted+';letter-spacing:2px;margin-top:6px;text-transform:uppercase">'+label+'</div></div>';}
+  function secHead(title){return '<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px 0;padding-bottom:8px;border-bottom:2px solid '+V.gold+'"><span style="font-family:Oswald,sans-serif;font-size:14px;font-weight:700;color:'+V.gold+';letter-spacing:2.5px;text-transform:uppercase">'+title+'</span></div>';}
+  function tHead(cols){return '<tr>'+cols.map(function(c){return '<td style="padding:8px 10px;background:'+V.panel+';color:'+V.gold+';font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border-bottom:2px solid '+V.gold+'">'+c+'</td>';}).join('')+'</tr>';}
+  function tRow(cells,i){var bg=i%2===0?'rgba(10,10,16,.6)':'rgba(15,15,24,.8)';return '<tr>'+cells.map(function(c){return '<td style="padding:7px 10px;font-size:10px;color:'+V.txt+';border-bottom:1px solid rgba(201,168,76,.06);background:'+bg+'">'+c+'</td>';}).join('')+'</tr>';}
+
+  var logoSrc=(typeof VOLO_LOGO_B64!=='undefined')?VOLO_LOGO_B64:'eagle_tactic.png';
+  var h='<div style="font-family:Inter,Segoe UI,Arial,sans-serif;color:'+V.txt+';width:100%;font-size:10.5px;line-height:1.5;-webkit-print-color-adjust:exact;print-color-adjust:exact">';
+
+  // COVER
+  h+='<div style="background:linear-gradient(160deg,'+V.bg+' 0%,#0A0F14 40%,'+V.panel+' 100%);padding:50px 30px 40px;border-radius:8px;position:relative;overflow:hidden;min-height:260mm">';
+  h+='<div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,'+V.gold+','+V.rescue+','+V.gold+')"></div>';
+  h+='<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-35deg);font-family:Oswald,sans-serif;font-size:100px;color:rgba(201,168,76,.03);letter-spacing:15px;white-space:nowrap;pointer-events:none">CONFIDENTIEL</div>';
+  h+='<div style="text-align:center;margin-bottom:40px">';
+  h+='<div style="margin-bottom:8px"><img src="'+logoSrc+'" style="width:80px;height:80px;border-radius:50%;border:2px solid rgba(201,168,76,.4)"/></div>';
+  h+='<div style="font-size:14px;color:'+V.muted+';letter-spacing:4px;font-weight:600;margin-bottom:8px">VOLO CONSTRUCTION SST</div>';
+  h+='<div style="font-family:Oswald,sans-serif;font-size:48px;font-weight:700;color:'+V.gold+';letter-spacing:6px;line-height:1.1">GOLDEN EAGLES</div>';
+  h+='<div style="font-family:Oswald,sans-serif;font-size:16px;color:'+V.rescue+';letter-spacing:4px;margin-top:4px">COMMAND CENTER</div>';
+  h+='<div style="width:80px;height:3px;background:linear-gradient(90deg,transparent,'+V.gold+',transparent);margin:20px auto"></div>';
+  h+='<div style="font-family:Oswald,sans-serif;font-size:20px;color:'+V.txt+';letter-spacing:3px;margin-top:16px">'+esc(typeLabel)+'</div>';
+  h+='</div>';
+  h+='<div style="text-align:center;margin-bottom:36px">';
+  h+='<div style="font-family:JetBrains Mono,monospace;font-size:22px;font-weight:700;color:'+V.gold+'">'+esc(dateStr)+'</div>';
+  h+='<div style="font-size:11px;color:'+V.muted+';margin-top:4px">'+esc(timeStr)+'</div>';
+  h+='<div style="margin-top:16px;font-size:13px;color:'+V.txt+';font-weight:600">'+esc(userName)+'</div>';
+  h+='<div style="font-size:10px;color:'+V.muted+';letter-spacing:2px;margin-top:2px">'+esc(userRole)+' | '+esc(userId)+'</div>';
+  h+='</div>';
+  h+='<div style="display:flex;gap:10px;margin-bottom:30px">'+kpiBox(missions.length,'MISSIONS ACTIVES',V.rescue)+kpiBox(deployedPersonnel.length,'DEPLOYES',V.green)+kpiBox(itemsSortis,'ITEMS DEHORS',V.gold)+'</div>';
+  h+='<div style="display:flex;gap:10px;margin-bottom:30px">'+kpiBox(totalItems,'ITEMS TOTAL',V.muted)+kpiBox(totalCaisses,'CAISSES',V.blue)+kpiBox(allAlerts.length,'ALERTES',V.red)+'</div>';
+  if(allAlerts.length>0){
+    h+='<div style="background:rgba(192,57,43,.08);border:1.5px solid rgba(192,57,43,.3);border-radius:10px;padding:14px 18px;margin-top:10px">';
+    h+='<div style="font-family:Oswald,sans-serif;font-size:12px;color:'+V.red+';letter-spacing:2px;margin-bottom:8px">ALERTES EQUIPEMENT</div>';
+    allAlerts.slice(0,8).forEach(function(a){var lb=a.days<=0?'EXPIRE':'J-'+a.days;var cl=a.days<=0?V.red:V.orange;h+='<div style="font-size:10px;color:'+V.txt+';padding:3px 0"><span style="color:'+cl+';font-weight:700">['+lb+']</span> '+esc(a.item.name)+' ('+esc(a.item.id)+')</div>';});
+    if(allAlerts.length>8) h+='<div style="font-size:9px;color:'+V.muted+';margin-top:4px">+'+(allAlerts.length-8)+' autres alertes</div>';
+    h+='</div>';
+  }
+  h+='<div style="position:absolute;bottom:20px;left:0;right:0;text-align:center"><div style="width:50px;height:2px;background:'+V.gold+';margin:0 auto 8px"></div><img src="'+logoSrc+'" style="width:28px;height:28px;border-radius:50%;opacity:.4"/><div style="font-size:7px;color:'+V.muted+';letter-spacing:2px">VOLO CONSTRUCTION SST — COMMAND CENTER — CONFIDENTIEL</div></div>';
+  h+='</div>';
+
+  // CONTENT PAGES
+  var showP=(type==='full'||type==='personnel'),showI=(type==='full'||type==='inventory'),showM=(type==='full'),showA=(type==='full'||type==='inventory');
+  h+='<div style="background:'+V.bg+';padding:20px 24px;min-height:100px">';
+
+  if(showM&&missions.length){
+    h+=secHead('Missions actives — '+missions.length);
+    h+='<table style="width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden">'+tHead(['DESTINATION','MODE','VEHICULE','ITEMS','DEPOT','DEPUIS']);
+    missions.forEach(function(tx,i){var nb=0;try{nb=JSON.parse(tx.items||'[]').length}catch(e){}var dt=tx.timestamp?new Date(tx.timestamp):null;var ds=dt?dt.toLocaleDateString('fr-CA')+' '+dt.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'}):'—';h+=tRow(['<span style="font-weight:600">'+esc(tx.destination||'—')+'</span>','<span style="color:'+V.rescue+';font-weight:700;font-size:9px">'+esc(tx.mode)+'</span>','<span style="font-size:9px;color:'+V.muted+'">'+esc(tx.vehicule||'—')+'</span>','<span style="font-weight:600;color:'+V.gold+'">'+nb+'</span>','<span style="font-size:9px;color:'+V.muted+'">'+esc(tx.depot||'—')+'</span>','<span style="font-family:JetBrains Mono,monospace;font-size:9px;color:'+V.muted+'">'+ds+'</span>'],i);});
+    h+='</table>';
+  }
+  if(showP&&deployedPersonnel.length){
+    h+=secHead('Personnel deploye — '+deployedPersonnel.length+' membres');
+    h+='<table style="width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden">'+tHead(['NOM','ROLE','SITE','DEPUIS','DUREE']);
+    deployedPersonnel.forEach(function(p,i){var dt=p.since?new Date(p.since):null;var hrs=dt?Math.floor((Date.now()-dt.getTime())/3600000)+'h':'—';var ds=dt?dt.toLocaleDateString('fr-CA'):'—';var rc=p.role==='SURVEILLANT'?V.blue:(p.role.toUpperCase().includes('CHEF')?V.gold:V.rescue);h+=tRow(['<span style="font-weight:600">'+esc(p.name)+'</span>','<span style="color:'+rc+';font-weight:600;font-size:9px">'+esc(p.role)+'</span>',esc(p.site||'—'),'<span style="font-family:JetBrains Mono,monospace;font-size:9px;color:'+V.muted+'">'+ds+'</span>','<span style="color:'+V.muted+'">'+hrs+'</span>'],i);});
+    h+='</table>';
+  }
+  if(showI&&activeItemsList.length){
+    h+=secHead('Inventaire en circulation — '+activeItemsList.length+' items');
+    h+='<table style="width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden">'+tHead(['ITEM','ID','SERIE','SAUVETEUR','DESTINATION','DEPUIS']);
+    activeItemsList.forEach(function(it,i){var dt=it.since?new Date(it.since):null;var ds=dt?dt.toLocaleDateString('fr-CA'):'—';h+=tRow(['<span style="font-weight:600">'+esc(it.name)+'</span>','<span style="font-family:JetBrains Mono,monospace;font-size:9px;color:'+V.rescue+'">'+esc(it.id)+'</span>','<span style="font-family:JetBrains Mono,monospace;font-size:9px;color:'+V.muted+'">'+esc(it.serial||'—')+'</span>',esc(it.sauveteur||'—'),esc(it.dest||'—'),'<span style="font-family:JetBrains Mono,monospace;font-size:9px;color:'+V.muted+'">'+ds+'</span>'],i);});
+    h+='</table>';
+  }
+  if(showA&&allAlerts.length){
+    h+=secHead('Alertes equipement — '+allAlerts.length+' items');
+    h+='<table style="width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden">'+tHead(['ITEM','ID','CATEGORIE','EXPIRATION','STATUT']);
+    allAlerts.forEach(function(a,i){var lb=a.days<=0?'EXPIRE':'J-'+a.days;var cl=a.days<=0?V.red:V.orange;h+=tRow(['<span style="font-weight:600">'+esc(a.item.name)+'</span>','<span style="font-family:JetBrains Mono,monospace;font-size:9px;color:'+V.rescue+'">'+esc(a.item.id)+'</span>','<span style="font-size:9px;color:'+V.muted+'">'+esc(a.item.cat||'—')+'</span>','<span style="font-family:JetBrains Mono,monospace;font-size:9px;color:'+V.muted+'">'+esc(a.item.expiry)+'</span>','<span style="color:'+cl+';font-weight:700;font-size:9px;letter-spacing:1px">'+lb+'</span>'],i);});
+    h+='</table>';
+  }
+  if(showM&&hist.length){
+    h+=secHead('Activite recente — '+Math.min(hist.length,30)+' dernieres');
+    h+='<table style="width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden">'+tHead(['MODE','DESTINATION','ITEMS','STATUT','DATE']);
+    hist.slice(0,30).forEach(function(tx,i){var nb=0;try{nb=JSON.parse(tx.items||'[]').length}catch(e){}var tc=tx.mode==='PICK-ON'?V.green:(tx.mode==='PICK-OFF'?V.blue:V.muted);var sc=tx.statut==='ACTIF'?V.rescue:V.green;var dt=tx.timestamp?new Date(tx.timestamp):null;var ds=dt?dt.toLocaleString('fr-CA'):'—';h+=tRow(['<span style="color:'+tc+';font-weight:700;font-size:9px;letter-spacing:1px">'+esc(tx.mode)+'</span>','<span style="font-weight:600">'+esc(tx.destination||'—')+'</span>','<span style="color:'+V.gold+'">'+nb+'</span>','<span style="color:'+sc+';font-size:9px;font-weight:600">'+esc(tx.statut||'—')+'</span>','<span style="font-family:JetBrains Mono,monospace;font-size:8.5px;color:'+V.muted+'">'+ds+'</span>'],i);});
+    h+='</table>';
+  }
+  h+='</div>';
+
+  // SIGNATURE
+  h+='<div style="background:linear-gradient(135deg,'+V.bg+','+V.panel+');padding:24px;border-top:3px solid '+V.gold+'"><div style="display:flex;gap:40px;justify-content:center">';
+  ['Superviseur','Date','Signature'].forEach(function(lbl){h+='<div style="text-align:center;flex:1"><div style="font-size:9px;color:'+V.muted+';letter-spacing:2px;text-transform:uppercase;margin-bottom:30px">'+lbl+'</div><div style="width:100%;border-bottom:1px solid '+V.muted+';margin-bottom:6px"></div>';if(lbl==='Superviseur')h+='<div style="font-size:9px;color:'+V.gold+'">'+esc(userName)+'</div>';else if(lbl==='Date')h+='<div style="font-size:9px;color:'+V.gold+'">'+esc(dateStr)+'</div>';h+='</div>';});
+  h+='</div></div>';
+
+  // FOOTER
+  h+='<div style="background:'+V.bg+';text-align:center;padding:12px 0;border-top:1px solid '+V.border+'"><img src="'+logoSrc+'" style="width:28px;height:28px;border-radius:50%;opacity:.4"/><div style="font-size:7px;color:'+V.muted+';letter-spacing:2px">VOLO CONSTRUCTION — GOLDEN EAGLES SST — COMMAND CENTER — CONFIDENTIEL — '+esc(dateStr)+' '+esc(timeStr)+'</div></div>';
+  h+='</div>';
+
+  // RENDER PDF
+  var container=document.createElement('div');
+  container.innerHTML=h;
+  container.style.cssText='position:absolute;left:-9999px;top:0;width:210mm;background:'+V.bg;
+  document.body.appendChild(container);
+
+  var imgs=container.querySelectorAll('img');
+  Promise.all([].slice.call(imgs).map(function(img){return img.complete?Promise.resolve():new Promise(function(r){img.onload=r;img.onerror=r;})})).then(function(){
+    var typeNames={full:'Rapport',personnel:'Personnel',inventory:'Inventaire'};
+    var fname='VOLO_RAPPORT_'+(typeNames[type]||'Rapport')+'_'+now.toISOString().slice(0,10)+'.pdf';
+    html2pdf().set({margin:[5,5,8,5],filename:fname,image:{type:'jpeg',quality:0.95},html2canvas:{scale:2.5,useCORS:true,allowTaint:true,backgroundColor:V.bg,logging:false},jsPDF:{unit:'mm',format:'letter',orientation:'portrait'},pagebreak:{mode:['css','legacy']}}).from(container.firstElementChild).save().then(function(){
+      document.body.removeChild(container);closeCCPrintModal();showCCToast('PDF telecharge: '+fname);
+    }).catch(function(err){
+      document.body.removeChild(container);closeCCPrintModal();showCCToast('Erreur PDF: '+err.message);console.error(err);
+    });
+  });
+}
+
+function showCCToast(msg){
+  var t=document.getElementById('ccToastPdf');
+  if(!t){t=document.createElement('div');t.id='ccToastPdf';t.style.cssText='position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:#E8C84A;padding:10px 24px;border-radius:10px;font-family:Inter,sans-serif;font-size:12px;z-index:99999;backdrop-filter:blur(12px);transition:opacity .3s;pointer-events:none';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';setTimeout(function(){t.style.opacity='0';},4000);
+}
+
+
+// ══════════════════════════════════════════════════════
+//  V2 UPGRADE 1: GPS LIVE SAUVETEURS — MOCK DATA
+// ══════════════════════════════════════════════════════
+
+const MOCK_GPS_PERSONNEL = [
+  {id:'V0205',name:'Jonathan Milone',role:'SAUVETEUR',lat:45.4042,lng:-71.8929},
+  {id:'V0075',name:'Alexandre Gendreau',role:'CHEF D\'EQUIPE',lat:45.4833+0.002,lng:-71.9500-0.003},
+  {id:'V0077',name:'Yann-Alexandre Belley',role:'CHEF D\'EQUIPE',lat:45.5667-0.001,lng:-71.9833+0.002},
+  {id:'V0180',name:'Maxime Boisvert',role:'CHEF D\'EQUIPE',lat:45.4042+0.008,lng:-71.8929-0.005},
+  {id:'V0120',name:'Samuel Tremblay',role:'SAUVETEUR',lat:45.4833-0.004,lng:-71.9500+0.006},
+  {id:'V0134',name:'Marc-Andre Poulin',role:'SAUVETEUR',lat:45.4833+0.005,lng:-71.9500+0.002},
+  {id:'V0156',name:'David Lavoie',role:'SAUVETEUR',lat:45.5667+0.003,lng:-71.9833-0.004},
+  {id:'V0167',name:'Kevin Bergeron',role:'SAUVETEUR',lat:45.5667-0.002,lng:-71.9833+0.006},
+  {id:'V0198',name:'Nicolas Fortin',role:'SAUVETEUR',lat:45.4042-0.003,lng:-71.8929+0.007},
+  {id:'V0210',name:'Patrick Gagnon',role:'SURVEILLANT',lat:45.4042+0.012,lng:-71.8929+0.003},
+  {id:'V0225',name:'Etienne Morin',role:'SURVEILLANT',lat:45.4833+0.009,lng:-71.9500-0.008},
+  {id:'V0240',name:'Francois Roy',role:'SURVEILLANT',lat:45.5667+0.007,lng:-71.9833+0.009},
+];
+
+let _mockGPSActive = false;
+let _mockGPSInterval = null;
+
+function initMockGPS(){
+  if(_mockGPSActive) return;
+  _mockGPSActive = true;
+
+  // Seed initial positions
+  const positions = getGPSPositions();
+  MOCK_GPS_PERSONNEL.forEach(p => {
+    positions[p.id] = {
+      lat: p.lat,
+      lng: p.lng,
+      acc: Math.floor(Math.random()*15)+3,
+      name: p.name,
+      role: p.role,
+      ts: Date.now() - Math.floor(Math.random()*120000)
+    };
+  });
+  saveGPSPositions(positions);
+  renderGPSMarkersV2();
+  updateGPSLegend();
+
+  // Simulate movement every 8 seconds
+  _mockGPSInterval = setInterval(function(){
+    const pos = getGPSPositions();
+    MOCK_GPS_PERSONNEL.forEach(p => {
+      if(!pos[p.id]) return;
+      // Small random drift (simulating movement on site)
+      pos[p.id].lat += (Math.random()-0.5)*0.0004;
+      pos[p.id].lng += (Math.random()-0.5)*0.0004;
+      pos[p.id].acc = Math.floor(Math.random()*12)+3;
+      pos[p.id].ts = Date.now() - Math.floor(Math.random()*30000);
+    });
+    saveGPSPositions(pos);
+    renderGPSMarkersV2();
+    updateGPSLegend();
+  }, 8000);
+}
+
+function personIconV2(color, label, role){
+  const isChef = role && role.toUpperCase().includes('CHEF');
+  const isSurv = role && role.toUpperCase().includes('SURVEILLANT');
+  const size = isChef ? 16 : 14;
+  const starSvg = isChef ? '<svg style="position:absolute;top:-8px;right:-6px;width:10px;height:10px;fill:#C9A84C" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 19,22 12,17 5,22 7,14 2,9 9,9"/></svg>' : '';
+
+  return L.divIcon({
+    className:'',
+    html:`<div class="gps-marker-wrap">
+      <div class="gps-marker-dot" style="width:${size}px;height:${size}px;background:${color};--gps-color:${color}">${starSvg}</div>
+      <div class="gps-marker-label" style="color:${color}">${label}</div>
+    </div>`,
+    iconSize:[70,36],
+    iconAnchor:[35,8]
+  });
+}
+
+function renderGPSMarkersV2(){
+  const positions = getGPSPositions();
+  const now = Date.now();
+  const MAX_AGE = 10 * 60 * 1000;
+
+  // Remove stale markers
+  for(const id in _personnelMarkers){
+    if(!positions[id] || (now - (positions[id].ts||0)) > MAX_AGE){
+      map.removeLayer(_personnelMarkers[id]);
+      delete _personnelMarkers[id];
+    }
+  }
+
+  let onSiteCount = 0;
+  for(const id in positions){
+    const p = positions[id];
+    if(now - p.ts > MAX_AGE) continue;
+
+    const color = getPersonColor(p.role);
+    const firstName = (p.name||id).split(' ')[0];
+    const agoSec = Math.round((now - p.ts)/1000);
+    const agoStr = agoSec < 60 ? agoSec+'s' : Math.round(agoSec/60)+'min';
+    const label = firstName + ' ' + agoStr;
+
+    if(_personnelMarkers[id]){
+      _personnelMarkers[id].setLatLng([p.lat, p.lng]);
+      _personnelMarkers[id].setIcon(personIconV2(color, label, p.role));
+    } else {
+      _personnelMarkers[id] = L.marker([p.lat, p.lng], {
+        icon: personIconV2(color, label, p.role),
+        zIndexOffset: 1000
+      }).addTo(map);
+      // Click on person marker opens person panel
+      _personnelMarkers[id]._voloId = id;
+      _personnelMarkers[id]._voloData = p;
+      _personnelMarkers[id].on('click', function(){
+        const person = (typeof PERSONNEL !== 'undefined') ?
+          PERSONNEL.find(pe => pe.volo === id || pe.id === id) : null;
+        if(person) openPersonPanel(person);
+      });
+    }
+    onSiteCount++;
+  }
+
+  document.getElementById('ccHPersonnel').textContent = onSiteCount;
+
+  // Show GPS chip
+  const chip = document.getElementById('chipGPS');
+  if(onSiteCount > 0){
+    chip.style.display = 'flex';
+    document.getElementById('chipGPSLabel').textContent = 'GPS: ' + onSiteCount + ' actifs';
+  }
+}
+
+function updateGPSLegend(){
+  const positions = getGPSPositions();
+  const legend = document.getElementById('ccGPSLegend');
+  const list = document.getElementById('ccGPSLegendList');
+  const now = Date.now();
+  const MAX_AGE = 10*60*1000;
+
+  let html = '';
+  let count = 0;
+  const sorted = Object.entries(positions)
+    .filter(([id,p]) => (now - p.ts) < MAX_AGE)
+    .sort(([,a],[,b]) => {
+      const ra = a.role||''; const rb = b.role||'';
+      if(ra.includes('CHEF') && !rb.includes('CHEF')) return -1;
+      if(!ra.includes('CHEF') && rb.includes('CHEF')) return 1;
+      return (a.name||'').localeCompare(b.name||'');
+    });
+
+  sorted.forEach(([id, p]) => {
+    // Skip invalid/corrupt entries (base64 garbage, empty names)
+    const nm = (p.name||'').trim();
+    if(!nm || nm.length < 2 || /^[A-Za-z0-9+/=]{6,}$/.test(nm.replace(/\s/g,''))) return;
+    const color = getPersonColor(p.role);
+    const role = (p.role||'').toUpperCase();
+    const roleTag = role.includes('CHEF') ? 'CHEF' : role.includes('SURVEILLANT') ? 'SURV' : 'SAUV';
+    html += `<div class="cc-gps-legend-row">
+      <div class="cc-gps-legend-dot" style="background:${color};box-shadow:0 0 6px ${color}"></div>
+      <span style="color:var(--txt);font-size:9px">${nm}</span>
+      <span style="color:${color};font-size:8px;margin-left:auto">${roleTag}</span>
+    </div>`;
+    count++;
+  });
+
+  if(count > 0){
+    list.innerHTML = html;
+    legend.classList.add('visible');
+  } else {
+    legend.classList.remove('visible');
+  }
+}
+
+
+// ══════════════════════════════════════════════════════
+//  V2 UPGRADE 2: ALERT ANIMATIONS
+// ══════════════════════════════════════════════════════
+
+let _alertAudio = null;
+
+function triggerAlertAnimation(alertData){
+  // 1. Screen edge flash
+  const flash = document.createElement('div');
+  flash.className = 'cc-alert-flash';
+  document.body.appendChild(flash);
+  setTimeout(()=> flash.remove(), 1300);
+
+  // 2. Alert sound
+  playAlertSound();
+
+  // 3. Slide-in alert card
+  const card = document.createElement('div');
+  card.className = 'cc-alert-card-anim';
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+
+  card.innerHTML = `
+    <div class="cc-acard-close" onclick="this.parentElement.remove()">&times;</div>
+    <div class="cc-acard-header">
+      <div class="cc-acard-icon">
+        <svg style="width:16px;height:16px;stroke:var(--red);stroke-width:2;fill:none" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
+      </div>
+      <div>
+        <div class="cc-acard-title">${escapeHtml(alertData.title || 'ALERTE URGENCE')}</div>
+        <div class="cc-acard-time">${timeStr}</div>
+      </div>
+    </div>
+    <div class="cc-acard-msg">${escapeHtml(alertData.message || 'Nouvelle alerte detectee')}</div>
+    <div class="cc-acard-source">${escapeHtml(alertData.source || 'COMMAND CENTER')}</div>
+  `;
+
+  document.body.appendChild(card);
+
+  // Auto-dismiss after 8 seconds
+  setTimeout(()=>{
+    if(card.parentElement){
+      card.style.transition = 'opacity .4s, transform .4s';
+      card.style.opacity = '0';
+      card.style.transform = 'translateX(120%)';
+      setTimeout(()=> card.remove(), 450);
+    }
+  }, 8000);
+}
+
+function playAlertSound(){
+  if(!_userGestureReceived) return;
+  try{
+    // Use AudioContext for a dramatic alert beep
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    // Three-tone alarm
+    [0, 0.15, 0.3].forEach((delay, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'square';
+      osc.frequency.value = i === 1 ? 880 : 660;
+      gain.gain.value = 0.08;
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.14);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + 0.15);
+    });
+  }catch(e){}
+
+  // Also play eagle sound
+  playEagleSound();
+}
+
+// Demo: simulate an incoming alert (call from console or trigger)
+function simulateAlert(){
+  triggerAlertAnimation({
+    title: 'URGENCE TERRAIN',
+    message: 'Chute de hauteur signalee — Kruger Bromptonville — Equipe medicale demandee',
+    source: 'Alexandre Gendreau — V0075'
+  });
+}
+
+// Hook into the existing emergency mode activation
+const _origActivateEmergency = activateEmergencyMode;
+activateEmergencyMode = function(msg){
+  _origActivateEmergency(msg);
+  triggerAlertAnimation({
+    title: 'URGENCE ACTIVEE',
+    message: msg || 'Mode urgence active depuis le Command Center',
+    source: localStorage.getItem('volo_last_name') || 'COMMAND CENTER'
+  });
+};
+
+
+// ══════════════════════════════════════════════════════
+//  V2 UPGRADE 3: ENHANCED SITE DETAIL (missions + more)
+// ══════════════════════════════════════════════════════
+
+// Override openSiteDetail with enhanced version
+const _origOpenSiteDetail = openSiteDetail;
+openSiteDetail = function(site){
+  // Fly to site at zoom 16
+  map.flyTo([site.lat, site.lng], 16, {duration:1.2});
+
+  const panel = document.getElementById('ccDetailPanel');
+  const content = document.getElementById('ccDetailContent');
+
+  // Data gathering
+  const pointages = getPointagesOnSite(site.name);
+  const deployedItems = getItemsDeployedAtSite(site.name);
+  const siteMissions = getActiveMissions().filter(tx => {
+    if(!tx.destination) return false;
+    return site.name.toLowerCase().includes(tx.destination.toLowerCase().split(' ')[0]) ||
+           tx.destination.toLowerCase().includes(site.name.toLowerCase().split(' ')[0]);
+  });
+
+  // Count GPS personnel near this site
+  const positions = getGPSPositions();
+  const now = Date.now();
+  let gpsNearby = 0;
+  for(const id in positions){
+    const p = positions[id];
+    if(now - p.ts > 600000) continue;
+    const dist = haversineDistance(site.lat, site.lng, p.lat, p.lng);
+    if(dist < 1000) gpsNearby++;
+  }
+
+  let html = `
+    <div class="cc-detail-header">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div class="cc-detail-name">${escapeHtml(site.name)}</div>
+          <div class="cc-detail-region">${site.region}</div>
+        </div>
+        ${site.isDepot ? '<span class="cc-s-badge cc-badge-gold" style="font-size:8px">DEPOT</span>' : '<span class="cc-s-badge cc-badge-rescue" style="font-size:8px">CHANTIER</span>'}
+      </div>
+      <div class="cc-detail-coords">
+        <svg style="width:9px;height:9px;stroke:var(--gold);stroke-width:1.5;fill:none;vertical-align:middle;margin-right:3px" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        ${site.lat.toFixed(4)}, ${site.lng.toFixed(4)}
+      </div>
+    </div>
+
+    <!-- PERSONNEL ON SITE -->
+    <div class="cc-detail-section">
+      <div class="cc-detail-section-title">
+        <svg style="width:10px;height:10px;stroke:var(--green);stroke-width:1.5;fill:none" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        PERSONNEL SUR SITE
+        <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--green)">${pointages.length + gpsNearby} detecte${(pointages.length + gpsNearby) > 1 ? 's' : ''}</span>
+      </div>
+      ${pointages.length ? pointages.map(p=>`
+        <div class="cc-detail-person">
+          <div class="cc-detail-person-dot" style="background:var(--green)"></div>
+          <div>
+            <div class="cc-detail-person-name">${escapeHtml(p.name)}</div>
+            <div class="cc-detail-person-sub">${p.role||''} ${p.since ? '-- depuis '+p.since : ''}</div>
+          </div>
+        </div>
+      `).join('') : '<div class="cc-detail-empty">Aucun personnel pointe</div>'}
+    </div>
+
+    <!-- ACTIVE MISSIONS AT THIS SITE -->
+    <div class="cc-detail-section">
+      <div class="cc-detail-section-title">
+        <svg style="width:10px;height:10px;stroke:var(--rescue);stroke-width:1.5;fill:none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        MISSIONS ACTIVES
+        ${siteMissions.length ? '<span class="cc-detail-missions-count">'+siteMissions.length+'</span>' : ''}
+      </div>
+      ${siteMissions.length ? siteMissions.map(tx => {
+        let nbItems = 0;
+        try{ nbItems = JSON.parse(tx.items||'[]').length; }catch(e){}
+        const dt = tx.timestamp ? new Date(tx.timestamp) : null;
+        const elapsed = dt ? Math.round((Date.now()-dt.getTime())/60000) : 0;
+        const elapsedStr = elapsed < 60 ? elapsed+'min' : Math.floor(elapsed/60)+'h'+String(elapsed%60).padStart(2,'0');
+        let crew = [];
+        try{
+          const sauvs = tx.sauveteurs || tx.sauvs;
+          if(typeof sauvs === 'string') crew = JSON.parse(sauvs);
+          else if(Array.isArray(sauvs)) crew = sauvs.map(s => typeof s==='string'?s:s.name||s.id||'');
+        }catch(e){}
+        return `<div class="cc-detail-mission-card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="cc-detail-mission-dest">${escapeHtml(tx.destination||'Mission')}</div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--rescue)">${elapsedStr}</span>
+          </div>
+          <div class="cc-detail-mission-info">${nbItems} items ${tx.remorque&&tx.remorque!=='Aucun'?'-- '+escapeHtml(tx.remorque):''}</div>
+          <div class="cc-detail-mission-crew">
+            ${crew.slice(0,5).map(c=>'<span class="cc-detail-mission-tag">'+escapeHtml(c)+'</span>').join('')}
+            ${crew.length>5?'<span class="cc-detail-mission-tag">+' + (crew.length-5) + '</span>':''}
+          </div>
+        </div>`;
+      }).join('') : '<div class="cc-detail-empty">Aucune mission active</div>'}
+    </div>
+
+    <!-- EQUIPMENT DEPLOYED -->
+    <div class="cc-detail-section">
+      <div class="cc-detail-section-title">
+        <svg style="width:10px;height:10px;stroke:var(--gold);stroke-width:1.5;fill:none" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+        EQUIPEMENT DEPLOYE (${deployedItems.length})
+      </div>
+      ${deployedItems.length ? deployedItems.slice(0,15).map(it=>`
+        <div class="cc-detail-item">
+          <span class="cc-detail-item-id">${escapeHtml(it.id||'')}</span>
+          <span>${escapeHtml(it.name||'')}</span>
+        </div>
+      `).join('') + (deployedItems.length > 15 ? '<div class="cc-detail-empty">+' + (deployedItems.length-15) + ' autres items</div>' : '')
+      : '<div class="cc-detail-empty">Aucun item deploye</div>'}
+    </div>
+
+    <!-- WEATHER -->
+    <div class="cc-detail-section">
+      <div class="cc-detail-section-title">
+        <svg style="width:10px;height:10px;stroke:var(--gold);stroke-width:1.5;fill:none" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 110-14h.5"/><path d="M22 10a5 5 0 00-9 2.5h-.5"/></svg>
+        METEO LOCALE
+      </div>
+      <div class="cc-detail-weather" id="detailWeather">
+        <div style="color:var(--dim);font-size:11px">Chargement...</div>
+      </div>
+    </div>
+  `;
+
+  content.innerHTML = html;
+  panel.classList.add('open');
+
+  // Fetch weather
+  fetchSiteWeather(site.lat, site.lng);
+
+  // Bounce the site marker
+  if(markers[site.id]){
+    const el = markers[site.id].getElement();
+    if(el){
+      const dot = el.querySelector('div');
+      if(dot){
+        dot.style.animation = 'markerBounce 1s ease, markerRipple 1.5s ease';
+        setTimeout(()=>{ dot.style.animation = ''; }, 1600);
+      }
+    }
+  }
+};
+
+// Haversine distance in meters
+function haversineDistance(lat1, lng1, lat2, lng2){
+  const R = 6371000;
+  const dLat = (lat2-lat1)*Math.PI/180;
+  const dLng = (lng2-lng1)*Math.PI/180;
+  const a = Math.sin(dLat/2)*Math.sin(dLat/2) +
+            Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+            Math.sin(dLng/2)*Math.sin(dLng/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+
+// ══════════════════════════════════════════════════════
+//  V2 INIT — Activate upgrades on DOMContentLoaded
+// ══════════════════════════════════════════════════════
+
+// Patch the existing DOMContentLoaded to include V2 upgrades
+// (runs after the original init since scripts execute in order)
+window.addEventListener('load', function(){
+  // Start mock GPS sauveteurs
+  setTimeout(function(){
+    initMockGPS();
+  }, 1500);
+});
+// -- View Transitions -- smooth navigation --
+(function(){
+  var mainContent = document.querySelector("#app") || document.querySelector(".screen") || document.querySelector("main") || document.body.firstElementChild;
+  if(mainContent) mainContent.style.viewTransitionName = "page-content";
+
+  document.addEventListener("click", function(e){
+    var link = e.target.closest("a[href]");
+    if(!link) return;
+    var href = link.getAttribute("href");
+    if(!href || href.startsWith("#") || href.startsWith("http") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
+    if(!document.startViewTransition) return;
+    e.preventDefault();
+    document.startViewTransition(function(){
+      window.location.href = href;
+    });
+  });
+})();
+
+// ══════════════════════════════════════════
+// ══════════════════════════════════════════
+//  HARD REFRESH — Unregister SW + clear caches
+// ══════════════════════════════════════════
+async function voloHardRefresh(){
+  try{
+    if('serviceWorker' in navigator){
+      const regs=await navigator.serviceWorker.getRegistrations();
+      for(const r of regs) await r.unregister();
+    }
+    if('caches' in window){
+      const keys=await caches.keys();
+      for(const k of keys) await caches.delete(k);
+    }
+  }catch(e){}
+  window.location.href=window.location.pathname+'?t='+Date.now();
+}
+
+//  MOBILE — Tab navigation + Map collapse
+// ══════════════════════════════════════════
+function ccToggleMap(){
+  const mapEl = document.querySelector('.cc-map');
+  const label = document.getElementById('ccMapToggleLabel');
+  const reopen = document.getElementById('ccMapReopen');
+  mapEl.classList.toggle('collapsed');
+  const isCollapsed = mapEl.classList.contains('collapsed');
+  label.textContent = isCollapsed ? 'AGRANDIR' : 'REDUIRE';
+  // Show/hide the reopen banner
+  if(reopen) reopen.classList.toggle('visible', isCollapsed);
+  // invalidate Leaflet map size after transition
+  if(!isCollapsed) setTimeout(()=>{ if(typeof map!=='undefined' && map) map.invalidateSize(); }, 350);
+}
+
+function ccReopenMap(){
+  const mapEl = document.querySelector('.cc-map');
+  const label = document.getElementById('ccMapToggleLabel');
+  const reopen = document.getElementById('ccMapReopen');
+  mapEl.classList.remove('collapsed');
+  mapEl.style.display = '';
+  if(label) label.textContent = 'REDUIRE';
+  if(reopen) reopen.classList.remove('visible');
+  // Activate map tab
+  const tabs = document.querySelectorAll('.cc-mob-tab');
+  tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === 'map'));
+  document.querySelector('.cc-left').classList.remove('mob-visible');
+  document.querySelector('.cc-right').classList.remove('mob-visible');
+  document.getElementById('ccMapToggle').style.display = '';
+  setTimeout(()=>{ if(typeof map!=='undefined' && map) map.invalidateSize(); }, 150);
+}
+
+function ccMobTab(tab){
+  const tabs = document.querySelectorAll('.cc-mob-tab');
+  tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+
+  const left = document.querySelector('.cc-left');
+  const right = document.querySelector('.cc-right');
+  const mapEl = document.querySelector('.cc-map');
+
+  // Reset all panels
+  left.classList.remove('mob-visible');
+  right.classList.remove('mob-visible');
+
+  if(tab === 'map'){
+    mapEl.style.display = '';
+    mapEl.classList.remove('collapsed');
+    setTimeout(()=>{ if(typeof map!=='undefined' && map) map.invalidateSize(); }, 100);
+  } else if(tab === 'missions'){
+    mapEl.style.display = 'none';
+    left.classList.add('mob-visible');
+  } else if(tab === 'stats'){
+    mapEl.style.display = 'none';
+    right.classList.add('mob-visible');
+    setTimeout(()=>{const s=right.querySelectorAll('.cc-section')[1];if(s)s.scrollIntoView({behavior:'smooth'});},50);
+  } else if(tab === 'feed'){
+    mapEl.style.display = 'none';
+    right.classList.add('mob-visible');
+    setTimeout(()=>{const s=right.querySelectorAll('.cc-section')[2];if(s)s.scrollIntoView({behavior:'smooth'});},50);
+  } else if(tab === 'equipe'){
+    mapEl.style.display = 'none';
+    left.classList.add('mob-visible');
+    setTimeout(()=>{const s=left.querySelectorAll('.cc-section')[2];if(s)s.scrollIntoView({behavior:'smooth'});},50);
+  }
+}
+
+
+</script>
+
+<!-- PRINT MODAL -->
+<div class="cc-print-overlay" id="ccPrintOverlay" onclick="if(event.target===this)closeCCPrintModal()">
+  <div class="cc-print-modal">
+    <h3>IMPRIMER / PDF</h3>
+    <div class="cc-pm-sub">Choisissez le type de rapport a generer</div>
+    <div id="ccPrintChoices">
+      <button class="cc-print-btn" onclick="ccGeneratePDF('full')">
+        <div class="cc-pb-title" style="color:var(--rescue)">RAPPORT COMPLET</div>
+        <div class="cc-pb-desc">Couverture + KPIs + Alertes + Personnel + Inventaire + Missions + Activite</div>
+        <div class="cc-pb-icon"><svg style="width:14px;height:14px;stroke:currentColor;stroke-width:1.5;fill:none" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+      </button>
+      <button class="cc-print-btn" onclick="ccGeneratePDF('personnel')">
+        <div class="cc-pb-title" style="color:var(--gold)">HORAIRES PERSONNEL</div>
+        <div class="cc-pb-desc">Couverture + KPIs + Personnel deploye avec heures</div>
+        <div class="cc-pb-icon"><svg style="width:14px;height:14px;stroke:currentColor;stroke-width:1.5;fill:none" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+      </button>
+      <button class="cc-print-btn" onclick="ccGeneratePDF('inventory')">
+        <div class="cc-pb-title" style="color:var(--blue)">INVENTAIRE</div>
+        <div class="cc-pb-desc">Couverture + Items en circulation + Alertes equipement</div>
+        <div class="cc-pb-icon"><svg style="width:14px;height:14px;stroke:currentColor;stroke-width:1.5;fill:none" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+      </button>
+      <button class="cc-print-btn-cancel" onclick="closeCCPrintModal()">ANNULER</button>
+    </div>
+    <div class="cc-print-progress" id="ccPrintProgress">
+      <div class="cc-print-spinner"></div>
+      <div style="font-family:Oswald,sans-serif;font-size:11px;letter-spacing:.2em;color:var(--gold)">GENERATION DU PDF...</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:6px">Veuillez patienter</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

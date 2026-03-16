@@ -2,28 +2,45 @@
 //  VOLO SST — Service Worker
 //  Cache-first pour assets, network-first pour API
 // ══════════════════════════════════════════
-const CACHE_NAME = 'volo-sst-v19.4';
+const CACHE_NAME = 'volo-sst-v31.0';
 const ASSETS = [
   '/index.html',
-  '/splash.html',
   '/agenda.html',
+  '/command-center.html',
+  '/inventaire-sac.html',
   '/caisses-stock.html',
   '/dashboard-superviseur.html',
   '/plan-travail.html',
   '/pointage.html',
   '/qr.html',
+  '/rapport-cnesst.html',
+  '/tracker-chantier.html',
+  '/plan-sauvetage.html',
   '/presentation.html',
+  '/badge-tactique.html',
   '/lexique.html',
-  '/data-inventory.js',
-  '/data-personnel-stub.js',
+  '/dashboard-rpg.html',
+  '/voice-command.html',
+  '/volo-automation.html',
+  '/cnesst-reglements.js',
   '/volo-crypto.js',
   '/firebase-config.js',
   '/firebase-service.js',
   '/firebase-auth.js',
+  '/volo-usage.js',
+  '/volo-chat.js',
+  '/volo-announce.js',
   '/logo.js',
+  '/king-logo.js',
+  '/volo-icons.js',
+  '/mode-inspection.html',
+  '/asat.html',
+  '/permis-espace-clos.html',
+  '/mode-terrain.html',
   '/volo-network.js',
   '/error-monitor.js',
   '/eagle_tactic.png',
+  '/eagle_crown.jpg',
   '/eagle.mp3',
   '/manifest.json'
 ];
@@ -50,8 +67,9 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Skip non-GET, Firebase, CDN dynamique, webhooks
+  // Skip non-GET, non-http(s), Firebase, CDN dynamique, webhooks
   if (e.request.method !== 'GET') return;
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') return;
   if (url.hostname.includes('firebase')) return;
   if (url.hostname.includes('googleapis.com')) return;
   if (url.hostname.includes('gstatic.com')) return;
@@ -59,8 +77,8 @@ self.addEventListener('fetch', e => {
   if (url.hostname.includes('identitytoolkit')) return;
   if (url.hostname.includes('securetoken')) return;
 
-  // HTML pages — network first, fallback cache
-  if (e.request.mode === 'navigate' || url.pathname.endsWith('.html')) {
+  // HTML + JS — network first, fallback cache
+  if (e.request.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname.endsWith('.js')) {
     e.respondWith(
       fetch(e.request)
         .then(res => {

@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="view-transition" content="same-origin">
 <title>VOLO SST — Lexique Inventaire</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap');
   :root{
     --bg:#0C0608;--card:#1a0f12;--border:#2a1a1f;
-    --rescue:#E65100;--gold:#D4A017;--teal:#00BCD4;--green:#27AE60;
+    --rescue:#E65100;--gold:#C9A84C;--teal:#00BCD4;--green:#27AE60;
     --text:#f0e6e8;--muted:#8a7070;
   }
   body.light{
@@ -22,6 +23,11 @@
     box-shadow:0 4px 20px rgba(0,0,0,.4);transition:all .2s;}
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;padding:16px;}
+  @view-transition{navigation:auto}
+  ::view-transition-old(root){animation:vt-fade-out .2s ease-out}
+  ::view-transition-new(root){animation:vt-fade-in .3s ease-in}
+  @keyframes vt-fade-out{from{opacity:1}to{opacity:0}}
+  @keyframes vt-fade-in{from{opacity:0}to{opacity:1}}
   
   header{display:flex;align-items:center;gap:14px;padding:16px 20px;
     background:var(--card);border:1px solid var(--border);border-radius:12px;
@@ -59,8 +65,8 @@
   .info .desc{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4;}
   
   .count-badge{font-size:11px;font-family:'JetBrains Mono',monospace;
-    color:var(--gold);background:rgba(212,160,23,.1);
-    border:1px solid rgba(212,160,23,.2);border-radius:4px;
+    color:var(--gold);background:rgba(201,168,76,.1);
+    border:1px solid rgba(201,168,76,.2);border-radius:4px;
     padding:2px 6px;white-space:nowrap;flex-shrink:0;}
 
   .section-title{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;
@@ -80,12 +86,14 @@
     .info .muted{color:#666;}
   }
 </style>
+<script src="king-logo.js"></script>
 </head>
 <body>
 
 <header>
   <a href="index.html" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:13px;font-family:'Inter',sans-serif;text-decoration:none;white-space:nowrap;transition:all .2s" onmouseover="this.style.borderColor='var(--rescue)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">← INVENTAIRE</a>
-  <div style="font-size:28px">📋</div>
+  <img src="eagle_tactic.png" alt="Eagle" style="width:32px;height:32px;border-radius:8px;border:2px solid rgba(201,168,76,.35)" onerror="if(typeof KING_LOGO_B64!=='undefined')this.src=KING_LOGO_B64;else this.style.display='none'">
+  <div style="display:flex;align-items:center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/></svg></div>
   <div>
     <h1>LEXIQUE INVENTAIRE — VOLO SST</h1>
     <p>Référence des codes d'identification · The Golden Eagles</p>
@@ -97,7 +105,7 @@
 </header>
 
 <div class="search-wrap">
-  <input type="text" id="search" placeholder="🔍  Rechercher un préfixe, nom, catégorie...">
+  <input type="text" id="search" placeholder="Rechercher un prefixe, nom, categorie...">
 </div>
 
 <div class="cat-filter" id="cat-filter">
@@ -109,63 +117,63 @@
 
 <script>
 const LEXIQUE = [
-  {prefix:"ANC", icon:"🔗", nom:"Ancrage quincaillerie", cat:"Surplus quincaillerie sauvetage", desc:"Paw L / Paw M — points d'ancrage fixes (Petzl)", count:16},
-  {prefix:"ASC", icon:"⬇️", nom:"Ascendeur", cat:"Surplus Descendeur/Ascendeur", desc:"CLUTCH, Poignée d'ascension — remontée sur corde (Petzl, CMC)", count:12},
-  {prefix:"ASP", icon:"🛡️", nom:"ASAP / Antichute", cat:"Surplus ASAP", desc:"Asap, Asap Lock, Asap'Sorber Axess — dispositif antichute mobile (Petzl, Falltech)", count:44},
-  {prefix:"BAT", icon:"🔋", nom:"Batteries", cat:"Caisse 23", desc:"AA et C4 — piles de rechange équipements", count:2},
-  {prefix:"BEA", icon:"🔧", nom:"Beam Anchor", cat:"Autre", desc:"Ancrage poutre horizontale (Hiigard)", count:2},
-  {prefix:"BNK", icon:"🧥", nom:"Bunker pompier", cat:"Bunker pompier", desc:"Manteau et pantalon ignifuges — bottes incluses (tailles 10–12)", count:28},
-  {prefix:"BSK", icon:"🛷", nom:"Basket Stretcher", cat:"Autre", desc:"Civière corbeille rigide (Ferno)", count:1},
-  {prefix:"BTL", icon:"🫁", nom:"Bouteille APRIA (SCBA)", cat:"Bouteilles APRIA", desc:"Bouteille MSA SCBA — air comprimé respirable, contrôle annuel obligatoire", count:11},
-  {prefix:"CCL", icon:"🔧", nom:"Pitagore / Podium", cat:"Autre", desc:"Équipements de confinement / support (Petzl)", count:3},
-  {prefix:"CDN", icon:"🔒", nom:"Cadenas", cat:"Caisse 23", desc:"Cadenas numérotés avec clés assignées — cadenassage LOTO", count:7},
-  {prefix:"COL", icon:"🏥", nom:"Collet cervical", cat:"Caisse 8", desc:"Immobilisation rachis cervical", count:1},
-  {prefix:"COR", icon:"🔧", nom:"Protecteur de corde", cat:"Surplus sauvetage", desc:"Manchons/protecteurs — bleu, noir, 30' à 600'", count:22},
-  {prefix:"CRD", icon:"🪢", nom:"Cordage SL Tech", cat:"Cordages", desc:"Corde kernmantle 11mm — 150' à 600', rouge/bleu/orange (SL Tech)", count:12},
-  {prefix:"CRL", icon:"🔧", nom:"Croll (poignée ventrale)", cat:"À déterminer", desc:"Bloqueur ventral pour remontée sur corde", count:1},
-  {prefix:"CRO", icon:"🔗", nom:"Courroie de suspension", cat:"Caisse 12", desc:"Rondelle et courroie d'ancrage", count:1},
-  {prefix:"CRV", icon:"🔧", nom:"Cervolet", cat:"Mobilisation", desc:"Équipement de mobilisation terrain", count:2},
-  {prefix:"CSQ", icon:"⛑️", nom:"Casque", cat:"Caisse 15", desc:"Vertex orange/rouge (sauveteur), casque surveillant — EPI tête", count:7},
-  {prefix:"CTR", icon:"😷", nom:"Cartouche filtre", cat:"Caisse 16", desc:"Cartouche 7093 P100/OV — masque demi-facial", count:1},
-  {prefix:"DES", icon:"⬇️", nom:"Descendeur", cat:"Sac Premonter #1", desc:"I'D L, I'D S, Rescue Sender — contrôle de descente (Petzl)", count:19},
-  {prefix:"DOS", icon:"🦺", nom:"Dossard surveillant", cat:"Caisse 5", desc:"S/M à 2XL, neuf et usagé — identification terrain", count:5},
-  {prefix:"FHK", icon:"🦺", nom:"Harnais FireHawk M7", cat:"Harnais FireHawk", desc:"Harnais SCBA MSA pour bouteille APRIA — Kit APRIA, inspection annuelle", count:10},
-  {prefix:"FLX", icon:"🎒", nom:"Flex", cat:"Sac Premonter #1", desc:"Équipement sac Flex (SMC)", count:2},
-  {prefix:"GAZ", icon:"☢️", nom:"Détecteur gaz", cat:"Caisse 16", desc:"Chlore 7902 — détection atmosphérique", count:1},
-  {prefix:"GNT", icon:"🧤", nom:"Gants anti-coupure", cat:"Caisse 18", desc:"Niveau A-5 — protection mains", count:1},
-  {prefix:"GRL", icon:"🪢", nom:"Grillion (longe)", cat:"Surplus Longe", desc:"Grillion simple et 2m — longe d'ancrage (Petzl)", count:4},
-  {prefix:"HAR", icon:"🦺", nom:"Harnais sauveteur", cat:"Harnais sauveteur", desc:"AVAO BOD FAST, Astro — harnais corps complet (Petzl), inspection annuelle", count:10},
-  {prefix:"JAG", icon:"🔧", nom:"Jag Systeme", cat:"Autre", desc:"Système de démultiplication pour sauvetage (Petzl)", count:1},
-  {prefix:"JAN", icon:"🪢", nom:"Jane / longe ajustable", cat:"Surplus Longe", desc:"Jane, Jane I, Jane Ajustable — longe réglable (Petzl)", count:12},
-  {prefix:"LGT", icon:"🧻", nom:"Lingette APRIA", cat:"Caisse 19", desc:"Lingettes nettoyantes pour pièces faciales APRIA", count:1},
-  {prefix:"LMP", icon:"🔦", nom:"Lampe frontale", cat:"Caisse 23", desc:"Lampe frontale Petzl sauveteur", count:1},
-  {prefix:"LNG", icon:"🔧", nom:"Longe d'ancrage", cat:"Sac Premonter #1", desc:"10', 25', 30' — connexion point d'ancrage fixe (SL Tech)", count:8},
-  {prefix:"LUN", icon:"🥽", nom:"Lunettes de protection", cat:"Caisse 18", desc:"Monocoque, nasale réserve — EPI yeux", count:3},
-  {prefix:"MAS", icon:"😷", nom:"Masque / pièce faciale", cat:"Caisse 16", desc:"N95, P100 demi-masque/full face, ballon réserve — protection respiratoire", count:12},
-  {prefix:"MED", icon:"🏥", nom:"Médical / pansements", cat:"Caisse 8", desc:"Pansements variés, réserve médicale de base", count:2},
-  {prefix:"MSQ", icon:"🔗", nom:"Mousqueton", cat:"Caisse mousqueton", desc:"Bm'D, DNA TWIST, Vulcan, William, Hook Up — connecteurs certifiés (Petzl, CMC)", count:271},
-  {prefix:"OXY", icon:"💨", nom:"Kit Oxygénothérapie", cat:"Autre", desc:"Kit oxygénothérapie 1 & 2 — administration oxygène terrain", count:2},
-  {prefix:"PAL", icon:"⚙️", nom:"Palan / Maestro", cat:"Surplus Descendeur/Ascendeur", desc:"Palan Harken Wingman, Maestro L — système de levage (CMC, Petzl)", count:10},
-  {prefix:"PLN", icon:"🩹", nom:"Planche dorsale", cat:"Autre", desc:"Planche dorsale, Ferno, kit strap — immobilisation (SL Tech)", count:3},
-  {prefix:"PRC", icon:"🔧", nom:"Perche", cat:"Autre", desc:"Perche de récupération (Yates)", count:1},
-  {prefix:"PRG", icon:"🔧", nom:"Progress", cat:"Surplus Longe", desc:"Bloqueur à came pour remontée sur corde (Petzl)", count:6},
-  {prefix:"PRU", icon:"🔵", nom:"Prussik", cat:"Surplus Prussik", desc:"6mm/8mm, rouge/vert — nœud autobloquant de sécurité (CMC, SL Tech)", count:34},
-  {prefix:"PSC", icon:"🔧", nom:"Passe-corniche", cat:"Autre", desc:"Passage d'arête pour corde (MSA)", count:2},
-  {prefix:"PUL", icon:"⚙️", nom:"Poulie", cat:"Surplus quincaillerie sauvetage", desc:"Spin L1, Spin L2 — renvoi de charge (Petzl)", count:28},
-  {prefix:"RLC", icon:"🔗", nom:"Rollclip", cat:"Caisse mousqueton", desc:"Connecteur à roulette — travaux en hauteur (Petzl)", count:8},
-  {prefix:"RSL", icon:"🔧", nom:"Rescue Sling", cat:"Surplus sauvetage", desc:"Sling 311 — sangle de sauvetage (Yates)", count:1},
-  {prefix:"RSP", icon:"🫁", nom:"Pièce faciale APRIA", cat:"Caisse 19", desc:"Partie faciale masque SCBA Médium/Large — Kit APRIA (MSA)", count:20},
-  {prefix:"SAC", icon:"🎒", nom:"Sac opérationnel", cat:"Sac Premonter #1", desc:"Prémonter #1/#2, Sauveteur, Médical, Premier de cordé — contenants de déploiement", count:9},
-  {prefix:"SKD", icon:"🛷", nom:"Sked (civière souple)", cat:"Autre", desc:"Civière d'évacuation flexible — espace confiné (Ferno)", count:2},
-  {prefix:"SNG", icon:"🔧", nom:"Sangle", cat:"Surplus sangle d'ancrage", desc:"Texora, cousues, anneau C40 — sangles d'ancrage multitâches", count:60},
-  {prefix:"SPK", icon:"🔧", nom:"Spec Pak", cat:"Autre", desc:"Système d'emballage évacuation (Yates)", count:1},
-  {prefix:"STP", icon:"🔧", nom:"Pick-off Strap", cat:"Surplus sauvetage", desc:"Sangle de récupération en suspension (CMC)", count:2},
-  {prefix:"SURV", icon:"📦", nom:"Équipement surveillant", cat:"EPI", desc:"Visières, casques, dossards, masques, gants, vêtements — EPI surveillant complet", count:84},
-  {prefix:"TRD", icon:"🔧", nom:"Terradaptor", cat:"Autre", desc:"Adaptateur d'ancrage terrain (SMC)", count:1},
-  {prefix:"TRI", icon:"🔺", nom:"Triangle d'évacuation", cat:"Surplus sauvetage", desc:"Harnais d'évacuation triangulaire d'urgence (3M DBI Sala)", count:1},
-  {prefix:"VET", icon:"👕", nom:"Vêtements VOLO", cat:"Vêtement", desc:"Imperméables, tyvex, chandails, T-shirts — uniforme terrain", count:22},
-  {prefix:"VIS", icon:"🛡️", nom:"Visière surveillant", cat:"Caisse 4", desc:"Support visière + visière — EPI visage", count:2},
-  {prefix:"VNT", icon:"🌀", nom:"Ventilateur", cat:"Autre", desc:"Ventilation espace confiné (Allegro)", count:1},
+  {prefix:"ANC", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><ellipse cx="12" cy="12" rx="6" ry="9"/><path d="M18 9V6"/></svg>', nom:"Ancrage quincaillerie", cat:"Surplus quincaillerie sauvetage", desc:"Paw L / Paw M — points d'ancrage fixes (Petzl)", count:16},
+  {prefix:"ASC", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>', nom:"Ascendeur", cat:"Surplus Descendeur/Ascendeur", desc:"CLUTCH, Poignée d'ascension — remontée sur corde (Petzl, CMC)", count:12},
+  {prefix:"ASP", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', nom:"ASAP / Antichute", cat:"Surplus ASAP", desc:"Asap, Asap Lock, Asap'Sorber Axess — dispositif antichute mobile (Petzl, Falltech)", count:44},
+  {prefix:"BAT", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><rect x="6" y="7" width="12" height="14" rx="2"/><path d="M10 7V5a2 2 0 014 0v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>', nom:"Batteries", cat:"Caisse 23", desc:"AA et C4 — piles de rechange équipements", count:2},
+  {prefix:"BEA", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>', nom:"Beam Anchor", cat:"Autre", desc:"Ancrage poutre horizontale (Hiigard)", count:2},
+  {prefix:"BNK", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M12 2C8 2 6 5 6 8v2H4v12h16V10h-2V8c0-3-2-6-6-6z"/><path d="M10 10V8c0-1.1.9-2 2-2s2 .9 2 2v2"/></svg>', nom:"Bunker pompier", cat:"Bunker pompier", desc:"Manteau et pantalon ignifuges — bottes incluses (tailles 10-12)", count:28},
+  {prefix:"BSK", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="10" width="20" height="4" rx="1"/><path d="M6 14v4M18 14v4M4 10V8M20 10V8"/></svg>', nom:"Basket Stretcher", cat:"Autre", desc:"Civiere corbeille rigide (Ferno)", count:1},
+  {prefix:"BTL", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><rect x="7" y="6" width="10" height="16" rx="3"/><path d="M10 6V3h4v3"/><path d="M12 10v4M10 12h4"/></svg>', nom:"Bouteille APRIA (SCBA)", cat:"Bouteilles APRIA", desc:"Bouteille MSA SCBA — air comprime respirable, controle annuel obligatoire", count:11},
+  {prefix:"CCL", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>', nom:"Pitagore / Podium", cat:"Autre", desc:"Equipements de confinement / support (Petzl)", count:3},
+  {prefix:"CDN", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>', nom:"Cadenas", cat:"Caisse 23", desc:"Cadenas numerotes avec cles assignees — cadenassage LOTO", count:7},
+  {prefix:"COL", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M18 6H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V8a2 2 0 00-2-2z"/><path d="M12 10v6M9 13h6"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>', nom:"Collet cervical", cat:"Caisse 8", desc:"Immobilisation rachis cervical", count:1},
+  {prefix:"COR", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>', nom:"Protecteur de corde", cat:"Surplus sauvetage", desc:"Manchons/protecteurs — bleu, noir, 30' a 600'", count:22},
+  {prefix:"CRD", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M4 4c4 4 4 8 0 12M20 4c-4 4-4 8 0 12M12 2v20"/></svg>', nom:"Cordage SL Tech", cat:"Cordages", desc:"Corde kernmantle 11mm — 150' a 600', rouge/bleu/orange (SL Tech)", count:12},
+  {prefix:"CRL", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>', nom:"Croll (poignee ventrale)", cat:"A determiner", desc:"Bloqueur ventral pour remontee sur corde", count:1},
+  {prefix:"CRO", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><ellipse cx="12" cy="12" rx="6" ry="9"/><path d="M18 9V6"/></svg>', nom:"Courroie de suspension", cat:"Caisse 12", desc:"Rondelle et courroie d'ancrage", count:1},
+  {prefix:"CRV", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>', nom:"Cervolet", cat:"Mobilisation", desc:"Equipement de mobilisation terrain", count:2},
+  {prefix:"CSQ", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M12 2C8 2 4 5 4 9v1h16V9c0-4-4-7-8-7z"/><rect x="2" y="10" width="20" height="3" rx="1"/></svg>', nom:"Casque", cat:"Caisse 15", desc:"Vertex orange/rouge (sauveteur), casque surveillant — EPI tete", count:7},
+  {prefix:"CTR", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M6 10c0-3 2-6 6-6s6 3 6 6"/><path d="M4 14h16a2 2 0 010 4H4a2 2 0 010-4z"/><path d="M8 18v2M16 18v2"/></svg>', nom:"Cartouche filtre", cat:"Caisse 16", desc:"Cartouche 7093 P100/OV — masque demi-facial", count:1},
+  {prefix:"DES", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>', nom:"Descendeur", cat:"Sac Premonter #1", desc:"I'D L, I'D S, Rescue Sender — controle de descente (Petzl)", count:19},
+  {prefix:"DOS", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M12 2v6M8 8l4 4 4-4M8 12v6l4 4 4-4v-6"/></svg>', nom:"Dossard surveillant", cat:"Caisse 5", desc:"S/M a 2XL, neuf et usage — identification terrain", count:5},
+  {prefix:"FHK", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M12 2v6M8 8l4 4 4-4M8 12v6l4 4 4-4v-6"/></svg>', nom:"Harnais FireHawk M7", cat:"Harnais FireHawk", desc:"Harnais SCBA MSA pour bouteille APRIA — Kit APRIA, inspection annuelle", count:10},
+  {prefix:"FLX", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/><path d="M4 4l5 5M15 4l5 5"/></svg>', nom:"Flex", cat:"Sac Premonter #1", desc:"Equipement sac Flex (SMC)", count:2},
+  {prefix:"GAZ", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="9"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/></svg>', nom:"Detecteur gaz", cat:"Caisse 16", desc:"Chlore 7902 — detection atmospherique", count:1},
+  {prefix:"GNT", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M18 11V6a4 4 0 00-4-4h-4a4 4 0 00-4 4v5"/><path d="M6 11v5a6 6 0 0012 0v-5"/><path d="M10 2v4M14 2v4"/></svg>', nom:"Gants anti-coupure", cat:"Caisse 18", desc:"Niveau A-5 — protection mains", count:1},
+  {prefix:"GRL", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M4 4c4 4 4 8 0 12M20 4c-4 4-4 8 0 12M12 2v20"/></svg>', nom:"Grillion (longe)", cat:"Surplus Longe", desc:"Grillion simple et 2m — longe d'ancrage (Petzl)", count:4},
+  {prefix:"HAR", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M12 2v6M8 8l4 4 4-4M8 12v6l4 4 4-4v-6"/></svg>', nom:"Harnais sauveteur", cat:"Harnais sauveteur", desc:"AVAO BOD FAST, Astro — harnais corps complet (Petzl), inspection annuelle", count:10},
+  {prefix:"JAG", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>', nom:"Jag Systeme", cat:"Autre", desc:"Systeme de demultiplication pour sauvetage (Petzl)", count:1},
+  {prefix:"JAN", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M4 4c4 4 4 8 0 12M20 4c-4 4-4 8 0 12M12 2v20"/></svg>', nom:"Jane / longe ajustable", cat:"Surplus Longe", desc:"Jane, Jane I, Jane Ajustable — longe reglable (Petzl)", count:12},
+  {prefix:"LGT", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 11h6M9 15h3"/></svg>', nom:"Lingette APRIA", cat:"Caisse 19", desc:"Lingettes nettoyantes pour pieces faciales APRIA", count:1},
+  {prefix:"LMP", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M9 18h6M10 22h4M12 2v1M4.22 7.22l.71.71M1 14h2M19.07 7.93l.71-.71M21 14h2"/><path d="M18 14a6 6 0 00-12 0c0 2 1 4 3 5v1h6v-1c2-1 3-3 3-5z"/></svg>', nom:"Lampe frontale", cat:"Caisse 23", desc:"Lampe frontale Petzl sauveteur", count:1},
+  {prefix:"LNG", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>', nom:"Longe d'ancrage", cat:"Sac Premonter #1", desc:"10', 25', 30' — connexion point d'ancrage fixe (SL Tech)", count:8},
+  {prefix:"LUN", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="12" r="4"/><circle cx="16" cy="12" r="4"/><path d="M4 12h-2M22 12h-2M12 12h0"/></svg>', nom:"Lunettes de protection", cat:"Caisse 18", desc:"Monocoque, nasale reserve — EPI yeux", count:3},
+  {prefix:"MAS", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M6 10c0-3 2-6 6-6s6 3 6 6"/><path d="M4 14h16a2 2 0 010 4H4a2 2 0 010-4z"/><path d="M8 18v2M16 18v2"/></svg>', nom:"Masque / piece faciale", cat:"Caisse 16", desc:"N95, P100 demi-masque/full face, ballon reserve — protection respiratoire", count:12},
+  {prefix:"MED", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M18 6H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V8a2 2 0 00-2-2z"/><path d="M12 10v6M9 13h6"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>', nom:"Medical / pansements", cat:"Caisse 8", desc:"Pansements varies, reserve medicale de base", count:2},
+  {prefix:"MSQ", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><ellipse cx="12" cy="12" rx="6" ry="9"/><path d="M18 9V6"/></svg>', nom:"Mousqueton", cat:"Caisse mousqueton", desc:"Bm'D, DNA TWIST, Vulcan, William, Hook Up — connecteurs certifies (Petzl, CMC)", count:271},
+  {prefix:"OXY", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M8 16c-2-2-3-5-1-8s4-4 5-6c1 2 3 3 5 6s1 6-1 8"/><path d="M12 20c-2 0-3-2-3-4s2-3 3-5c1 2 3 3 3 5s-1 4-3 4z"/></svg>', nom:"Kit Oxygenotherapie", cat:"Autre", desc:"Kit oxygenotherapie 1 & 2 — administration oxygene terrain", count:2},
+  {prefix:"PAL", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>', nom:"Palan / Maestro", cat:"Surplus Descendeur/Ascendeur", desc:"Palan Harken Wingman, Maestro L — systeme de levage (CMC, Petzl)", count:10},
+  {prefix:"PLN", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M18 6H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V8a2 2 0 00-2-2z"/><path d="M12 10v6M9 13h6"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>', nom:"Planche dorsale", cat:"Autre", desc:"Planche dorsale, Ferno, kit strap — immobilisation (SL Tech)", count:3},
+  {prefix:"PRC", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>', nom:"Perche", cat:"Autre", desc:"Perche de recuperation (Yates)", count:1},
+  {prefix:"PRG", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>', nom:"Progress", cat:"Surplus Longe", desc:"Bloqueur a came pour remontee sur corde (Petzl)", count:6},
+  {prefix:"PRU", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>', nom:"Prussik", cat:"Surplus Prussik", desc:"6mm/8mm, rouge/vert — noeud autobloquant de securite (CMC, SL Tech)", count:34},
+  {prefix:"PSC", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>', nom:"Passe-corniche", cat:"Autre", desc:"Passage d'arete pour corde (MSA)", count:2},
+  {prefix:"PUL", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="8" r="5"/><path d="M7 8v12M17 8v12"/><line x1="7" y1="20" x2="17" y2="20"/></svg>', nom:"Poulie", cat:"Surplus quincaillerie sauvetage", desc:"Spin L1, Spin L2 — renvoi de charge (Petzl)", count:28},
+  {prefix:"RLC", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><ellipse cx="12" cy="12" rx="6" ry="9"/><path d="M18 9V6"/></svg>', nom:"Rollclip", cat:"Caisse mousqueton", desc:"Connecteur a roulette — travaux en hauteur (Petzl)", count:8},
+  {prefix:"RSL", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>', nom:"Rescue Sling", cat:"Surplus sauvetage", desc:"Sling 311 — sangle de sauvetage (Yates)", count:1},
+  {prefix:"RSP", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><rect x="7" y="6" width="10" height="16" rx="3"/><path d="M10 6V3h4v3"/><path d="M12 10v4M10 12h4"/></svg>', nom:"Piece faciale APRIA", cat:"Caisse 19", desc:"Partie faciale masque SCBA Medium/Large — Kit APRIA (MSA)", count:20},
+  {prefix:"SAC", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/><path d="M4 4l5 5M15 4l5 5"/></svg>', nom:"Sac operationnel", cat:"Sac Premonter #1", desc:"Premonter #1/#2, Sauveteur, Medical, Premier de corde — contenants de deploiement", count:9},
+  {prefix:"SKD", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="10" width="20" height="4" rx="1"/><path d="M6 14v4M18 14v4M4 10V8M20 10V8"/></svg>', nom:"Sked (civiere souple)", cat:"Autre", desc:"Civiere d'evacuation flexible — espace confine (Ferno)", count:2},
+  {prefix:"SNG", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>', nom:"Sangle", cat:"Surplus sangle d'ancrage", desc:"Texora, cousues, anneau C40 — sangles d'ancrage multitaches", count:60},
+  {prefix:"SPK", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>', nom:"Spec Pak", cat:"Autre", desc:"Systeme d'emballage evacuation (Yates)", count:1},
+  {prefix:"STP", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>', nom:"Pick-off Strap", cat:"Surplus sauvetage", desc:"Sangle de recuperation en suspension (CMC)", count:2},
+  {prefix:"SURV", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>', nom:"Equipement surveillant", cat:"EPI", desc:"Visieres, casques, dossards, masques, gants, vetements — EPI surveillant complet", count:84},
+  {prefix:"TRD", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>', nom:"Terradaptor", cat:"Autre", desc:"Adaptateur d'ancrage terrain (SMC)", count:1},
+  {prefix:"TRI", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>', nom:"Triangle d'evacuation", cat:"Surplus sauvetage", desc:"Harnais d'evacuation triangulaire d'urgence (3M DBI Sala)", count:1},
+  {prefix:"VET", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M6 2l-4 6v12a2 2 0 002 2h16a2 2 0 002-2V8l-4-6"/><path d="M6 2h12M8 2v4a4 4 0 008 0V2"/></svg>', nom:"Vetements VOLO", cat:"Vetement", desc:"Impermeables, tyvex, chandails, T-shirts — uniforme terrain", count:22},
+  {prefix:"VIS", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', nom:"Visiere surveillant", cat:"Caisse 4", desc:"Support visiere + visiere — EPI visage", count:2},
+  {prefix:"VNT", icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1c3 3 3 5 0 8M23 12c-3 3-5 3-8 0M12 23c-3-3-3-5 0-8M1 12c3-3 5-3 8 0"/></svg>', nom:"Ventilateur", cat:"Autre", desc:"Ventilation espace confine (Allegro)", count:1},
 ];
 
 const cats = [...new Set(LEXIQUE.map(e=>e.cat))].sort();
@@ -232,7 +240,7 @@ const LEX_THEME_KEY = 'volo_theme';
 const btnLexTheme = document.getElementById('btn-lex-theme');
 function applyLexTheme(t){
   document.body.classList.toggle('light', t==='light');
-  btnLexTheme.textContent = t==='light' ? '☀️' : '🌙';
+  btnLexTheme.innerHTML = t==='light' ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>' : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>';
   localStorage.setItem(LEX_THEME_KEY, t);
 }
 btnLexTheme.addEventListener('click', ()=>{
@@ -241,6 +249,6 @@ btnLexTheme.addEventListener('click', ()=>{
 applyLexTheme(localStorage.getItem(LEX_THEME_KEY) || 'dark');
 </script>
 
-<button id="btn-lex-theme">🌙</button>
+<button id="btn-lex-theme"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg></button>
 </body>
 </html>

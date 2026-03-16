@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<meta name="view-transition" content="same-origin">
 <title>VOLO SST — Pointage</title>
 <link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -11,7 +12,7 @@
 :root{
   --bg:#0C0608;
   --card:rgba(28,16,18,.90);--card2:rgba(38,22,26,.94);--cardSolid:#1C1012;
-  --gold:#D4A017;--goldL:#E8C547;
+  --gold:#C9A84C;--goldL:#E8C84A;
   --rescue:#E65100;--rescueL:#FF6D00;--rescueD:#BF360C;--rescueGlow:rgba(230,81,0,.15);
   --red:#C0392B;--green:#27AE60;--orange:#E67E22;
   --txt:#F5F0EB;--muted:#C9BAA9;--border:rgba(68,40,46,.55);
@@ -26,6 +27,30 @@ body.light{
 *{margin:0;padding:0;box-sizing:border-box;}
 body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.028;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:256px 256px;}
 body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;min-height:100vh;min-height:100dvh;overflow-x:hidden;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;transition:background .3s,color .2s;}
+@view-transition{navigation:auto}
+/* -- View Transitions -- */
+@keyframes vt-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes vt-fade-out{from{opacity:1}to{opacity:0}}
+@keyframes vt-slide-from-right{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes vt-slide-to-left{from{transform:translateX(0);opacity:1}to{transform:translateX(-30px);opacity:0}}
+@keyframes vt-slide-from-left{from{transform:translateX(-30px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes vt-slide-to-right{from{transform:translateX(0);opacity:1}to{transform:translateX(30px);opacity:0}}
+
+::view-transition-old(root){animation:.25s ease-out both vt-fade-out}
+::view-transition-new(root){animation:.25s ease-out both vt-fade-in}
+
+::view-transition-old(page-content){animation:.3s ease-out both vt-slide-to-left}
+::view-transition-new(page-content){animation:.3s ease-in both vt-slide-from-right}
+
+.header{view-transition-name:main-header}
+::view-transition-old(main-header){animation:.2s ease-out both vt-fade-out}
+::view-transition-new(main-header){animation:.2s ease-in both vt-fade-in}
+
+@media(prefers-reduced-motion:reduce){
+  ::view-transition-old(root),::view-transition-new(root),
+  ::view-transition-old(page-content),::view-transition-new(page-content),
+  ::view-transition-old(main-header),::view-transition-new(main-header){animation-duration:.01s}
+}
 .gold-bar{height:3px;background:linear-gradient(90deg,transparent 0%,var(--rescue) 20%,var(--gold) 50%,var(--rescue) 80%,transparent 100%);background-size:200% 100%;animation:shimmer 3s linear infinite;position:relative;z-index:200;}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
@@ -42,9 +67,9 @@ body.light .net-badge{background:rgba(248,250,252,.95);}
 .header .sub{font-size:.7em;color:var(--muted);letter-spacing:2px;margin-top:2px;}
 .back-btn{position:absolute;left:0;top:50%;transform:translateY(-50%);background:none;border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:var(--radius-sm);font-size:.72em;font-family:'Oswald',sans-serif;letter-spacing:1px;cursor:pointer;transition:all .2s;}
 .back-btn:hover{border-color:var(--rescue);color:var(--rescue);}
-.eagle-logo{width:72px;height:72px;border-radius:50%;margin-bottom:8px;border:2.5px solid var(--rescue);object-fit:cover;box-shadow:0 0 24px rgba(230,81,0,.3),0 0 60px rgba(230,81,0,.1);animation:float 3s ease-in-out infinite,pulseGlow 3s ease-in-out infinite;}
-.eagle-fallback{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--rescue),var(--rescueD));display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:8px;border:2.5px solid var(--rescue);box-shadow:0 0 24px rgba(230,81,0,.3);animation:float 3s ease-in-out infinite;}
-.eagle-accueil{width:72px;height:72px;border-radius:50%;margin-bottom:6px;border:2.5px solid var(--rescue);object-fit:cover;box-shadow:0 0 24px rgba(230,81,0,.3);animation:float 3s ease-in-out infinite;}
+.eagle-logo{width:72px;height:72px;border-radius:50%;margin-bottom:8px;border:2.5px solid var(--gold);object-fit:cover;box-shadow:0 0 24px rgba(201,168,76,.35),0 0 60px rgba(201,168,76,.12);animation:float 3s ease-in-out infinite,pulseGlow 3s ease-in-out infinite;}
+.eagle-fallback{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#9A8230);display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:8px;border:2.5px solid var(--gold);box-shadow:0 0 24px rgba(201,168,76,.35);animation:float 3s ease-in-out infinite;}
+.eagle-accueil{width:72px;height:72px;border-radius:50%;margin-bottom:6px;border:2.5px solid var(--gold);object-fit:cover;box-shadow:0 0 24px rgba(201,168,76,.35);animation:float 3s ease-in-out infinite;}
 .clock-display{text-align:center;margin:12px 0;}
 .clock-display .time{font-family:'JetBrains Mono',monospace;font-size:2.4em;color:var(--rescue);text-shadow:0 0 20px rgba(230,81,0,.2);}
 .clock-display .date{font-size:.78em;color:var(--muted);margin-top:4px;}
@@ -134,31 +159,83 @@ body.light .net-badge{background:rgba(248,250,252,.95);}
 .ptg-modal p{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5}
 .ptg-modal .ptg-modal-btns{display:flex;gap:10px}
 .ptg-modal .ptg-modal-btns button{flex:1;padding:12px;border-radius:10px;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:1px;cursor:pointer;border:1px solid var(--border);transition:all .2s}
+/* === MOBILE 480px FINE-TUNING === */
+@media(max-width:480px){
+  .container{padding-left:12px;padding-right:12px;padding-bottom:calc(100px + env(safe-area-inset-bottom,0px));overflow-x:hidden;}
+  .theme-pill{bottom:calc(20px + env(safe-area-inset-bottom,0px));right:12px;}
+  .net-badge{top:calc(10px + env(safe-area-inset-top,0px));right:10px;font-size:.6em;padding:3px 8px;}
+  .toast{max-width:92vw;font-size:.8em;padding:10px 16px;}
+  .header h1{font-size:1.15em;letter-spacing:2px;}
+  .header .sub{font-size:.65em;}
+  .back-btn{padding:10px 14px;font-size:.72em;min-height:44px;}
+  .eagle-logo,.eagle-fallback,.eagle-accueil{width:60px;height:60px;}
+  .clock-display .time{font-size:2em;}
+  .numpad{max-width:260px;gap:8px;}
+  .numpad button{padding:14px;font-size:1.2em;}
+  .pin-dot{width:46px;height:52px;font-size:22px;}
+  .stat-grid{grid-template-columns:1fr 1fr;gap:8px;}
+  .stat-card{padding:10px 8px;}
+  .stat-card .num{font-size:1.3em;}
+  .btn{padding:14px;font-size:.95em;}
+  .card{padding:16px;margin-bottom:10px;}
+  .user-badge .name{font-size:1.1em;}
+  .lieu-list{max-height:320px;}
+  .lieu-item{padding:12px 14px;font-size:.9em;}
+  .search-box{padding:10px 14px;font-size:.85em;}
+  .custom-input{padding:10px 14px;font-size:.85em;}
+  .qr-overlay{padding:16px 12px;}
+  .ptg-modal{padding:20px;max-width:calc(100vw - 32px);}
+  .ptg-modal .ptg-modal-btns button{padding:10px;font-size:13px;}
+  .hist-item{font-size:.82em;}
+  body{padding-bottom:env(safe-area-inset-bottom,0px);}
+}
+@supports(padding-bottom:env(safe-area-inset-bottom)){
+  .theme-pill{padding-bottom:env(safe-area-inset-bottom,0px);}
+  .container{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px));}
+}
 </style>
 </head>
 <body>
 <div id="pickOnActiveBanner"></div>
 <script>
-(function(){try{var h=JSON.parse(localStorage.getItem('volo_history')||'[]'),closed=new Set();h.forEach(function(tx){if(tx.statut==='ANNULÉ'||tx.statut==='RETOURNÉ')closed.add((tx.original_timestamp||tx.timestamp)+tx.sauveteur_id)});var active=h.filter(function(tx){return tx.statut==='ACTIF'&&tx.mode==='PICK-ON'&&!closed.has(tx.timestamp+tx.sauveteur_id)});if(active.length===0)return;var totalItems=active.reduce(function(n,tx){try{return n+JSON.parse(tx.items||'[]').length}catch(e){return n}},0);document.getElementById('pickOnActiveBanner').innerHTML='<div onclick="window.location.href=\'index.html\'" style="position:sticky;top:0;z-index:9999;padding:10px 16px;background:linear-gradient(135deg,rgba(230,81,0,.95),rgba(192,57,43,.9));color:#fff;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:2px solid #E65100"><span style="font-size:20px">⚠️</span><div style="flex:1"><div style="font-weight:800;font-size:13px;letter-spacing:1px;font-family:Oswald,sans-serif">PICK ON ACTIF — '+totalItems+' item'+(totalItems>1?'s':'')+' sorti'+(totalItems>1?'s':'')+'</div><div style="font-size:10px;opacity:.85">Toucher pour retourner au Pick-Off</div></div><span style="font-size:16px">→</span></div>';}catch(e){}})();
+(function(){try{var h=JSON.parse(localStorage.getItem('volo_history')||'[]'),closed=new Set();h.forEach(function(tx){if(tx.statut==='ANNULÉ'||tx.statut==='RETOURNÉ')closed.add((tx.original_timestamp||tx.timestamp)+tx.sauveteur_id)});var active=h.filter(function(tx){return tx.statut==='ACTIF'&&tx.mode==='PICK-ON'&&!closed.has(tx.timestamp+tx.sauveteur_id)});if(active.length===0)return;var totalItems=active.reduce(function(n,tx){try{return n+JSON.parse(tx.items||'[]').length}catch(e){return n}},0);document.getElementById('pickOnActiveBanner').innerHTML='<div onclick="window.location.href=\'index.html\'" style="position:sticky;top:0;z-index:9999;padding:10px 16px;background:linear-gradient(135deg,rgba(230,81,0,.95),rgba(192,57,43,.9));color:#fff;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:2px solid #E65100"><span style="font-size:20px;font-weight:bold">!</span><div style="flex:1"><div style="font-weight:800;font-size:13px;letter-spacing:1px;font-family:Oswald,sans-serif">PICK ON ACTIF — '+totalItems+' item'+(totalItems>1?'s':'')+' sorti'+(totalItems>1?'s':'')+'</div><div style="font-size:10px;opacity:.85">Toucher pour retourner au Pick-Off</div></div><span style="font-size:16px">→</span></div>';}catch(e){}})();
+
+// -- View Transitions -- smooth navigation --
+(function(){
+  var mainContent = document.querySelector('#app') || document.querySelector('.screen') || document.querySelector('main') || document.body.firstElementChild;
+  if(mainContent) mainContent.style.viewTransitionName = 'page-content';
+
+  document.addEventListener('click', function(e){
+    var link = e.target.closest('a[href]');
+    if(!link) return;
+    var href = link.getAttribute('href');
+    if(!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+    if(!document.startViewTransition) return;
+    e.preventDefault();
+    document.startViewTransition(function(){
+      window.location.href = href;
+    });
+  });
+})();
 </script>
 <div class="gold-bar"></div>
 <div class="net-badge"><div class="net-dot on" id="netDot"></div><span id="netText" style="color:var(--green)">EN LIGNE</span></div>
 <div class="toast" id="toast"></div>
 <div class="container" id="app"></div>
 <div class="theme-pill">
-  <button id="th-dark" class="active" title="Mode sombre" aria-label="Mode sombre">🌙</button>
-  <button id="th-light" title="Mode clair" aria-label="Mode clair">☀️</button>
+  <button id="th-dark" class="active" title="Mode sombre" aria-label="Mode sombre"></button>
+  <button id="th-light" title="Mode clair" aria-label="Mode clair"></button>
 </div>
 <audio id="eagleAudio" preload="none"><source src="eagle.mp3" type="audio/mpeg"></audio>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="error-monitor.js"></script>
-<script src="data-inventory.js?v=19"></script>
-<script src="data-personnel-stub.js?v=19"></script>
+<script src="data.js?v=20"></script>
 <script src="volo-crypto.js"></script>
 <script src="firebase-config.js"></script>
 <script src="firebase-service.js"></script>
 <script src="volo-network.js"></script>
+<script src="king-logo.js"></script>
 <script>
 // ══════════════════════════════════════════════════
 //  VOLO SST — MODULE POINTAGE D'HEURES
@@ -182,7 +259,7 @@ const LIEUX=[
   {id:"L14",nom:"Chantier Drummondville",region:"Mauricie"},
   {id:"L15",nom:"Chantier Terrebonne",region:"Lanaudière"},
   {id:"L16",nom:"Formation / Entraînement",region:"Formation"},
-  {id:"LAUTRE",nom:"⊕ Autre (préciser)",region:"—"},
+  {id:"LAUTRE",nom:"Autre (préciser)",region:"—"},
 ];
 const WEBHOOK_POINTAGE='/api/webhook-pointage';
 let state={step:'pin',pin:'',user:null,mode:null,lieu:null,lieuCustom:'',missionType:'STANDARD',ts:null,_h:'',_m:0};
@@ -222,11 +299,11 @@ window.addEventListener('offline',updateNet);
 if(typeof VoloNetwork!=='undefined')VoloNetwork.init({skipBadge:true});
 async function flushQueue(){
   const q=getQueue();if(!q.length)return;
-  toast('🔄 Envoi de '+q.length+' pointage(s)...','info');
+  toast('Envoi de '+q.length+' pointage(s)...','info');
   const fail=[];
   for(const e of q){try{const r=await fetch(WEBHOOK_POINTAGE,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(e)});if(!r.ok)fail.push(e);}catch{fail.push(e);}}
   setQueue(fail);
-  if(!fail.length)toast('✅ Tous les pointages envoyés','ok');
+  if(!fail.length)toast('Tous les pointages envoyés','ok');
 }
 
 // ── UTILITIES ──
@@ -240,8 +317,8 @@ function startClock(){clearInterval(clockInt);clockInt=setInterval(()=>{const el
 function vibrate(ms=30){try{navigator.vibrate(ms)}catch{}}
 
 // ── LOGO HELPERS ──
-const LOGO_BIG=`<img src="eagle_tactic.png" class="eagle-logo" alt="Golden Eagles" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="eagle-fallback" style="display:none">🦅</div>`;
-const LOGO_MED=`<img src="eagle_tactic.png" class="eagle-accueil" alt="Golden Eagles" onerror="this.style.display='none'">`;
+const LOGO_BIG=`<img src="eagle_tactic.png" class="eagle-logo" alt="Golden Eagles" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none';this.nextElementSibling.style.display='flex'}"><div class="eagle-fallback" style="display:none">GE</div>`;
+const LOGO_MED=`<img src="eagle_tactic.png" class="eagle-accueil" alt="Golden Eagles" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none'}">`;
 
 // ── RENDER ──
 function render(){
@@ -274,7 +351,7 @@ function rPIN(app){
     else  identified='<div style="text-align:center;margin-top:14px;color:var(--red);font-weight:600;font-family:\'Oswald\',sans-serif;letter-spacing:1px">✗ Code '+state.pin+' non reconnu</div>';
   }
   app.innerHTML='<div style="margin-bottom:10px"><a href="index.html" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:13px;font-family:\'Inter\',sans-serif;text-decoration:none">◀ INVENTAIRE</a></div>'
-    +'<div class="header" style="padding-bottom:4px"><div style="display:flex;flex-direction:column;align-items:center">'+LOGO_BIG+'<h1>⏱ POINTAGE</h1><div class="sub">THE GOLDEN EAGLES</div></div></div>'
+    +'<div class="header" style="padding-bottom:4px"><div style="display:flex;flex-direction:column;align-items:center">'+LOGO_BIG+'<h1>POINTAGE</h1><div class="sub">THE GOLDEN EAGLES</div></div></div>'
     +'<div class="clock-display"><div class="time" id="liveClock">'+fmtTime(new Date())+'</div><div class="date">'+fmtDate(new Date())+'</div></div>'
     +'<div class="card"><div class="step-label">ENTREZ VOTRE CODE PIN</div><div class="pin-row">'+dots+'</div><div class="numpad">'+nums+'</div>'+identified+'</div>'
     +(state.pin.length===4&&PERSONNEL.find(p=>p.volo==='V'+state.pin)?'<button class="btn btn-gold" onclick="doLogin()" style="margin-top:4px">CONTINUER →</button>':'')
@@ -303,7 +380,7 @@ function rAccueil(app){
   const todayH=getHistory().filter(e=>e.mode==='DÉPART'&&new Date(e.timestamp).toDateString()===today).reduce((a,e)=>a+(e.heures_minutes||0),0);
   const th=Math.floor(todayH/60),tm=todayH%60;
   app.innerHTML='<div style="display:flex;gap:10px;margin-bottom:10px"><a href="index.html" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:13px;font-family:\'Inter\',sans-serif;text-decoration:none">◀ INVENTAIRE</a></div>'
-    +'<div class="header"><button class="back-btn" onclick="logout()">DÉCONNEXION</button><h1>⏱ POINTAGE</h1><div class="sub">THE GOLDEN EAGLES</div></div>'
+    +'<div class="header"><button class="back-btn" onclick="logout()">DÉCONNEXION</button><h1>POINTAGE</h1><div class="sub">THE GOLDEN EAGLES</div></div>'
     +'<div class="user-badge"><div style="display:flex;flex-direction:column;align-items:center">'+LOGO_MED+'</div>'
     +'<div class="name">'+escapeHtml(state.user.name)+'</div><div class="role">'+escapeHtml(state.user.role)+' — '+escapeHtml(state.user.region)+'</div><div class="uid">'+escapeHtml(state.user.id)+' | '+escapeHtml(state.user.volo)+'</div>'
     +(me?'<div style="margin-top:8px"><span class="status-badge on-site">● Sur site depuis '+calcH(me.arrival).display+' — '+escapeHtml(me.lieu)+'</span></div>'
@@ -312,11 +389,11 @@ function rAccueil(app){
     +'<div class="clock-display"><div class="time" id="liveClock">'+fmtTime(new Date())+'</div></div>'
     +'<div class="stat-grid"><div class="stat-card"><div class="num" style="color:var(--green)">'+onSite.length+'</div><div class="lbl">SUR LE TERRAIN</div></div>'
     +'<div class="stat-card"><div class="num" style="color:var(--gold)">'+th+'h'+String(tm).padStart(2,'0')+'</div><div class="lbl">HEURES AUJOURD\'HUI</div></div></div>'
-    +(me?'<button class="btn btn-red" onclick="startMode(\'DÉPART\')" style="margin-bottom:10px">🔴 ENREGISTRER MON DÉPART</button><button class="btn btn-outline" onclick="startMode(\'ARRIVÉE\',true)" style="margin-bottom:10px">📍 Changer de lieu</button>'
-        :'<button class="btn btn-green" onclick="startMode(\'ARRIVÉE\')" style="margin-bottom:10px">🟢 ENREGISTRER MON ARRIVÉE</button>')
+    +(me?'<button class="btn btn-red" onclick="startMode(\'DÉPART\')" style="margin-bottom:10px">ENREGISTRER MON DÉPART</button><button class="btn btn-outline" onclick="startMode(\'ARRIVÉE\',true)" style="margin-bottom:10px">Changer de lieu</button>'
+        :'<button class="btn btn-green" onclick="startMode(\'ARRIVÉE\')" style="margin-bottom:10px">ENREGISTRER MON ARRIVÉE</button>')
     +'<div style="display:flex;gap:10px;margin-bottom:10px">'
-    +'<button class="btn btn-outline" style="flex:1;font-size:.78em" onclick="state.step=\'onsite\';render()">👥 QUI EST LÀ ('+onSite.length+')</button>'
-    +'<button class="btn btn-outline" style="flex:1;font-size:.78em" onclick="state.step=\'history\';render()">📜 HISTORIQUE</button></div>';
+    +'<button class="btn btn-outline" style="flex:1;font-size:.78em" onclick="state.step=\'onsite\';render()">QUI EST LA ('+onSite.length+')</button>'
+    +'<button class="btn btn-outline" style="flex:1;font-size:.78em" onclick="state.step=\'history\';render()">HISTORIQUE</button></div>';
   startClock();
 }
 
@@ -331,7 +408,7 @@ function startMode(mode,isChangeLieu){
     const onSite=getOnSite();
     const me=onSite.find(e=>e.id===state.user.id);
     if(me&&!isChangeLieu){
-      showPtgModal('⚠️ DÉJÀ EN POSTE','Vous êtes déjà EN POSTE à <b>'+escapeHtml(me.lieu)+'</b>.<br>Forcer le DÉPART de la session précédente?','OUI, FORCER',function(){
+      showPtgModal('DÉJÀ EN POSTE','Vous êtes déjà EN POSTE à <b>'+escapeHtml(me.lieu)+'</b>.<br>Forcer le DÉPART de la session précédente?','OUI, FORCER',function(){
         closePtgModal();
         const c=calcH(me.arrival);
         const now=new Date();const ts=fmtTS(now);
@@ -342,7 +419,7 @@ function startMode(mode,isChangeLieu){
         }else{const q=getQueue();q.push(depPayload);setQueue(q);}
         if(typeof VoloData!=='undefined'){try{VoloData.savePointage(depPayload);}catch(e){}}
         setOnSite(onSite.filter(e=>e.id!==state.user.id));
-        toast('🔴 Départ forcé — '+c.display,'warn');
+        toast('Départ forcé — '+c.display,'warn');
         state.lieu=null;state.lieuCustom='';state.missionType='STANDARD';
         state.step='lieu';render();
       });
@@ -360,8 +437,8 @@ function rLieu(app){
     +'<div><div class="ln">'+l.nom+'</div><div class="lr">'+l.region+'</div></div>'
     +(state.lieu&&state.lieu.id===l.id?'<span style="color:var(--gold);font-size:1.1em">✓</span>':'')
     +'</div>').join('');
-  app.innerHTML='<div class="header"><button class="back-btn" onclick="state.step=\'accueil\';render()">← RETOUR</button><h1>📍 LIEU</h1><div class="sub">OÙ TRAVAILLEZ-VOUS?</div></div>'
-    +'<input class="search-box" id="lieuQ" placeholder="🔍 Rechercher un lieu..." oninput="filterLieux()">'
+  app.innerHTML='<div class="header"><button class="back-btn" onclick="state.step=\'accueil\';render()">← RETOUR</button><h1>LIEU</h1><div class="sub">OÙ TRAVAILLEZ-VOUS?</div></div>'
+    +'<input class="search-box" id="lieuQ" placeholder="Rechercher un lieu..." oninput="filterLieux()">'
     +'<div class="lieu-list" id="lieuList">'+items+'</div>'
     +'<button class="btn btn-gold '+((!state.lieu)?'btn-disabled':'')+'" onclick="if(state.lieu){if(state.lieu.id===\'LAUTRE\'){state.step=\'custom\';}else{state.step=\'mission\';}render();}" style="margin-top:14px">CONTINUER →</button>';
 }
@@ -376,7 +453,7 @@ function pickLieu(id){state.lieu=LIEUX.find(l=>l.id===id);vibrate();render();}
 
 // ── CUSTOM ──
 function rCustom(app){
-  app.innerHTML='<div class="header"><button class="back-btn" onclick="state.step=\'lieu\';render()">← RETOUR</button><h1>📍 LIEU CUSTOM</h1><div class="sub">PRÉCISEZ LE LIEU</div></div>'
+  app.innerHTML='<div class="header"><button class="back-btn" onclick="state.step=\'lieu\';render()">← RETOUR</button><h1>LIEU CUSTOM</h1><div class="sub">PRÉCISEZ LE LIEU</div></div>'
     +'<div class="card"><div class="step-label">NOM DU CHANTIER / LIEU</div>'
     +'<input class="custom-input" id="customLieu" placeholder="Ex: Chantier Hydro-Québec Lac-Mégantic" value="'+escapeHtml(state.lieuCustom)+'" autofocus></div>'
     +'<button class="btn btn-gold btn-disabled" id="btnCustomGo" onclick="submitCustomLieu()">CONTINUER →</button>';
@@ -392,10 +469,10 @@ function submitCustomLieu(){if(!state.lieuCustom.trim())return;state.lieu={id:'C
 function getMissionTypes(){
   const surv=state.user&&state.user.type==='SURVEILLANT';
   const types=[
-    {id:'STANDARD',label:'STANDARD',desc:'Mission régulière hors local',icon:'📋',perdiem:surv?'150$/j':'200$/j (sauv.) · 150$/j (surv.)'},
-    {id:'LOCAL',label:'LOCAL',desc:'Travail au bureau / local',icon:'🏢',perdiem:'0$/j (pas de per diem)'},
+    {id:'STANDARD',label:'STANDARD',desc:'Mission régulière hors local',icon:'',perdiem:surv?'150$/j':'200$/j (sauv.) · 150$/j (surv.)'},
+    {id:'LOCAL',label:'LOCAL',desc:'Travail au bureau / local',icon:'',perdiem:'0$/j (pas de per diem)'},
   ];
-  if(!surv)types.push({id:'URGENCE',label:'URGENCE',desc:'Intervention urgente / rappel',icon:'🚨',perdiem:'285$/j + 64$/h transport'});
+  if(!surv)types.push({id:'URGENCE',label:'URGENCE',desc:'Intervention urgente / rappel',icon:'',perdiem:'285$/j + 64$/h transport'});
   return types;
 }
 function rMission(app){
@@ -403,7 +480,7 @@ function rMission(app){
     +'<div><div class="ln">'+m.icon+' '+m.label+'</div><div class="lr">'+m.desc+'</div><div style="font-size:.65em;color:var(--gold);margin-top:2px">'+m.perdiem+'</div></div>'
     +(state.missionType===m.id?'<span style="color:var(--gold);font-size:1.2em">✓</span>':'')
     +'</div>').join('');
-  app.innerHTML='<div class="header"><button class="back-btn" onclick="state.step=\'lieu\';render()">← RETOUR</button><h1>💰 TYPE MISSION</h1><div class="sub">QUEL TYPE DE JOURNÉE?</div></div>'
+  app.innerHTML='<div class="header"><button class="back-btn" onclick="state.step=\'lieu\';render()">← RETOUR</button><h1>TYPE MISSION</h1><div class="sub">QUEL TYPE DE JOURNÉE?</div></div>'
     +'<div class="lieu-list">'+items+'</div>'
     +'<button class="btn btn-gold" onclick="state.step=\'confirm\';render()" style="margin-top:14px">CONTINUER →</button>';
 }
@@ -416,14 +493,14 @@ function rConfirm(app){
   let hBlock='';
   if(isDep&&me){const c=calcH(me.arrival);hBlock='<div class="receipt-hours"><div class="lbl">HEURES TRAVAILLÉES</div><div class="big">'+c.display+'</div></div>';}
   app.innerHTML='<div class="header"><button class="back-btn" onclick="state.step='+(isDep?"'accueil'":"'mission'")+';render()">← RETOUR</button><h1>✓ CONFIRMER</h1><div class="sub">'+state.mode+'</div></div>'
-    +'<div class="receipt"><div class="receipt-header"><div class="mode" style="color:'+(isDep?'var(--red)':'var(--green)')+'">'+(isDep?'🔴':'🟢')+' '+state.mode+'</div></div>'
+    +'<div class="receipt"><div class="receipt-header"><div class="mode" style="color:'+(isDep?'var(--red)':'var(--green)')+'">'+(isDep?'':'')+' '+state.mode+'</div></div>'
     +'<div class="rrow"><span class="rl">Nom</span><span class="rv">'+escapeHtml(state.user.name)+'</span></div>'
     +'<div class="rrow"><span class="rl">ID</span><span class="rv" style="font-family:\'JetBrains Mono\',monospace;font-size:.85em">'+escapeHtml(state.user.id)+'</span></div>'
     +'<div class="rrow"><span class="rl">Lieu</span><span class="rv">'+(state.lieu?escapeHtml(state.lieu.nom):'—')+'</span></div>'
     +(!isDep?'<div class="rrow"><span class="rl">Type</span><span class="rv" style="color:var(--gold);font-weight:600">'+state.missionType+'</span></div>':'')
     +'<div class="rrow"><span class="rl">Date/Heure</span><span class="rv">'+fmtTS(now)+'</span></div>'
     +hBlock+'</div>'
-    +'<button class="btn '+(isDep?'btn-red':'btn-green')+'" onclick="doPointage()">'+(isDep?'🔴 CONFIRMER DÉPART':'🟢 CONFIRMER ARRIVÉE')+'</button>'
+    +'<button class="btn '+(isDep?'btn-red':'btn-green')+'" onclick="doPointage()">'+(isDep?'CONFIRMER DÉPART':'CONFIRMER ARRIVÉE')+'</button>'
     +'<button class="btn btn-outline" onclick="state.step=\'accueil\';render()" style="margin-top:10px">ANNULER</button>';
 }
 
@@ -438,10 +515,10 @@ async function doPointage(){
   addHistory(payload);
   if(navigator.onLine){
     try{const r=await fetch(WEBHOOK_POINTAGE,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-      if(r.ok)toast(isDep?'🔴 Départ — '+hDisp:'🟢 Arrivée enregistrée','ok');
-      else{toast('⚠️ Erreur serveur — sauvé local','err');const q=getQueue();q.push(payload);setQueue(q);}}
-    catch{toast('⚠️ Erreur réseau — sauvé local','err');const q=getQueue();q.push(payload);setQueue(q);}
-  }else{toast('📴 Hors-ligne — sauvé local','warn');const q=getQueue();q.push(payload);setQueue(q);}
+      if(r.ok)toast(isDep?'Départ — '+hDisp:'Arrivée enregistrée','ok');
+      else{toast('Erreur serveur — sauvé local','err');const q=getQueue();q.push(payload);setQueue(q);}}
+    catch{toast('Erreur réseau — sauvé local','err');const q=getQueue();q.push(payload);setQueue(q);}
+  }else{toast('Hors-ligne — sauvé local','warn');const q=getQueue();q.push(payload);setQueue(q);}
   // Firestore dual-write (fire & forget)
   if(typeof VoloData!=='undefined'){try{VoloData.savePointage(payload);}catch(e){console.warn('[VoloData] savePointage:',e);}}
   try{document.getElementById('eagleAudio').currentTime=0;document.getElementById('eagleAudio').play();}catch{}
@@ -451,7 +528,7 @@ async function doPointage(){
 // ── RECEIPT ──
 function rReceipt(app){
   const isDep=state.mode==='DÉPART';
-  app.innerHTML='<div class="header"><h1>'+(isDep?'🔴':'🟢')+' '+state.mode+'</h1><div class="sub">POINTAGE ENREGISTRÉ</div></div>'
+  app.innerHTML='<div class="header"><h1>'+(isDep?'':'')+' '+state.mode+'</h1><div class="sub">POINTAGE ENREGISTRÉ</div></div>'
     +'<div class="receipt card-glow"><div class="receipt-header"><div class="mode" style="color:'+(isDep?'var(--red)':'var(--green)')+'">✓ '+state.mode+' CONFIRMÉ'+(isDep?'':'E')+'</div></div>'
     +'<div class="rrow"><span class="rl">Nom</span><span class="rv">'+escapeHtml(state.user.name)+'</span></div>'
     +'<div class="rrow"><span class="rl">ID</span><span class="rv" style="font-family:\'JetBrains Mono\',monospace">'+escapeHtml(state.user.id)+'</span></div>'
@@ -469,11 +546,11 @@ function rOnSite(app){
   const onSite=getOnSite();
   const items=onSite.length?onSite.map(e=>{
     const c=calcH(e.arrival);const col=c.h>=10?'var(--red)':c.h>=8?'var(--orange)':'var(--green)';
-    return '<div class="onsite-item" data-n="'+escapeHtml(e.nom.toLowerCase())+'"><div><div class="on-name">'+escapeHtml(e.nom)+'</div><div class="on-lieu">📍 '+escapeHtml(e.lieu)+(e.region?' — '+escapeHtml(e.region):'')+'</div>'+(e.missionType?'<div style="font-size:.62em;color:var(--gold);margin-top:2px">💰 '+escapeHtml(e.missionType)+'</div>':'')+'</div>'
+    return '<div class="onsite-item" data-n="'+escapeHtml(e.nom.toLowerCase())+'"><div><div class="on-name">'+escapeHtml(e.nom)+'</div><div class="on-lieu">'+escapeHtml(e.lieu)+(e.region?' — '+escapeHtml(e.region):'')+'</div>'+(e.missionType?'<div style="font-size:.62em;color:var(--gold);margin-top:2px">'+escapeHtml(e.missionType)+'</div>':'')+'</div>'
       +'<div style="text-align:right"><div class="on-time" style="color:'+col+'">'+c.display+'</div><div style="font-size:.65em;color:var(--muted)">depuis '+new Date(e.arrival).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit',hour12:false})+'</div></div></div>';
   }).join(''):'<div class="card" style="text-align:center;color:var(--muted);font-family:\'Oswald\',sans-serif;letter-spacing:1px">Personne n\'est pointé actuellement</div>';
-  app.innerHTML='<div class="header"><button class="back-btn" onclick="state.step=\'accueil\';render()">← RETOUR</button><h1>👥 SUR LE TERRAIN</h1><div class="sub">'+onSite.length+' PERSONNE'+(onSite.length>1?'S':'')+'</div></div>'
-    +'<input class="search-box" placeholder="🔍 Rechercher..." oninput="document.querySelectorAll(\'.onsite-item\').forEach(e=>e.style.display=e.dataset.n.includes(this.value.toLowerCase())?\'flex\':\'none\')">'
+  app.innerHTML='<div class="header"><button class="back-btn" onclick="state.step=\'accueil\';render()">← RETOUR</button><h1>SUR LE TERRAIN</h1><div class="sub">'+onSite.length+' PERSONNE'+(onSite.length>1?'S':'')+'</div></div>'
+    +'<input class="search-box" placeholder="Rechercher..." oninput="document.querySelectorAll(\'.onsite-item\').forEach(e=>e.style.display=e.dataset.n.includes(this.value.toLowerCase())?\'flex\':\'none\')">'
     +'<div id="onSiteList">'+items+'</div>';
 }
 
@@ -482,12 +559,12 @@ function rHistory(app){
   const hist=getHistory().slice(0,50);
   const items=hist.length?hist.map(e=>{
     const isDep=e.mode==='DÉPART';
-    return '<div class="hist-item"><div><div class="h-mode" style="color:'+(isDep?'var(--red)':'var(--green)')+'">'+(isDep?'🔴':'🟢')+' '+e.mode+'</div><div style="font-size:.75em;color:var(--muted)">'+escapeHtml(e.sauveteur_nom)+' — '+escapeHtml(e.lieu)+'</div></div>'
+    return '<div class="hist-item"><div><div class="h-mode" style="color:'+(isDep?'var(--red)':'var(--green)')+'">'+(isDep?'':'')+' '+e.mode+'</div><div style="font-size:.75em;color:var(--muted)">'+escapeHtml(e.sauveteur_nom)+' — '+escapeHtml(e.lieu)+'</div></div>'
       +'<div class="h-info"><div>'+(e.timestamp.split(' ')[1]||'')+'</div><div>'+(e.timestamp.split(' ')[0]||'')+'</div>'+(isDep&&e.heures?'<div style="color:var(--green);font-weight:600">'+e.heures+'</div>':'')+'</div></div>';
   }).join(''):'<div class="card" style="text-align:center;color:var(--muted);font-family:\'Oswald\',sans-serif;letter-spacing:1px">Aucun historique</div>';
-  app.innerHTML='<div class="header"><button class="back-btn" onclick="state.step=\'accueil\';render()">← RETOUR</button><h1>📜 HISTORIQUE</h1><div class="sub">DERNIERS POINTAGES</div></div>'
+  app.innerHTML='<div class="header"><button class="back-btn" onclick="state.step=\'accueil\';render()">← RETOUR</button><h1>HISTORIQUE</h1><div class="sub">DERNIERS POINTAGES</div></div>'
     +items
-    +(hist.length?'<button class="btn btn-outline" onclick="confirmClearHistory()" style="margin-top:14px;font-size:.8em">🗑 EFFACER L\'HISTORIQUE</button>':'');
+    +(hist.length?'<button class="btn btn-outline" onclick="confirmClearHistory()" style="margin-top:14px;font-size:.8em">EFFACER L\'HISTORIQUE</button>':'');
 }
 
 // ── QR SCANNER ──
@@ -525,7 +602,7 @@ function openQRScanner(){
   vibrate();
   const overlay=document.createElement('div');overlay.className='qr-overlay';overlay.id='qr-overlay';
   overlay.innerHTML='<button onclick="closeQRScanner()" aria-label="Fermer le scanner" style="position:fixed;top:16px;right:16px;z-index:251;background:var(--red);border:none;color:#fff;width:50px;height:50px;border-radius:50%;font-size:1.4em;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(192,57,43,.5)">✕</button>'
-    +'<div class="qr-title">📷 SCANNER VOTRE BADGE</div><div id="qr-reader"></div>'
+    +'<div class="qr-title">SCANNER VOTRE BADGE</div><div id="qr-reader"></div>'
     +'<div class="qr-hint">Placez le QR code de votre badge devant la caméra.<br>La connexion sera automatique.</div>';
   document.body.appendChild(overlay);
   startQrScan();
@@ -537,13 +614,13 @@ function closeQRScanner(){
 function onQRSuccess(data){
   const parts=data.split('|');
   if(parts.length>=3&&parts[0]==='VOLO'){const pin=parts[2];const user=PERSONNEL.find(p=>p.volo==='V'+pin);
-    if(user){closeQRScanner();vibrate();state.pin=pin;state.user=user;state.step='accueil';toast('✅ Badge scanné — '+user.name,'ok');render();return;}}
-  toast('❌ Badge non reconnu','err');
+    if(user){closeQRScanner();vibrate();state.pin=pin;state.user=user;state.step='accueil';toast('Badge scanné — '+user.name,'ok');render();return;}}
+  toast('Badge non reconnu','err');
 }
 
 // ── AUTO-LOCK ──
 let lockTimer;
-function resetLock(){clearTimeout(lockTimer);if(state.step!=='pin'){lockTimer=setTimeout(()=>{toast('🔒 Session expirée','warn');logout();},120000);}}
+function resetLock(){clearTimeout(lockTimer);if(state.step!=='pin'){lockTimer=setTimeout(()=>{toast('Session expirée','warn');logout();},120000);}}
 ['click','touchstart','keydown'].forEach(e=>document.addEventListener(e,resetLock));
 
 // ── MODALS (remplacement confirm/prompt natifs) ──
@@ -560,7 +637,7 @@ function closePtgModal(){
   const el=document.getElementById('ptg-modal-overlay');if(el)el.remove();_ptgModalCb=null;
 }
 function confirmClearHistory(){
-  showPtgModal('🗑 EFFACER','Effacer tout l\'historique de pointage local?','OUI, EFFACER',function(){closePtgModal();localStorage.removeItem(LS_HIST);render();});
+  showPtgModal('EFFACER','Effacer tout l\'historique de pointage local?','OUI, EFFACER',function(){closePtgModal();localStorage.removeItem(LS_HIST);render();});
 }
 
 // ── INIT ──

@@ -1,0 +1,78 @@
+{
+  "rules": {
+    "chat": {
+      "general": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        "$messageId": {
+          ".validate": "newData.hasChildren(['text', 'author', 'authorName', 'timestamp'])",
+          "text": { ".validate": "newData.isString() && newData.val().length <= 2000" },
+          "author": { ".validate": "newData.isString()" },
+          "authorName": { ".validate": "newData.isString()" },
+          "timestamp": { ".validate": "newData.isNumber()" },
+          "reactions": {
+            "$emoji": {
+              "$uid": { ".validate": "newData.isBoolean()" }
+            }
+          },
+          "pinned": { ".validate": "newData.isBoolean()" }
+        }
+      },
+      "sauveteur": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        "$messageId": {
+          ".validate": "newData.hasChildren(['text', 'author', 'authorName', 'timestamp'])"
+        }
+      },
+      "$dmChannel": {
+        ".read": "auth != null && $dmChannel.contains(auth.uid)",
+        ".write": "auth != null && $dmChannel.contains(auth.uid)",
+        "$messageId": {
+          ".validate": "newData.hasChildren(['text', 'author', 'authorName', 'timestamp'])"
+        }
+      }
+    },
+    "presence": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid == $uid",
+        ".validate": "newData.hasChildren(['online', 'lastSeen'])",
+        "online": { ".validate": "newData.isBoolean()" },
+        "lastSeen": { ".validate": "newData.isNumber()" },
+        "displayName": { ".validate": "newData.isString()" }
+      }
+    },
+    "availabilities": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null",
+        "$date": {
+          ".validate": "newData.isString()"
+        }
+      }
+    },
+    "tracking": {
+      "live": {
+        ".read": true,
+        "$visitorId": {
+          ".write": true,
+          ".validate": "newData.hasChildren(['site_id', 'last_heartbeat'])",
+          "site_id": { ".validate": "newData.isString()" },
+          "last_heartbeat": { ".validate": "newData.isString()" }
+        }
+      },
+      "events": {
+        ".read": true,
+        ".write": true,
+        "$eventId": {
+          ".validate": "newData.hasChildren(['visitor_id', 'site_id', 'event_type', 'timestamp'])"
+        }
+      }
+    },
+    "$other": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}

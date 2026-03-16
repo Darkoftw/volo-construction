@@ -1,0 +1,1009 @@
+[
+  {
+    "id": "rsst-33-1",
+    "titre": "Protection obligatoire contre les chutes de plus de 3 mètres",
+    "categorie": "chutes_hauteur",
+    "loi": "RSST",
+    "articles": "33.1",
+    "contenu": "L'article 33.1 du Règlement sur la santé et la sécurité du travail (RSST) établit l'obligation fondamentale de protéger tout travailleur contre le risque de chute dès que la hauteur de chute potentielle est supérieure à 3 mètres (environ 10 pieds). Cette disposition s'applique à toute situation de travail en hauteur, que ce soit sur un plancher de travail temporaire, une plateforme, un toit, ou tout autre endroit en élévation. L'employeur est le premier responsable de la mise en place de ces protections, mais l'obligation s'étend également aux maîtres d'œuvre sur les chantiers de construction.\n\nLa règle des 3 mètres est le seuil déclencheur qui impose une protection collective ou individuelle reconnue. En dessous de ce seuil, des mesures de vigilance demeurent recommandées, mais au-delà, elles deviennent obligatoires selon la loi. Ce seuil tient compte des statistiques d'accidents mortels et des blessures graves associées aux chutes, car une chute libre de 3 mètres peut engendrer des traumatismes crâniens, des fractures multiples ou la mort.\n\nToute entreprise, tout contracteur et tout employeur opérant dans les secteurs de la construction, de la fabrication, de l'entretien ou de tout autre secteur exposant les travailleurs à des dénivellations doit intégrer cette exigence dans son programme de prévention. Les inspecteurs de la CNESST vérifient systématiquement la conformité à cet article lors de leurs visites de chantier.",
+    "application_terrain": "1. Avant de démarrer tout travail en hauteur, mesurer la hauteur de chute potentielle à partir du poste de travail jusqu'au prochain niveau ou au sol — si la mesure dépasse 3 mètres, une protection est obligatoire immédiatement.\n2. Afficher clairement dans le plan de travail la hauteur de chute pour chaque zone de travail identifiée comme à risque, afin que les travailleurs soient informés.\n3. Ne jamais autoriser un travailleur à s'approcher d'un bord non protégé à plus de 3 mètres de hauteur sans équipement de protection individuelle contre les chutes (EPIC) ou protection collective installée.\n4. Vérifier lors de l'inspection matinale (toolbox talk) que toutes les protections collectives (garde-corps, filets) sont en place avant que les travailleurs accèdent aux zones en hauteur.\n5. Consigner dans le registre de chantier toutes les mesures prises pour chaque zone de travail en hauteur, incluant le type de protection retenu et la date d'installation.",
+    "sanctions": "Un employeur qui ne respecte pas l'article 33.1 du RSST s'expose à une amende pouvant aller de 1 702 $ à 170 208 $ selon la gravité de l'infraction et le statut juridique du contrevenant (personne physique ou morale). En cas d'accident mortel ou grave résultant d'une chute non protégée, des poursuites criminelles peuvent être intentées en vertu du Code criminel canadien (négligence criminelle). La CNESST peut également émettre un arrêt de travail immédiat pour la zone non conforme, ce qui entraîne des pertes de productivité importantes pour l'entreprise.",
+    "tags": [
+      "chutes",
+      "hauteur",
+      "3m",
+      "protection",
+      "obligation",
+      "RSST",
+      "employeur",
+      "prévention"
+    ]
+  },
+  {
+    "id": "rsst-33-2",
+    "titre": "Mesures de protection contre les chutes — garde-corps, filet de sécurité et harnais",
+    "categorie": "chutes_hauteur",
+    "loi": "RSST",
+    "articles": "33.2",
+    "contenu": "L'article 33.2 du RSST établit la hiérarchie des mesures de protection contre les chutes à appliquer lorsque la condition de l'article 33.1 est remplie (hauteur supérieure à 3 mètres). Le législateur a clairement établi un ordre de priorité : la protection collective doit être privilégiée avant le recours à la protection individuelle. Ainsi, le garde-corps constitue la première mesure à mettre en place, suivi du filet de sécurité, et enfin du système individuel de harnais avec dispositif antichute.\n\nCette hiérarchisation découle du principe de prévention intrinsèque : le garde-corps protège passivement et automatiquement tous les travailleurs présents, sans intervention ni vigilance de leur part. Le filet de sécurité limite la hauteur de chute libre et absorbe l'énergie cinétique, mais ne prévient pas la chute. Le harnais, quant à lui, exige une formation, un entretien et un port rigoureux, ce qui le rend plus susceptible d'erreur humaine. C'est pourquoi il est utilisé en dernier recours lorsque les deux premières solutions ne sont pas praticables techniquement.\n\nL'employeur doit documenter les raisons techniques ou pratiques justifiant l'impossibilité d'installer un garde-corps ou un filet avant d'autoriser le recours au harnais. Cette justification doit être intégrée au plan de travail et conservée sur le chantier pour inspection éventuelle par la CNESST.",
+    "application_terrain": "1. Appliquer systématiquement la hiérarchie des protections : évaluer d'abord l'installation d'un garde-corps, puis un filet de sécurité, et seulement si ces options sont techniquement impossibles, autoriser l'utilisation du harnais.\n2. Documenter par écrit dans le plan de travail la justification technique lorsque le garde-corps ne peut pas être installé (ex. : travaux sur une arête de toit, structure non compatible avec un garde-corps).\n3. S'assurer que les filets de sécurité installés respectent les normes CSA et sont inspectés visuellement chaque matin avant le démarrage des travaux pour détecter toute déchirure ou détérioration.\n4. Lorsque le harnais est la seule option retenue, vérifier que chaque travailleur a complété une formation reconnue sur l'utilisation du harnais et qu'un registre de formation est disponible sur le chantier.\n5. En cas de combinaison de mesures (ex. : filet + harnais), s'assurer que les deux systèmes sont compatibles et que la hauteur libre sous le travailleur est suffisante pour éviter qu'il touche le sol ou un obstacle en cas d'activation du système de retenue.",
+    "sanctions": "Le défaut d'appliquer les mesures de protection prévues à l'article 33.2 entraîne les mêmes sanctions que l'article 33.1, soit des amendes de 1 702 $ à 170 208 $. De plus, si l'employeur a recours au harnais sans documenter l'impossibilité d'utiliser une protection collective, cela constitue une infraction distincte qui peut être cumulée à d'autres violations. En cas d'accident, l'absence de justification écrite aggrave la responsabilité civile et pénale de l'employeur.",
+    "tags": [
+      "chutes",
+      "hauteur",
+      "garde-corps",
+      "filet",
+      "harnais",
+      "hiérarchie",
+      "protection collective",
+      "RSST"
+    ]
+  },
+  {
+    "id": "rsst-33-3",
+    "titre": "Garde-corps obligatoire en bordure du vide",
+    "categorie": "chutes_hauteur",
+    "loi": "RSST",
+    "articles": "33.3",
+    "contenu": "L'article 33.3 du RSST précise les exigences techniques détaillées applicables aux garde-corps installés en bordure du vide. Un garde-corps conforme doit obligatoirement comporter une lisse supérieure, une lisse intermédiaire (à mi-hauteur) et une plinthe ou butoir de pied. La hauteur réglementaire de la lisse supérieure est d'au moins 1 mètre (100 cm), mesurée verticalement depuis le niveau de la surface de travail. La plinthe doit avoir une hauteur minimale de 15 cm pour prévenir la chute de matériaux, d'outils ou d'objets qui pourraient blesser des personnes situées en contrebas.\n\nLes matériaux utilisés pour la construction des garde-corps doivent être capables de résister à une force horizontale d'au moins 890 newtons (environ 200 livres-force) appliquée en n'importe quel point de la lisse supérieure, sans déformation permanente ni défaillance. Cette exigence de résistance garantit que le garde-corps peut arrêter un travailleur qui trébuche et vient en contact avec lui. Les garde-corps en bois doivent être construits à partir de bois sain, sans nœuds importants, et correctement chevillé ou boulonné.\n\nLes garde-corps temporaires utilisés sur les chantiers de construction doivent être solidement ancrés à la structure et inspectés régulièrement. Ils ne doivent jamais être retirés sans qu'une mesure de protection alternative soit immédiatement mise en place. L'article 33.3 s'applique à toutes les ouvertures dans les planchers, les trémies d'escalier, les bords de toiture et toute autre bordure du vide accessible à un travailleur.",
+    "application_terrain": "1. Vérifier avant chaque quart de travail que tous les garde-corps présents sur le chantier sont complets (lisse supérieure, lisse intermédiaire, plinthe) et fermement fixés à la structure — signaler immédiatement tout élément manquant ou endommagé au chef de chantier.\n2. Utiliser un mètre ruban pour confirmer que la hauteur de la lisse supérieure est d'au moins 1 mètre depuis le plancher de travail — cette mesure prend moins de 30 secondes et évite une non-conformité facilement évitable.\n3. Ne jamais enlever un garde-corps pour faciliter l'accès d'un matériau ou d'un équipement sans avoir mis en place immédiatement une mesure alternative (ex. : zone barricadée avec harnais obligatoire, surveillant de sécurité dédié).\n4. Installer obligatoirement une plinthe de 15 cm minimum en bas de tous les garde-corps en bordure de zones accessibles au public ou à d'autres corps de métier travaillant en contrebas — cela prévient la chute d'outils ou de débris pouvant causer des blessures graves.\n5. Photographier l'état des garde-corps lors de l'inspection quotidienne et archiver ces photos dans le dossier de chantier — cette preuve photographique protège l'employeur en cas de litige ou d'enquête de la CNESST.",
+    "sanctions": "La non-conformité aux spécifications techniques de l'article 33.3 (hauteur insuffisante, lisse intermédiaire absente, plinthe manquante) entraîne une amende immédiate et un avis de correction. Si la situation n'est pas corrigée dans le délai prescrit, une amende supplémentaire s'ajoute pour chaque jour de non-conformité. En cas de chute d'un outil ou d'un matériau blessant un tiers, la responsabilité civile de l'employeur est directement engagée, avec un risque de poursuite en dommages-intérêts.",
+    "tags": [
+      "garde-corps",
+      "lisse",
+      "plinthe",
+      "bordure",
+      "vide",
+      "1m",
+      "résistance",
+      "RSST",
+      "chantier"
+    ]
+  },
+  {
+    "id": "rsst-33-5",
+    "titre": "Travail sur toiture à faible pente — ligne d'avertissement et zone de sécurité",
+    "categorie": "chutes_hauteur",
+    "loi": "RSST",
+    "articles": "33.5",
+    "contenu": "L'article 33.5 du RSST traite spécifiquement des toitures dont la pente est inférieure ou égale à 4 sur 12 (soit environ 18,4 degrés), c'est-à-dire les toitures plates ou à très faible pente fréquentes dans les bâtiments commerciaux, industriels et institutionnels du Québec. Sur ce type de surface, l'installation d'un garde-corps traditionnel n'est pas toujours praticable ou économiquement faisable, notamment lors de travaux d'entretien de courte durée. Le législateur a donc prévu une alternative : l'utilisation d'une ligne d'avertissement combinée à une zone de sécurité délimitée.\n\nLa ligne d'avertissement est un dispositif de signalisation — généralement une corde, un câble ou une chaîne de couleur vive — installé à une distance minimale de 2 mètres du bord de la toiture. Ce dispositif n'arrête pas un travailleur qui trébuche, mais constitue un avertissement visuel et tactile signalant la proximité du bord. Son efficacité repose donc entièrement sur la discipline des travailleurs qui s'y trouvent. La zone comprise entre la ligne d'avertissement et le bord de toiture est appelée la zone de danger — les travailleurs ne doivent pas y entrer sans port de harnais.\n\nL'article 33.5 précise également que la ligne d'avertissement doit être maintenue sous tension (non affaissée), supportée par des poteaux espacés de manière à éviter qu'elle ne touche le sol entre deux supports, et qu'elle doit être d'une couleur hautement visible (orange vif, rouge ou jaune). Son installation, son inspection et son entretien relèvent de la responsabilité de l'employeur. Lors de vents forts ou de conditions météorologiques défavorables (verglas, neige), des mesures supplémentaires doivent être prises.",
+    "application_terrain": "1. Installer la ligne d'avertissement avant que le premier travailleur accède à la toiture — elle doit être en place et inspectée AVANT que les travaux débutent, pas après.\n2. Mesurer et confirmer que la ligne est positionnée à au moins 2 mètres du bord de toiture sur tout le périmètre accessible aux travailleurs, en incluant les angles et les découpes de toiture.\n3. Former chaque travailleur affecté à des travaux sur toiture à la signification de la ligne d'avertissement : la traverser sans harnais est une infraction grave passible de mesures disciplinaires immédiates.\n4. Vérifier que la ligne est maintenue sous tension et visible — une ligne affaissée ou dissimulée sous la neige n'est plus fonctionnelle et doit être remise en état immédiatement avant la reprise des travaux.\n5. Par temps de pluie verglaçante, de neige ou de vents dépassant 50 km/h, évaluer si les travaux doivent être suspendus — les conditions météo dégradent la traction des semelles et augmentent drastiquement le risque de chute sur une surface plate.",
+    "sanctions": "L'absence de ligne d'avertissement sur une toiture à faible pente lors de travaux constitue une infraction directe à l'article 33.5 et expose l'employeur à une amende de 1 702 $ à 170 208 $. La CNESST peut ordonner l'arrêt immédiat des travaux sur le toit jusqu'à correction. En cas d'accident d'un travailleur ayant chuté d'un toit sans ligne d'avertissement installée, la CNESST peut recommander le dossier pour poursuites pénales au Directeur des poursuites criminelles et pénales.",
+    "tags": [
+      "toiture",
+      "pente",
+      "ligne avertissement",
+      "faible pente",
+      "bordure",
+      "zone sécurité",
+      "RSST",
+      "entretien"
+    ]
+  },
+  {
+    "id": "rsst-347",
+    "titre": "Conformité des harnais de sécurité et des dispositifs de liaison selon la norme CSA",
+    "categorie": "chutes_hauteur",
+    "loi": "RSST",
+    "articles": "347",
+    "contenu": "L'article 347 du RSST exige que tout harnais de sécurité et tout dispositif de liaison (longe, absorbeur d'énergie, enrouleur autobloquant) utilisé comme équipement de protection individuelle contre les chutes soit conforme à la norme CSA Z259.10 pour les harnais, à la norme CSA Z259.11 pour les absorbeurs d'énergie, et aux autres normes de la série CSA Z259 selon le type d'équipement. Cette exigence de conformité aux normes CSA garantit que l'équipement a été testé et certifié selon des critères de performance rigoureux, notamment la résistance à la force de choc, la durabilité des matériaux et la résistance à la dégradation.\n\nLa norme CSA impose notamment que tout harnais de sécurité soit conçu pour limiter la force de choc ressentie par le travailleur à 8 kN (kilonewtons) maximum lors d'une chute arrêtée — ce qui correspond approximativement à la force maximale que le corps humain peut supporter sans blessures internes graves. Les absorbeurs d'énergie déployables doivent limiter la force de choc ET limiter la distance totale de chute (chute libre + déploiement de l'absorbeur) à une valeur sécuritaire en tenant compte de la hauteur disponible sous le travailleur.\n\nL'article 347 impose également à l'employeur de s'assurer que l'équipement est inspecté avant chaque utilisation, que les points d'ancrage sont certifiés pour une résistance minimale de 22,2 kN (soit environ 5 000 lb-force), et que les travailleurs ont reçu une formation adéquate sur l'utilisation, l'inspection et les limites de l'équipement. Tout harnais ayant subi une chute doit être retiré du service immédiatement et inspecté par un professionnel qualifié ou mis au rebut.",
+    "application_terrain": "1. Vérifier avant chaque utilisation que le harnais porte une étiquette de certification CSA lisible et non effacée — si l'étiquette est illisible ou absente, le harnais doit être mis hors service immédiatement.\n2. Inspecter visuellement chaque matin les sangles (recherche de coupures, effilochage, brûlures, décoloration), les boucles (corrosion, déformation), les coutures (fils cassés ou décousus) et le mousqueton (fonctionnement du verrouillage) avant de remettre l'équipement à un travailleur.\n3. Installer un registre d'inspection des harnais sur le chantier : chaque harnais doit avoir un numéro d'identification unique, et chaque inspection doit être consignée avec la date et la signature du vérificateur.\n4. Vérifier que le point d'ancrage utilisé est certifié pour au moins 22,2 kN et qu'il est installé au-dessus du point d'attache dorsal du harnais pour réduire la hauteur de chute libre — ancrer sous les pieds est dangereux et non conforme.\n5. Après tout incident impliquant une chute (même sans blessure apparente), retirer immédiatement le harnais et la longe du service, les étiqueter « HORS SERVICE – CHUTE SUBIE » et les isoler — ils ne peuvent être réutilisés qu'après inspection par un expert certifié ou doivent être détruits.",
+    "sanctions": "L'utilisation d'un harnais non conforme aux normes CSA constitue une infraction à l'article 347 du RSST passible d'amendes importantes. En cas d'accident impliquant un harnais non certifié ou défectueux, la responsabilité de l'employeur est pleinement engagée et les indemnités versées à la CNESST (financement CNESST/CSPAAT) peuvent être majorées. La CNESST peut saisir et détruire tout équipement non conforme trouvé sur un chantier.",
+    "tags": [
+      "harnais",
+      "CSA",
+      "Z259",
+      "longe",
+      "absorbeur",
+      "ancrage",
+      "certification",
+      "RSST",
+      "EPIC"
+    ]
+  },
+  {
+    "id": "cstc-2-9",
+    "titre": "Garde-corps et filets de sécurité sur chantier de construction",
+    "categorie": "chutes_hauteur",
+    "loi": "CSTC",
+    "articles": "2.9.1-2.9.3",
+    "contenu": "Les articles 2.9.1 à 2.9.3 du Code de sécurité pour les travaux de construction (CSTC) complètent et précisent les exigences du RSST spécifiquement pour les chantiers de construction au Québec. L'article 2.9.1 établit l'obligation d'installer des garde-corps sur tout plancher de travail, plateforme, passerelle ou toiture où des travailleurs sont susceptibles de chuter d'une hauteur supérieure à 3 mètres. Ces garde-corps doivent être installés dès que la structure porteuse est suffisamment solide pour les supporter, et doivent rester en place jusqu'à ce que des ouvrages permanents (murs, rampes d'escalier définitives) les remplacent fonctionnellement.\n\nL'article 2.9.2 traite des filets de sécurité comme mesure de protection complémentaire ou de substitution lorsque l'installation de garde-corps n'est pas praticable. Les filets de sécurité doivent être de type certifié, conformes à la norme ANSI/ASSE A10.11 ou équivalente, et doivent être installés de manière à limiter la chute libre à 6 mètres maximum. Leur installation nécessite l'intervention d'un spécialiste qualifié, et un rapport d'installation documentant les points d'ancrage, la tension et la résistance du filet doit être conservé sur le chantier.\n\nL'article 2.9.3 précise les responsabilités respectives du maître d'œuvre, de l'employeur et des travailleurs indépendants en matière de protection contre les chutes sur les chantiers à plusieurs corps de métier. Le maître d'œuvre a l'obligation de s'assurer que les protections collectives sont en place pour TOUS les travailleurs présents sur le chantier, peu importe leur employeur. Cette responsabilité partagée est fondamentale sur les grands chantiers de construction où plusieurs sous-traitants se succèdent dans les mêmes zones.",
+    "application_terrain": "1. Le maître d'œuvre doit inclure dans le plan de sécurité de chantier (PSC) un registre de toutes les zones de travail en hauteur, le type de protection prévu pour chacune, et la personne responsable de l'installation et du maintien de ces protections.\n2. Lors de la séquence de construction, planifier l'installation des garde-corps temporaires dès la mise en place de chaque plancher ou structure accessible — ne jamais laisser une zone non protégée accessible aux travailleurs, même temporairement.\n3. Lors des réunions de coordination de chantier (kick-off meeting, réunions hebdomadaires), rappeler à tous les sous-traitants leur obligation de signaler immédiatement tout garde-corps manquant ou défectueux dans leur zone de travail.\n4. Pour l'installation d'un filet de sécurité, obtenir un certificat d'installation signé par le spécialiste qualifié et l'afficher sur le chantier — la CNESST peut demander ce document lors d'une inspection.\n5. Lors des inspections journalières, vérifier spécifiquement les zones de transition entre niveaux (trémies d'escalier, ouvertures pour monte-charges, trémies techniques) qui sont souvent négligées mais représentent un risque élevé de chute.",
+    "sanctions": "Les infractions aux articles 2.9.1 à 2.9.3 du CSTC sont punissables d'amendes allant de 1 702 $ à 170 208 $ pour une personne morale. Le maître d'œuvre peut être tenu solidairement responsable des accidents survenant dans les zones qu'il devait protéger. La CNESST peut imposer un arrêt de travail pour l'ensemble du chantier si les déficiences de protection sont jugées systémiques et représentent un danger immédiat pour plusieurs travailleurs.",
+    "tags": [
+      "garde-corps",
+      "filet",
+      "chantier",
+      "construction",
+      "CSTC",
+      "maître d'oeuvre",
+      "plancher",
+      "protection collective"
+    ]
+  },
+  {
+    "id": "cstc-2-10",
+    "titre": "Harnais, ancrage et limitation de déplacement sur chantier de construction",
+    "categorie": "chutes_hauteur",
+    "loi": "CSTC",
+    "articles": "2.10.12-2.10.16",
+    "contenu": "Les articles 2.10.12 à 2.10.16 du Code de sécurité pour les travaux de construction (CSTC) constituent le cadre réglementaire complet régissant l'utilisation des systèmes individuels de protection contre les chutes sur les chantiers de construction québécois. L'article 2.10.12 exige que tout système de protection individuelle comprenne au minimum trois composantes : un harnais complet de sécurité certifié CSA Z259.10, un dispositif de liaison (longe avec absorbeur d'énergie ou enrouleur autobloquant certifié CSA Z259.11 ou Z259.2.2), et un point d'ancrage structuralement qualifié capable de résister à une charge de 22,2 kN.\n\nL'article 2.10.13 introduit la notion critique de longueur de déplacement et de hauteur libre disponible. Avant d'utiliser un système antichute, le superviseur et le travailleur doivent calculer la hauteur libre totale requise sous le travailleur, qui est la somme de : la longueur de la longe (ou longueur de déploiement de l'absorbeur), la hauteur du travailleur mesurée du sol au point d'attache dorsal, et une marge de sécurité de 1 mètre. Si la hauteur libre disponible est insuffisante pour absorber la chute sans que le travailleur touche le sol ou un obstacle, le système antichute NE DOIT PAS être utilisé et une protection collective doit être mise en place.\n\nLes articles 2.10.14 à 2.10.16 traitent respectivement de la qualification des points d'ancrage permanents et temporaires, de l'obligation de formation des travailleurs avant l'utilisation de tout EPIC antichute, et des procédures de sauvetage. Ce dernier point est souvent négligé : l'article 2.10.16 exige qu'un plan de sauvetage soit établi AVANT que les travaux débutent, car un travailleur suspendu dans son harnais après une chute peut subir un syndrome de suspension (compression des veines fémorales) en moins de 15 minutes, avec risque de mort si le sauvetage tarde.",
+    "application_terrain": "1. Avant tout travail en hauteur avec harnais, calculer sur papier ou sur le formulaire de plan de travail la hauteur libre disponible et la comparer à la hauteur libre requise (longe + déploiement absorbeur + hauteur du travailleur + 1m de marge) — cette étape prend 5 minutes et peut sauver une vie.\n2. Installer les points d'ancrage temporaires uniquement sur des éléments structuraux qualifiés (poutres en acier, colonnes en béton, ancrages provisoires certifiés) — jamais sur des garde-corps temporaires, des tuyaux de plomberie ou des conduits électriques.\n3. Remettre à chaque travailleur utilisant un harnais une carte de poche résumant la procédure d'inspection pré-utilisation (5 points : sangles, boucles, mousqueton, point dorsal, étiquette CSA) — cette inspection doit prendre moins de 2 minutes et se faire avant chaque prise d'équipement.\n4. Afficher le plan de sauvetage au poste de travail et s'assurer qu'au minimum un travailleur par zone dispose d'une formation en premiers secours et connaît la procédure de sauvetage d'un travailleur suspendu — le sauvetage doit être initié dans les 3 à 5 minutes suivant une chute pour éviter le syndrome de suspension.\n5. Tenir un registre des inspections périodiques (trimestrielles) de tous les EPIC antichute par un inspecteur qualifié — les équipements ayant plus de 5 ans ou présentant des signes de vieillissement (décoloration UV des sangles, corrosion des métaux) doivent être retirés du service même s'ils n'ont jamais subi de chute.",
+    "sanctions": "Les infractions aux articles 2.10.12 à 2.10.16 du CSTC peuvent entraîner des amendes de 1 702 $ à 170 208 $ ainsi qu'un arrêt de travail immédiat pour les zones non conformes. L'absence d'un plan de sauvetage documenté (exigé par l'article 2.10.16) constitue une infraction distincte. En cas de décès d'un travailleur résultant d'un syndrome de suspension faute de plan de sauvetage adéquat, le maître d'œuvre et l'employeur s'exposent à des chefs d'accusation de négligence criminelle, avec des peines pouvant inclure l'emprisonnement pour les dirigeants responsables.",
+    "tags": [
+      "harnais",
+      "ancrage",
+      "limitation déplacement",
+      "CSTC",
+      "antichute",
+      "sauvetage",
+      "suspension",
+      "formation",
+      "plan travail"
+    ]
+  },
+  {
+    "id": "rsst-298",
+    "titre": "Definition et classification des espaces clos",
+    "categorie": "espaces_clos",
+    "loi": "RSST",
+    "articles": "298",
+    "contenu": "L'article 298 du RSST definit un espace clos comme tout espace qui n'est pas concu pour etre occupe de facon continue par des personnes, dont les dimensions permettent a un travailleur d'y entrer pour effectuer un travail, et qui possede des moyens d'acces et de sortie limites ou restreints. Cette definition est la pierre angulaire de toute la reglementation sur les espaces clos au Quebec.\n\nLes exemples types couverts par cet article incluent les reservoirs de stockage (eau, produits chimiques, hydrocarbures), les silos a grain ou a ciment, les cuves de process industriel, les fosses septiques ou de retention, les egouts collecteurs, les chambres de vannes, les puits d'acces, les conduites et tunnels. La presence de l'un de ces trois criteres (occupation non continue, acces limite, espace suffisant pour entrer) suffit pour qualifier le lieu d'espace clos et declencher l'application de toute la section du RSST.\n\nL'identification correcte des espaces clos sur un site est une obligation de l'employeur. Chaque espace clos doit etre repertorie, evalue quant a ses dangers potentiels, et signalise adequatement. Un registre des espaces clos doit etre maintenu a jour, incluant les caracteristiques physiques, les dangers connus, et les mesures preventives applicables a chacun d'eux.",
+    "application_terrain": "- Faire un inventaire complet de tous les espaces clos sur le site: reservoirs, silos, cuves, fosses, egouts, puits, chambres de vannes — les identifier et les cartographier.\n- Poser une affiche de danger normalisee sur chaque entree d'espace clos: 'ESPACE CLOS — ENTREE INTERDITE SANS PERMIS'.\n- Maintenir un registre des espaces clos accessible aux travailleurs, contremaitres et inspecteurs CNESST.\n- Former les travailleurs a reconnaitre un espace clos: ils doivent pouvoir identifier tout espace qui correspond a la definition avant meme de s'y approcher.\n- Revoir l'inventaire annuellement et lors de tout changement dans les installations (renovation, ajout d'equipements, modification des procedes).",
+    "sanctions": "Le defaut d'identifier et de classifier correctement les espaces clos constitue une infraction au RSST. L'employeur s'expose a une amende pouvant aller de 1 744 $ a 70 192 $ pour une personne morale, selon la LSST art. 236 et 237. En cas d'accident grave ou mortel dans un espace clos non identifie ou mal signalise, les sanctions penales et civiles sont amplifiees considerablement. La CNESST peut egalement emettre un avis de correction avec delai oblige ou une suspension des travaux immediate.",
+    "tags": [
+      "espaces_clos",
+      "definition",
+      "reservoir",
+      "silo",
+      "cuve",
+      "fosse",
+      "egout",
+      "classification",
+      "inventaire",
+      "signalisation"
+    ]
+  },
+  {
+    "id": "rsst-299-300",
+    "titre": "Programme de prevention specifique aux espaces clos",
+    "categorie": "espaces_clos",
+    "loi": "RSST",
+    "articles": "299-300",
+    "contenu": "Les articles 299 et 300 du RSST obligent l'employeur a etablir un programme de prevention ecrit et specifique pour chaque espace clos identifie sur le lieu de travail. Ce programme doit etre redige avant toute entree de travailleur et doit couvrir l'ensemble des dangers presents ou potentiels, les mesures de controle applicables, les responsabilites de chaque intervenant, et les procedures d'urgence.\n\nL'article 299 precise que le programme doit inclure une identification detaillee des dangers (atmospheriques, mecaniques, electriques, physiques, biologiques), une evaluation du niveau de risque pour chaque danger, et les moyens de controle choisis selon la hierarchie des controles (elimination, substitution, controles techniques, procedures, EPI). Le programme doit egalement preciser les competences requises pour les travailleurs autorises a entrer, les surveillants, et les sauveteurs.\n\nL'article 300 ajoute que le programme de prevention doit etre revise et mis a jour chaque fois que les conditions de travail changent, qu'un incident survient, ou au minimum une fois par annee. La participation des travailleurs et du comite de sante et securite dans l'elaboration et la revision du programme est exigee. Tous les travailleurs susceptibles de travailler dans ou autour d'espaces clos doivent recevoir une formation specifique basee sur ce programme.",
+    "application_terrain": "- Rediger un programme de prevention distinct pour chaque type d'espace clos sur le site — ne pas utiliser un document generique pour tous.\n- Inclure des fiches techniques des produits (FDS) pertinents dans le programme pour documenter les dangers chimiques specifiques a chaque espace.\n- Planifier et documenter les formations annuelles obligatoires pour tous les travailleurs concernes, avec registre de signatures.\n- Impliquer le comite SST (ou le representant en sante securite) dans la revision annuelle du programme — consigner cette participation au PV de reunion.\n- Afficher ou rendre facilement accessible le programme dans le secteur de travail concerne, pas seulement dans le bureau du superviseur.",
+    "sanctions": "L'absence d'un programme de prevention ecrit pour les espaces clos est une infraction directe aux articles 299-300 du RSST. Amende de 1 744 $ a 70 192 $ pour une personne morale. Un programme incomplet ou non mis a jour depuis plus d'un an peut egalement faire l'objet d'un avis de correction. En cas d'accident, l'inexistence ou la deficience du programme constitue une preuve de negligence pouvant engager la responsabilite personnelle des dirigeants (art. 239 LSST).",
+    "tags": [
+      "espaces_clos",
+      "programme_prevention",
+      "formation",
+      "dangers",
+      "hierarchie_controles",
+      "comite_sst",
+      "revision_annuelle",
+      "responsabilites"
+    ]
+  },
+  {
+    "id": "rsst-301-302",
+    "titre": "Evaluation et controle de l'atmosphere en espace clos",
+    "categorie": "espaces_clos",
+    "loi": "RSST",
+    "articles": "301-302",
+    "contenu": "Les articles 301 et 302 du RSST constituent le coeur technique de la securite en espace clos: l'evaluation et le controle de l'atmosphere avant et pendant toute entree. L'article 301 exige qu'avant chaque entree, un test atmospherique complet soit effectue par une personne competente a l'aide d'instruments calibres et certifies. Les quatre parametres obligatoires a mesurer sont: le niveau d'oxygene (O2), la concentration en monoxyde de carbone (CO), la concentration en hydrogene sulfure (H2S), et le pourcentage de la limite inferieure d'explosivite (LIE) pour les gaz ou vapeurs inflammables.\n\nLes seuils critiques etablis par le RSST sont les suivants: O2 entre 19,5% et 23% (danger d'asphyxie sous 19,5%, danger d'enrichissement au-dessus de 23%), CO inferieur a 25 ppm (VEMP), H2S inferieur a 10 ppm (VEMP), LIE inferieur a 10% de la valeur explosive. Si l'un de ces seuils est depasse, l'entree est interdite jusqu'a correction. L'article 302 precise que la surveillance atmospherique doit se poursuivre en continu pendant toute la duree des travaux lorsque des conditions atmospheriques dangereuses peuvent se developper, par exemple lors de travaux chauds, utilisation de solvants, ou presence de matiere organique en decomposition.\n\nLe choix et l'entretien des detecteurs de gaz est aussi une obligation: les appareils doivent etre calibres selon les recommandations du fabricant (generalement avant chaque utilisation avec un gaz etalon certifie) et leur registre de calibration doit etre conserve. Un detecteur multi-gaz (4 en 1) est le minimum recommande pour les interventions en espace clos industriel.",
+    "application_terrain": "- Toujours effectuer les tests atmospheriques en abaissant la sonde depuis l'exterieur, dans toutes les zones de l'espace clos (haut, milieu, bas) — les gaz plus lourds que l'air s'accumulent en bas, les plus legers en haut.\n- Calibrer le detecteur multi-gaz avant chaque utilisation avec un gaz etalon certifie, et noter la calibration dans le registre d'entretien de l'appareil.\n- Ne jamais entrer pour 'sentir' ou 'voir' si ca a l'air correct — les gaz dangereux (CO, H2S) sont inodores a hautes concentrations toxiques.\n- Si les resultats sont hors normes, ventiler l'espace pendant au minimum 15 minutes, puis retester avant toute entree.\n- En presence de travaux generant des contaminants (soudage, peinture, nettoyage chimique), maintenir la surveillance continue avec detecteur a alarme audible et visuelle.",
+    "sanctions": "Entrer dans un espace clos sans test atmospherique prealable est l'une des infractions les plus graves en SST Quebec. Amende immediate de 1 744 $ a 70 192 $ pour l'employeur, et possibilite de poursuite penale si travailleur blesse ou decede. L'utilisation d'un appareil non calibre ou defectueux est equivalente a l'absence de test. La CNESST peut suspendre les travaux sur-le-champ (article 186 LSST) et exiger une remise en etat complete avant reprise.",
+    "tags": [
+      "espaces_clos",
+      "atmosphere",
+      "oxygene",
+      "O2",
+      "CO",
+      "H2S",
+      "LIE",
+      "detecteur_gaz",
+      "calibration",
+      "ventilation",
+      "asphyxie",
+      "explosion"
+    ]
+  },
+  {
+    "id": "rsst-303-305",
+    "titre": "Procedures d'entree et permis de travail en espace clos",
+    "categorie": "espaces_clos",
+    "loi": "RSST",
+    "articles": "303-305",
+    "contenu": "Les articles 303 a 305 du RSST encadrent le systeme de permis de travail pour les espaces clos, qui est l'outil de controle central permettant de s'assurer que toutes les mesures preventives sont en place avant chaque entree. L'article 303 etablit que tout employeur dont les travailleurs executent des taches dans un espace clos doit mettre en place un systeme de permis d'entree ecrit obligatoire. Ce permis doit etre rempli, signe et affiche avant chaque entree sans exception.\n\nL'article 304 detaille le contenu minimum obligatoire du permis d'entree: identification de l'espace clos (nom, localisation), date et heure d'emission et d'expiration, nature du travail a effectuer, liste des dangers identifies (atmospheriques, mecaniques, electriques, biologiques), resultats des tests atmospheriques avec heure de prise de mesure, liste nominative des travailleurs autorises a entrer, identification du surveillant exterieur, equipements de protection individuelle requis, equipements de communication et de sauvetage disponibles, mesures de consignation (lockout/tagout) completees, et signature de la personne responsable d'autoriser l'entree.\n\nL'article 305 precise les conditions d'invalidation automatique du permis: depassement de la duree de validite, changement des conditions de travail ou de l'equipe, depassement d'un seuil atmospherique, modification de la tache effectuee, ou incident/blessure. Lorsqu'un permis devient invalide, tous les travailleurs doivent sortir immediatement et un nouveau permis doit etre emis apres reevaluation complete des conditions.",
+    "application_terrain": "- Utiliser un formulaire de permis standardise et pre-imprime — jamais un permis improvise sur un bout de papier. Le modele doit etre approuve par le comite SST.\n- Afficher le permis signe a l'entree de l'espace clos pendant toute la duree des travaux — visible et lisible depuis l'exterieur.\n- Fixer une duree de validite raisonnable (maximum un quart de travail de 8h) et emettre un nouveau permis apres chaque pause prolongee ou changement d'equipe.\n- Former specifiquement les superviseurs a remplir correctement chaque section du permis — une case mal remplie peut invalider la protection legale.\n- Conserver les permis completes (utilises et annules) pendant au minimum un an — ils constituent la preuve documentaire en cas d'inspection ou d'accident.",
+    "sanctions": "L'absence de permis d'entree, l'utilisation d'un permis incomplet ou d'un permis expire constitue une violation directe des articles 303-305. Amende de 1 744 $ a 70 192 $ pour la personne morale. En cas d'accident avec un permis invalide ou absent, la CNESST et les tribunaux considerent cette omission comme une faute grave pouvant engager la responsabilite criminelle du dirigeant (Code criminel, art. 217.1 — negligence criminelle). Des poursuites civiles en dommages sont quasi-garanties.",
+    "tags": [
+      "espaces_clos",
+      "permis_travail",
+      "permis_entree",
+      "lockout_tagout",
+      "consignation",
+      "formulaire",
+      "autorisation",
+      "validite",
+      "documentation"
+    ]
+  },
+  {
+    "id": "rsst-306-308",
+    "titre": "Surveillance et communication pendant les travaux en espace clos",
+    "categorie": "espaces_clos",
+    "loi": "RSST",
+    "articles": "306-308",
+    "contenu": "Les articles 306 a 308 du RSST definissent les obligations relatives a la surveillance en continu et aux communications lors de travaux en espace clos. L'article 306 est clair et non negociable: un surveillant exterieur designe doit etre present en permanence a l'exterieur de l'espace clos pendant toute la duree de l'entree. Ce surveillant ne peut en aucun cas entrer dans l'espace pour porter secours, meme en cas d'urgence — son role est exclusivement la surveillance et la communication. Il doit rester a proximite immediate de l'ouverture d'acces, les yeux et oreilles toujours en alerte.\n\nL'article 307 definit les responsabilites precises du surveillant: maintenir le contact visuel ou auditif continu avec le ou les travailleurs a l'interieur, connaitre le nombre exact de personnes dans l'espace, surveiller les conditions exterieures pouvant affecter la securite (trafic, equipements mobiles, conditions meteorologiques), controler les acces pour empecher toute entree non autorisee, surveiller le detecteur de gaz si celui-ci est situe a l'exterieur, et declencher immediatement la procedure d'urgence si le contact est perdu ou si une alarme se declenche.\n\nL'article 308 specifie les moyens de communication obligatoires. Un systeme de communication fiable doit etre etabli entre le travailleur et le surveillant avant l'entree. Pour les espaces de taille reduite ou faiblement bruites, un contact visuel ou verbal direct peut suffire. Pour les espaces plus profonds, bruyants ou complexes (tunnels, egouts, grandes cuves), une communication electronique (radio, interphone, systeme filaire) est requise. Des signaux de securite conventionnels (nombre de secousses sur la ligne de vie) doivent etre etablis et connus de tous avant l'entree.",
+    "application_terrain": "- Assigner un surveillant exclusif et qualifie — il ne peut pas etre affecte a une autre tache simultanement, meme 'juste cinq minutes'.\n- Etablir un protocole de communication au debut de chaque entree: signal verbal toutes les X minutes, ou signal sur la ligne de vie, avec procedure claire si pas de reponse dans les 30 secondes.\n- Equiper le surveillant d'une alarme ou d'un moyen d'appel d'urgence (radio, cellulaire) pour contacter les secours sans quitter son poste.\n- Tenir un registre des entrees et sorties: noter l'heure d'entree et de sortie de chaque travailleur — simple mais critique pour les secours.\n- Former le surveillant a reconnaitre les signaux de detresse subtils: mouvement anormal, perte de reponse verbale, chute de la ligne de vie, alarme du detecteur de gaz.",
+    "sanctions": "L'absence de surveillant exterieur est une des causes les plus frequentes de deces en espace clos au Quebec. C'est aussi une infraction majeure au RSST: amende de 1 744 $ a 70 192 $. En cas de deces sans surveillant, la CNESST classe systematiquement l'accident comme evitable et pouvant faire l'objet de poursuites criminelles. Plusieurs jurisprudences quebecoise ont condamne des employeurs a des amendes superieures a 100 000 $ et a des peines d'emprisonnement suspendues pour dirigeants dans des cas similaires.",
+    "tags": [
+      "espaces_clos",
+      "surveillant",
+      "communication",
+      "ligne_de_vie",
+      "radio",
+      "signal_urgence",
+      "contact_visuel",
+      "supervision",
+      "secours"
+    ]
+  },
+  {
+    "id": "rsst-309-310",
+    "titre": "Plan de sauvetage et equipements de secours obligatoires",
+    "categorie": "espaces_clos",
+    "loi": "RSST",
+    "articles": "309-310",
+    "contenu": "Les articles 309 et 310 du RSST completent le cadre reglementaire des espaces clos en imposant la preparation d'un plan de sauvetage specifique et la disponibilite immediate des equipements de secours requis. L'article 309 stipule que pour chaque espace clos ou des travaux sont realises, un plan de sauvetage ecrit doit etre etabli avant la premiere entree. Ce plan doit etre adapte aux caracteristiques physiques de l'espace (dimensions, configuration des ouvertures, obstacles interieurs) et aux types de dangers presents. Il doit preciser les methodes de sauvetage privilegiees, les ressources humaines disponibles, les equipements requis, et les numeros d'urgence a contacter.\n\nL'article 310 est particulierement exigeant sur la disponibilite physique des equipements de sauvetage. Les equipements suivants doivent etre presents et prets a l'utilisation sur le lieu des travaux avant le debut de l'entree: un systeme de recuperation non entrant (tripode, potence ou equivalent avec trepied et treuil de levage), un harnais de securite de type classe D (harnais de sauvetage) porte par chaque travailleur dans l'espace, une ligne de vie reliee au harnais et au systeme de recuperation, un appareil de protection respiratoire autonome (APRA/SCBA) disponible pour le sauveteur, et les equipements de premiers secours adaptes aux dangers identifies. La regle d'or est que le sauvetage doit pouvoir s'effectuer de l'exterieur, sans necessite d'entrer dans l'espace — ce qu'on appelle le sauvetage non entrant ou Non-Entry Rescue.\n\nLe plan de sauvetage doit etre pratique et teste periodiquement par des exercices (au minimum annuels). Le surveillant exterieur et tous les membres de l'equipe doivent connaitre le plan par coeur et etre capables d'activer la procedure d'evacuation et de sauvetage sans hesitation. La coordination avec les services d'urgence locaux (pompiers, SIMV) est fortement recommandee, notamment pour les espaces complexes ou les dangers chimiques specifiques.",
+    "application_terrain": "- Installer le tripode ou le systeme de levage avant l'entree du premier travailleur — jamais apres, jamais 'si besoin'.\n- Pratiquer un exercice de sauvetage non entrant au moins une fois par annee avec toute l'equipe: simuler une evacuation d'urgence complete avec le treuil et le harnais.\n- Verifier l'integrite de tous les equipements de sauvetage avant chaque utilisation: harnais (coutures, boucles, D-rings), ligne de vie (effilochures, connecteurs), treuil (mecanisme, cable), APRA (pression, masque, joints).\n- Afficher le plan de sauvetage (version simplifiee avec schema) a l'exterieur de l'espace clos, visible par le surveillant — pas seulement dans le classeur du bureau SST.\n- Connaitre le numero du service de secours specialise le plus proche capable d'intervenir en espace clos (souvent le service d'incendie municipal avec equipe hasmat ou espace clos).",
+    "sanctions": "L'absence de plan de sauvetage ou d'equipements de sauvetage est une infraction double (art. 309 et 310) passible d'amendes cumulatives de 1 744 $ a 70 192 $ par infraction pour une personne morale. En cas de deces d'un travailleur sans plan de sauvetage ni equipements sur place, la CNESST et le Directeur des poursuites criminelles et penales (DPCP) peuvent porter des accusations de negligence criminelle contre le dirigeant et l'entreprise (Code criminel, art. 219-220). Des condamnations avec periodes d'emprisonnement ont ete rendues au Quebec dans des cas impliquant le defaut de plans de sauvetage en espace clos.",
+    "tags": [
+      "espaces_clos",
+      "plan_sauvetage",
+      "tripode",
+      "harnais_sauvetage",
+      "ligne_de_vie",
+      "treuil",
+      "APRA",
+      "SCBA",
+      "sauvetage_non_entrant",
+      "exercice_urgence",
+      "premiers_secours"
+    ]
+  },
+  {
+    "id": "rsst-188-1",
+    "titre": "Cadenassage — Définition et champ d'application",
+    "categorie": "cadenassage",
+    "loi": "RSST",
+    "articles": "188.1",
+    "contenu": "L'article 188.1 du RSST établit les définitions fondamentales et le champ d'application du programme de cadenassage au Québec. Le cadenassage est défini comme l'ensemble des mesures de contrôle des énergies dangereuses visant à protéger les travailleurs contre toute mise en marche intempestive d'une machine, d'un équipement ou d'un procédé lors de travaux de maintenance, de réparation, de déblocage, de nettoyage ou d'inspection.\n\nCet article s'applique à tout employeur dont les travailleurs effectuent des travaux sur des machines ou équipements susceptibles de libérer des énergies dangereuses. Les énergies visées comprennent l'énergie électrique, pneumatique, hydraulique, mécanique (cinétique et potentielle), thermique, chimique et gravitationnelle. Dès qu'un travailleur doit intervenir sur un équipement hors production ou ouvrir un carter de protection, les dispositions du cadenassage s'appliquent obligatoirement.\n\nLe champ d'application est très large : il couvre les usines de fabrication, les chantiers de construction, les entrepôts avec convoyeurs, les installations de traitement des eaux, les scieries, les imprimeries, et tout secteur industriel utilisant des équipements motorisés ou sous pression. L'obligation incombe autant à l'employeur (mise en place du programme) qu'aux travailleurs (application rigoureuse des procédures). Un programme de cadenassage écrit et propre à chaque établissement est exigé.",
+    "application_terrain": "• Identifier TOUS les types d'énergie présents sur chaque machine (électrique, pneumatique, hydraulique, thermique, gravitationnelle) avant de rédiger les procédures.\n• Apposer des étiquettes permanentes sur chaque point de consignation (disjoncteur, vanne, accumulateur) indiquant le type et le niveau d'énergie.\n• Créer un inventaire exhaustif des machines et équipements visés par le programme — chaque machine doit avoir sa fiche de procédure spécifique.\n• Ne pas confondre «arrêt de la machine» et «cadenassage» : une machine arrêtée peut redémarrer ou contenir de l'énergie résiduelle; le cadenassage verrouille physiquement les sources d'énergie.\n• Tenir à jour la liste des machines modifiées ou ajoutées pour que les procédures restent valides à tout moment.",
+    "sanctions": "Le non-respect des exigences de cadenassage expose l'employeur à des amendes de 1 500 $ à 150 000 $ par infraction en vertu de la LSST. En cas d'accident grave lié à l'absence de cadenassage, la CNESST peut imposer une correction immédiate (avis de correction) et suspendre les activités de production. Des poursuites pénales peuvent s'ajouter si une négligence criminelle est démontrée. Les récidives multiplient le montant des amendes.",
+    "tags": [
+      "cadenassage",
+      "energies-dangereuses",
+      "champ-application",
+      "RSST",
+      "programme-cadenassage",
+      "SST-Quebec"
+    ]
+  },
+  {
+    "id": "rsst-188-2-4",
+    "titre": "Méthode de contrôle des énergies dangereuses",
+    "categorie": "cadenassage",
+    "loi": "RSST",
+    "articles": "188.2 à 188.4",
+    "contenu": "Les articles 188.2 à 188.4 du RSST définissent les méthodes acceptables de contrôle des énergies dangereuses et établissent la hiérarchie des mesures à appliquer. L'article 188.2 précise que le cadenassage avec cadenas personnel est la méthode de contrôle privilégiée pour les énergies pouvant être isolées par un dispositif de consignation. Chaque travailleur exposé au risque doit poser son propre cadenas; un seul cadenas collectif n'est pas suffisant pour plusieurs travailleurs intervenant simultanément.\n\nL'article 188.3 traite des situations où le cadenassage classique n'est pas techniquement réalisable. Dans ces cas exceptionnels, l'employeur peut recourir à des mesures alternatives équivalentes, mais celles-ci doivent offrir un niveau de protection équivalent ou supérieur au cadenassage. Les mesures alternatives doivent être documentées, approuvées par un ingénieur ou un spécialiste SST, et faire l'objet d'une procédure écrite spécifique. Elles ne peuvent jamais être utilisées par commodité ou pour gagner du temps.\n\nL'article 188.4 impose l'obligation de vérifier l'efficacité du contrôle des énergies avant d'entreprendre les travaux. Cette vérification, appelée «essai de mise en marche» ou «vérification de l'état zéro», consiste à tenter de mettre en marche l'équipement après avoir posé les cadenas, pour confirmer que toute énergie a bien été neutralisée. La vérification doit être faite par le travailleur lui-même, et non seulement par un superviseur.",
+    "application_terrain": "• Utiliser un cadenas individuel par travailleur — si 3 mécaniciens travaillent sur la même machine, 3 cadenas doivent être posés sur chaque point de consignation via une cheville de groupe.\n• Documenter toute situation où le cadenassage est impossible (ex. : maintenance sur équipement en marche nécessaire) et obtenir l'approbation SST avant d'appliquer une mesure alternative.\n• Effectuer systématiquement l'essai de mise en marche après chaque cadenassage — appuyer sur le bouton de démarrage pour confirmer que la machine ne réagit pas.\n• Former les travailleurs à reconnaître les énergies résiduelles (condensateurs électriques chargés, ressorts sous tension, fluides sous pression dans les tuyaux) qui persistent même après coupure de l'alimentation principale.\n• Consigner par écrit chaque utilisation d'une mesure alternative avec la justification, la personne responsable et la date.",
+    "sanctions": "L'utilisation de méthodes alternatives non documentées ou non approuvées constitue une infraction grave. Amendes de 1 500 $ à 150 000 $. En cas d'accident, la responsabilité civile et pénale de l'employeur est engagée. L'absence de vérification de l'état zéro est régulièrement citée dans les enquêtes d'accidents mortels et entraîne des poursuites sous la Loi sur la santé et la sécurité du travail.",
+    "tags": [
+      "cadenassage",
+      "controle-energies",
+      "mesures-alternatives",
+      "etat-zero",
+      "cadenas-personnel",
+      "RSST"
+    ]
+  },
+  {
+    "id": "rsst-188-5-6",
+    "titre": "Procédure de cadenassage — Étapes et vérification point zéro",
+    "categorie": "cadenassage",
+    "loi": "RSST",
+    "articles": "188.5 à 188.6",
+    "contenu": "Les articles 188.5 et 188.6 détaillent la procédure séquentielle obligatoire de cadenassage. L'article 188.5 impose que chaque machine ou équipement visé par le programme dispose d'une procédure de cadenassage écrite, propre à cet équipement, décrivant chaque point de consignation dans l'ordre d'isolation. La procédure doit identifier : le nom de l'équipement, les types d'énergie présents, la localisation précise de chaque point de consignation, le type de cadenas et de dispositif à utiliser, ainsi que les mesures de dissipation de l'énergie résiduelle (ex. : purge d'un circuit pneumatique, décharge d'un condensateur, abaissement d'un bras mécanique).\n\nL'article 188.5 prescrit également les étapes obligatoires dans un ordre précis : (1) prévenir les personnes affectées par l'arrêt de la machine; (2) identifier toutes les sources d'énergie; (3) arrêter l'équipement selon la procédure normale; (4) isoler chaque source d'énergie au point de consignation; (5) poser son cadenas personnel et son étiquette d'identification; (6) dissiper ou retenir les énergies résiduelles; (7) vérifier l'état zéro. L'article 188.6 précise que la vérification de l'état zéro doit être documentée et que le travailleur doit confirmer physiquement l'absence d'énergie avant d'intervenir.\n\nLa procédure de déconsignation est tout aussi encadrée : chaque travailleur retire son propre cadenas, l'espace de travail est dégagé, les dispositifs de protection sont remis en place, les personnes affectées sont prévenues du redémarrage imminent, et seulement ensuite l'équipement est remis en service. Aucun superviseur ne peut retirer le cadenas d'un travailleur à sa place, sauf dans le cadre strict de la procédure de cadenas oublié (art. 188.10).",
+    "application_terrain": "• Plastifier les procédures de cadenassage et les accrocher directement sur la machine concernée ou dans un classeur accessible à proximité du poste de travail.\n• Utiliser des étiquettes de danger personnalisées avec le nom du travailleur, la date et la nature des travaux — elles complètent le cadenas et servent de communication visuelle pour les autres.\n• Ne jamais sauter l'étape de dissipation de l'énergie résiduelle : purger les tuyaux pneumatiques, vider les accumulateurs hydrauliques, abaisser les charges suspendues, laisser refroidir les surfaces thermiques.\n• Appliquer la règle «un travailleur = un cadenas» sans exception, même pour une intervention de 5 minutes.\n• Lors de la déconsignation, toujours vérifier que toutes les clavettes, outils et chiffons ont été retirés de la machine avant le redémarrage.",
+    "sanctions": "L'absence de procédure écrite par machine est une infraction documentable lors d'une visite d'inspection CNESST. Amendes de 1 500 $ à 150 000 $ par machine non conforme. Toute intervention sans cadenassage documenté peut entraîner une suspension immédiate des opérations. En cas d'accident mortel lié à une procédure non suivie, des accusations criminelles sous le Code criminel (art. 217.1 — devoir de protection des travailleurs) sont possibles contre les gestionnaires directement impliqués.",
+    "tags": [
+      "cadenassage",
+      "procedure-cadenassage",
+      "etapes-cadenassage",
+      "etat-zero",
+      "point-zero",
+      "deconsignation",
+      "RSST"
+    ]
+  },
+  {
+    "id": "rsst-188-7-9",
+    "titre": "Cadenassage de groupe et transfert de quart",
+    "categorie": "cadenassage",
+    "loi": "RSST",
+    "articles": "188.7 à 188.9",
+    "contenu": "Les articles 188.7 à 188.9 du RSST encadrent les situations particulières du cadenassage impliquant plusieurs travailleurs ou des changements de quart de travail. L'article 188.7 définit le cadenassage de groupe comme la situation où plusieurs travailleurs interviennent simultanément sur un même équipement. Dans ce contexte, une cheville de groupe (dispositif multi-cadenas) doit être utilisée : chaque travailleur y appose son cadenas personnel, et la machine ne peut être déverrouillée que lorsque tous les cadenas ont été retirés. Un travailleur désigné («gardien de la cheville») supervise la procédure sans pour autant remplacer les cadenas individuels.\n\nL'article 188.8 traite spécifiquement du transfert de cadenassage lors d'un changement de quart. Si des travaux de maintenance commencés lors d'un quart doivent se poursuivre au quart suivant, une procédure formelle de transfert doit être appliquée. Le travailleur entrant pose son cadenas avant que le travailleur sortant retire le sien — il ne doit jamais y avoir un moment où la machine est sans protection. Ce chevauchement de cadenas est obligatoire et doit être documenté dans le registre de transfert de quart.\n\nL'article 188.9 précise les responsabilités lors du cadenassage de groupe : le superviseur doit s'assurer que tous les travailleurs concernés ont bien posé leur cadenas avant le début des travaux, que la cheville de groupe est correctement installée, et que la liste des intervenants est à jour. En cas de sous-traitance, les travailleurs de l'entreprise externe doivent également poser leur propre cadenas, conformément à leur propre programme de cadenassage ou à celui de l'employeur maître d'œuvre.",
+    "application_terrain": "• Avoir en stock un nombre suffisant de chevilles de groupe (multi-hasps) de différentes tailles (6, 9, 12 cadenas) pour couvrir les équipes les plus nombreuses.\n• Créer un registre de transfert de quart spécifiquement pour les travaux de maintenance longue durée — y noter l'heure de transfert, les noms des travailleurs entrants/sortants, et l'état d'avancement des travaux.\n• Former les sous-traitants sur le programme de cadenassage de l'établissement AVANT leur première intervention — conserver une preuve écrite de cette formation.\n• Afficher la liste des intervenants actifs sur l'équipement lors d'un cadenassage de groupe (sur un tableau magnétique ou un carnet de bord attaché à la cheville).\n• Le gardien de la cheville ne retire JAMAIS son cadenas le premier — il est le dernier à déconsigner pour confirmer que tous les autres l'ont fait correctement.",
+    "sanctions": "Le manquement au protocole de transfert de quart est l'une des causes les plus fréquentes d'accidents lors de maintenances prolongées. Amendes de 1 500 $ à 150 000 $. La CNESST peut exiger la révision complète du programme de cadenassage et une formation obligatoire de tous les travailleurs à la charge de l'employeur. En cas d'accident lors d'un transfert non conforme, la responsabilité est partagée entre le superviseur de quart entrant et sortant.",
+    "tags": [
+      "cadenassage",
+      "cadenassage-groupe",
+      "transfert-quart",
+      "cheville-groupe",
+      "multi-hasps",
+      "sous-traitants",
+      "RSST"
+    ]
+  },
+  {
+    "id": "rsst-188-10-11",
+    "titre": "Retrait d'un cadenas oublié et procédures d'urgence",
+    "categorie": "cadenassage",
+    "loi": "RSST",
+    "articles": "188.10 à 188.11",
+    "contenu": "L'article 188.10 du RSST encadre la procédure à suivre lorsqu'un travailleur a quitté les lieux sans retirer son cadenas à la fin de ses travaux. Cette situation, appelée «cadenas oublié», est l'une des plus délicates du programme de cadenassage. La procédure est strictement réglementée pour éviter qu'un superviseur impatient ne retire le cadenas sans s'assurer que le travailleur est bien hors de la zone dangereuse. L'employeur doit disposer d'une procédure écrite de retrait de cadenas oublié incluant obligatoirement : (1) tenter de rejoindre le travailleur concerné; (2) confirmer physiquement que le travailleur est absent de la zone et que la zone est sécuritaire; (3) faire appel à un superviseur autorisé (jamais le demandeur direct du retrait); (4) documenter le retrait avec heure, date, noms et raison; (5) informer le travailleur dès son retour.\n\nL'article 188.11 traite des procédures d'urgence liées au cadenassage. En situation d'urgence (ex. : déversement chimique, incendie, travailleur coincé), des procédures d'urgence peuvent permettre de lever temporairement un cadenassage, mais seulement sous l'autorité d'un responsable désigné et avec documentation immédiate. Ces procédures d'urgence ne peuvent jamais servir à contourner le cadenassage pour raisons de production ou de délai. L'article précise également que tout incident lié au cadenassage (cadenas retiré sans procédure, équipement démarré malgré un cadenas) doit être signalé et consigné dans le registre de l'établissement, puis analysé pour prévenir la récurrence.\n\nLa procédure de retrait de cadenas oublié doit être affichée dans le lieu de travail et connue de tous les superviseurs. Elle protège autant le travailleur absent (qui pourrait être revenu dans la machine) que l'employeur (qui doit prouver sa diligence raisonnable).",
+    "application_terrain": "• Afficher la procédure de retrait de cadenas oublié à proximité du tableau de cadenas — elle doit être accessible sans chercher dans un classeur.\n• Désigner au moins 2 superviseurs autorisés par quart pour approuver le retrait d'un cadenas oublié, et s'assurer qu'ils sont formés et que leur délégation est documentée.\n• Toujours tenter de joindre le travailleur par téléphone ou radio AVANT tout retrait — conserver une trace de la tentative (journal de communication).\n• Installer un tableau de gestion visuelle des cadenas (ex. : tableau magnétique avec étiquettes nominatives) pour identifier rapidement qui est encore sur une machine en fin de quart.\n• Après tout retrait de cadenas oublié, tenir un entretien avec le travailleur concerné pour comprendre pourquoi il n'a pas suivi la procédure — documenter et archiver cet entretien.",
+    "sanctions": "Le retrait d'un cadenas sans suivre la procédure formelle constitue une infraction grave passible d'amendes de 1 500 $ à 150 000 $. Si un accident survient suite à un retrait non autorisé d'un cadenas oublié, le superviseur ayant autorisé le retrait peut être personnellement poursuivi. La CNESST peut émettre une suspension immédiate des opérations et exiger une révision complète du programme. Les données d'accidents au Québec montrent que les cadenas retirés de façon informelle figurent parmi les causes les plus fréquentes d'accidents graves en maintenance industrielle.",
+    "tags": [
+      "cadenassage",
+      "cadenas-oublie",
+      "urgence-cadenassage",
+      "retrait-cadenas",
+      "procedure-urgence",
+      "superviseur",
+      "RSST"
+    ]
+  },
+  {
+    "id": "rsst-188-12-13",
+    "titre": "Formation obligatoire et registre de cadenassage",
+    "categorie": "cadenassage",
+    "loi": "RSST",
+    "articles": "188.12 à 188.13",
+    "contenu": "L'article 188.12 du RSST impose une formation obligatoire à tous les travailleurs susceptibles d'effectuer des travaux sous cadenassage ou dont les activités sont affectées par un cadenassage. La formation doit couvrir : les principes fondamentaux du contrôle des énergies dangereuses, les types d'énergies présentes dans l'établissement, les procédures de cadenassage spécifiques aux équipements sur lesquels le travailleur intervient, le rôle et les responsabilités de chaque intervenant, la procédure de cadenas oublié, et les situations d'urgence. La formation doit être initiale (à l'embauche ou lors d'une affectation à de nouvelles tâches) et périodique (révision au minimum à chaque modification du programme ou tous les 3 ans, ou après un incident lié au cadenassage).\n\nL'article 188.12 précise également que la formation doit être pratique et non seulement théorique : le travailleur doit démontrer sa capacité à appliquer les procédures sur les équipements réels de son poste. Une formation purement en salle sans exercice pratique ne satisfait pas à cette exigence. L'employeur doit conserver une preuve de la formation (attestation signée, feuille de présence) pour chaque travailleur formé.\n\nL'article 188.13 impose la tenue d'un registre de cadenassage. Ce registre doit documenter : toutes les interventions sous cadenassage (date, machine, travailleurs, nature des travaux), tous les retraits de cadenas oublié, toutes les utilisations de mesures alternatives, tous les incidents et quasi-accidents liés au cadenassage, et les révisions et mises à jour du programme. Le registre doit être conservé pendant au moins 5 ans et être accessible à la CNESST sur demande. En pratique, le registre sert aussi d'outil de gestion interne pour identifier les équipements nécessitant des améliorations de conception ou des procédures particulièrement complexes.",
+    "application_terrain": "• Intégrer une démonstration pratique de cadenassage dans la formation de chaque nouvel employé de maintenance — avec évaluation documentée signée par le formateur ET le travailleur.\n• Mettre en place un système de rappel automatique pour les formations périodiques (ex. : alertes dans le logiciel RH tous les 3 ans par travailleur).\n• Utiliser un registre numérique (tablette, logiciel de maintenance, Google Sheets) pour faciliter la saisie en temps réel des interventions sous cadenassage.\n• Lors de chaque révision annuelle du programme, impliquer les travailleurs de terrain — ils connaissent les lacunes pratiques que les gestionnaires ne voient pas depuis leur bureau.\n• Archiver physiquement et numériquement les registres des 5 dernières années — en cas d'audit CNESST ou d'accident, l'absence de registre est une circonstance aggravante majeure.",
+    "sanctions": "L'absence de formation documentée ou de registre de cadenassage est l'infraction la plus facilement vérifiable lors d'une inspection CNESST. Amendes de 1 500 $ à 150 000 $ pour défaut de formation ou de tenue de registre. La CNESST peut exiger une formation obligatoire de l'ensemble du personnel à la charge de l'employeur, incluant les coûts de remplacement durant les heures de formation. En cas d'accident, l'absence de preuve de formation supprime toute possibilité de défense de diligence raisonnable et expose l'employeur à la responsabilité civile totale ainsi qu'à des pénalités maximales.",
+    "tags": [
+      "cadenassage",
+      "formation-cadenassage",
+      "registre-cadenassage",
+      "formation-obligatoire",
+      "documentation-SST",
+      "audit-CNESST",
+      "RSST"
+    ]
+  },
+  {
+    "id": "rsst-lsst-51-11",
+    "titre": "Obligation patronale de fournir les EPI gratuitement",
+    "categorie": "epi",
+    "loi": "LSST",
+    "articles": "51(11)",
+    "contenu": "L'article 51(11) de la Loi sur la santé et la sécurité du travail impose à tout employeur l'obligation légale de fournir gratuitement à ses travailleurs les équipements de protection individuelle (EPI) requis par leur travail. Cette obligation est absolue : l'employeur ne peut pas exiger une contribution financière du travailleur pour l'achat, la location ou l'entretien de ces équipements. Le coût des EPI est une dépense d'exploitation assumée à 100% par l'employeur.\n\nCette disposition s'applique à tous les secteurs d'activité assujettis à la LSST, que ce soit la construction, la fabrication, les mines, les services ou tout autre milieu de travail. Elle vise l'ensemble des EPI : casques de sécurité, lunettes, protège-oreilles, chaussures de sécurité, gants, harnais, vêtements de protection, appareils de protection respiratoire, etc. La gratuité couvre également le remplacement des EPI défectueux ou usés.\n\nL'employeur a aussi l'obligation corrélative de s'assurer que les EPI fournis sont conformes aux normes en vigueur, adaptés au risque identifié, en bon état de fonctionnement, et que les travailleurs reçoivent la formation nécessaire pour les utiliser correctement. Fournir un EPI non conforme ou inadapté équivaut à ne pas en fournir du tout aux yeux de la CNESST.",
+    "application_terrain": "- Tenir un registre de distribution des EPI signé par chaque travailleur à la remise de l'équipement.\n- Prévoir un stock tampon pour remplacer immédiatement tout EPI endommagé ou perdu — ne jamais laisser un travailleur sans protection.\n- Afficher la politique EPI en salle de pause ou vestiaire : liste des EPI obligatoires par poste de travail.\n- Intégrer la remise des EPI dans la procédure d'accueil de tout nouvel employé dès le jour 1.\n- Documenter les refus de port d'EPI par les travailleurs pour protéger l'employeur en cas d'enquête CNESST.",
+    "sanctions": "Amende de 1 754 $ à 70 208 $ pour une première infraction (personne morale), pouvant doubler en cas de récidive. En cas d'accident résultant de l'absence d'EPI fourni par l'employeur, responsabilité civile et pénale aggravée. La CNESST peut émettre un avis de correction immédiat et, si non-conformité persiste, un ordre d'arrêt des travaux. Les coûts d'indemnisation CIAT sont imputés directement au dossier de l'employeur, augmentant la cotisation CNESST.",
+    "tags": [
+      "epi",
+      "obligation-employeur",
+      "gratuite",
+      "lsst",
+      "fourniture-epi",
+      "protection-individuelle"
+    ]
+  },
+  {
+    "id": "rsst-66",
+    "titre": "Vêtements de protection contre les contaminants dangereux (plomb, amiante, mercure)",
+    "categorie": "epi",
+    "loi": "RSST",
+    "articles": "66",
+    "contenu": "L'article 66 du Règlement sur la santé et la sécurité du travail traite des vêtements de protection exclusifs obligatoires lorsque des travailleurs sont exposés à des contaminants hautement toxiques tels que le plomb, l'amiante, le mercure et autres substances désignées. Ces vêtements doivent être fournis par l'employeur et portés exclusivement sur les lieux de travail : ils ne peuvent en aucun cas quitter le site de travail pour éviter la contamination des domiciles des travailleurs et l'exposition de leurs proches (contamination croisée dite 'take-home').\n\nL'article précise que les vêtements contaminés doivent être entreposés dans un endroit séparé des vêtements personnels des travailleurs, dans des contenants fermés et étiquetés. La décontamination de ces vêtements doit être effectuée par l'employeur ou par un service spécialisé, jamais par le travailleur à domicile. Des vestiaires à double casier (côté propre / côté contaminé) avec douche intermédiaire sont requis dans les installations traitant de l'amiante friable ou du plomb.\n\nCet article s'applique à tous les secteurs où une exposition aux contaminants concernés est possible : démolition de bâtiments contenant de l'amiante, travaux de peinture au plomb dans les vieux édifices, traitement de minerais, récupération de batteries, industries chimiques. Les contaminants visés sont ceux dont les valeurs d'exposition admissibles (VEA) sont particulièrement basses et dont la bioaccumulation représente un risque chronique grave.",
+    "application_terrain": "- Installer obligatoirement des vestiaires double-compartiment (propre/sale) avec douche sur tout chantier d'amiante ou de plomb.\n- Utiliser des combinaisons jetables Type 5 ou 6 (Tyvek ou équivalent) pour les travaux ponctuels — jamais de vêtements réutilisables lavés à domicile.\n- Étiqueter les sacs de vêtements contaminés avec la mention 'CONTAMINÉ — NE PAS OUVRIR' et les confier à un service de décontamination certifié.\n- Inclure dans le plan de décontamination les procédures de retrait des EPI (séquence précise pour éviter l'auto-contamination).\n- Tenir un registre de gestion des vêtements contaminés (date, quantité, transporteur, centre de traitement).",
+    "sanctions": "Amende de 1 754 $ à 70 208 $ par infraction. En cas d'exposition de l'entourage familial (contamination croisée), responsabilité civile potentiellement illimitée de l'employeur. Retrait du certificat d'entrepreneur en amiante possible. Enquête de la CNESST et obligation de décontamination complète du site aux frais de l'employeur. Poursuite criminelle possible sous le Code criminel canadien si négligence criminelle démontrée.",
+    "tags": [
+      "epi",
+      "vetements-protection",
+      "amiante",
+      "plomb",
+      "mercure",
+      "contamination",
+      "vestiaires",
+      "decontamination"
+    ]
+  },
+  {
+    "id": "rsst-69",
+    "titre": "Cagoule de sablage à adduction d'air — protection respiratoire et visuelle intégrale",
+    "categorie": "epi",
+    "loi": "RSST",
+    "articles": "69",
+    "contenu": "L'article 69 du RSST impose l'utilisation d'une cagoule de sablage à adduction d'air lors de travaux de sablage, grenaillage ou décapage abrasif. Cette cagoule est un EPI complexe qui assure simultanément la protection respiratoire (air comprimé grade D ou meilleur), la protection oculaire et faciale (écran résistant aux impacts et à l'abrasion), et la protection crânienne. Elle doit répondre aux exigences de la norme CSA Z94.4 pour la protection respiratoire et être alimentée par une source d'air respirable conforme.\n\nLe règlement précise que la qualité de l'air fourni doit être certifiée Grade D minimum selon la norme CGA G-7.1 : teneur en CO inférieure à 20 ppm, en huile inférieure à 5 mg/m³, en CO₂ inférieure à 1000 ppm. Un système d'alarme ou une vanne de surpression doit protéger le travailleur en cas de chute de pression. Le débit d'air doit être suffisant pour maintenir une légère surpression dans la cagoule, empêchant toute infiltration de poussières abrasives. La maintenance de la ligne d'air (filtres, séparateurs d'huile, alarmes CO) est une obligation patronale documentée.\n\nCet article vise tous les opérateurs de sablage : sablage de structures métalliques, décapage de ponts, nettoyage de réservoirs, préparation de surfaces industrielles. Les risques couverts incluent la silicose (poussières de silice), les pneumoconioses diverses, les traumatismes oculaires par projections abrasives, et les intoxications au CO en cas de défaillance du système d'alimentation en air. La cagoule remplace et interdit tout autre type de protection respiratoire (masque filtrant) lors d'opérations de sablage.",
+    "application_terrain": "- Effectuer un test d'étanchéité de la cagoule avant chaque utilisation et vérifier l'intégrité de l'écran facial (remplacer à la première fissure).\n- Installer un détecteur de CO sur la ligne d'alimentation en air avec alarme sonore audible par l'opérateur en cours de travail.\n- Tenir un journal de maintenance de la pompe à air et des filtres (changement selon les recommandations du fabricant ou au minimum mensuel).\n- Former les opérateurs au retrait sécuritaire de la cagoule (zone propre, assistance d'un collègue pour décontamination).\n- Délimiter et signaliser la zone de sablage avec barriérage physique — aucune autre personne dans le rayon de projection abrasive.",
+    "sanctions": "Amende de 1 754 $ à 70 208 $ pour l'employeur. Arrêt immédiat des travaux possible par l'inspecteur CNESST. En cas de maladie professionnelle (silicose), coûts CIAT importés au dossier de l'employeur pendant 10 à 20 ans. Responsabilité civile pour le fabricant ou le distributeur si l'équipement fourni est défectueux. Obligation de déclaration de la maladie professionnelle à la CNESST et suivi médical aux frais de l'employeur.",
+    "tags": [
+      "epi",
+      "cagoule-sablage",
+      "adduction-air",
+      "sablage",
+      "grenaillage",
+      "silice",
+      "protection-respiratoire",
+      "rsst-69"
+    ]
+  },
+  {
+    "id": "cstc-2-10-3",
+    "titre": "Casque de sécurité conforme CSA Z94.1 — obligation sur tout chantier de construction",
+    "categorie": "epi",
+    "loi": "CSTC",
+    "articles": "2.10.3",
+    "contenu": "L'article 2.10.3 du Code de sécurité pour les travaux de construction rend obligatoire le port d'un casque de sécurité conforme à la norme CSA Z94.1 pour tout travailleur présent sur un chantier de construction. Cette obligation est universelle : elle s'applique aux travailleurs, aux superviseurs, aux visiteurs, aux inspecteurs et à toute personne pénétrant dans la zone de chantier. Le casque doit être porté en tout temps dans les zones à risque de chutes d'objets ou de heurt avec des éléments de structure.\n\nLa norme CSA Z94.1 classifie les casques en plusieurs types et classes : Type I (protection sommet uniquement) et Type II (protection latérale additionnelle), puis Classe E (électrique, 20 000 V), Classe G (général, 2 200 V) et Classe C (conducteur, aucune protection électrique). Le choix du type et de la classe doit correspondre aux risques spécifiques du poste : les électriciens et linemen doivent utiliser des casques Classe E, les charpentiers peuvent utiliser Classe G, les travaux miniers ou à risques latéraux nécessitent le Type II. Le casque doit afficher la date de fabrication et être remplacé selon les indications du fabricant (généralement 5 ans maximum).\n\nL'article interdit l'utilisation de casques endommagés, fissurés, déformés, ayant subi un impact violent ou exposés à des produits chimiques corrosifs. La jugulaire est obligatoire pour les travaux en hauteur, sur échafaudages ou en présence de vents forts. Toute modification du casque (perçage, peinture, collage d'autocollants non approuvés) est interdite car elle peut compromettre l'intégrité structurelle de la coque.",
+    "application_terrain": "- Inspecter visuellement chaque casque en début de quart : vérifier la coque (fissures, déformation), le système de suspension intérieur et la jugulaire.\n- Tenir un registre de tous les casques sur le chantier avec numéro de série, date d'achat et date limite d'utilisation.\n- Apposer un code couleur par entreprise sur les chantiers multi-employeurs pour identifier rapidement l'appartenance (ex: rouge=électriciens, blanc=superviseurs, jaune=charpentiers).\n- Remplacer immédiatement tout casque ayant reçu un impact, même sans dommage visible — la coque absorbe l'énergie sans toujours montrer de signe extérieur.\n- Interdire l'accès au chantier à toute personne sans casque conforme, incluant les visiteurs et représentants commerciaux.",
+    "sanctions": "Amende de 1 196 $ à 34 518 $ pour le maître d'oeuvre ou l'employeur. Arrêt des travaux possible par l'inspecteur CNESST. En cas d'accident crânien sans port du casque, refus partiel ou total d'indemnisation CIAT pour le travailleur (faute lourde). Responsabilité solidaire du maître d'oeuvre pour les sous-traitants non conformes sur son chantier. Inscription au Registre public des employeurs ayant reçu des amendes (effet sur réputation commerciale).",
+    "tags": [
+      "epi",
+      "casque-securite",
+      "csa-z94-1",
+      "chantier",
+      "protection-cranienne",
+      "cstc",
+      "construction"
+    ]
+  },
+  {
+    "id": "cstc-2-10-5-6",
+    "titre": "Protection des yeux, du visage et chaussures de classe 1 sur chantier",
+    "categorie": "epi",
+    "loi": "CSTC",
+    "articles": "2.10.5 et 2.10.6",
+    "contenu": "Les articles 2.10.5 et 2.10.6 du Code de sécurité pour les travaux de construction établissent les exigences relatives à la protection des yeux et du visage d'une part, et au port de chaussures de sécurité de classe 1 d'autre part. Pour la protection oculaire (art. 2.10.5), toute opération présentant un risque de projection (soudage, meulage, clouage pneumatique, travaux de béton, découpe) exige le port de lunettes de sécurité conformes à la norme CSA Z94.3. Les montures doivent être résistantes aux impacts et les verres traités antirayures. Pour les projections liquides (acides, ciments liquides, résines), des lunettes-masque hermétiques sont requises. Pour le soudage, l'indice de protection des verres doit correspondre au procédé utilisé.\n\nPour les chaussures de sécurité (art. 2.10.6), la norme CSA Z195 définit plusieurs classes. La Classe 1 (embout d'acier ou composite résistant à 125 joules) est obligatoire sur tous les chantiers de construction. La protection contre la perforation plantaire (plaque d'acier ou semelle composite) est requise sur les chantiers à risque de clous au sol, notamment en charpenterie et démolition. Les chaussures doivent également offrir un support de cheville adéquat sur les surfaces inégales. Des bottes imperméables peuvent être exigées dans les zones humides ou en présence de béton frais (brûlures alcalines).\n\nCes deux articles sont fréquemment à l'origine d'infractions sur les chantiers, les travailleurs omettant de porter leurs lunettes lors d'opérations courtes ou utilisant des chaussures de sport inadaptées. L'employeur et le maître d'oeuvre ont la responsabilité de faire respecter ces exigences activement, pas seulement de mettre les EPI à disposition.",
+    "application_terrain": "- Afficher dans la roulotte de chantier un tableau des EPI obligatoires par type de travaux (soudage, béton, clouage, meulage) avec les normes applicables.\n- Inspecter les chaussures des travailleurs lors de l'accueil chantier — refuser l'accès aux chaussures de sport ou sandales sans exception.\n- Fournir des lunettes de remplacement en réserve sur le chantier pour les travailleurs qui perdent ou brisent les leurs en cours de journée.\n- Utiliser des écrans faciaux (face shields) en complément des lunettes pour les travaux de meulage intense ou de découpe de béton.\n- Rappeler systématiquement l'obligation de protection oculaire lors des causeries SST — c'est l'EPI le plus souvent négligé selon la CNESST.",
+    "sanctions": "Amende de 1 196 $ à 34 518 $ par infraction constatée. Pour les chaussures non conformes, arrêt du travailleur immédiat sans rémunération possible jusqu'à conformité. Refus d'indemnisation CIAT en cas de blessure au pied survenue sans port de chaussures de sécurité (faute du travailleur). Pour les blessures oculaires sans protection, poursuites civiles possibles de l'employeur par le travailleur en cas de séquelles permanentes. Malus sur la cotisation CNESST si taux de fréquence d'accidents oculaires ou podaux élevé.",
+    "tags": [
+      "epi",
+      "lunettes-securite",
+      "chaussures-securite",
+      "csa-z94-3",
+      "csa-z195",
+      "protection-yeux",
+      "protection-pieds",
+      "chantier",
+      "cstc"
+    ]
+  },
+  {
+    "id": "cstc-2-10-10",
+    "titre": "Gants et moufles de protection — obligations et normes sur chantier",
+    "categorie": "epi",
+    "loi": "CSTC",
+    "articles": "2.10.10",
+    "contenu": "L'article 2.10.10 du Code de sécurité pour les travaux de construction impose le port de gants ou moufles appropriés lors de toute manipulation de matériaux ou d'équipements présentant un risque de coupure, d'abrasion, de brûlure thermique ou chimique, ou d'engelure. Le choix du type de gant doit être adapté au risque spécifique : gants en cuir renforcé pour la manutention de matériaux abrasifs, gants résistants aux coupures (niveau ANSI/ISEA A4 minimum) pour la manipulation de tôles ou de verre, gants isolants pour les travaux électriques, gants résistants aux produits chimiques (nitrile, néoprène selon la substance) pour la manipulation de produits dangereux.\n\nL'article précise que les gants utilisés pour les travaux électriques doivent être conformes à la norme ASTM D120 avec un niveau de tension correspondant aux risques (Classe 00 à Classe 4). Il est interdit de porter des gants lors de l'utilisation de certaines machines tournantes (tours, perceuses à colonne, certaines fraiseuses) car le risque d'entraînement dépasse le risque de coupure — cette exception doit être explicitement identifiée dans l'évaluation des risques. Les moufles peuvent remplacer les gants pour les travaux de soudage lourd ou de manipulation de charges chaudes.\n\nLes engelures représentent un risque spécifique des chantiers québécois en hiver : les gants de travail doivent en période froide (température effective inférieure à -10°C) assurer à la fois la protection mécanique et l'isolation thermique. Des systèmes de gants en couches (liner thermique + gant de protection extérieur) sont recommandés. L'employeur doit évaluer les risques spécifiques aux mains pour chaque poste et spécifier le type de gant requis dans les procédures de travail.",
+    "application_terrain": "- Établir une matrice de sélection des gants par poste de travail (type de travaux → niveau de risque → norme applicable → modèle de gant approuvé).\n- Inspecter les gants avant chaque utilisation : trous, coupures, coutures décollées, perte de résistance chimique (décoloration, gonflement) sont des critères de mise au rebut.\n- Sensibiliser les travailleurs aux risques d'entraînement par les machines : afficher clairement les postes où le port de gants est INTERDIT (avec pictogramme).\n- Pour les travaux électriques, tester les gants isolants à l'air (test de gonflage) avant chaque utilisation et les faire re-tester en laboratoire selon le calendrier ASTM D120.\n- En hiver, prévoir un système de séchage des gants (séchoir chauffant) dans la roulotte pour les équipes travaillant par quarts.",
+    "sanctions": "Amende de 1 196 $ à 34 518 $ pour l'employeur. En cas de coupure grave ou d'amputation sans port de gants prescrits, responsabilité pénale et civile de l'employeur. Refus d'indemnisation CIAT partiel possible si la faute du travailleur est établie. Pour les blessures électriques sans gants isolants conformes, poursuites criminelles possibles (négligence criminelle si mort ou blessures graves). Obligation de rapport d'incident à la CNESST dans les 24 heures pour toute mutilation, amputation ou blessure grave à la main.",
+    "tags": [
+      "epi",
+      "gants",
+      "moufles",
+      "protection-mains",
+      "gants-electriques",
+      "coupures",
+      "chantier",
+      "hiver",
+      "cstc"
+    ]
+  },
+  {
+    "id": "cstc-2-10-13",
+    "titre": "Vêtement de flottaison 150N minimum — travaux près de l'eau",
+    "categorie": "epi",
+    "loi": "CSTC",
+    "articles": "2.10.13",
+    "contenu": "L'article 2.10.13 du Code de sécurité pour les travaux de construction exige le port d'un vêtement de flottaison individuel (VFI) offrant une flottabilité minimale de 150 Newton lors de tout travail effectué à proximité d'une étendue d'eau où un travailleur pourrait tomber et où la récupération immédiate ne peut être garantie. Un VFI de 150N est classé comme gilet de sauvetage de haute performance — il est conçu pour retourner une personne inconsciente en position de survie (visage hors de l'eau) même dans des eaux agitées. Il se distingue des aides à la flottabilité (50N) et des gilets de flottaison (100N) par sa capacité à protéger une personne inconsciente ou désorientée.\n\nLe règlement s'applique à une gamme étendue de travaux de construction : construction et réfection de ponts, batardeaux, quais et installations portuaires, travaux sur berges de rivières ou de lacs, dragage, pose de conduites sous-marines, travaux sur pontons ou plateformes flottantes, et tout chantier à moins de 2 mètres d'une rive sans garde-corps adéquat. La norme applicable pour les VFI au Canada est la norme Transport Canada ou la norme ISO 12402 (niveaux 150 et 275). Le VFI doit porter l'approbation de Transport Canada ou être certifié ISO.\n\nL'article impose également à l'employeur de maintenir en place des équipements de sauvetage accessibles (anneau de sauvetage avec ligne flottante de 30 m minimum, perche de sauvetage) sur tout chantier riverain ou marin. Une procédure d'urgence pour la récupération d'un travailleur tombé à l'eau, incluant les numéros d'urgence locaux (Garde côtière, SQ, 911), doit être affichée et connue de tous les travailleurs. En eau froide (inférieure à 15°C), une combinaison de protection thermique peut être requise en complément du VFI pour prévenir l'hypothermie.",
+    "application_terrain": "- Évaluer le risque de chute à l'eau pour chaque poste de travail riverain et documenter la décision de VFI obligatoire dans le plan de prévention du chantier.\n- Inspecter les VFI à chaque utilisation : vérifier l'état des sangles et boucles, la chambre de flottaison (pas de déchirures), le cylindre CO₂ des VFI gonflables (poids conforme, armateur intact).\n- Former tous les travailleurs au port correct du VFI (ajustement des sangles, déclenchement du gonflage automatique) avant le début des travaux près de l'eau.\n- Installer des anneaux de sauvetage avec lignes flottantes à intervalles maximaux de 30 mètres le long de toute zone de travail riveraine.\n- Prévoir un plan de récupération spécifique en eau froide : en dessous de 10°C, l'incapacitation d'un travailleur peut survenir en moins de 3 minutes — la récupération doit être possible en moins de 90 secondes.",
+    "sanctions": "Amende de 1 196 $ à 34 518 $ pour l'employeur en cas de non-port du VFI. En cas de noyade, enquête obligatoire de la CNESST et transmission possible au Directeur des poursuites criminelles et pénales (DPCP) pour négligence criminelle. Responsabilité civile quasi-automatique de l'employeur si absence de VFI documentée. Maître d'oeuvre solidairement responsable si le chantier manque d'équipements de sauvetage. Suspension ou révocation possible du certificat de compétence de l'entrepreneur par la CCQ en cas d'accident mortel par noyade sur chantier.",
+    "tags": [
+      "epi",
+      "vfi",
+      "gilet-flottaison",
+      "150n",
+      "noyade",
+      "travaux-eau",
+      "pont",
+      "berge",
+      "eau-froide",
+      "cstc",
+      "securite-nautique"
+    ]
+  },
+  {
+    "id": "lsst-51-9",
+    "titre": "Formation, entrainement et supervision adequats",
+    "categorie": "formation",
+    "loi": "LSST",
+    "articles": "51(9)",
+    "contenu": "L'article 51(9) de la Loi sur la sante et la securite du travail (LSST) oblige tout employeur a fournir une formation, un entrainement et une supervision adequats aux travailleurs afin de leur permettre d'accomplir leurs taches de facon securitaire. Cette obligation est fondamentale : un travailleur ne peut etre expose a un risque sans avoir d'abord ete informe des dangers et forme pour les maitriser. La formation doit etre adaptee au poste, aux equipements utilises et aux risques specifiques presents dans le milieu de travail.\n\nCet article s'applique des l'embauche d'un nouveau travailleur, lors d'un changement de poste, lors de l'introduction de nouvelles technologies ou de nouveaux produits, ou apres un accident ou incident significatif. Il vise l'ensemble des travailleurs, peu importe leur statut (permanent, temporaire, sous-traitant sur place), et responsabilise directement le superieur immediat dans son role de supervision active.\n\nLa supervision 'adequate' exigee par la loi ne signifie pas une surveillance constante, mais plutot que l'employeur s'assure que le travailleur applique correctement les methodes de travail securitaires, qu'il dispose des ressources necessaires et qu'un mecanisme de suivi est en place. La documentation de la formation (registre, attestation, signature) est fortement recommandee pour prouver la conformite en cas d'inspection ou d'enquete.",
+    "application_terrain": "- Tenir un registre de formation signe par chaque travailleur, avec date et contenu covert\n- Effectuer un compagnonnage structure pour tout nouveau travailleur ou tout changement de poste\n- Le superviseur doit valider les competences du travailleur AVANT de le laisser executer une tache risquee\n- Mettre a jour les formations lors de l'introduction de nouveaux equipements, produits ou procedures\n- Documenter les supervisions effectuees (observations, corrections apportees, suivi)",
+    "sanctions": "En cas de non-conformite, l'employeur s'expose a des avis de correction de la CNESST, des ordres d'arret de travail et des amendes pouvant aller de 1 729 $ a 20 749 $ pour une premiere infraction (personne morale), avec doublement possible lors de recidives. En cas d'accident grave ou mortel lie a une lacune de formation, des poursuites penales sous la LSST ou le Code criminel (art. 217.1 — obligation de securite) peuvent etre deposees contre les dirigeants.",
+    "tags": [
+      "formation",
+      "supervision",
+      "obligation-employeur",
+      "LSST",
+      "embauche",
+      "entrainement",
+      "nouveau-travailleur"
+    ]
+  },
+  {
+    "id": "lsst-62-1",
+    "titre": "Interdiction d'utiliser un produit dangereux sans formation",
+    "categorie": "formation",
+    "loi": "LSST",
+    "articles": "62.1",
+    "contenu": "L'article 62.1 de la LSST pose une interdiction claire et absolue : aucun travailleur ne peut utiliser un produit dangereux dans le cadre de son travail s'il n'a pas prealablement recu la formation et l'information requises concernant ce produit. Cette disposition est directement liee au systeme SIMDUT (Systeme d'information sur les matieres dangereuses utilisees au travail) et oblige l'employeur a s'assurer que chaque travailleur comprend les risques associes aux produits qu'il manipule, les mesures de protection appropriees et les procedures d'urgence en cas d'exposition ou de deversement.\n\nCet article vise tous les milieux de travail ou des produits chimiques, biologiques ou physiques dangereux sont presents : construction, fabrication, entretien de batiments, agriculture, soins de sante, nettoyage industriel, etc. Il s'applique a chaque produit specifique utilise, ce qui implique que la formation doit couvrir l'ensemble des matieres dangereuses presentes sur le lieu de travail et etre mise a jour des qu'un nouveau produit est introduit.\n\nL'obligation repose conjointement sur l'employeur (fournir la formation, rendre les fiches de donnees de securite accessibles) et sur le travailleur (suivre la formation, respecter les mesures de prevention). Un travailleur qui refuse d'utiliser un produit faute de formation adequats est protege par le droit de refus prevu a l'article 12 de la LSST.",
+    "application_terrain": "- Aucun travailleur ne doit manipuler un nouveau produit chimique sans avoir lu et compris sa fiche de donnees de securite (FDS)\n- Organiser une formation SIMDUT annuelle minimum et a chaque ajout de nouveau produit dangereux\n- Afficher les FDS accessibles en tout temps a l'endroit de stockage et d'utilisation des produits\n- Verifier que les contenants sont etiquetes correctement selon les normes SIMDUT 2015 (GHS)\n- Tenir un inventaire des produits dangereux a jour et croiser avec les formations completees par les travailleurs",
+    "sanctions": "Le non-respect de l'article 62.1 peut entrainer des amendes de 1 729 $ a 20 749 $ par infraction pour une personne morale. En cas d'intoxication ou de blessure d'un travailleur lie a un defaut de formation SIMDUT, la CNESST peut emettre un rapport d'enquete accablant et les tribunaux peuvent condamner l'employeur a des dommages-interets civils supplementaires. Les inspecteurs CNESST verifient systematiquement la conformite SIMDUT lors des visites d'etablissement.",
+    "tags": [
+      "SIMDUT",
+      "produits-dangereux",
+      "formation",
+      "FDS",
+      "chimique",
+      "interdiction",
+      "LSST",
+      "62.1"
+    ]
+  },
+  {
+    "id": "lsst-62-5",
+    "titre": "Programme de formation produits dangereux (SIMDUT)",
+    "categorie": "formation",
+    "loi": "LSST",
+    "articles": "62.5",
+    "contenu": "L'article 62.5 de la LSST oblige tout employeur dont des travailleurs sont susceptibles d'etre exposes a des produits dangereux a etablir, mettre en oeuvre et maintenir un programme de formation et d'information specifique au SIMDUT. Ce programme doit etre structure, documente et adapte aux realites du milieu de travail : il ne peut pas etre generique. Il doit couvrir les categories de danger du systeme GHS/SIMDUT 2015, la lecture et l'interpretation des etiquettes, la comprehension des fiches de donnees de securite, ainsi que les mesures de prevention et d'intervention d'urgence propres aux produits utilises.\n\nLe programme doit etre concu en collaboration avec le comite de sante et de securite (CSS) ou le representant en sante et securite lorsqu'il en existe un. Il doit etre revise au minimum lorsque de nouveaux renseignements sur la securite d'un produit deviennent disponibles, lors de l'introduction d'un nouveau produit dangereux, ou lors de changements dans les conditions de travail pouvant affecter l'exposition. La loi exige que le programme soit accessible aux travailleurs et au CSS.\n\nL'employeur doit egalement s'assurer que la formation est efficace — il ne suffit pas de presenter un diaporama et de faire signer une feuille de presence. Des evaluations de comprehension, des demonstrations pratiques et des mises en situation sont recommandees pour satisfaire aux exigences legales et pour reellement proteger les travailleurs. La formation doit etre dispensee en francais (Charte de la langue francaise) et tenir compte des niveaux de litteratie des travailleurs.",
+    "application_terrain": "- Creer un programme SIMDUT ecrit, specifique a votre etablissement, liste de tous les produits dangereux utilises\n- Inclure des evaluations pratiques (quiz, mise en situation, identification d'etiquettes) et conserver les resultats\n- Nommer un responsable SIMDUT interne charge de maintenir le programme a jour\n- Impliquer le CSS dans la revision annuelle du programme\n- Assurer la formation en langue comprise par tous les travailleurs — prevoir traduction si necessaire",
+    "sanctions": "L'absence d'un programme SIMDUT formel constitue une infraction en soi, independamment de tout accident. Les inspecteurs CNESST peuvent emettre un avis de correction avec delai serré et ordonner l'arret d'utilisation de produits dangereux jusqu'a conformite. Les amendes varient de 1 729 $ a 20 749 $ (personne morale) et peuvent etre majorees si l'inspection revele un historique de non-conformite. En cas d'accident, l'absence de programme documente est une circonstance aggravante devant les tribunaux.",
+    "tags": [
+      "SIMDUT",
+      "programme-formation",
+      "produits-dangereux",
+      "GHS",
+      "FDS",
+      "etiquetage",
+      "LSST",
+      "62.5",
+      "chimique"
+    ]
+  },
+  {
+    "id": "loi59-modernisation",
+    "titre": "Loi 59 — Modernisation du regime SST : mecanismes de prevention etendus",
+    "categorie": "formation",
+    "loi": "Loi 59",
+    "articles": "Loi 59 (2021)",
+    "contenu": "La Loi 59 (Loi modernisant le regime de sante et de securite du travail), adoptee en 2021 et mise en oeuvre progressivement jusqu'en 2024, constitue la reforme la plus importante du droit SST quebecois depuis la creation de la LSST en 1979. Parmi ses apports majeurs, la Loi 59 etend l'obligation de mettre en place des mecanismes de prevention — comite de sante et securite (CSS), representant en prevention (RP), programme de prevention et plan d'action — a un beaucoup plus grand nombre d'employeurs, notamment les PME de 20 a 49 travailleurs qui en etaient auparavant exemptees.\n\nEn matiere de formation, la Loi 59 renforce significativement les obligations. Elle etend l'application du programme de formation en sante et securite generale (communement appele 'carte de competence' dans la construction) et prevoit que le gouvernement peut, par reglement, definir des formations obligatoires specifiques a des secteurs ou des risques particuliers. La loi introduce egalement le concept de 'groupe prioritaire' permettant a la CNESST de cibler des secteurs a hauts risques et d'y imposer des obligations de formation renforcees.\n\nLa Loi 59 modernise aussi le volet psychosocial : elle reconnait explicitement les risques psychosociaux du travail (violence, harcelement, epuisement) comme des risques SST devant etre couverts par le programme de prevention. Les employeurs doivent desormais inclure la prevention des risques psychosociaux dans leurs activites de formation et de sensibilisation des travailleurs et des gestionnaires.",
+    "application_terrain": "- Verifier si votre etablissement est maintenant assujetti aux nouvelles obligations (CSS, RP, programme de prevention) selon le nouveau seuil de travailleurs\n- Mettre a jour votre programme de prevention pour inclure les risques psychosociaux (violence, harcelement, surcharge)\n- Former les gestionnaires et superviseurs sur la reconnaissance et la gestion des risques psychosociaux\n- Consulter la CNESST pour determiner les nouvelles obligations applicables a votre groupe d'activite economique (GAE)\n- Documenter la mise en conformite progressive avec un calendrier interne auditable",
+    "sanctions": "La Loi 59 n'a pas modifie le regime de sanctions de la LSST mais a elargi le champ d'application des infractions. Les amendes restent de 1 729 $ a 20 749 $ (personne morale, premiere infraction), avec doublement en cas de recidive. Les nouvelles obligations (CSS, RP) sont desormais inspectables et une absence de conformite peut mener a des ordres directs de la CNESST avec delai d'execution contraint. Le non-respect des ordres de la CNESST constitue une infraction penale additionnelle.",
+    "tags": [
+      "Loi-59",
+      "modernisation",
+      "prevention",
+      "CSS",
+      "representant-prevention",
+      "PME",
+      "psychosocial",
+      "programme-prevention",
+      "2021",
+      "reforme"
+    ]
+  },
+  {
+    "id": "cstc-2-4-2",
+    "titre": "Cours sante et securite generale obligatoire sur chantier",
+    "categorie": "formation",
+    "loi": "LSST",
+    "articles": "CSTC 2.4.2",
+    "contenu": "L'article 2.4.2 du Code de securite pour les travaux de construction (CSTC) etablit l'obligation pour tout travailleur de la construction d'avoir suivi et complete la formation de sante et securite generale avant de travailler sur un chantier de construction au Quebec. Cette formation, geree par la Commission de la construction du Quebec (CCQ) en partenariat avec l'ASP Construction, est communement connue sous le nom de 'carte de competence sante et securite' ou formation de 30 heures (pour les nouvelles entrees dans l'industrie) ou de mise a jour periodique.\n\nLa formation couvre les bases fondamentales de la securite sur les chantiers : identification des dangers courants (chutes, electrocution, vehicules, espaces clos), utilisation des equipements de protection individuelle (EPI), droits et obligations du travailleur et de l'employeur, procedure d'urgence, et introduction aux risques specifiques de la construction. Elle vise tous les travailleurs de la construction, quel que soit leur metier ou leur occupation, et constitue une condition prealable a l'obtention et au maintien du carnet de competences CCQ.\n\nPour les travailleurs qui entrent dans l'industrie, la formation initiale de 30 heures est obligatoire avant d'aller sur chantier. Des formations de mise a jour sont requises periodiquement. Les employeurs ont la responsabilite de verifier que leurs travailleurs sont a jour dans leur formation avant de les envoyer sur un chantier, et les contremaitres ou chefs de chantier doivent refuser l'acces a tout travailleur dont la formation n'est pas a jour.",
+    "application_terrain": "- Verifier la carte de competence SST de chaque travailleur AVANT son premier jour sur le chantier\n- Tenir un registre des dates d'expiration des formations de chaque membre de l'equipe\n- Ne jamais permettre a un travailleur non forme de commencer des travaux — meme pour une journee\n- Planifier les mises a jour de formation avant les periodes de pointe pour eviter les lacunes\n- Afficher a l'entree du chantier la liste des formations requises et les coordonnees ASP Construction",
+    "sanctions": "Un employeur qui permet a un travailleur non forme de travailler sur un chantier contrevient directement au CSTC et s'expose a des arrets de travail immediats ordonnes par un inspecteur CNESST. Les amendes peuvent aller de 1 729 $ a 20 749 $ par infraction (personne morale). La CCQ peut emettre des constats d'infraction additionnels. Le travailleur non conforme peut se voir refuser l'acces au chantier et risquer la suspension de son carnet CCQ. En cas d'accident impliquant un travailleur non forme, la responsabilite de l'employeur est quasi-automatique.",
+    "tags": [
+      "formation-obligatoire",
+      "chantier",
+      "CCQ",
+      "ASP-Construction",
+      "carte-competence",
+      "CSTC",
+      "2.4.2",
+      "construction",
+      "30-heures"
+    ]
+  },
+  {
+    "id": "cstc-2-9-5-1",
+    "titre": "Formation sauvetage obligatoire avant travaux critiques",
+    "categorie": "formation",
+    "loi": "LSST",
+    "articles": "CSTC 2.9.5.1",
+    "contenu": "L'article 2.9.5.1 du Code de securite pour les travaux de construction (CSTC) impose une obligation de formation specifique en sauvetage avant d'entreprendre certains travaux a risque eleve, notamment les travaux en espaces clos. Cette disposition vise a garantir que, si un travailleur est victime d'un accident, d'une perte de conscience ou d'une intoxication dans un environnement confine ou dangereux, une equipe formee et equipee est capable d'intervenir immediatement sur place — sans attendre les secours exterieurs, dont les delais peuvent etre fatals.\n\nLa formation en sauvetage pour travaux critiques couvre plusieurs volets : identification et classification des espaces clos (permis requis ou non), procedures d'entree securitaire, utilisation des instruments de detection de gaz (multi-gaz, detecteur d'oxygene), equipements de protection et de communication, techniques de sauvetage non-entrant (treuil, harnais, ligne de vie) et entrant (si applicable), et communication avec les secours exterieurs. Les travailleurs devant agir comme 'surveillant de surface' ou 'sauveteur designe' doivent imperativement avoir complete cette formation avant le debut des travaux.\n\nCette obligation s'applique aux entrepreneurs generaux, specialises et aux donneurs d'ouvrage qui organisent des travaux en espaces clos (egouts, reservoirs, tunnels, fosses, chambres de valves, cuves, silos, etc.). La planification des travaux doit inclure un plan de sauvetage ecrit, une liste des travailleurs formes en sauvetage et la disponibilite immediate de l'equipement de sauvetage sur le site pendant toute la duree des travaux.",
+    "application_terrain": "- Identifier et classifier tous les espaces clos sur le chantier AVANT le debut des travaux (permis requis ou non)\n- S'assurer qu'au moins un sauveteur designe forme est present sur le site pendant toute intervention en espace clos\n- Fournir et inspecter regulierement l'equipement de sauvetage : treuil, harnais, detecteur de gaz, communication\n- Rediger un plan de sauvetage specifique au site et en faire la simulation avec l'equipe avant l'entree\n- Verifier les attestations de formation sauvetage (valides et a jour) de tous les intervenants en espace clos",
+    "sanctions": "Les violations de l'article 2.9.5.1 du CSTC constituent des infractions graves en raison du potentiel mortel des espaces clos. Un inspecteur CNESST peut ordonner l'arret immediat des travaux sans preavis si les conditions de formation ou d'equipement ne sont pas satisfaites. Les amendes pour les personnes morales vont de 1 729 $ a 20 749 $ par infraction, avec aggravation en cas de recidive. En cas d'accident mortel en espace clos sans formation adequats, des accusations criminelles de negligence criminelle (Code criminel art. 219-220) peuvent etre deposees contre les responsables.",
+    "tags": [
+      "sauvetage",
+      "espace-clos",
+      "formation-obligatoire",
+      "CSTC",
+      "2.9.5.1",
+      "travaux-critiques",
+      "sauveteur-designe",
+      "treuil",
+      "detection-gaz",
+      "plan-sauvetage"
+    ]
+  },
+  {
+    "id": "rsst-173",
+    "titre": "Inspection périodique obligatoire des équipements de travail",
+    "categorie": "inspection_equipements",
+    "loi": "RSST",
+    "articles": "173",
+    "contenu": "L'article 173 du RSST impose à tout employeur de soumettre les équipements de travail à des inspections périodiques afin de s'assurer qu'ils demeurent en bon état de fonctionnement et ne présentent aucun danger pour les travailleurs. Cette obligation s'applique à l'ensemble des équipements utilisés dans le cadre du travail, qu'il s'agisse de machines, d'outils motorisés, d'équipements de protection collectifs ou de tout appareil susceptible d'engendrer un risque lors d'une défaillance. La fréquence des inspections doit être établie en fonction de la nature de l'équipement, de son niveau d'utilisation, des conditions d'exposition (poussière, humidité, vibrations) et des recommandations du fabricant.\n\nL'inspection périodique vise à détecter précocement tout signe d'usure, de détérioration, de corrosion ou de déréglage avant qu'une défaillance ne survienne. Elle constitue la pierre angulaire d'une stratégie de maintenance préventive et doit être intégrée dans les procédures opérationnelles de l'entreprise. Chaque type d'équipement requiert un protocole d'inspection adapté à ses caractéristiques techniques : pièces mobiles, systèmes de sécurité intégrés, dispositifs d'arrêt d'urgence, circuits hydrauliques ou pneumatiques.\n\nL'employeur est responsable de désigner des personnes compétentes pour réaliser ces inspections. Une personne compétente doit posséder les connaissances théoriques et l'expérience pratique nécessaires pour identifier les anomalies et évaluer le niveau de risque associé. En milieu industriel (pâtes et papiers, mines, construction), cette obligation revêt une importance capitale compte tenu des charges mécaniques élevées et des conditions d'utilisation extrêmes auxquelles les équipements sont soumis.",
+    "application_terrain": "• Établir un calendrier d'inspection par équipement (ex. : journalier pour les équipements de levage, hebdomadaire pour les convoyeurs, mensuel pour les compresseurs) selon les recommandations du fabricant et les risques identifiés.\n• Former et désigner officiellement les personnes responsables des inspections — leur compétence doit être documentée (formation, certification, expérience).\n• Utiliser des listes de vérification (checklists) standardisées pour chaque type d'équipement, couvrant tous les points critiques : systèmes de sécurité, joints, câbles, boulonnerie, dispositifs d'arrêt d'urgence.\n• Inspecter systématiquement les équipements après tout incident, choc accidentel ou intervention de maintenance corrective avant la remise en service.\n• Intégrer l'inspection dans les procédures de démarrage de quart (pre-shift inspection) pour les équipements utilisés en continu.",
+    "sanctions": "Le non-respect de l'obligation d'inspection périodique expose l'employeur à des amendes pouvant aller de 1 755 $ à 6 003 $ pour une première infraction en vertu de la LSST. En cas de récidive, les montants peuvent être doublés ou triplés. Si une défaillance d'équipement non inspecté cause un accident de travail grave ou mortel, l'employeur peut faire face à des poursuites pénales avec des amendes pouvant atteindre 300 000 $ par infraction, en plus de l'engagement de sa responsabilité civile. La CNESST peut également ordonner l'arrêt immédiat des travaux (avis de correction ou ordre d'arrêt) jusqu'à la mise en conformité.",
+    "tags": [
+      "inspection",
+      "equipements",
+      "periodique",
+      "maintenance",
+      "prevention",
+      "RSST",
+      "conformation",
+      "securite"
+    ]
+  },
+  {
+    "id": "rsst-174",
+    "titre": "Registre d'inspection et d'entretien obligatoire des équipements",
+    "categorie": "inspection_equipements",
+    "loi": "RSST",
+    "articles": "174",
+    "contenu": "L'article 174 du RSST exige que tout employeur tienne un registre d'inspection et d'entretien pour chaque équipement soumis à des inspections périodiques. Ce registre constitue la preuve documentaire que l'employeur s'acquitte de ses obligations légales en matière de maintenance préventive et d'inspection. Il doit être accessible en tout temps aux travailleurs concernés, au comité de santé et de sécurité (CSS) et aux inspecteurs de la CNESST lors de leurs visites.\n\nLe registre doit contenir, pour chaque intervention, la date de l'inspection ou de l'entretien, l'identité de la personne ayant effectué les vérifications, les résultats observés (conformité ou anomalies détectées), les mesures correctives appliquées le cas échéant, et la date de la prochaine inspection prévue. Ces informations permettent de constituer un historique complet de l'état de chaque équipement et de démontrer la rigueur du programme de maintenance en place. En cas d'accident, le registre sera l'une des premières pièces examinées par les enquêteurs de la CNESST.\n\nLe format du registre peut être papier ou numérique, à condition qu'il soit sécurisé, intègre et facilement consultable. Dans les industries lourdes comme les pâtes et papiers, les mines ou la construction, les registres informatisés (GMAO — Gestion de Maintenance Assistée par Ordinateur) sont fortement recommandés pour gérer efficacement un grand parc d'équipements. La durée de conservation des registres doit être suffisante pour couvrir au minimum la durée de vie utile de l'équipement ou cinq ans selon les meilleures pratiques.",
+    "application_terrain": "• Créer une fiche d'équipement individuelle pour chaque machine ou outil critique, intégrant le numéro de série, la date d'achat, les caractéristiques techniques et l'historique complet des interventions.\n• Utiliser des formulaires standardisés ou un logiciel de GMAO pour consigner toutes les inspections — chaque entrée doit être datée, signée et archivée de façon à ne pas pouvoir être modifiée rétroactivement.\n• Afficher un sommaire du calendrier d'inspection à proximité de chaque équipement majeur pour que les opérateurs puissent vérifier que l'entretien est à jour.\n• Inclure dans le registre les rapports d'inspection externe (certifications, inspections par des organismes accrédités) ainsi que les bulletins de service du fabricant appliqués.\n• Réviser le registre lors des réunions du comité SST pour identifier les équipements présentant des anomalies récurrentes et décider d'actions correctives structurelles.",
+    "sanctions": "L'absence de registre ou un registre incomplet et non tenu à jour constitue une infraction directe au RSST passible d'une amende de 1 755 $ à 6 003 $ (première infraction). Un registre falsifié ou incomplet lors d'une enquête d'accident peut constituer une circonstance aggravante entraînant des pénalités plus sévères. La CNESST peut émettre un avis de correction forçant l'employeur à se conformer dans un délai déterminé. En cas d'accident grave lié à un équipement dont le registre était absent ou déficient, la responsabilité pénale de l'employeur et des gestionnaires directement impliqués peut être engagée.",
+    "tags": [
+      "registre",
+      "entretien",
+      "inspection",
+      "documentation",
+      "RSST",
+      "GMAO",
+      "historique",
+      "conformite"
+    ]
+  },
+  {
+    "id": "rsst-175-176",
+    "titre": "Retrait de service et remplacement des équipements défectueux",
+    "categorie": "inspection_equipements",
+    "loi": "RSST",
+    "articles": "175-176",
+    "contenu": "Les articles 175 et 176 du RSST établissent les obligations claires concernant le retrait de service immédiat de tout équipement présentant une défectuosité susceptible de mettre en danger la sécurité des travailleurs. Dès qu'une anomalie est détectée — qu'elle soit signalée par un travailleur, découverte lors d'une inspection périodique ou constatée suite à un incident — l'équipement doit être retiré de l'utilisation jusqu'à ce qu'il ait été réparé, ajusté ou remplacé, et que sa conformité ait été vérifiée et documentée. Ce principe de précaution est fondamental dans la prévention des accidents mécaniques.\n\nL'article 176 précise les conditions de remise en service : l'équipement ne peut être réintégré dans les opérations qu'après qu'une personne compétente ait certifié que les réparations effectuées restituent l'équipement à un état de fonctionnement sécuritaire, conformément aux spécifications du fabricant. Toute remise en service doit être consignée dans le registre d'entretien prévu à l'article 174. L'employeur a également l'obligation d'informer les travailleurs concernés des défectuosités constatées et des mesures correctives appliquées.\n\nLe retrait de service doit être matérialisé physiquement par un système de cadenassage (lockout/tagout) ou un étiquetage clairement visible signalant l'interdiction d'utilisation. Dans les milieux industriels complexes où plusieurs équipes se relaient, la communication formelle de l'état des équipements entre les quarts est essentielle pour éviter qu'un équipement retiré ne soit réactivé par inadvertance. Le remplacement d'un équipement doit être précédé d'une évaluation des risques pour s'assurer que le nouvel équipement répond aux normes en vigueur.",
+    "application_terrain": "• Implanter un système de cadenassage (lockout) et d'étiquetage (tagout) standardisé pour tous les équipements retirés du service — l'étiquette doit indiquer la date, la nature du problème et le nom du responsable.\n• Former tous les travailleurs et superviseurs à la procédure de signalement et de retrait d'équipement défectueux : zéro tolérance pour l'utilisation d'un équipement étiqueté hors service.\n• Établir une procédure de remise en service formelle : vérification par personne compétente, essai à vide, documentation dans le registre, communication à l'équipe avant reprise des opérations.\n• Maintenir un stock de pièces critiques ou des équipements de remplacement pour les machines essentielles à la production afin de réduire les pressions à remettre en service un équipement non conforme.\n• Lors de remplacement d'équipement, effectuer une évaluation des risques (ER) sur le nouvel équipement avant la première mise en service et conserver le rapport dans le dossier de l'équipement.",
+    "sanctions": "Remettre en service un équipement défectueux sans avoir procédé aux réparations requises constitue une faute grave exposant l'employeur à des amendes de 1 755 $ à 6 003 $ par infraction. Si un travailleur est blessé en raison d'un équipement connu comme défectueux mais maintenu en service, les amendes peuvent atteindre 300 000 $ et des poursuites criminelles pour négligence criminelle peuvent être intentées contre les dirigeants. La CNESST peut ordonner l'arrêt immédiat des travaux et l'équipement peut être séquestré aux fins d'enquête. Des dommages civils peuvent être réclamés par le travailleur blessé ou sa famille.",
+    "tags": [
+      "retrait_service",
+      "defectueux",
+      "remplacement",
+      "lockout",
+      "tagout",
+      "cadenassage",
+      "remise_service",
+      "RSST"
+    ]
+  },
+  {
+    "id": "rsst-5",
+    "titre": "Maintien en état optimal des équipements de ventilation, éclairage et sécurité",
+    "categorie": "inspection_equipements",
+    "loi": "RSST",
+    "articles": "5",
+    "contenu": "L'article 5 du RSST pose une obligation générale fondamentale : l'employeur doit maintenir les installations, les équipements et les lieux de travail dans un état ne présentant pas de risques pour la santé et la sécurité des travailleurs. Cet article s'applique spécifiquement — mais non exclusivement — aux systèmes de ventilation, d'éclairage et aux dispositifs de sécurité collectifs qui sont indispensables au maintien de conditions de travail sécuritaires. Un système de ventilation défaillant peut entraîner l'accumulation de contaminants chimiques ou biologiques à des concentrations dangereuses. Un éclairage insuffisant augmente le risque de chutes, de collisions et d'erreurs de manipulation.\n\nLes équipements de sécurité visés par cet article incluent notamment les systèmes de détection de gaz, les alarmes d'incendie, les systèmes d'extinction automatique, les équipements de premiers secours, les douches oculaires et les sorties de secours. Leur état de fonctionnement doit être vérifié régulièrement selon des protocoles établis. Pour la ventilation industrielle, les débits d'air, les pressions différentielles et l'efficacité de captage des polluants à la source doivent être mesurés périodiquement et comparés aux valeurs de conception.\n\nCet article crée une obligation de résultat : peu importe les difficultés organisationnelles ou financières, l'employeur doit s'assurer que ces équipements critiques sont opérationnels en tout temps. En cas de défaillance d'un système critique, des mesures compensatoires immédiates doivent être mises en place (ventilation temporaire, éclairage d'appoint, EPI supplémentaires) jusqu'à la remise en état complète. Cette obligation s'étend à tous les secteurs — usines, chantiers de construction, mines, entrepôts et bureaux.",
+    "application_terrain": "• Établir un programme d'inspection mensuel pour les systèmes de ventilation (filtres, débits, conduits) et semestriel pour une mesure complète des contaminants aériens avec comparaison aux VEMP (Valeurs d'exposition moyenne pondérée).\n• Tester les systèmes d'alarme (incendie, gaz, évacuation) selon un calendrier mensuel minimum et documenter chaque test dans le registre dédié.\n• Vérifier l'intensité de l'éclairage (en lux) dans toutes les zones de travail au minimum annuellement ou après toute modification des installations — utiliser un luxmètre calibré.\n• Créer un inventaire complet des équipements de sécurité (douches, extincteurs, défibrillateurs, kits de premiers secours) avec les dates d'inspection et d'expiration de chaque item.\n• Former un responsable de zone pour chaque secteur critique — cette personne effectue des vérifications visuelles quotidiennes et escalade immédiatement toute anomalie au superviseur et au département de maintenance.",
+    "sanctions": "Le non-respect de l'article 5 du RSST peut entraîner des amendes de 1 755 $ à 6 003 $ pour l'employeur (première infraction) et des montants doublés en cas de récidive. La CNESST dispose du pouvoir d'ordonner l'arrêt immédiat des travaux dans toute zone où un équipement de sécurité critique est hors service. Si une défaillance de ventilation ou d'éclairage contribue à un accident, l'employeur fait face à des poursuites pénales pouvant atteindre 300 000 $ d'amende. Les gestionnaires ayant connaissance de la défaillance et n'ayant pas agi peuvent être personnellement tenus responsables.",
+    "tags": [
+      "ventilation",
+      "eclairage",
+      "securite",
+      "etat_optimal",
+      "RSST",
+      "systemes_securite",
+      "contaminants",
+      "inspection"
+    ]
+  },
+  {
+    "id": "cstc-2.15.1",
+    "titre": "Vérification avant utilisation initiale et inspection périodique des équipements de chantier",
+    "categorie": "inspection_equipements",
+    "loi": "CSTC",
+    "articles": "2.15.1",
+    "contenu": "L'article 2.15.1 du Code de sécurité pour les travaux de construction (CSTC) établit l'obligation de procéder à une vérification complète de tout équipement avant sa première utilisation sur un chantier et de maintenir un programme d'inspection périodique tout au long de son utilisation. Cette disposition s'applique à tous les équipements mécaniques et électriques présents sur les chantiers de construction : grues, excavateurs, chariots élévateurs, nacelles élévatrices, compresseurs, générateurs, outils pneumatiques et électriques, échafaudages motorisés et tout autre équipement susceptible de présenter un danger.\n\nLa vérification avant utilisation initiale doit couvrir l'intégralité des systèmes de l'équipement : structure porteuse, mécanismes de transmission, systèmes hydrauliques, dispositifs de sécurité (limiteurs de charge, interrupteurs de fin de course, alarmes de surcharge), équipements de protection de l'opérateur (cabine, ceinture, ROPS/FOPS), et conformité aux normes applicables (CSA, ANSI ou équivalent). Cette vérification doit être effectuée par une personne qualifiée et son résultat consigné dans un rapport formel avant toute mise en service.\n\nLes inspections périodiques subséquentes doivent être planifiées en tenant compte du type d'équipement, des conditions d'utilisation sur chantier (sols instables, vibrations, poussière de silice, conditions climatiques extrêmes) et des exigences du fabricant. En construction, les équipements sont soumis à des contraintes particulièrement sévères qui accélèrent l'usure — les intervalles d'inspection doivent donc souvent être plus courts que les recommandations générales du fabricant.",
+    "application_terrain": "• Créer un formulaire de vérification avant mise en service (commissioning checklist) spécifique à chaque catégorie d'équipement — ce formulaire doit être signé par le compétent et remis au surintendant de chantier avant la première utilisation.\n• Exiger de tous les sous-traitants amenant leurs propres équipements sur le chantier qu'ils fournissent la preuve d'inspection récente et les registres d'entretien avant autorisation d'accès au chantier.\n• Effectuer une inspection visuelle quotidienne (pre-shift check) par l'opérateur pour tous les équipements de levage, de transport et de terrassement — consigner les résultats sur une fiche journalière signée.\n• Planifier des inspections approfondies hebdomadaires par le contremaître ou le responsable mécanique de chantier pour tous les équipements utilisés en continu.\n• Documenter les conditions d'utilisation inhabituelles (travaux en terrain très instable, surcharges exceptionnelles, impacts) et déclencher une inspection de suivi immédiate suite à tout incident mécanique, même mineur.",
+    "sanctions": "Une infraction à l'article 2.15.1 du CSTC expose le maître d'ouvrage, l'entrepreneur général et le sous-traitant propriétaire de l'équipement à des amendes de 1 755 $ à 6 003 $ par infraction (LSST). En cas d'accident impliquant un équipement n'ayant pas été vérifié avant utilisation, les amendes peuvent atteindre 300 000 $ et la fermeture du chantier peut être ordonnée par la CNESST. Les organismes d'inspection accrédités (OIA) peuvent suspendre les certifications d'équipements non conformes. La responsabilité peut être partagée entre le propriétaire de l'équipement et l'entrepreneur général si ce dernier a permis l'utilisation d'un équipement sans exiger la preuve d'inspection.",
+    "tags": [
+      "verification_initiale",
+      "inspection_periodique",
+      "chantier",
+      "CSTC",
+      "mise_en_service",
+      "commissioning",
+      "construction",
+      "equipements_chantier"
+    ]
+  },
+  {
+    "id": "cstc-2.15.12-8",
+    "titre": "Registre obligatoire des inspections et réparations des appareils de levage",
+    "categorie": "inspection_equipements",
+    "loi": "CSTC",
+    "articles": "2.15.12(8)",
+    "contenu": "L'article 2.15.12(8) du CSTC impose spécifiquement la tenue d'un registre détaillé de toutes les inspections et réparations effectuées sur les appareils de levage utilisés sur les chantiers de construction. Les appareils de levage visés comprennent les grues à tour, les grues mobiles (sur chenilles, sur camion, sur porteur tout-terrain), les portiques, les ponts roulants de chantier, les treuils mécaniques, les nacelles élévatrices (boomlift, ciseau, mât vertical) et les monte-charges. Ces équipements font l'objet d'exigences documentaires renforcées en raison du niveau de risque exceptionnel qu'ils représentent — une défaillance peut avoir des conséquences catastrophiques pour plusieurs travailleurs simultanément.\n\nLe registre exigé par cet article doit contenir pour chaque intervention : la date et le type d'inspection (quotidienne, hebdomadaire, mensuelle, annuelle), l'identité et les qualifications de l'inspecteur, les composants vérifiés (structure, câbles, crochets, limiteurs de charge, freins, dispositifs anti-déraillement, systèmes électriques et hydrauliques), les défectuosités constatées, les réparations effectuées avec détail des pièces remplacées, la certification de conformité après réparation et la date prévue de la prochaine inspection. Ce niveau de détail permet de retracer l'historique complet de l'appareil et d'identifier les tendances d'usure anormale.\n\nLe registre doit être conservé sur le chantier et présenté immédiatement sur demande de l'inspecteur de la CNESST ou du responsable de chantier. Pour les appareils de levage dont la capacité nominale dépasse un certain seuil (généralement 2 000 kg), des inspections par des organismes accrédités (OIA) sont requises en plus des inspections internes, et leurs rapports doivent être intégrés au registre. La conservation des registres doit couvrir la durée totale d'utilisation de l'appareil plus une période minimale post-utilisation déterminée par la réglementation.",
+    "application_terrain": "• Créer un registre physique (classeur résistant aux conditions de chantier) et numérique (sauvegarde cloud) pour chaque appareil de levage présent sur le chantier — le registre physique reste avec l'appareil en tout temps.\n• Implanter un système d'inspection à 4 niveaux : quotidien (opérateur, liste de contrôle 10 points), hebdomadaire (contremaître ou mécanicien de chantier), mensuel (personne désignée compétente avec rapport détaillé) et annuel ou selon les heures d'opération (OIA accrédité avec certification).\n• Former les opérateurs de grue et de nacelle à remplir correctement les fiches d'inspection quotidienne — aucun démarrage sans fiche complétée et signée, même en urgence de production.\n• Pour les réparations majeures (remplacement de câbles porteurs, réparation de structure, modifications du système hydraulique), exiger une inspection de reprise par un OIA accrédité avant remise en service et annexer le rapport au registre.\n• Lors du transfert d'un appareil de levage vers un autre chantier, transmettre l'intégralité du registre au nouveau responsable de chantier — ce registre est indissociable de l'appareil.",
+    "sanctions": "L'absence de registre ou un registre incomplet pour un appareil de levage constitue une infraction grave au CSTC pouvant entraîner une amende de 1 755 $ à 6 003 $ (première infraction) avec doublement ou triplement en cas de récidive. La CNESST peut ordonner l'immobilisation immédiate de tout appareil de levage sans registre conforme — l'arrêt d'une grue à tour sur un chantier actif peut engendrer des pertes économiques considérables. Si une défaillance non documentée d'un appareil de levage cause un accident grave ou mortel, les amendes peuvent atteindre 300 000 $ par infraction et des poursuites criminelles pour négligence criminelle peuvent être intentées. Les certifications des opérateurs peuvent être suspendues par la Régie du bâtiment du Québec (RBQ) dans les cas les plus graves.",
+    "tags": [
+      "registre",
+      "appareils_levage",
+      "grue",
+      "nacelle",
+      "CSTC",
+      "inspections_levage",
+      "OIA",
+      "certification",
+      "construction"
+    ]
+  },
+  {
+    "id": "lsst-51",
+    "titre": "Obligations générales de l'employeur — santé, sécurité, intégrité",
+    "categorie": "obligations_employeur",
+    "loi": "LSST",
+    "articles": "51",
+    "contenu": "L'article 51 de la Loi sur la santé et la sécurité du travail (LSST) constitue le fondement de toutes les obligations patronales en matière de SST au Québec. Il impose à tout employeur de prendre les mesures nécessaires pour protéger la santé, assurer la sécurité et préserver l'intégrité physique et psychique de ses travailleurs. Cette obligation est générale, proactive et non exhaustive : l'employeur ne peut se contenter de réagir aux accidents, il doit anticiper les risques et les éliminer à la source.\n\nL'article 51 couvre plusieurs obligations concrètes : informer les travailleurs des risques liés à leur emploi, former et superviser les employés nouvellement embauchés ou affectés à de nouvelles tâches, afficher les informations exigées par la loi, fournir des équipements de protection individuelle (EPI) appropriés et s'assurer qu'ils sont utilisés correctement, ainsi que s'assurer que l'organisation du travail et les méthodes utilisées sont sécuritaires. L'employeur doit aussi respecter les normes et règlements adoptés en vertu de la LSST.\n\nCet article s'applique à TOUS les employeurs du Québec, quelle que soit la taille de l'entreprise ou le secteur d'activité. Il vise autant les PME de deux employés que les grandes corporations industrielles. Il constitue la base légale sur laquelle reposent la plupart des interventions de la CNESST lors d'inspections ou d'enquêtes d'accidents.",
+    "application_terrain": "- Afficher les droits et obligations des travailleurs (art. 51.9) dans un endroit visible accessible à tous les employés.\n- Fournir les EPI requis (casque, harnais, lunettes, etc.) AVANT que le travailleur commence la tâche dangereuse — pas après.\n- Documenter toutes les formations SST données : nom du travailleur, date, formateur, contenu abordé.\n- Faire une tournée de plancher régulière pour identifier les nouveaux risques avant qu'un incident ne survienne.\n- S'assurer que les nouvelles recrues et les travailleurs réaffectés reçoivent une formation spécifique à leur poste avant d'opérer seuls.",
+    "sanctions": "Le non-respect de l'article 51 expose l'employeur à des amendes de 1 741 $ à 173 205 $ par infraction (barème 2024, indexé annuellement). En cas de récidive, les amendes sont doublées. Si un travailleur subit une lésion professionnelle due à un manquement à l'article 51, l'employeur peut être tenu responsable des coûts d'indemnisation et voir son taux de cotisation CNESST augmenter significativement. Dans les cas graves impliquant négligence criminelle, des poursuites pénales sous le Code criminel (art. 217.1) peuvent également être intentées contre les dirigeants.",
+    "tags": [
+      "obligations",
+      "employeur",
+      "lsst-51",
+      "securite",
+      "prevention",
+      "epi",
+      "formation",
+      "base-legale"
+    ]
+  },
+  {
+    "id": "lsst-52",
+    "titre": "Registre des contaminants et matières dangereuses",
+    "categorie": "obligations_employeur",
+    "loi": "LSST",
+    "articles": "52",
+    "contenu": "L'article 52 de la LSST oblige tout employeur qui utilise, produit, entrepose ou élimine des contaminants ou des matières dangereuses dans son établissement à tenir un registre à jour de ces substances. Ce registre doit être accessible à tout moment aux travailleurs, aux représentants en santé et sécurité, aux membres du comité SST et aux inspecteurs de la CNESST. L'objectif est de permettre une identification rapide des risques chimiques et biologiques présents dans le milieu de travail.\n\nLe registre doit contenir, pour chaque substance dangereuse : sa dénomination chimique et commerciale, sa quantité approximative sur les lieux, les risques connus pour la santé et la sécurité, et les mesures de prévention applicables. En lien avec le Règlement sur l'information concernant les produits contrôlés (SIMDUT/SGH), l'employeur doit également s'assurer que des fiches de données de sécurité (FDS) à jour sont disponibles pour chaque produit contrôlé utilisé.\n\nCet article s'applique à tous les secteurs où des produits chimiques, biologiques ou dangereux sont utilisés : construction, fabrication, nettoyage industriel, agriculture, soins de santé, etc. Une entreprise qui utilise même des produits de nettoyage courants (comme des désinfectants concentrés) est visée par cette obligation dès lors que ces produits présentent un risque pour la santé.",
+    "application_terrain": "- Créer un registre physique ou numérique (tableur ou logiciel SST) répertoriant tous les produits dangereux utilisés dans l'établissement.\n- Coller les FDS (fiches de données de sécurité) dans un cartable accessible en tout temps dans chaque zone de travail concernée.\n- Former les travailleurs à lire et interpréter une FDS — minimum : savoir identifier les pictogrammes SGH (crâne, flamme, corrosif, etc.).\n- Mettre le registre à jour dès qu'un nouveau produit est introduit ou qu'un produit existant est retiré de l'inventaire.\n- Vérifier que les étiquettes SIMDUT sur les contenants sont complètes, lisibles et en français.",
+    "sanctions": "L'absence ou l'incomplétude du registre peut entraîner une mise en demeure de la CNESST suivie d'une amende de 1 741 $ à 173 205 $. L'employeur qui refuse d'accès au registre à un inspecteur ou à un représentant syndical commet une infraction distincte. En cas d'accident impliquant une matière dangereuse non répertoriée, les tribunaux considèrent généralement cette omission comme une faute aggravante, ce qui peut alourdir les amendes et engager la responsabilité civile personnelle des dirigeants.",
+    "tags": [
+      "registre",
+      "contaminants",
+      "matieres-dangereuses",
+      "simdut",
+      "fds",
+      "chimique",
+      "lsst-52",
+      "risques"
+    ]
+  },
+  {
+    "id": "lsst-58",
+    "titre": "Programme de prévention obligatoire — établissements de 20 travailleurs et plus",
+    "categorie": "obligations_employeur",
+    "loi": "LSST",
+    "articles": "58",
+    "contenu": "L'article 58 de la LSST oblige tout employeur dont l'établissement compte 20 travailleurs ou plus à mettre en place un programme de prévention écrit. Ce programme constitue l'outil de planification central de la SST dans l'entreprise : il identifie les risques, détermine les mesures pour les éliminer ou les contrôler, et fixe les priorités d'action avec des délais de réalisation. Il doit être adapté à la réalité spécifique de l'établissement concerné — aucun programme générique copié-collé n'est accepté.\n\nLe programme de prévention doit être élaboré en consultation avec le comité de santé et sécurité (s'il en existe un) ou le représentant en santé et sécurité. Une fois rédigé, il doit être transmis à la CNESST sur demande. L'employeur doit aussi s'assurer que le programme est réellement appliqué — un document qui dort dans un tiroir n'est pas conforme à la loi. Des mécanismes de suivi, de révision et de mise à jour doivent être intégrés au programme.\n\nCet article s'applique aux établissements de toutes les industries visées par la LSST dès que le seuil de 20 travailleurs est atteint. Attention : le calcul inclut tous les travailleurs, y compris les temps partiels et les saisonniers. Une entreprise qui oscille autour de 20 employés doit surveiller ce seuil et mettre en place le programme dès qu'il est franchi.",
+    "application_terrain": "- Désigner un responsable SST interne pour coordonner la rédaction et le suivi du programme de prévention.\n- Procéder à une analyse des risques par poste de travail avant de rédiger le programme — utiliser une grille d'identification des dangers (physiques, chimiques, ergonomiques, psychosociaux).\n- Établir un calendrier d'actions correctives avec des responsables nommés et des échéances réalistes.\n- Inclure un volet formation dans le programme : qui doit être formé, sur quoi, à quelle fréquence.\n- Réviser le programme au moins une fois par an ou à chaque changement significatif dans les procédés ou les équipements.",
+    "sanctions": "L'absence d'un programme de prévention dans un établissement de 20 travailleurs et plus est une infraction directe à la LSST, punissable d'une amende de 1 741 $ à 173 205 $. La CNESST peut aussi émettre un avis de correction exigeant la mise en place du programme dans un délai précis. Si l'employeur ne s'y conforme pas, il s'expose à des amendes récurrentes jusqu'à correction. En cas d'accident grave dans un établissement sans programme de prévention, cette absence est retenue comme facteur aggravant lors des poursuites pénales.",
+    "tags": [
+      "programme-prevention",
+      "20-travailleurs",
+      "lsst-58",
+      "planification",
+      "risques",
+      "obligatoire",
+      "etablissement"
+    ]
+  },
+  {
+    "id": "lsst-59",
+    "titre": "Contenu du programme de prévention — mesures, surveillance et suivi",
+    "categorie": "obligations_employeur",
+    "loi": "LSST",
+    "articles": "59",
+    "contenu": "L'article 59 précise le contenu minimal obligatoire que doit comprendre le programme de prévention institué par l'article 58. Un programme conforme doit inclure : (1) les programmes de maîtrise des contaminants et des risques physiques présents dans l'établissement ; (2) les mesures de surveillance de la qualité du milieu de travail et de la santé des travailleurs ; (3) les mesures d'urgence en cas d'accident ou de sinistre ; (4) les mécanismes de formation et d'information des travailleurs ; (5) les programmes d'entretien préventif des équipements ; (6) la supervision de l'application des mesures de sécurité. Chaque élément doit être adapté aux risques réels présents dans l'établissement.\n\nL'article 59 insiste particulièrement sur la surveillance continue : l'employeur ne doit pas simplement identifier les risques une fois, mais mettre en place des mécanismes réguliers de vérification (rondes de sécurité, audits internes, analyses d'incidents). Le volet santé inclut des examens médicaux de surveillance pour les travailleurs exposés à des contaminants spécifiques, selon les protocoles établis par le médecin responsable de l'établissement.\n\nCet article s'applique à tous les établissements déjà visés par l'article 58 (20 travailleurs et plus). Le niveau de détail du programme doit être proportionnel à la nature et à l'importance des risques dans l'établissement. Un chantier de construction ou une usine chimique aura un programme beaucoup plus élaboré qu'un bureau administratif, même si les deux sont assujettis à la même obligation.",
+    "application_terrain": "- Intégrer un calendrier d'entretien préventif pour tous les équipements à risque (presses, nacelles, grues, systèmes électriques, etc.) directement dans le programme.\n- Documenter les procédures d'urgence par scénario : incendie, déversement chimique, blessure grave, panne électrique — et les afficher dans les zones concernées.\n- Prévoir des mesures de surveillance atmosphérique (détection de gaz, mesures de bruit, etc.) si des contaminants sont présents et définir les fréquences de mesure.\n- Inclure les procédures de cadenassage (LOTO) pour tous les équipements nécessitant une intervention de maintenance.\n- Tenir un registre des inspections internes réalisées dans le cadre du programme : date, zone inspectée, observations, correctifs apportés.",
+    "sanctions": "Un programme de prévention incomplet — qui ne couvre pas les éléments exigés par l'article 59 — est traité par la CNESST comme l'équivalent d'une absence de programme. L'employeur s'expose aux mêmes amendes (1 741 $ à 173 205 $) et peut recevoir un avis de correction avec délai de mise en conformité. En cas d'accident impliquant un risque non couvert par le programme alors qu'il aurait dû l'être, la responsabilité de l'employeur est directement engagée, et les tribunaux administratifs (TAT) peuvent imposer des pénalités supplémentaires liées aux coûts de réadaptation du travailleur blessé.",
+    "tags": [
+      "contenu-programme",
+      "surveillance",
+      "suivi",
+      "lsst-59",
+      "mesures",
+      "urgence",
+      "entretien-preventif",
+      "formation"
+    ]
+  },
+  {
+    "id": "lsst-60",
+    "titre": "Transmission du programme au comité SST et rapport triennal",
+    "categorie": "obligations_employeur",
+    "loi": "LSST",
+    "articles": "60",
+    "contenu": "L'article 60 de la LSST établit les obligations de communication et de reddition de comptes de l'employeur concernant son programme de prévention. L'employeur doit transmettre une copie complète du programme de prévention au comité de santé et sécurité dès sa création ou sa mise à jour. Cette transmission n'est pas une formalité — le comité a le droit de l'examiner, de formuler des recommandations et de demander des modifications. L'employeur est tenu de répondre aux recommandations du comité dans un délai raisonnable.\n\nDe plus, l'article 60 impose la production d'un rapport d'évaluation du programme au moins tous les trois ans. Ce rapport doit faire le bilan des mesures mises en œuvre, des résultats obtenus (statistiques d'accidents, taux de fréquence, maladies professionnelles), des lacunes identifiées et des ajustements planifiés. Ce rapport triennal est un outil de gestion SST indispensable — il oblige l'employeur à mesurer l'efficacité réelle de ses actions de prévention plutôt que de simplement les documenter.\n\nL'article 60 s'inscrit dans une logique de transparence et de participation des travailleurs à la gestion SST. Il s'applique à tout établissement disposant d'un comité de santé et sécurité (c.-à-d. les établissements de secteurs prioritaires avec 20 travailleurs et plus ou tout établissement de 300 travailleurs et plus). L'absence de comité ne dispense pas l'employeur de produire le rapport triennal — il doit alors le remettre directement au représentant en santé et sécurité ou l'afficher pour les travailleurs.",
+    "application_terrain": "- Planifier la production du rapport triennal à l'avance : créer un rappel calendrier 3 mois avant l'échéance pour collecter les données nécessaires.\n- Présenter le rapport triennal lors d'une réunion officielle du comité SST et archiver le procès-verbal confirmant la transmission.\n- Compiler annuellement les données d'accidents et incidents (fréquence, gravité, type de blessure, département) pour faciliter la rédaction du rapport triennal.\n- Répondre par écrit aux recommandations du comité SST suite à leur examen du programme — même un refus doit être motivé et documenté.\n- Conserver tous les rapports triennaux passés dans le dossier SST de l'établissement — la CNESST peut les demander lors d'une inspection.",
+    "sanctions": "Le défaut de transmettre le programme au comité SST ou de produire le rapport triennal constitue une infraction à la LSST, exposant l'employeur à des amendes de 1 741 $ à 173 205 $. Si la CNESST constate lors d'une inspection que l'employeur n'a pas consulté le comité sur le programme, elle peut imposer un avis de correction et exiger la tenue d'une réunion du comité dans un délai fixé. Le manquement répété à cette obligation de reddition de comptes peut signaler à la CNESST une culture SST déficiente, déclenchant une surveillance accrue de l'établissement.",
+    "tags": [
+      "rapport-triennal",
+      "comite-sst",
+      "transmission",
+      "lsst-60",
+      "reddition-comptes",
+      "evaluation",
+      "bilan"
+    ]
+  },
+  {
+    "id": "lsst-69-80",
+    "titre": "Comité de santé et sécurité — composition, attributions et fonctionnement",
+    "categorie": "obligations_employeur",
+    "loi": "LSST",
+    "articles": "69-80",
+    "contenu": "Les articles 69 à 80 de la LSST régissent la création, la composition et le fonctionnement des comités de santé et sécurité (CSS) dans les établissements assujettis. Un CSS est obligatoire dans tout établissement d'un secteur d'activité prioritaire (défini par règlement) comptant 20 travailleurs ou plus, ainsi que dans tout établissement de 300 travailleurs ou plus, tous secteurs confondus. Le CSS est une instance paritaire : il est composé d'un nombre égal de représentants de l'employeur et de représentants des travailleurs (désignés par le syndicat ou élus par les travailleurs en l'absence de syndicat).\n\nLes attributions du comité sont larges et substantielles (art. 78) : choisir le médecin responsable de l'établissement, établir des programmes de formation, participer à l'identification et à l'évaluation des risques, approuver le programme de prévention, faire des recommandations à l'employeur sur toute question de SST, recevoir les copies des rapports d'accident, tenir des registres, et effectuer des inspections des lieux de travail. Le CSS doit se réunir au moins une fois par mois (art. 76) ou aussi souvent que nécessaire. L'employeur est obligé de prendre en considération les recommandations du comité et de justifier par écrit tout refus.\n\nLe fonctionnement du CSS est encadré par la loi pour garantir son efficacité : les membres ont droit à la libération de leur travail avec maintien du salaire pour assister aux réunions et accomplir leurs fonctions (art. 72). L'employeur doit mettre à la disposition du comité les ressources nécessaires (locaux, documentation, accès aux lieux de travail). Un règlement de fonctionnement interne peut être adopté pour préciser les modalités propres à chaque établissement, notamment la fréquence des inspections et les procédures de traitement des recommandations.",
+    "application_terrain": "- Tenir un registre officiel de toutes les réunions du comité SST : ordre du jour, présences, résolutions adoptées, recommandations formulées et réponses de l'employeur.\n- Libérer les membres du comité (travailleurs ET représentants patronaux) avec salaire pour toutes les activités SST : réunions, inspections, formations — ne jamais refuser cette libération.\n- Donner accès au comité à tous les documents SST de l'établissement : registre des accidents, rapports d'inspection CNESST, FDS, programme de prévention, résultats de surveillance.\n- Intégrer les recommandations du comité dans le programme de prévention dès qu'elles sont adoptées — documenter la mise en oeuvre ou justifier formellement le refus.\n- Planifier un calendrier annuel des réunions mensuelles dès le début de l'année et le communiquer à tous les membres pour éviter les absences et les reports.",
+    "sanctions": "Le défaut de mettre en place un comité SST dans un établissement assujetti est une infraction à la LSST passible d'une amende de 1 741 $ à 173 205 $. Entraver le fonctionnement du comité (refus de libération, non-transmission de documents, ignorance systématique des recommandations) constitue une infraction distincte avec la même fourchette d'amendes. Un employeur qui prend des mesures de représailles contre un membre du comité (mise à pied, mutation forcée, réduction de salaire) s'expose à des poursuites additionnelles pour pratiques interdites, pouvant entraîner la réintégration du travailleur et le paiement des salaires perdus.",
+    "tags": [
+      "comite-sst",
+      "lsst-69-80",
+      "paritaire",
+      "attributions",
+      "fonctionnement",
+      "reunions",
+      "travailleurs",
+      "employeur",
+      "prevention"
+    ]
+  },
+  {
+    "id": "lsst-62",
+    "titre": "Déclaration obligatoire des accidents graves à la CNESST (24h)",
+    "categorie": "urgences_accidents",
+    "loi": "LSST",
+    "articles": "62",
+    "contenu": "L'article 62 de la Loi sur la santé et la sécurité du travail (LSST) impose à tout employeur de déclarer sans délai à la CNESST tout accident qui a causé ou est susceptible d'avoir causé la mort d'un travailleur, ou qui a provoqué une blessure nécessitant l'hospitalisation. Cette obligation de déclaration doit être faite dans les 24 heures suivant l'événement, par téléphone dans un premier temps, puis confirmée par écrit dans les délais prescrits. L'objectif est de permettre à la CNESST d'intervenir rapidement pour enquêter et prévenir toute récidive.\n\nSont visés par cette obligation tous les employeurs du Québec assujettis à la LSST, qu'il s'agisse d'un employeur privé, municipal, ou du secteur public. L'accident doit être survenu sur les lieux du travail ou lors de l'exécution du travail. Cela inclut les accidents de la route en contexte de travail, les effondrements de structures, les chutes graves, les intoxications aiguës, les électrocutions, et tout incident mettant en jeu la vie d'un travailleur. Les incidents dangereux (near miss) ayant un fort potentiel de causer la mort ou une blessure grave doivent également faire l'objet d'une déclaration.\n\nParallèlement à la déclaration, l'employeur est tenu de préserver les lieux de l'accident dans l'état où ils se trouvaient au moment de l'événement, sauf pour dégager un blessé ou éviter un sur-accident. Aucun nettoyage, déplacement d'équipement ou reprise du travail dans la zone ne peut avoir lieu avant que l'inspecteur de la CNESST n'ait visité les lieux et donné son autorisation. Cette mesure conservatoire est essentielle pour permettre une enquête rigoureuse.",
+    "application_terrain": "- Afficher le numéro d'urgence CNESST (1-844-838-0808) bien en vue dans la cabane de chantier, la salle des machines et tout bureau de supervision.\n- Former tous les contremaîtres et superviseurs sur le seuil de déclaration : toute hospitalisation ou suspicion de blessure grave déclenche la procédure 24h.\n- Dès qu'un accident grave se produit, interdire immédiatement la zone avec des rubans ou barrières et documenter l'état des lieux par photos/vidéo avant tout déplacement.\n- Désigner un responsable unique (ex. : chef de chantier ou directeur SST) comme point de contact CNESST pour éviter les déclarations contradictoires.\n- Tenir un registre horodaté de toutes les déclarations effectuées, incluant le nom de l'agent CNESST contacté et le numéro de dossier attribué.",
+    "sanctions": "Un employeur qui omet de déclarer un accident grave dans le délai de 24 heures s'expose à des amendes pouvant aller de 1 728 $ à 17 277 $ pour une première infraction, et de 3 456 $ à 69 110 $ pour une récidive. En cas de décès ou de blessure grave, le non-respect de l'obligation de préserver les lieux peut constituer une infraction criminelle distincte en vertu du Code criminel canadien (négligence criminelle). La CNESST peut également émettre une ordonnance de fermeture du chantier ou d'arrêt des travaux jusqu'à inspection complète. Les administrateurs et dirigeants de l'entreprise peuvent être tenus personnellement responsables si la décision de ne pas déclarer est prouvée intentionnelle.",
+    "tags": [
+      "urgences",
+      "accidents_graves",
+      "declaration_cnesst",
+      "24h",
+      "hospitalisation",
+      "preservation_lieux",
+      "enquete"
+    ]
+  },
+  {
+    "id": "latmp-280",
+    "titre": "Registre des accidents et incidents tenu par l'employeur",
+    "categorie": "urgences_accidents",
+    "loi": "LATMP",
+    "articles": "280",
+    "contenu": "L'article 280 de la Loi sur les accidents du travail et les maladies professionnelles (LATMP) oblige tout employeur à tenir et à conserver un registre de tous les accidents du travail et incidents dangereux survenus dans son établissement. Ce registre doit être maintenu à jour en continu et accessible en tout temps aux représentants de la CNESST, aux membres du comité de santé et de sécurité (CSS), ainsi qu'aux travailleurs et à leurs représentants. Il constitue un outil de gestion préventive fondamental pour identifier les tendances accidentogènes et mettre en place des mesures correctives.\n\nLe registre doit contenir, pour chaque événement, la date, l'heure et le lieu précis de l'accident ou de l'incident, le nom du travailleur impliqué, une description détaillée de l'événement et de ses circonstances, la nature des blessures subies ou du danger rencontré, les premiers soins prodigués, les jours de travail perdus le cas échéant, et les mesures correctives prises ou planifiées. Les incidents sans blessure (near miss) présentant un potentiel de blessure grave doivent aussi y figurer — leur inclusion est une bonne pratique fortement recommandée par la CNESST et souvent exigée par les normes ISO 45001.\n\nLe registre doit être conservé pendant au moins cinq ans suivant la date de l'événement. Il ne se substitue pas au rapport d'accident interne de l'entreprise ni à la déclaration CNESST, mais il en est le complément systématique. Dans les établissements de grande taille ou les chantiers complexes, le registre peut être tenu en format numérique à condition qu'il soit structuré, sécurisé, et exportable pour consultation lors des inspections.",
+    "application_terrain": "- Utiliser un formulaire standardisé (ou l'outil numérique interne) pour chaque entrée au registre — ne jamais se fier à la mémoire ou aux notes informelles.\n- Intégrer les incidents sans blessure (near miss) au registre : ils représentent souvent 10x plus d'événements que les accidents réels et sont des signaux d'alarme essentiels.\n- Présenter le registre à chaque réunion du comité SST (mensuelle ou trimestrielle) pour analyse des tendances : zones à risque, types de blessures, équipements défectueux récurrents.\n- S'assurer que chaque superviseur de terrain sait remplir une entrée correcte : formation de 30 minutes suffit, mais doit être faite à l'embauche.\n- En cas d'inspection CNESST, sortir le registre immédiatement sans chercher — le ranger dans un endroit connu de tous les gestionnaires clés.",
+    "sanctions": "L'absence de registre ou un registre incomplet, falsifié ou non accessible constitue une infraction à la LATMP. Les amendes pour les employeurs vont de 1 728 $ à 17 277 $ (première infraction) et peuvent doubler en cas de récidive. Si la CNESST constate qu'un incident grave n'a pas été inscrit au registre, cela peut aggraver les pénalités liées à la déclaration obligatoire (LSST art. 62). Un registre mal tenu peut également être utilisé contre l'employeur dans des procédures civiles ou pénales pour démontrer un manque de diligence dans la gestion SST. Les entreprises ayant un bon registre, au contraire, peuvent s'en servir comme preuve de gestion responsable pour réduire leurs cotisations CNESST.",
+    "tags": [
+      "registre",
+      "accidents_travail",
+      "incidents",
+      "near_miss",
+      "documentation",
+      "LATMP",
+      "comite_sst"
+    ]
+  },
+  {
+    "id": "lsst-12-14",
+    "titre": "Droit de refus du travailleur — motifs raisonnables de danger",
+    "categorie": "urgences_accidents",
+    "loi": "LSST",
+    "articles": "12, 13, 14",
+    "contenu": "Les articles 12 à 14 de la LSST consacrent le droit fondamental de tout travailleur de refuser d'exécuter un travail s'il a des motifs raisonnables de croire que l'exécution de ce travail l'expose à un danger pour sa santé, sa sécurité ou son intégrité physique. Ce droit est individuel et ne peut pas être supprimé par contrat, convention collective ou directive de l'employeur. Il s'applique dans tous les secteurs couverts par la LSST, qu'il s'agisse d'un chantier de construction, d'une usine, d'un entrepôt ou d'un bureau.\n\nLa notion de «motifs raisonnables» est centrale : le travailleur n'a pas à prouver avec certitude qu'un danger existe, mais doit avoir une croyance honnête et raisonnablement fondée sur des éléments concrets. Par exemple : une machine sans garde de sécurité, un plancher instable, un produit chimique dont les EPI requis sont manquants, ou une tâche pour laquelle il n'a pas reçu la formation nécessaire. Il ne suffit pas d'un inconfort ou d'une simple préférence — le danger doit être réel, imminent ou potentiel et sérieux. Les risques habituels inhérents au travail ne justifient généralement pas un droit de refus, sauf si le niveau de risque dépasse la normale acceptable.\n\nL'article 14 précise que le travailleur qui exerce son droit de refus doit en informer son supérieur immédiat ou l'employeur dès que possible. Il ne peut quitter le lieu de travail sans autorisation, mais peut être affecté temporairement à d'autres tâches sécuritaires le temps que la situation soit réglée. Ce droit protège aussi les travailleurs d'autrui : un représentant en santé-sécurité ou un membre du CSS peut exercer un droit de refus au nom du groupe si plusieurs travailleurs font face au même danger.",
+    "application_terrain": "- Former tous les travailleurs à l'embauche sur leur droit de refus : ils doivent savoir qu'ils peuvent refuser sans craindre de perdre leur emploi.\n- Afficher un résumé du droit de refus (avec les étapes clés) dans les vestiaires, la cafétéria et les zones d'accès commun.\n- Lors d'un refus, le superviseur doit prendre la situation au sérieux immédiatement — ne jamais ridiculiser, intimider ou ignorer le travailleur.\n- Documenter chaque droit de refus exercé dans le registre d'accidents/incidents, même si la situation est réglée rapidement et sans intervention CNESST.\n- Utiliser chaque droit de refus comme opportunité d'amélioration : enquêter sur la cause, corriger le danger, et communiquer le correctif à l'équipe.",
+    "sanctions": "Un employeur qui punit, intimide ou menace un travailleur ayant exercé son droit de refus commet une infraction grave à la LSST (voir art. 30 sur les représailles). Les amendes pour entrave au droit de refus vont de 1 728 $ à 69 110 $ selon la gravité et la récidive. Si le refus était justifié et que l'employeur a forcé le travailleur à reprendre le travail sans corriger le danger, et qu'un accident survient par la suite, la responsabilité criminelle et civile de l'employeur est considérablement alourdie. Le Code criminel (art. 217.1 — obligation de protéger les travailleurs) peut s'appliquer si la négligence est flagrante.",
+    "tags": [
+      "droit_de_refus",
+      "danger",
+      "motifs_raisonnables",
+      "travailleur",
+      "refus_travail",
+      "LSST",
+      "securite"
+    ]
+  },
+  {
+    "id": "lsst-15-19",
+    "titre": "Processus d'exercice du droit de refus — notification, examen, inspecteur",
+    "categorie": "urgences_accidents",
+    "loi": "LSST",
+    "articles": "15, 16, 17, 18, 19",
+    "contenu": "Les articles 15 à 19 de la LSST définissent la procédure formelle que doit suivre un travailleur lorsqu'il exerce son droit de refus. La première étape (art. 15) est d'aviser immédiatement le supérieur immédiat ou l'employeur de son refus d'exécuter le travail et d'en expliquer les motifs. L'employeur ou son représentant doit alors examiner la situation sans délai, en présence du travailleur et, si possible, du représentant en santé-sécurité (RSS). Cet examen conjoint est crucial : il permet souvent de résoudre le problème sur le terrain rapidement.\n\nSi, après l'examen conjoint, le travailleur maintient son refus parce qu'il estime que le danger subsiste, ou si aucune entente n'est possible entre les parties, l'article 18 permet au travailleur ou à l'employeur de faire appel à un inspecteur de la CNESST. L'inspecteur doit alors se présenter sur les lieux dans les meilleurs délais. Pendant toute la durée du processus, le travailleur ne peut pas être contraint de reprendre l'exécution du travail contesté, mais l'employeur peut, en attendant, lui confier d'autres tâches compatibles avec sa qualification, aux mêmes conditions de travail (art. 16). Si l'employeur ne peut pas lui offrir d'autre tâche, le travailleur doit rester disponible sur les lieux.\n\nL'inspecteur de la CNESST mène une enquête sur place, entend les deux parties, examine les lieux, les équipements, les procédures, et rend une décision (art. 19). Cette décision peut ordonner à l'employeur de corriger la situation, interdire l'utilisation d'une machine, ou conclure que le refus n'était pas justifié. Elle est exécutoire immédiatement mais peut être contestée devant le Tribunal administratif du travail (TAT). Pendant toute la procédure, aucun autre travailleur ne peut être assigné à la tâche refusée si ce travailleur est informé du refus en cours (art. 17).",
+    "application_terrain": "- Afficher la procédure de droit de refus en 5 étapes visuelles dans la cabane de chantier ou le bureau du contremaître — les travailleurs doivent pouvoir la consulter facilement.\n- Dès qu'un refus est exercé, convoquer immédiatement le RSS (ou à défaut un membre du CSS) pour l'examen conjoint — ne jamais faire l'examen seul comme employeur.\n- Ne jamais affecter un autre travailleur à la tâche refusée avant que l'inspecteur CNESST ait statué — cette violation est sanctionnée séparément.\n- Garder le numéro de la CNESST à portée de main : 1-844-838-0808. En cas de danger immédiat, l'inspecteur peut intervenir en urgence dans les heures qui suivent.\n- Documenter chaque étape du processus (heure de l'avis, présence du RSS, décision de l'examen conjoint, appel CNESST si applicable) — cette traçabilité protège l'employeur en cas de litige.",
+    "sanctions": "Assigner un autre travailleur à la tâche refusée avant la décision de l'inspecteur constitue une infraction autonome sanctionnée par des amendes de 1 728 $ à 17 277 $. L'employeur qui entrave le processus d'inspection (refus d'accès aux lieux, obstruction de l'inspecteur, fausses déclarations) risque des amendes supplémentaires et peut faire l'objet de poursuites pénales. Si l'inspecteur conclut que le danger était réel et que l'employeur avait forcé le travailleur à reprendre le travail, les pénalités sont majorées. Une décision de l'inspecteur non respectée est une infraction distincte passible d'amendes journalières tant que la non-conformité persiste.",
+    "tags": [
+      "droit_de_refus",
+      "processus",
+      "inspecteur_cnesst",
+      "examen_conjoint",
+      "RSS",
+      "procedure",
+      "notification"
+    ]
+  },
+  {
+    "id": "lsst-30",
+    "titre": "Protection contre les représailles — congédiement, suspension, déplacement",
+    "categorie": "urgences_accidents",
+    "loi": "LSST",
+    "articles": "30",
+    "contenu": "L'article 30 de la LSST interdit formellement à tout employeur de congédier, suspendre, déplacer, sanctionner ou autrement pénaliser un travailleur pour le motif qu'il a exercé un droit que lui confère la LSST — notamment le droit de refus, le droit de participation aux activités du CSS, le droit de se plaindre à la CNESST, ou tout autre droit prévu par la loi. Cette protection s'applique également aux membres du CSS, aux représentants en santé-sécurité (RSS), aux travailleurs désignés secouristes, et aux travailleurs témoins d'un accident ayant coopéré à une enquête CNESST.\n\nLa protection contre les représailles est fondamentale pour que les droits prévus par la LSST soient réellement exercés sur le terrain. Sans cette protection, la pression sociale et économique sur les travailleurs — surtout ceux précaires ou en période de probation — rendrait le droit de refus et les autres droits purement théoriques. La loi établit une présomption en faveur du travailleur : si ce dernier démontre qu'il a exercé un droit prévu par la LSST et qu'il a subi une mesure défavorable dans les six mois suivants, l'employeur doit prouver que sa décision était basée sur une autre cause juste et suffisante, sans lien avec l'exercice de ce droit.\n\nLe travailleur qui croit avoir été victime de représailles dispose d'un recours devant le Tribunal administratif du travail (TAT). Le délai pour déposer une plainte est de 45 jours suivant la mesure de représailles. En cas de plainte fondée, le TAT peut ordonner la réintégration du travailleur dans son poste, le paiement des salaires perdus, et le versement de dommages et intérêts additionnels. Les mesures de représailles indirectes — réduction des heures, retrait de quarts, harcèlement subtil, changement de poste non demandé — sont aussi visées.",
+    "application_terrain": "- Former les superviseurs et contremaîtres : toute réaction négative face à un travailleur qui exerce un droit SST peut être qualifiée de représailles, même si l'intention n'était pas malveillante.\n- Documenter toutes les mesures disciplinaires et les changements de poste avec des motifs clairs et documentés, indépendants de tout exercice de droit SST.\n- Si un travailleur exerce un droit de refus vendredi et reçoit un avertissement disciplinaire pour autre chose lundi, préparez-vous à devoir justifier cette coïncidence devant le TAT.\n- Créer une culture où les signalements SST sont valorisés publiquement — reconnaître les travailleurs qui identifient des dangers réduit la perception de risque lié à l'exercice de ces droits.\n- En cas de plainte de représailles, contacter immédiatement le service juridique ou un avocat spécialisé en droit du travail — le délai de 45 jours pour le travailleur est court.",
+    "sanctions": "Un employeur reconnu coupable de représailles s'expose à une amende pénale de 1 728 $ à 17 277 $ (première infraction), doublée en cas de récidive. En parallèle, le TAT peut ordonner la réintégration immédiate du travailleur et le paiement intégral des salaires perdus depuis la mesure de représailles, sans plafond fixé. Des dommages moraux et punitifs peuvent être accordés si les représailles étaient délibérées ou systématiques. La condamnation pour représailles est aussi un signal d'alarme pour la CNESST qui peut déclencher un audit SST complet de l'établissement. Réputation et cotisations CNESST peuvent en être affectées durablement.",
+    "tags": [
+      "represailles",
+      "protection_travailleur",
+      "congediment",
+      "droit_de_refus",
+      "TAT",
+      "reinstement",
+      "LSST"
+    ]
+  },
+  {
+    "id": "lsst-38",
+    "titre": "Secouristes obligatoires sur les lieux de travail — ratios par règlement",
+    "categorie": "urgences_accidents",
+    "loi": "LSST",
+    "articles": "38",
+    "contenu": "L'article 38 de la LSST oblige tout employeur à maintenir, en tout temps durant les heures de travail, la présence d'un nombre suffisant de secouristes sur les lieux de travail. Le nombre minimal de secouristes requis est déterminé par le Règlement sur les normes minimales de premiers secours et de premiers soins (RMNPSS, c. S-2.1, r. 13), qui établit des ratios selon le nombre de travailleurs présents simultanément et le niveau de risque du secteur d'activité. Dans les secteurs à faible risque (bureaux, commerce), un secouriste pour 50 travailleurs est généralement requis. Dans les secteurs à risque élevé (construction, industrie lourde, mines), le ratio est d'un secouriste pour 20 travailleurs, et parfois plus restrictif selon le règlement spécifique au secteur.\n\nLe secouriste doit détenir une attestation valide de formation en premiers secours en milieu de travail (PSMT), délivrée par un organisme reconnu par la Commission des normes, de l'équité, de la santé et de la sécurité du travail (CNESST). Cette formation est d'une durée minimale de 16 heures pour la certification initiale, avec une recertification obligatoire aux trois ans. L'employeur est responsable de planifier les formations, de maintenir les attestations à jour, et de s'assurer que les secouristes désignés sont effectivement présents pendant toutes les heures de travail — y compris les quarts de nuit, les fins de semaine et les périodes de vacances. Une liste à jour des secouristes doit être affichée dans le milieu de travail.\n\nEn plus de la présence humaine, l'employeur doit mettre à disposition un contenu de trousse de premiers secours conforme aux exigences réglementaires, proportionnel au nombre de travailleurs et au type de risques présents. Les trousses doivent être accessibles, correctement rangées, non périmées, et régulièrement inspectées. Dans les secteurs à risque élevé ou les chantiers isolés, des équipements complémentaires peuvent être requis : oxygénothérapie, défibrillateur (DEA), brancard, etc.",
+    "application_terrain": "- Établir un calendrier de rotation des secouristes pour chaque quart de travail et l'afficher dans la salle des employés — vérifier que la couverture ne dépend pas d'une seule personne.\n- Identifier clairement les secouristes par un badge, un dossard ou une mention sur le tableau de service : en cas d'urgence, les collègues doivent les localiser en secondes.\n- Vérifier les attestations de formation aux trois ans AVANT qu'elles expirent — mettre des rappels dans le calendrier d'équipe 3 mois avant l'expiration.\n- Inspecter les trousses de premiers secours à chaque début de mois : date de péremption des gants, pansements, masques de réanimation et médicaments d'urgence autorisés.\n- Sur les chantiers avec accès difficile (forêt, toiture, espace clos), s'assurer que le secouriste dispose d'un équipement adapté à l'environnement (ex. : kit de brûlures, collier cervical, DEA si distance ambulance > 8 min).",
+    "sanctions": "L'absence de secouriste qualifié pendant les heures de travail constitue une infraction à la LSST et au RMNPSS. Les amendes varient de 1 728 $ à 17 277 $ pour une première infraction, et peuvent atteindre 69 110 $ en cas de récidive ou d'accident lié à l'absence de secouriste. Si un travailleur décède ou subit une blessure grave en partie due à l'absence de premiers soins immédiats, la responsabilité pénale de l'employeur est engagée de façon significative. Les inspecteurs CNESST vérifient systématiquement la présence des secouristes lors des visites d'inspection. Une entreprise sans secouriste en règle peut voir son chantier fermé immédiatement par ordonnance d'arrêt des travaux.",
+    "tags": [
+      "secouristes",
+      "premiers_secours",
+      "PSMT",
+      "ratios",
+      "trousse_premiers_secours",
+      "DEA",
+      "formation_secourisme"
+    ]
+  }
+]

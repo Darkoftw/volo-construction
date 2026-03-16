@@ -26,7 +26,7 @@ if (!admin.apps.length) {
 
 // --- CORS headers ---
 const CORS = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://voloinv7.netlify.app',
   'Access-Control-Allow-Headers': 'Content-Type, x-admin-secret',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Content-Type': 'application/json'

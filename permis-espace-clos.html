@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="view-transition" content="same-origin">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0C0608">
+<title>VOLO SST — Permis Espace Clos</title>
+<link rel="icon" href="eagle_tactic.png">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="data.js"></script>
+<script src="cnesst-reglements.js"></script>
+<style>
+:root{
+  --bg:#0C0608;--card:#151015;--card2:#1A141A;--txt:#F5F0EB;--muted:#8A8A9A;
+  --rescue:#E65100;--gold:#C9A84C;--green:#27AE60;--red:#C0392B;--blue:#3B82F6;
+  --purple:#8B5CF6;--border:rgba(201,168,76,.15);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+input,select,textarea{font-size:16px!important}
+button,.btn{min-height:48px}
+@supports(-webkit-touch-callout:none){html{height:-webkit-fill-available}body{min-height:-webkit-fill-available}}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;-webkit-font-smoothing:antialiased;padding-bottom:env(safe-area-inset-bottom,20px);-webkit-tap-highlight-color:transparent}
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:vt-out .2s ease-out}
+::view-transition-new(root){animation:vt-in .3s ease-in}
+@keyframes vt-out{from{opacity:1}to{opacity:0}}
+@keyframes vt-in{from{opacity:0}to{opacity:1}}
+
+/* ── TOP BAR ── */
+.top-bar{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0C0608,rgba(12,6,8,.97));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:env(safe-area-inset-top,10px) 14px 10px;display:flex;align-items:center;gap:10px}
+.top-bar img{width:32px;height:32px;border-radius:8px;border:2px solid rgba(201,168,76,.35)}
+.top-bar h1{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;color:var(--gold);flex:1;line-height:1.3}
+.top-bar h1 span{display:block;font-size:10px;color:var(--rescue);letter-spacing:1.5px;font-weight:400}
+.btn-back{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--txt);padding:6px 14px;font-size:12px;cursor:pointer;text-decoration:none;min-height:36px;display:flex;align-items:center}
+
+/* ── HERO ── */
+.hero{text-align:center;padding:28px 20px 20px;background:linear-gradient(180deg,rgba(192,57,43,.12),rgba(230,81,0,.06),transparent)}
+.hero-icon{font-size:48px;margin-bottom:8px;filter:drop-shadow(0 0 20px rgba(192,57,43,.4))}
+.hero h2{font-family:'Oswald',sans-serif;font-size:20px;letter-spacing:3px;background:linear-gradient(135deg,var(--red),var(--rescue));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--muted);font-size:11px;margin-top:6px;letter-spacing:.5px}
+.hero .crit-badge{display:inline-block;margin-top:10px;padding:4px 14px;border-radius:20px;background:rgba(192,57,43,.15);border:1px solid rgba(192,57,43,.4);color:var(--red);font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:2px;animation:pulse-crit 2s infinite}
+@keyframes pulse-crit{0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,.3)}50%{box-shadow:0 0 0 8px rgba(192,57,43,0)}}
+
+/* ── SEARCH ── */
+.search-wrap{padding:8px 14px}
+.search-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--txt);padding:10px 14px 10px 36px;font-size:14px;outline:none;font-family:'Inter',sans-serif}
+.search-input:focus{border-color:var(--gold)}
+.search-wrap{position:relative}
+.search-icon{position:absolute;left:26px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--muted);pointer-events:none}
+
+/* ── SECTIONS ── */
+.section{margin:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:all .3s}
+.sec-head{display:flex;align-items:center;gap:10px;padding:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;min-height:48px}
+.sec-num{width:28px;height:28px;border-radius:50%;color:var(--bg);font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sec-num.rescue{background:linear-gradient(135deg,var(--rescue),#B33600)}
+.sec-num.red{background:linear-gradient(135deg,var(--red),#8B1A1A)}
+.sec-num.gold{background:linear-gradient(135deg,var(--gold),#A08030)}
+.sec-num.green{background:linear-gradient(135deg,var(--green),#1E8449)}
+.sec-num.blue{background:linear-gradient(135deg,var(--blue),#2563EB)}
+.sec-num.purple{background:linear-gradient(135deg,var(--purple),#6D28D9)}
+.sec-title{flex:1;font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1.5px}
+.sec-badge{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);background:rgba(255,255,255,.05);padding:2px 8px;border-radius:10px;letter-spacing:.5px}
+.sec-chev{color:var(--muted);font-size:10px;transition:transform .3s}
+.sec-chev.open{transform:rotate(180deg)}
+.sec-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.sec-body.open{max-height:8000px}
+.sec-content{padding:0 14px 16px}
+
+/* ── GAS CARDS ── */
+.gas-grid{display:grid;gap:10px}
+.gas-card{background:var(--card2);border-radius:12px;border:1px solid rgba(255,255,255,.06);overflow:hidden}
+.gas-header{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;min-height:48px}
+.gas-symbol{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;width:48px;text-align:center;flex-shrink:0}
+.gas-name{flex:1;font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1px}
+.gas-ref{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)}
+.gas-detail{padding:0 14px 14px;display:none}
+.gas-detail.open{display:block}
+
+.threshold-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+.threshold-box{border-radius:10px;padding:10px;text-align:center;border:1px solid}
+.threshold-box.safe{background:rgba(39,174,96,.08);border-color:rgba(39,174,96,.3)}
+.threshold-box.caution{background:rgba(201,168,76,.08);border-color:rgba(201,168,76,.3)}
+.threshold-box.danger{background:rgba(192,57,43,.08);border-color:rgba(192,57,43,.3)}
+.threshold-box.idlh{background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.3)}
+.threshold-label{font-size:9px;letter-spacing:1px;font-family:'Oswald',sans-serif;margin-bottom:4px}
+.threshold-label.safe{color:var(--green)}
+.threshold-label.caution{color:var(--gold)}
+.threshold-label.danger{color:var(--red)}
+.threshold-label.idlh{color:var(--purple)}
+.threshold-val{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;line-height:1.2}
+.threshold-val.safe{color:var(--green)}
+.threshold-val.caution{color:var(--gold)}
+.threshold-val.danger{color:var(--red)}
+.threshold-val.idlh{color:var(--purple)}
+.threshold-sub{font-size:10px;color:var(--muted);margin-top:2px}
+
+.symptom-list{margin-top:8px;padding:8px 10px;background:rgba(255,255,255,.02);border-radius:8px;border-left:3px solid var(--rescue)}
+.symptom-list h4{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:1px;color:var(--rescue);margin-bottom:4px}
+.symptom-list li{font-size:11px;color:var(--muted);margin-left:14px;margin-bottom:2px;line-height:1.4}
+.action-box{margin-top:8px;padding:8px 10px;border-radius:8px;border:1px solid rgba(192,57,43,.3);background:rgba(192,57,43,.06)}
+.action-box h4{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:1px;color:var(--red);margin-bottom:4px}
+.action-box p{font-size:11px;color:var(--txt);line-height:1.4}
+
+/* ── ROLE CARDS ── */
+.role-grid{display:grid;gap:10px}
+.role-card{background:var(--card2);border-radius:12px;padding:14px;border-left:4px solid}
+.role-card.entrant{border-left-color:var(--blue)}
+.role-card.surveillant{border-left-color:var(--gold)}
+.role-card.sauveteur{border-left-color:var(--rescue)}
+.role-card.responsable{border-left-color:var(--green)}
+.role-icon{font-size:22px;margin-bottom:6px}
+.role-title{font-family:'Oswald',sans-serif;font-size:15px;letter-spacing:2px;margin-bottom:4px}
+.role-card.entrant .role-title{color:var(--blue)}
+.role-card.surveillant .role-title{color:var(--gold)}
+.role-card.sauveteur .role-title{color:var(--rescue)}
+.role-card.responsable .role-title{color:var(--green)}
+.role-duties{list-style:none;padding:0}
+.role-duties li{font-size:12px;color:var(--muted);padding:3px 0;padding-left:16px;position:relative;line-height:1.5}
+.role-duties li::before{content:'';position:absolute;left:0;top:10px;width:6px;height:6px;border-radius:50%}
+.role-card.entrant .role-duties li::before{background:var(--blue)}
+.role-card.surveillant .role-duties li::before{background:var(--gold)}
+.role-card.sauveteur .role-duties li::before{background:var(--rescue)}
+.role-card.responsable .role-duties li::before{background:var(--green)}
+.role-critical{margin-top:8px;padding:6px 10px;border-radius:6px;background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.25);font-size:11px;color:var(--red);font-weight:600}
+
+/* ── EQUIPMENT CHECKLIST ── */
+.equip-list{display:grid;gap:6px}
+.equip-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card2);border-radius:10px;border:1px solid rgba(255,255,255,.04);min-height:48px}
+.equip-icon{font-size:20px;flex-shrink:0;width:32px;text-align:center}
+.equip-info{flex:1}
+.equip-name{font-size:13px;font-weight:500}
+.equip-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.equip-tag{font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 8px;border-radius:6px;letter-spacing:.5px;flex-shrink:0}
+.equip-tag.required{background:rgba(192,57,43,.12);color:var(--red);border:1px solid rgba(192,57,43,.3)}
+.equip-tag.recommended{background:rgba(59,130,246,.1);color:var(--blue);border:1px solid rgba(59,130,246,.25)}
+
+/* ── PROCEDURE STEPS ── */
+.proc-list{display:grid;gap:6px}
+.proc-step{background:var(--card2);border-radius:10px;border:1px solid rgba(255,255,255,.04);overflow:hidden}
+.proc-head{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;min-height:48px}
+.proc-num{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--rescue),#B33600);color:var(--bg);font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.proc-txt{flex:1;font-size:13px;font-weight:500;line-height:1.4}
+.proc-detail{padding:0 12px 12px 50px;font-size:11px;color:var(--muted);line-height:1.6;display:none}
+.proc-detail.open{display:block}
+
+/* ── DANGER CARDS ── */
+.danger-grid{display:grid;gap:8px}
+.danger-card{background:var(--card2);border-radius:12px;border:1px solid rgba(255,255,255,.04);overflow:hidden}
+.danger-head{display:flex;align-items:center;gap:10px;padding:12px;cursor:pointer;min-height:48px}
+.danger-icon{font-size:22px;flex-shrink:0}
+.danger-name{flex:1;font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1px}
+.danger-body{padding:0 12px 14px;display:none}
+.danger-body.open{display:block}
+.danger-sub{margin-bottom:8px}
+.danger-sub h4{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:1px;margin-bottom:4px}
+.danger-sub.desc h4{color:var(--blue)}
+.danger-sub.signs h4{color:var(--gold)}
+.danger-sub.control h4{color:var(--green)}
+.danger-sub.emergency h4{color:var(--red)}
+.danger-sub p,.danger-sub li{font-size:11px;color:var(--muted);line-height:1.5}
+.danger-sub ul{padding-left:14px}
+
+/* ── TYPE ICONS (definition) ── */
+.type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.type-card{text-align:center;padding:12px 6px;background:var(--card2);border-radius:10px;border:1px solid rgba(255,255,255,.04)}
+.type-card .icon{font-size:28px;margin-bottom:4px}
+.type-card .label{font-size:10px;color:var(--muted);font-family:'Oswald',sans-serif;letter-spacing:.5px}
+
+/* ── CLASSIFICATION ── */
+.class-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.class-card{padding:12px;border-radius:10px;text-align:center}
+.class-card.idlh-card{background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.3)}
+.class-card.non-idlh{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25)}
+.class-card h4{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1px;margin-bottom:4px}
+.class-card.idlh-card h4{color:var(--purple)}
+.class-card.non-idlh h4{color:var(--blue)}
+.class-card p{font-size:10px;color:var(--muted);line-height:1.4}
+
+/* ── EMERGENCY ── */
+.emergency-box{padding:14px;border-radius:12px;background:rgba(192,57,43,.08);border:2px solid rgba(192,57,43,.4);margin-bottom:10px}
+.emergency-box h3{font-family:'Oswald',sans-serif;color:var(--red);font-size:15px;letter-spacing:2px;margin-bottom:8px}
+.emergency-step{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px}
+.emergency-num{width:22px;height:22px;border-radius:50%;background:var(--red);color:var(--bg);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.emergency-txt{font-size:12px;line-height:1.5}
+.never-box{margin-top:12px;padding:10px;border-radius:8px;background:rgba(192,57,43,.15);border:1px solid var(--red);text-align:center}
+.never-box p{font-size:13px;font-weight:700;color:var(--red);letter-spacing:1px}
+.comm-codes{margin-top:10px;display:grid;gap:6px}
+.comm-code{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--card2);border-radius:8px}
+.comm-code .code{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;min-width:80px}
+.comm-code .meaning{font-size:11px;color:var(--muted)}
+
+/* ── ARTICLES ── */
+.article-list{display:grid;gap:6px}
+.article-item{background:var(--card2);border-radius:10px;border:1px solid rgba(255,255,255,.04);overflow:hidden}
+.article-head{display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;min-height:44px}
+.article-num{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--gold);min-width:50px}
+.article-title{flex:1;font-size:12px;color:var(--txt)}
+.article-body{padding:0 12px 12px;font-size:11px;color:var(--muted);line-height:1.6;display:none}
+.article-body.open{display:block}
+
+/* ── UTILS ── */
+.ref-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--gold);background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);border-radius:4px;padding:1px 6px;margin:2px 2px 2px 0}
+.info-text{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px}
+.divider{height:1px;background:var(--border);margin:10px 0}
+.hidden{display:none!important}
+
+/* ── ALWAYS VISIBLE (atmospheric) ── */
+.always-visible .sec-body{max-height:8000px!important}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <a href="index.html" class="btn-back">&#9664;</a>
+  <img src="eagle_tactic.png" alt="VOLO">
+  <h1>PERMIS D'ENTREE — ESPACE CLOS <span>RSST ARTICLES 298-310</span></h1>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-icon">&#9888;&#65039;</div>
+  <h2>ESPACE CLOS</h2>
+  <p>Reference critique pour les entrees en espace clos — Usines industrielles</p>
+  <div class="crit-badge">DOCUMENT CRITIQUE — SECURITE VIE</div>
+</div>
+
+<!-- SEARCH -->
+<div class="search-wrap">
+  <span class="search-icon">&#128269;</span>
+  <input class="search-input" type="text" placeholder="Rechercher (gaz, procedure, article...)" oninput="handleSearch(this.value)">
+</div>
+
+<!-- MAIN CONTENT -->
+<main id="mainContent">
+
+<!-- ═══ SECTION 1: DEFINITION ═══ -->
+<div class="section" data-section="definition">
+  <div class="sec-head" onclick="toggleSection(this)">
+    <div class="sec-num red">1</div>
+    <div class="sec-title">DEFINITION ESPACE CLOS</div>
+    <div class="sec-badge">RSST art. 1</div>
+    <div class="sec-chev">&#9660;</div>
+  </div>
+  <div class="sec-body">
+    <div class="sec-content">
+      <p class="info-text">Un <strong>espace clos</strong> est un espace totalement ou partiellement ferme qui n'est pas concu pour etre occupe par des personnes, mais qui peut etre occupe pour l'execution d'un travail. Il presente des risques pour la sante et la securite des personnes qui y penetrent en raison de sa conception, sa construction, son emplacement, son atmosphere ou les matieres qu'il contient.</p>
+
+      <h3 style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1px;color:var(--gold);margin:12px 0 8px">TYPES D'ESPACES CLOS</h3>
+      <div class="type-grid">
+        <div class="type-card"><div class="icon">&#127981;</div><div class="label">RESERVOIRS</div></div>
+        <div class="type-card"><div class="icon">&#9878;&#65039;</div><div class="label">SILOS</div></div>
+        <div class="type-card"><div class="icon">&#129514;</div><div class="label">CUVES</div></div>
+        <div class="type-card"><div class="icon">&#128375;</div><div class="label">FOSSES</div></div>
+        <div class="type-card"><div class="icon">&#128704;</div><div class="label">EGOUTS</div></div>
+        <div class="type-card"><div class="icon">&#128647;</div><div class="label">TUNNELS</div></div>
+        <div class="type-card"><div class="icon">&#128293;</div><div class="label">CHAUDIERES</div></div>
+        <div class="type-card"><div class="icon">&#9881;&#65039;</div><div class="label">CONDUITES</div></div>
+        <div class="type-card"><div class="icon">&#127979;</div><div class="label">CAISSONS</div></div>
+      </div>
+
+      <h3 style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1px;color:var(--gold);margin:12px 0 8px">CLASSIFICATION</h3>
+      <div class="class-grid">
+        <div class="class-card idlh-card">
+          <h4>IDLH</h4>
+          <p>Immediately Dangerous to Life or Health — Atmosphere pouvant causer la mort ou des effets irreversibles en 30 min</p>
+        </div>
+        <div class="class-card non-idlh">
+          <h4>NON-IDLH</h4>
+          <p>Risques presents mais controlables par ventilation et surveillance continue</p>
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <span class="ref-tag">RSST art. 1</span>
+        <span class="ref-tag">RSST Section XXVI</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SECTION 2: TESTS ATMOSPHERIQUES ═══ -->
+<div class="section always-visible" data-section="atmosphere">
+  <div class="sec-head" onclick="toggleSection(this)">
+    <div class="sec-num rescue">2</div>
+    <div class="sec-title">TESTS ATMOSPHERIQUES</div>
+    <div class="sec-badge">CRITIQUE</div>
+    <div class="sec-chev open">&#9660;</div>
+  </div>
+  <div class="sec-body open">
+    <div class="sec-content">
+      <p class="info-text">Tester <strong>TOUJOURS</strong> a 3 niveaux : haut, milieu, bas. Le detecteur multi-gaz doit etre calibre et en fonction. Les seuils ci-dessous sont des <strong>valeurs critiques pour la vie</strong>.</p>
+
+      <div class="gas-grid">
+        <!-- O2 -->
+        <div class="gas-card" data-gas="o2">
+          <div class="gas-header" onclick="toggleGas(this)">
+            <div class="gas-symbol" style="color:var(--blue)">O&#8322;</div>
+            <div class="gas-name">OXYGENE</div>
+            <div class="gas-ref">RSST 300-302</div>
+            <div class="sec-chev open">&#9660;</div>
+          </div>
+          <div class="gas-detail open">
+            <div class="threshold-row">
+              <div class="threshold-box safe">
+                <div class="threshold-label safe">ACCEPTABLE</div>
+                <div class="threshold-val safe">19.5-23.5%</div>
+                <div class="threshold-sub">Normal</div>
+              </div>
+              <div class="threshold-box caution">
+                <div class="threshold-label caution">ALERTE</div>
+                <div class="threshold-val caution">&lt;19.5%</div>
+                <div class="threshold-sub">ou &gt;23.5%</div>
+              </div>
+            </div>
+            <div class="threshold-row">
+              <div class="threshold-box danger">
+                <div class="threshold-label danger">DANGER</div>
+                <div class="threshold-val danger">&lt;16%</div>
+                <div class="threshold-sub">Incapacite</div>
+              </div>
+              <div class="threshold-box idlh">
+                <div class="threshold-label idlh">IDLH</div>
+                <div class="threshold-val idlh">&lt;12.5%</div>
+                <div class="threshold-sub">Mort rapide</div>
+              </div>
+            </div>
+            <div class="symptom-list">
+              <h4>SYMPTOMES</h4>
+              <ul>
+                <li>&lt;19.5% : Essoufflement, confusion, jugement altere</li>
+                <li>&lt;16% : Nausees, evanouissement, perte de coordination</li>
+                <li>&lt;12.5% : Perte de conscience en 1-3 min, mort en 8 min</li>
+                <li>&gt;23.5% : Risque d'explosion/incendie accru</li>
+              </ul>
+            </div>
+            <div class="action-box">
+              <h4>ACTION</h4>
+              <p>Evacuer immediatement. Ventiler. Ne JAMAIS entrer sans APRIA si O&#8322; &lt;19.5%</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CO -->
+        <div class="gas-card" data-gas="co">
+          <div class="gas-header" onclick="toggleGas(this)">
+            <div class="gas-symbol" style="color:var(--red)">CO</div>
+            <div class="gas-name">MONOXYDE DE CARBONE</div>
+            <div class="gas-ref">RSST 300-302</div>
+            <div class="sec-chev open">&#9660;</div>
+          </div>
+          <div class="gas-detail open">
+            <div class="threshold-row">
+              <div class="threshold-box safe">
+                <div class="threshold-label safe">ACCEPTABLE</div>
+                <div class="threshold-val safe">0-25 ppm</div>
+                <div class="threshold-sub">TWA 8h</div>
+              </div>
+              <div class="threshold-box caution">
+                <div class="threshold-label caution">ALERTE</div>
+                <div class="threshold-val caution">25-50 ppm</div>
+                <div class="threshold-sub">Ventiler</div>
+              </div>
+            </div>
+            <div class="threshold-row">
+              <div class="threshold-box danger">
+                <div class="threshold-label danger">DANGER</div>
+                <div class="threshold-val danger">&gt;50 ppm</div>
+                <div class="threshold-sub">Evacuer</div>
+              </div>
+              <div class="threshold-box idlh">
+                <div class="threshold-label idlh">IDLH</div>
+                <div class="threshold-val idlh">1200 ppm</div>
+                <div class="threshold-sub">Mort en min</div>
+              </div>
+            </div>
+            <div class="symptom-list">
+              <h4>SYMPTOMES</h4>
+              <ul>
+                <li>25-50 ppm : Maux de tete legers apres exposition prolongee</li>
+                <li>50-100 ppm : Maux de tete severes, etourdissements, nausees</li>
+                <li>200+ ppm : Confusion, vomissements, perte de conscience</li>
+                <li>1200+ ppm : Mort en quelques minutes</li>
+              </ul>
+            </div>
+            <div class="action-box">
+              <h4>ACTION</h4>
+              <p>Gaz inodore et incolore — le "tueur silencieux". Evacuer a &gt;50 ppm. Ventilation forcee obligatoire.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- H2S -->
+        <div class="gas-card" data-gas="h2s">
+          <div class="gas-header" onclick="toggleGas(this)">
+            <div class="gas-symbol" style="color:var(--gold)">H&#8322;S</div>
+            <div class="gas-name">SULFURE D'HYDROGENE</div>
+            <div class="gas-ref">RSST 300-302</div>
+            <div class="sec-chev open">&#9660;</div>
+          </div>
+          <div class="gas-detail open">
+            <div class="threshold-row">
+              <div class="threshold-box safe">
+                <div class="threshold-label safe">ACCEPTABLE</div>
+                <div class="threshold-val safe">0-10 ppm</div>
+                <div class="threshold-sub">TWA 8h</div>
+              </div>
+              <div class="threshold-box caution">
+                <div class="threshold-label caution">ALERTE</div>
+                <div class="threshold-val caution">10-15 ppm</div>
+                <div class="threshold-sub">STEL 15 min</div>
+              </div>
+            </div>
+            <div class="threshold-row">
+              <div class="threshold-box danger">
+                <div class="threshold-label danger">DANGER</div>
+                <div class="threshold-val danger">&gt;15 ppm</div>
+                <div class="threshold-sub">Evacuer</div>
+              </div>
+              <div class="threshold-box idlh">
+                <div class="threshold-label idlh">IDLH</div>
+                <div class="threshold-val idlh">100 ppm</div>
+                <div class="threshold-sub">Fatal rapide</div>
+              </div>
+            </div>
+            <div class="symptom-list">
+              <h4>SYMPTOMES</h4>
+              <ul>
+                <li>0-10 ppm : Odeur d'oeufs pourris (attention : anosmie a &gt;100 ppm)</li>
+                <li>10-50 ppm : Irritation yeux, gorge, toux</li>
+                <li>50-100 ppm : Conjonctivite, difficulte respiratoire severe</li>
+                <li>100+ ppm : Paralysie olfactive, perte de conscience, mort</li>
+              </ul>
+            </div>
+            <div class="action-box">
+              <h4>ACTION</h4>
+              <p>Frequent dans les usines de pates et papiers (Kruger, Domtar). A &gt;100 ppm, l'odorat est paralyse — NE PAS se fier a l'odeur.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- LEL -->
+        <div class="gas-card" data-gas="lel">
+          <div class="gas-header" onclick="toggleGas(this)">
+            <div class="gas-symbol" style="color:var(--rescue)">LIE</div>
+            <div class="gas-name">LIMITE INFERIEURE EXPLOSIVE</div>
+            <div class="gas-ref">RSST 300-302</div>
+            <div class="sec-chev open">&#9660;</div>
+          </div>
+          <div class="gas-detail open">
+            <div class="threshold-row">
+              <div class="threshold-box safe">
+                <div class="threshold-label safe">ACCEPTABLE</div>
+                <div class="threshold-val safe">0-10% LEL</div>
+                <div class="threshold-sub">Securitaire</div>
+              </div>
+              <div class="threshold-box caution">
+                <div class="threshold-label caution">ALERTE</div>
+                <div class="threshold-val caution">10-25% LEL</div>
+                <div class="threshold-sub">Ventiler</div>
+              </div>
+            </div>
+            <div class="threshold-row">
+              <div class="threshold-box danger">
+                <div class="threshold-label danger">DANGER</div>
+                <div class="threshold-val danger">&gt;25% LEL</div>
+                <div class="threshold-sub">Evacuer</div>
+              </div>
+              <div class="threshold-box idlh">
+                <div class="threshold-label idlh">EXPLOSIF</div>
+                <div class="threshold-val idlh">&gt;25% LEL</div>
+                <div class="threshold-sub">Risque explosion</div>
+              </div>
+            </div>
+            <div class="symptom-list">
+              <h4>FACTEURS DE RISQUE</h4>
+              <ul>
+                <li>Sources : solvants, carburants, gaz naturel, vapeurs de procede</li>
+                <li>Sources d'ignition : etincelles, electricite statique, outils non anti-deflagrants</li>
+                <li>100% LEL = concentration minimale pour explosion</li>
+                <li>Au-dela de la LSE (limite superieure) : trop riche pour exploser mais toujours toxique</li>
+              </ul>
+            </div>
+            <div class="action-box">
+              <h4>ACTION</h4>
+              <p>A &gt;10% LEL : ventilation forcee. A &gt;25% LEL : evacuation immediate, couper les sources d'ignition. Utiliser UNIQUEMENT des outils anti-deflagrants.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <span class="ref-tag">RSST art. 300</span>
+        <span class="ref-tag">RSST art. 301</span>
+        <span class="ref-tag">RSST art. 302</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SECTION 3: ROLES ═══ -->
+<div class="section" data-section="roles">
+  <div class="sec-head" onclick="toggleSection(this)">
+    <div class="sec-num gold">3</div>
+    <div class="sec-title">ROLES ET RESPONSABILITES</div>
+    <div class="sec-badge">RSST 298-308</div>
+    <div class="sec-chev">&#9660;</div>
+  </div>
+  <div class="sec-body">
+    <div class="sec-content">
+      <div class="role-grid">
+        <div class="role-card entrant">
+          <div class="role-icon">&#128119;</div>
+          <div class="role-title">ENTRANT</div>
+          <ul class="role-duties">
+            <li>Personne autorisee qui penetre dans l'espace clos</li>
+            <li>Doit avoir recu la formation espace clos (RSST Section XXVI)</li>
+            <li>Connait les risques specifiques a l'espace</li>
+            <li>Porte tous les EPI requis et le detecteur multi-gaz</li>
+            <li>Maintient la communication avec le surveillant en tout temps</li>
+            <li>Sort immediatement si alarme du detecteur ou ordre du surveillant</li>
+            <li>Signale tout symptome anormal sans delai</li>
+          </ul>
+          <div class="role-critical">En cas d'urgence : evacuer IMMEDIATEMENT par le chemin planifie</div>
+        </div>
+
+        <div class="role-card surveillant">
+          <div class="role-icon">&#128065;&#65039;</div>
+          <div class="role-title">SURVEILLANT</div>
+          <ul class="role-duties">
+            <li>Poste a l'entree de l'espace clos en PERMANENCE</li>
+            <li>Tient le registre des entrants (noms, heures)</li>
+            <li>Maintient la communication continue avec les entrants</li>
+            <li>Surveille les conditions atmospheriques en continu</li>
+            <li>Ordonne l'evacuation si conditions dangereuses</li>
+            <li>Appelle les secours si necessaire</li>
+            <li>Empeche les personnes non autorisees d'entrer</li>
+          </ul>
+          <div class="role-critical">NE JAMAIS quitter le poste — NE JAMAIS entrer dans l'espace</div>
+        </div>
+
+        <div class="role-card sauveteur">
+          <div class="role-icon">&#129337;</div>
+          <div class="role-title">SAUVETEUR</div>
+          <ul class="role-duties">
+            <li>Equipe de sauvetage en attente a proximite</li>
+            <li>Formation sauvetage en espace clos a jour</li>
+            <li>Equipement de sauvetage pret et verifie (tripode, treuil, APRIA)</li>
+            <li>Plan de sauvetage repete et connu de tous</li>
+            <li>Peut intervenir en moins de 4 minutes</li>
+            <li>NE JAMAIS entrer sans equipement respiratoire adequat</li>
+          </ul>
+          <div class="role-critical">Sauvetage = equipe formee avec equipement. JAMAIS en improvisation.</div>
+        </div>
+
+        <div class="role-card responsable">
+          <div class="role-icon">&#128221;</div>
+          <div class="role-title">RESPONSABLE</div>
+          <ul class="role-duties">
+            <li>Autorise l'entree en signant le permis</li>
+            <li>Verifie que toutes les conditions du permis sont remplies</li>
+            <li>S'assure que le cadenassage/isolation est fait</li>
+            <li>Peut annuler le permis a tout moment</li>
+            <li>Revise les resultats de tests atmospheriques</li>
+            <li>Confirme la disponibilite de l'equipe de sauvetage</li>
+          </ul>
+          <div class="role-critical">Aucune entree sans la signature du responsable sur le permis</div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <span class="ref-tag">RSST art. 298</span>
+        <span class="ref-tag">RSST art. 299</span>
+        <span class="ref-tag">RSST art. 306</span>
+        <span class="ref-tag">RSST art. 307</span>
+        <span class="ref-tag">RSST art. 308</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SECTION 4: EQUIPEMENTS ═══ -->
+<div class="section" data-section="equipements">
+  <div class="sec-head" onclick="toggleSection(this)">
+    <div class="sec-num green">4</div>
+    <div class="sec-title">EQUIPEMENTS REQUIS</div>
+    <div class="sec-badge">RSST 303-305</div>
+    <div class="sec-chev">&#9660;</div>
+  </div>
+  <div class="sec-body">
+    <div class="sec-content">
+      <div class="equip-list">
+        <div class="equip-item">
+          <div class="equip-icon">&#128290;</div>
+          <div class="equip-info">
+            <div class="equip-name">Detecteur multi-gaz (calibre)</div>
+            <div class="equip-sub">O&#8322;, CO, H&#8322;S, LIE — calibration mensuelle</div>
+          </div>
+          <div class="equip-tag required">REQUIS</div>
+        </div>
+        <div class="equip-item">
+          <div class="equip-icon">&#127744;</div>
+          <div class="equip-info">
+            <div class="equip-name">Ventilation forcee</div>
+            <div class="equip-sub">Ventilateur axial ou centrifuge avec gaine</div>
+          </div>
+          <div class="equip-tag required">REQUIS</div>
+        </div>
+        <div class="equip-item">
+          <div class="equip-icon">&#129526;</div>
+          <div class="equip-info">
+            <div class="equip-name">Harnais + longe de sauvetage</div>
+            <div class="equip-sub">CSA Z259.10 — inspectee annuellement</div>
+          </div>
+          <div class="equip-tag required">REQUIS</div>
+        </div>
+        <div class="equip-item">
+          <div class="equip-icon">&#9650;</div>
+          <div class="equip-info">
+            <div class="equip-name">Tripode + treuil de sauvetage</div>
+            <div class="equip-sub">Capacite min 140 kg — pret a l'emploi</div>
+          </div>
+          <div class="equip-tag required">REQUIS</div>
+        </div>
+        <div class="equip-item">
+          <div class="equip-icon">&#128225;</div>
+          <div class="equip-info">
+            <div class="equip-name">Communication (radio/intercom)</div>
+            <div class="equip-sub">Lien continu surveillant-entrant</div>
+          </div>
+          <div class="equip-tag required">REQUIS</div>
+        </div>
+        <div class="equip-item">
+          <div class="equip-icon">&#128161;</div>
+          <div class="equip-info">
+            <div class="equip-name">Eclairage antideflagrant</div>
+            <div class="equip-sub">Lampes certifiees pour zones explosives</div>
+          </div>
+          <div class="equip-tag required">REQUIS</div>
+        </div>
+        <div class="equip-item">
+          <div class="equip-icon">&#128168;</div>
+          <div class="equip-info">
+            <div class="equip-name">SCBA / APRIA</div>
+            <div class="equip-sub">Appareil de protection respiratoire autonome</div>
+          </div>
+          <div class="equip-tag recommended">SI REQUIS</div>
+        </div>
+        <div class="equip-item">
+          <div class="equip-icon">&#129657;</div>
+          <div class="equip-info">
+            <div class="equip-name">Trousse premiers soins</div>
+            <div class="equip-sub">Conforme au Reglement sur les premiers secours</div>
+          </div>
+          <div class="equip-tag required">REQUIS</div>
+        </div>
+        <div class="equip-item">
+          <div class="equip-icon">&#129519;</div>
+          <div class="equip-info">
+            <div class="equip-name">Extincteur</div>
+            <div class="equip-sub">Type ABC — accessible a l'entree</div>
+          </div>
+          <div class="equip-tag recommended">RECOMMANDE</div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <span class="ref-tag">RSST art. 303</span>
+        <span class="ref-tag">RSST art. 304</span>
+        <span class="ref-tag">RSST art. 305</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SECTION 5: PROCEDURE D'ENTREE ═══ -->
+<div class="section" data-section="procedure">
+  <div class="sec-head" onclick="toggleSection(this)">
+    <div class="sec-num rescue">5</div>
+    <div class="sec-title">PROCEDURE D'ENTREE</div>
+    <div class="sec-badge">RSST 300-310</div>
+    <div class="sec-chev">&#9660;</div>
+  </div>
+  <div class="sec-body">
+    <div class="sec-content">
+      <div class="proc-list">
+        <div class="proc-step">
+          <div class="proc-head" onclick="toggleProc(this)">
+            <div class="proc-num">1</div>
+            <div class="proc-txt">Obtenir le permis signe</div>
+            <div class="sec-chev">&#9660;</div>
+          </div>
+          <div class="proc-detail">Le permis d'entree doit etre signe par le responsable designe. Il doit mentionner : lieu, date, heure, duree prevue, travail a effectuer, risques identifies, equipements requis, noms des entrants/surveillant/sauveteurs. Valide pour UN quart de travail maximum.</div>
+        </div>
+
+        <div class="proc-step">
+          <div class="proc-head" onclick="toggleProc(this)">
+            <div class="proc-num">2</div>
+            <div class="proc-txt">Verifier le cadenassage / isolation des energies</div>
+            <div class="sec-chev">&#9660;</div>
+          </div>
+          <div class="proc-detail">Toutes les sources d'energie doivent etre cadenassees : electrique, mecanique, hydraulique, pneumatique, thermique, chimique. Verifier les conduits d'alimentation, vannes, interrupteurs. Chaque travailleur appose son cadenas personnel. Procedure LOTO (Lock Out Tag Out) complete.</div>
+        </div>
+
+        <div class="proc-step">
+          <div class="proc-head" onclick="toggleProc(this)">
+            <div class="proc-num">3</div>
+            <div class="proc-txt">Purger et ventiler l'espace</div>
+            <div class="sec-chev">&#9660;</div>
+          </div>
+          <div class="proc-detail">Purger les residus (gaz, liquides, vapeurs). Installer la ventilation forcee. Attendre un minimum de 15 minutes de ventilation avant le premier test. La ventilation doit etre continue pendant toute la duree des travaux.</div>
+        </div>
+
+        <div class="proc-step">
+          <div class="proc-head" onclick="toggleProc(this)">
+            <div class="proc-num">4</div>
+            <div class="proc-txt">Tester l'atmosphere (3 niveaux : haut/milieu/bas)</div>
+            <div class="sec-chev">&#9660;</div>
+          </div>
+          <div class="proc-detail">Utiliser le detecteur multi-gaz calibre. Tester a 3 hauteurs car les gaz se stratifient : gaz legers en haut (methane), gaz lourds en bas (H&#8322;S, CO&#8322;). Enregistrer les lectures sur le permis. Les 4 parametres : O&#8322;, CO, H&#8322;S, LIE. Si un seul seuil est depasse : NE PAS ENTRER.</div>
+        </div>
+
+        <div class="proc-step">
+          <div class="proc-head" onclick="toggleProc(this)">
+            <div class="proc-num">5</div>
+            <div class="proc-txt">Verifier les equipements de sauvetage</div>
+            <div class="sec-chev">&#9660;</div>
+          </div>
+          <div class="proc-detail">Tripode et treuil installes et fonctionnels. Harnais inspecte et ajuste. APRIA charge et teste (minimum 30 min d'air). Longe de sauvetage attachee. Communication testee. Trousse de premiers soins accessible.</div>
+        </div>
+
+        <div class="proc-step">
+          <div class="proc-head" onclick="toggleProc(this)">
+            <div class="proc-num">6</div>
+            <div class="proc-txt">Briefer l'equipe (entrant + surveillant + sauveteur)</div>
+            <div class="sec-chev">&#9660;</div>
+          </div>
+          <div class="proc-detail">Revoir : risques specifiques, procedure d'urgence, signaux de communication, plan de sauvetage, roles de chacun. S'assurer que tout le monde connait les seuils d'alarme et les actions a prendre. Chaque membre confirme verbalement.</div>
+        </div>
+
+        <div class="proc-step">
+          <div class="proc-head" onclick="toggleProc(this)">
+            <div class="proc-num">7</div>
+            <div class="proc-txt">Installer la ventilation continue</div>
+            <div class="sec-chev">&#9660;</div>
+          </div>
+          <div class="proc-detail">La ventilation doit fonctionner en continu. Positionner la gaine pour assurer le brassage complet de l'atmosphere. Verifier que l'air soufle n'est pas contamine (source d'air propre). Si la ventilation s'arrete : evacuation immediate.</div>
+        </div>
+
+        <div class="proc-step">
+          <div class="proc-head" onclick="toggleProc(this)">
+            <div class="proc-num">8</div>
+            <div class="proc-txt">Entrer avec detecteur ALLUME</div>
+            <div class="sec-chev">&#9660;</div>
+          </div>
+          <div class="proc-detail">Le detecteur multi-gaz personnel doit etre allume et en mode surveillance continue. Le porter dans la zone respiratoire (poitrine/epaule). Si une alarme se declenche : sortir immediatement sans questionner.</div>
+        </div>
+
+        <div class="proc-step">
+          <div class="proc-head" onclick="toggleProc(this)">
+            <div class="proc-num">9</div>
+            <div class="proc-txt">Tests atmospheriques continus</div>
+            <div class="sec-chev">&#9660;</div>
+          </div>
+          <div class="proc-detail">Verification continue par le detecteur personnel de l'entrant. Le surveillant effectue aussi des tests depuis l'exterieur toutes les 15-30 minutes. Enregistrer toutes les lectures sur le permis. Tout changement de condition = reevaluation complete.</div>
+        </div>
+
+        <div class="proc-step">
+          <div class="proc-head" onclick="toggleProc(this)">
+            <div class="proc-num">10</div>
+            <div class="proc-txt">A la sortie : fermer le permis</div>
+            <div class="sec-chev">&#9660;</div>
+          </div>
+          <div class="proc-detail">Confirmer que tous les entrants sont sortis. Enregistrer l'heure de sortie. Verifier l'etat de sante de chaque entrant. Retirer les equipements de sauvetage. Fermer et signer le permis. Conserver le permis selon les exigences de retention (minimum 1 an).</div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <span class="ref-tag">RSST art. 300</span>
+        <span class="ref-tag">RSST art. 301</span>
+        <span class="ref-tag">RSST art. 302</span>
+        <span class="ref-tag">RSST art. 303</span>
+        <span class="ref-tag">RSST art. 304</span>
+        <span class="ref-tag">RSST art. 305</span>
+        <span class="ref-tag">RSST art. 310</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SECTION 6: DANGERS SPECIFIQUES ═══ -->
+<div class="section" data-section="dangers">
+  <div class="sec-head" onclick="toggleSection(this)">
+    <div class="sec-num red">6</div>
+    <div class="sec-title">DANGERS SPECIFIQUES</div>
+    <div class="sec-badge">8 TYPES</div>
+    <div class="sec-chev">&#9660;</div>
+  </div>
+  <div class="sec-body">
+    <div class="sec-content">
+      <div class="danger-grid">
+
+        <div class="danger-card">
+          <div class="danger-head" onclick="toggleDanger(this)">
+            <div class="danger-icon">&#9760;&#65039;</div>
+            <div class="danger-name">ATMOSPHERE TOXIQUE</div>
+            <div class="sec-chev">&#9660;</div>
+          </div>
+          <div class="danger-body">
+            <div class="danger-sub desc"><h4>DESCRIPTION</h4><p>Presence de gaz, vapeurs ou poussieres toxiques (CO, H&#8322;S, NH&#8323;, Cl&#8322;, SO&#8322;, vapeurs de solvants).</p></div>
+            <div class="danger-sub signs"><h4>SIGNES PRECURSEURS</h4><ul><li>Odeurs inhabituelles (mais certains gaz sont inodores)</li><li>Irritation des yeux, nez, gorge</li><li>Etourdissements, nausees</li><li>Alarme du detecteur</li></ul></div>
+            <div class="danger-sub control"><h4>MESURES DE CONTROLE</h4><ul><li>Tests atmospheriques avant et pendant</li><li>Ventilation forcee continue</li><li>APRIA si concentration elevee</li><li>Identification des sources de contamination</li></ul></div>
+            <div class="danger-sub emergency"><h4>ACTION D'URGENCE</h4><p>Evacuer. Ne pas tenter de secourir sans protection respiratoire. Appeler les secours.</p></div>
+          </div>
+        </div>
+
+        <div class="danger-card">
+          <div class="danger-head" onclick="toggleDanger(this)">
+            <div class="danger-icon">&#128168;</div>
+            <div class="danger-name">DEFICIENCE EN OXYGENE</div>
+            <div class="sec-chev">&#9660;</div>
+          </div>
+          <div class="danger-body">
+            <div class="danger-sub desc"><h4>DESCRIPTION</h4><p>O&#8322; &lt;19.5% cause par rouille (oxydation), fermentation, deplacement par gaz inertes (azote, argon, CO&#8322;), consommation bacterienne.</p></div>
+            <div class="danger-sub signs"><h4>SIGNES PRECURSEURS</h4><ul><li>Essoufflement anormal</li><li>Fatigue soudaine, confusion</li><li>Cyanose (levres/ongles bleutees)</li><li>Perte de coordination</li></ul></div>
+            <div class="danger-sub control"><h4>MESURES DE CONTROLE</h4><ul><li>Ventilation forcee avant et pendant</li><li>Surveillance O&#8322; continue</li><li>APRIA si O&#8322; &lt;19.5%</li></ul></div>
+            <div class="danger-sub emergency"><h4>ACTION D'URGENCE</h4><p>Evacuer immediatement. Administrer O&#8322; supplementaire. Appeler le 911.</p></div>
+          </div>
+        </div>
+
+        <div class="danger-card">
+          <div class="danger-head" onclick="toggleDanger(this)">
+            <div class="danger-icon">&#128165;</div>
+            <div class="danger-name">ATMOSPHERE EXPLOSIVE</div>
+            <div class="sec-chev">&#9660;</div>
+          </div>
+          <div class="danger-body">
+            <div class="danger-sub desc"><h4>DESCRIPTION</h4><p>Concentration de gaz/vapeurs inflammables entre la LIE et la LSE. Risque d'explosion en presence d'une source d'ignition.</p></div>
+            <div class="danger-sub signs"><h4>SIGNES PRECURSEURS</h4><ul><li>Lecture LIE &gt;10% sur le detecteur</li><li>Odeurs de solvants ou hydrocarbures</li><li>Residus de matieres inflammables</li></ul></div>
+            <div class="danger-sub control"><h4>MESURES DE CONTROLE</h4><ul><li>Purger et ventiler avant entree</li><li>Surveillance LIE continue</li><li>Outils anti-deflagrants UNIQUEMENT</li><li>Eliminer toutes sources d'ignition</li><li>Mise a la terre des equipements</li></ul></div>
+            <div class="danger-sub emergency"><h4>ACTION D'URGENCE</h4><p>Evacuer si LIE &gt;25%. Couper ventilation electrique. Aucune source d'etincelle. Appeler les secours.</p></div>
+          </div>
+        </div>
+
+        <div class="danger-card">
+          <div class="danger-head" onclick="toggleDanger(this)">
+            <div class="danger-icon">&#9968;&#65039;</div>
+            <div class="danger-name">ENSEVELISSEMENT / ENGULFMENT</div>
+            <div class="sec-chev">&#9660;</div>
+          </div>
+          <div class="danger-body">
+            <div class="danger-sub desc"><h4>DESCRIPTION</h4><p>Risque d'etre submerge par des matieres solides (grain, sable, copeaux) ou liquides. Frequent dans les silos, tremies, reservoirs a matieres.</p></div>
+            <div class="danger-sub signs"><h4>SIGNES PRECURSEURS</h4><ul><li>Matieres stockees en surplomb (pont de matiere)</li><li>Parois instables</li><li>Arrivee d'eau/liquide imprevue</li></ul></div>
+            <div class="danger-sub control"><h4>MESURES DE CONTROLE</h4><ul><li>Isolation complete des alimentations</li><li>Cadenassage des vannes et convoyeurs</li><li>Harnais avec longe de sauvetage</li><li>Ne jamais marcher sur la matiere</li></ul></div>
+            <div class="danger-sub emergency"><h4>ACTION D'URGENCE</h4><p>Extraction par treuil. Ne JAMAIS tenter de creuser sans securiser. Risque d'effondrement progressif.</p></div>
+          </div>
+        </div>
+
+        <div class="danger-card">
+          <div class="danger-head" onclick="toggleDanger(this)">
+            <div class="danger-icon">&#127754;</div>
+            <div class="danger-name">NOYADE</div>
+            <div class="sec-chev">&#9660;</div>
+          </div>
+          <div class="danger-body">
+            <div class="danger-sub desc"><h4>DESCRIPTION</h4><p>Presence de liquides ou risque d'inondation soudaine (cuves, fosses, egouts, stations de pompage).</p></div>
+            <div class="danger-sub signs"><h4>SIGNES PRECURSEURS</h4><ul><li>Traces d'eau ou d'humidite</li><li>Vannes ou conduites non isolees</li><li>Meteo : risque de pluie (egouts)</li></ul></div>
+            <div class="danger-sub control"><h4>MESURES DE CONTROLE</h4><ul><li>Isolation et vidange complete</li><li>Pompage continu si infiltration</li><li>VFI si travail pres de l'eau (&gt;150N)</li><li>Plan de sauvetage aquatique</li></ul></div>
+            <div class="danger-sub emergency"><h4>ACTION D'URGENCE</h4><p>Evacuer. Arreter les pompes d'alimentation. Sauvetage aquatique par equipe formee.</p></div>
+          </div>
+        </div>
+
+        <div class="danger-card">
+          <div class="danger-head" onclick="toggleDanger(this)">
+            <div class="danger-icon">&#9881;&#65039;</div>
+            <div class="danger-name">PIEGE MECANIQUE</div>
+            <div class="sec-chev">&#9660;</div>
+          </div>
+          <div class="danger-body">
+            <div class="danger-sub desc"><h4>DESCRIPTION</h4><p>Risque d'etre happe par des pieces mobiles : agitateurs, vis sans fin, convoyeurs, melangeurs, broyeurs.</p></div>
+            <div class="danger-sub signs"><h4>SIGNES PRECURSEURS</h4><ul><li>Equipements non cadenasses</li><li>Vibrations ou bruits anormaux</li><li>Espaces restreints pres de mecanismes</li></ul></div>
+            <div class="danger-sub control"><h4>MESURES DE CONTROLE</h4><ul><li>Cadenassage COMPLET de toutes les sources d'energie</li><li>Verification zero energie</li><li>Blocage mecanique des pieces mobiles</li><li>Procedures LOTO strictes</li></ul></div>
+            <div class="danger-sub emergency"><h4>ACTION D'URGENCE</h4><p>NE PAS tenter de degager mecaniquement. Couper toutes les sources d'energie. Appeler les secours specialises.</p></div>
+          </div>
+        </div>
+
+        <div class="danger-card">
+          <div class="danger-head" onclick="toggleDanger(this)">
+            <div class="danger-icon">&#127777;&#65039;</div>
+            <div class="danger-name">CHALEUR EXCESSIVE</div>
+            <div class="sec-chev">&#9660;</div>
+          </div>
+          <div class="danger-body">
+            <div class="danger-sub desc"><h4>DESCRIPTION</h4><p>Temperature ambiante elevee, surfaces chaudes, rayonnement thermique. Chaudieres, fours, sechoirs, reacteurs.</p></div>
+            <div class="danger-sub signs"><h4>SIGNES PRECURSEURS</h4><ul><li>Transpiration excessive</li><li>Crampes, nausees, fatigue</li><li>Peau rouge et seche (coup de chaleur)</li><li>Confusion mentale</li></ul></div>
+            <div class="danger-sub control"><h4>MESURES DE CONTROLE</h4><ul><li>Refroidissement avant entree</li><li>Rotation des entrants (15-30 min max)</li><li>Hydratation obligatoire</li><li>Surveillance des signes vitaux</li></ul></div>
+            <div class="danger-sub emergency"><h4>ACTION D'URGENCE</h4><p>Evacuer. Refroidir le travailleur (eau fraiche, ombre). Si confusion ou perte de conscience : 911 immediatement.</p></div>
+          </div>
+        </div>
+
+        <div class="danger-card">
+          <div class="danger-head" onclick="toggleDanger(this)">
+            <div class="danger-icon">&#128266;</div>
+            <div class="danger-name">BRUIT EXCESSIF</div>
+            <div class="sec-chev">&#9660;</div>
+          </div>
+          <div class="danger-body">
+            <div class="danger-sub desc"><h4>DESCRIPTION</h4><p>Amplification du bruit dans un espace confine. Ventilateurs, outils pneumatiques, martelage. Peut depasser 100 dBA facilement.</p></div>
+            <div class="danger-sub signs"><h4>SIGNES PRECURSEURS</h4><ul><li>Doit crier pour se faire entendre a 1m</li><li>Bourdonnement apres exposition</li><li>Difficulte a entendre les alarmes du detecteur</li></ul></div>
+            <div class="danger-sub control"><h4>MESURES DE CONTROLE</h4><ul><li>Protection auditive double si &gt;100 dBA</li><li>Rotation des travailleurs</li><li>Outils anti-vibration</li><li>Alarmes visuelles en complement</li></ul></div>
+            <div class="danger-sub emergency"><h4>ACTION D'URGENCE</h4><p>Si le bruit empeche la communication : arreter les travaux. La communication est CRITIQUE en espace clos.</p></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SECTION 7: PROCEDURE D'URGENCE ═══ -->
+<div class="section" data-section="urgence">
+  <div class="sec-head" onclick="toggleSection(this)">
+    <div class="sec-num red">7</div>
+    <div class="sec-title">PROCEDURE D'URGENCE / SAUVETAGE</div>
+    <div class="sec-badge">RSST 309-310</div>
+    <div class="sec-chev">&#9660;</div>
+  </div>
+  <div class="sec-body">
+    <div class="sec-content">
+      <div class="emergency-box">
+        <h3>EXTRACTION D'URGENCE</h3>
+        <div class="emergency-step">
+          <div class="emergency-num">1</div>
+          <div class="emergency-txt">Ordonner l'evacuation immediate — tous les entrants sortent</div>
+        </div>
+        <div class="emergency-step">
+          <div class="emergency-num">2</div>
+          <div class="emergency-txt">Le surveillant RESTE a son poste et appelle les secours (sauveteurs + 911)</div>
+        </div>
+        <div class="emergency-step">
+          <div class="emergency-num">3</div>
+          <div class="emergency-txt">Les sauveteurs enfilent les APRIA et s'equipent AVANT d'entrer</div>
+        </div>
+        <div class="emergency-step">
+          <div class="emergency-num">4</div>
+          <div class="emergency-txt">Extraction par treuil/tripode si la victime est attachee a la longe</div>
+        </div>
+        <div class="emergency-step">
+          <div class="emergency-num">5</div>
+          <div class="emergency-txt">Si entree necessaire : equipe de 2 sauveteurs minimum, surveilles par un 3e</div>
+        </div>
+        <div class="emergency-step">
+          <div class="emergency-num">6</div>
+          <div class="emergency-txt">Premiers soins des l'extraction — RCR si necessaire</div>
+        </div>
+        <div class="emergency-step">
+          <div class="emergency-num">7</div>
+          <div class="emergency-txt">Transfert aux services d'urgence. Documenter l'evenement.</div>
+        </div>
+      </div>
+
+      <div class="never-box">
+        <p>NE JAMAIS ENTRER POUR SECOURIR SANS EQUIPEMENT DE PROTECTION RESPIRATOIRE</p>
+      </div>
+
+      <h3 style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1px;color:var(--gold);margin:16px 0 8px">CODES DE COMMUNICATION</h3>
+      <div class="comm-codes">
+        <div class="comm-code">
+          <div class="code" style="color:var(--green)">OK</div>
+          <div class="meaning">Tout va bien, conditions normales</div>
+        </div>
+        <div class="comm-code">
+          <div class="code" style="color:var(--gold)">ALERTE</div>
+          <div class="meaning">Changement de condition, surveillance accrue</div>
+        </div>
+        <div class="comm-code">
+          <div class="code" style="color:var(--rescue)">EVACUER</div>
+          <div class="meaning">Sortie immediate de tous les entrants</div>
+        </div>
+        <div class="comm-code">
+          <div class="code" style="color:var(--red)">MAYDAY</div>
+          <div class="meaning">Urgence vitale — sauvetage requis immediatement</div>
+        </div>
+        <div class="comm-code">
+          <div class="code" style="color:var(--blue)">SILENCE</div>
+          <div class="meaning">Pas de reponse de l'entrant — verifier immediatement</div>
+        </div>
+      </div>
+
+      <h3 style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1px;color:var(--gold);margin:16px 0 8px">QUAND APPELER LE 911</h3>
+      <ul style="padding-left:16px">
+        <li style="font-size:12px;color:var(--muted);margin-bottom:4px;line-height:1.5">Perte de conscience d'un entrant</li>
+        <li style="font-size:12px;color:var(--muted);margin-bottom:4px;line-height:1.5">Explosion ou incendie dans l'espace</li>
+        <li style="font-size:12px;color:var(--muted);margin-bottom:4px;line-height:1.5">Impossibilite d'extraire la victime</li>
+        <li style="font-size:12px;color:var(--muted);margin-bottom:4px;line-height:1.5">Blessures graves (fractures, brulures, intoxication)</li>
+        <li style="font-size:12px;color:var(--muted);margin-bottom:4px;line-height:1.5">Arret cardiorespiratoire</li>
+      </ul>
+
+      <div style="margin-top:10px">
+        <span class="ref-tag">RSST art. 309</span>
+        <span class="ref-tag">RSST art. 310</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SECTION 8: ARTICLES CNESST ═══ -->
+<div class="section" data-section="articles">
+  <div class="sec-head" onclick="toggleSection(this)">
+    <div class="sec-num purple">8</div>
+    <div class="sec-title">ARTICLES CNESST — ESPACE CLOS</div>
+    <div class="sec-badge">RSST 298-310</div>
+    <div class="sec-chev">&#9660;</div>
+  </div>
+  <div class="sec-body">
+    <div class="sec-content">
+      <div class="article-list" id="articleList">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- FOOTER -->
+<div style="text-align:center;padding:24px 14px 40px;opacity:.4">
+  <p style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:2px;color:var(--gold)">VOLO SST — GOLDEN EAGLES</p>
+  <p style="font-size:9px;color:var(--muted);margin-top:4px">Permis Espace Clos — RSST Section XXVI</p>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  ACCORDION / TOGGLE LOGIC
+// ══════════════════════════════════════════
+
+function toggleSection(head) {
+  const body = head.nextElementSibling;
+  const chev = head.querySelector('.sec-chev');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+function toggleGas(header) {
+  const detail = header.nextElementSibling;
+  const chev = header.querySelector('.sec-chev');
+  detail.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+function toggleProc(head) {
+  const detail = head.nextElementSibling;
+  const chev = head.querySelector('.sec-chev');
+  detail.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+function toggleDanger(head) {
+  const body = head.nextElementSibling;
+  const chev = head.querySelector('.sec-chev');
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+function toggleArticle(head) {
+  const body = head.nextElementSibling;
+  body.classList.toggle('open');
+}
+
+// ══════════════════════════════════════════
+//  SEARCH
+// ══════════════════════════════════════════
+
+function handleSearch(query) {
+  const q = query.toLowerCase().trim();
+  const sections = document.querySelectorAll('.section');
+
+  if (!q) {
+    sections.forEach(s => s.classList.remove('hidden'));
+    document.querySelectorAll('.gas-card, .danger-card, .role-card, .equip-item, .proc-step, .article-item').forEach(el => el.classList.remove('hidden'));
+    return;
+  }
+
+  sections.forEach(section => {
+    const text = section.textContent.toLowerCase();
+    if (text.includes(q)) {
+      section.classList.remove('hidden');
+      // Open section if match found
+      const body = section.querySelector('.sec-body');
+      const chev = section.querySelector('.sec-chev');
+      if (body && !body.classList.contains('open')) {
+        body.classList.add('open');
+        if (chev) chev.classList.add('open');
+      }
+    } else {
+      section.classList.add('hidden');
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+//  LOAD CNESST ARTICLES
+// ══════════════════════════════════════════
+
+const ESPACE_CLOS_ARTICLES = [
+  { num: "298", title: "Champ d'application", text: "La presente section s'applique a tout espace clos dans lequel un travailleur doit penetrer pour y executer un travail. L'employeur doit elaborer une procedure d'entree specifique a chaque espace clos." },
+  { num: "299", title: "Programme de prevention", text: "L'employeur doit elaborer un programme de prevention specifique aux espaces clos comprenant : l'identification des espaces, l'evaluation des risques, les procedures d'entree, les mesures d'urgence, la formation du personnel." },
+  { num: "300", title: "Evaluation des risques", text: "Avant toute entree, l'employeur doit faire evaluer les risques par une personne qualifiee : atmosphere, configuration physique, risques mecaniques, electriques, thermiques, et d'ensevelissement." },
+  { num: "301", title: "Tests atmospheriques", text: "Des tests atmospheriques doivent etre effectues avant l'entree et de facon continue pendant les travaux. Les parametres a verifier : concentration d'oxygene, gaz inflammables, gaz toxiques." },
+  { num: "302", title: "Valeurs limites", text: "L'atmosphere doit respecter les valeurs limites prescrites a l'Annexe I du RSST. La concentration d'oxygene doit etre entre 19.5% et 23.5%. La concentration de gaz inflammables doit etre inferieure a 25% de la LIE." },
+  { num: "303", title: "Ventilation", text: "L'espace clos doit etre ventile de facon a maintenir une atmosphere securitaire. La ventilation doit etre continue pendant toute la duree des travaux. L'air insuffle doit provenir d'une source non contaminee." },
+  { num: "304", title: "Equipements de protection", text: "Les travailleurs doivent porter les equipements de protection individuelle adequats : harnais de securite, appareil de protection respiratoire si necessaire, equipements de communication, detecteur de gaz personnel." },
+  { num: "305", title: "Equipements de sauvetage", text: "Les equipements de sauvetage doivent etre disponibles et prets a l'emploi : dispositif de levage mecanique (tripode/treuil), appareil de protection respiratoire autonome, trousse de premiers soins, moyens de communication." },
+  { num: "306", title: "Surveillant", text: "Un surveillant doit etre affecte a l'entree de l'espace clos pendant toute la duree des travaux. Il doit maintenir la communication avec les entrants, tenir un registre, et connaitre les procedures d'urgence." },
+  { num: "307", title: "Formation", text: "Tous les travailleurs impliques (entrants, surveillants, sauveteurs) doivent recevoir une formation specifique sur : les risques des espaces clos, les procedures d'entree, l'utilisation des equipements, les mesures d'urgence." },
+  { num: "308", title: "Permis d'entree", text: "Un permis d'entree ecrit doit etre emis avant chaque entree. Il doit contenir : identification de l'espace, date et duree, noms des personnes autorisees, risques identifies, resultats des tests, equipements requis, mesures d'urgence." },
+  { num: "309", title: "Mesures d'urgence", text: "Un plan de sauvetage doit etre etabli et repete avant le debut des travaux. Les sauveteurs doivent etre formes et equipes. Les procedures d'alerte et d'evacuation doivent etre connues de tous." },
+  { num: "310", title: "Fermeture du permis", text: "A la fin des travaux, le permis doit etre ferme. L'employeur doit s'assurer que tous les travailleurs ont quitte l'espace clos et que les conditions de securite sont retablies." }
+];
+
+function loadArticles() {
+  const list = document.getElementById('articleList');
+  if (!list) return;
+
+  // Load hardcoded RSST articles 298-310
+  let html = '';
+  ESPACE_CLOS_ARTICLES.forEach(a => {
+    html += '<div class="article-item">';
+    html += '<div class="article-head" onclick="toggleArticle(this)">';
+    html += '<div class="article-num">Art. ' + a.num + '</div>';
+    html += '<div class="article-title">' + a.title + '</div>';
+    html += '<div class="sec-chev">&#9660;</div>';
+    html += '</div>';
+    html += '<div class="article-body">' + a.text + '</div>';
+    html += '</div>';
+  });
+
+  // Load from cnesst-reglements.js if available
+  if (typeof CNESST_REGLEMENTS !== 'undefined') {
+    const sources = [
+      { data: CNESST_REGLEMENTS.RSST?.espaces_clos, label: 'RSST' },
+      { data: CNESST_REGLEMENTS.CODE_CONSTRUCTION?.espaces_clos, label: 'Code Construction' }
+    ];
+    sources.forEach(src => {
+      if (src.data && src.data.length) {
+        src.data.forEach(item => {
+          html += '<div class="article-item">';
+          html += '<div class="article-head" onclick="toggleArticle(this)">';
+          html += '<div class="article-num">' + src.label + ' ' + item.art + '</div>';
+          html += '<div class="article-title">' + (item.resume || '') + '</div>';
+          html += '<div class="sec-chev">&#9660;</div>';
+          html += '</div>';
+          html += '<div class="article-body">' + (item.resume || '') + '</div>';
+          html += '</div>';
+        });
+      }
+    });
+
+    // Also add relevant checklist items
+    if (CNESST_REGLEMENTS.CHECKLIST_CONFORMITE) {
+      const ecItems = CNESST_REGLEMENTS.CHECKLIST_CONFORMITE.filter(c => c.categorie === 'Espaces clos');
+      ecItems.forEach(item => {
+        html += '<div class="article-item">';
+        html += '<div class="article-head" onclick="toggleArticle(this)">';
+        html += '<div class="article-num">' + item.ref + '</div>';
+        html += '<div class="article-title">' + item.item + '</div>';
+        html += '<div class="sec-chev">&#9660;</div>';
+        html += '</div>';
+        html += '<div class="article-body">Point de conformite #' + item.id + (item.critique ? ' — CRITIQUE' : '') + '. ' + item.item + '. Reference : ' + item.ref + '</div>';
+        html += '</div>';
+      });
+    }
+  }
+
+  list.innerHTML = html;
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadArticles();
+});
+</script>
+</body>
+</html>

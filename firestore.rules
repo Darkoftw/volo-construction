@@ -7,7 +7,7 @@ service cloud.firestore {
     // ══════════════════════════════════════════
 
     function isAuth() {
-      return request.auth != null;
+      return request.auth != null && request.auth.token.role != null;
     }
 
     function hasRole(role) {
@@ -156,6 +156,27 @@ service cloud.firestore {
       allow read: if isAuth();
       allow create: if isAdmin();
       allow update, delete: if false;
+    }
+
+    // ── FCM Tokens — chaque user peut enregistrer son token ──
+    match /fcm_tokens/{voloId} {
+      allow read: if isAuth();
+      allow write: if isAuth() && request.auth.uid == voloId;
+    }
+
+    // ── Notifications — queue pour Cloud Function ──
+    match /notifications/{docId} {
+      allow read: if isAuth();
+      allow create: if isChefOrAdmin();
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // ── Articles RSST (base de connaissances réglementaire) ──
+    // Lecture pour tous les authentifiés, écriture admin seulement
+    match /articles_rsst/{articleId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
     }
 
     // Bloquer tout le reste

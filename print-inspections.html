@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rapport Inspections — VOLO SST</title>
+<script src="data.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+/* ── SCREEN: dark selector ── */
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#111;color:#ccc;min-height:100vh}
+body.printing{background:#fff!important;color:#111!important}
+.selector{max-width:600px;margin:40px auto;text-align:center;padding:0 16px}
+.selector h1{font-size:1.4rem;color:#C9A84C;margin-bottom:8px;letter-spacing:2px}
+.selector .sub{color:#888;margin-bottom:20px;font-size:.85rem}
+.selector .btn{display:block;width:100%;padding:16px;margin:8px 0;background:#1a1a2e;border:1px solid #333;color:#eee;font-size:1rem;border-radius:8px;cursor:pointer;transition:.2s;text-align:left}
+.selector .btn:hover{border-color:#C9A84C;background:#222}
+.selector .btn .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:10px;vertical-align:middle}
+.selector .btn .count{float:right;font-weight:700;font-size:1.1rem}
+.selector .btn.gold{border-color:#C9A84C;color:#C9A84C;text-align:center;margin-top:16px}
+
+.summary-cards{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.summary-card{background:#1a1a2e;border-radius:8px;padding:12px;text-align:center;border:1px solid #333}
+.summary-card .num{font-size:1.8rem;font-weight:900}
+.summary-card .lbl{font-size:.7rem;text-transform:uppercase;color:#888;margin-top:2px}
+.sc-red .num{color:#DC2626}.sc-orange .num{color:#F97316}.sc-yellow .num{color:#EAB308}.sc-blue .num{color:#3B82F6}
+
+/* ── PRINT PAGE: always white ── */
+.print-page{display:none;background:#fff;color:#111;width:210mm;margin:0 auto;padding:3mm 5mm;font-size:7pt;line-height:1.2}
+
+/* ── HEADER ── */
+.print-header{display:flex;align-items:center;justify-content:space-between;border-bottom:2.5px solid #111;padding-bottom:3px;margin-bottom:4px}
+.print-header h1{font-size:14pt;font-weight:900;letter-spacing:.5px}
+.print-header .sub{font-size:6.5pt;color:#555}
+.print-header .meta{text-align:right;font-size:7pt;color:#555}
+
+/* ── STATS BAR ── */
+.stats-bar{display:flex;gap:12px;margin-bottom:4px;font-size:7pt;flex-wrap:wrap}
+.stats-bar .stat{padding:2px 8px;border-radius:3px;font-weight:700}
+.stat-red{background:#FEE2E2;color:#991B1B}
+.stat-orange{background:#FFEDD5;color:#9A3412}
+.stat-yellow{background:#FEF9C3;color:#854D0E}
+.stat-blue{background:#DBEAFE;color:#1E40AF}
+
+/* ── CATEGORY HEADER ── */
+.cat-header{margin-top:5px;margin-bottom:2px;padding:2px 6px;font-size:8pt;font-weight:800;border-left:3px solid #111;background:#f0f0f0}
+.cat-red{border-left-color:#DC2626;background:#FEF2F2;color:#991B1B}
+.cat-orange{border-left-color:#F97316;background:#FFF7ED;color:#9A3412}
+.cat-yellow{border-left-color:#EAB308;background:#FEFCE8;color:#854D0E}
+.cat-blue{border-left-color:#3B82F6;background:#EFF6FF;color:#1E40AF}
+
+/* ── TABLE ── */
+.inv-table{width:100%;border-collapse:collapse;font-size:6.5pt;margin-bottom:3px}
+.inv-table th{background:#e8e8e8;border:0.5px solid #bbb;padding:2px 3px;text-align:left;font-weight:700;font-size:6pt;text-transform:uppercase}
+.inv-table td{border:0.5px solid #ddd;padding:1.5px 3px;vertical-align:middle}
+.inv-table tr:nth-child(even){background:#f8f8f8}
+.inv-table .photo-cell{width:24px;text-align:center;padding:1px}
+.inv-table .photo-cell img{width:22px;height:22px;object-fit:contain}
+.inv-table .name-cell{font-weight:600;max-width:80px}
+.inv-table .id-cell{font-family:Consolas,monospace;font-size:5.5pt;color:#555}
+.inv-table .caisse-cell{font-size:5.5pt;color:#666}
+.inv-table .date-cell{font-size:6pt;white-space:nowrap}
+.inv-table .status-cell{font-weight:700;font-size:6pt;text-align:center}
+.inv-table .notes-cell{font-size:5pt;color:#777;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.status-expired{color:#DC2626}.status-overdue{color:#F97316}.status-watch{color:#B45309}.status-soon{color:#2563EB}
+
+/* ── FOOTER ── */
+.footer-brand{text-align:center;font-size:5.5pt;color:#aaa;margin-top:4px;border-top:1px solid #ddd;padding-top:2px}
+
+/* ── SCREEN CONTROLS ── */
+.print-controls{text-align:center;margin:10px;padding:10px}
+.print-controls button{padding:12px 30px;font-size:1rem;background:#C9A84C;color:#111;border:none;border-radius:6px;cursor:pointer;font-weight:700;margin:0 5px}
+.print-controls button.back{background:#333;color:#eee}
+
+/* ── PRINT MEDIA ── */
+@media print{
+  body{background:#fff!important}
+  .selector,.print-controls{display:none!important}
+  .print-page{display:block!important;width:100%!important;padding:3mm 5mm!important;margin:0!important;page-break-after:always;box-shadow:none!important}
+  .print-page:last-child{page-break-after:avoid}
+  @page{size:A4 portrait;margin:3mm}
+}
+</style>
+</head>
+<body>
+
+<div class="selector" id="selector">
+  <h1>RAPPORT INSPECTIONS</h1>
+  <p class="sub">Fond blanc, format A4 — items a inspecter, expirés, à surveiller</p>
+  <div class="summary-cards" id="summaryCards"></div>
+  <div id="selButtons"></div>
+</div>
+
+<div id="printArea"></div>
+<div class="print-controls" id="printControls" style="display:none">
+  <button class="back" onclick="backToSelector()">Retour</button>
+  <button onclick="window.print()">IMPRIMER / PDF</button>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  PHOTO MAPPING (same as inventaire-sac)
+// ══════════════════════════════════════════
+const PHOTO_MAP = {
+  "Bm'D":"_Bm_D.jpeg","Bm'D noir":"_Bm_D.jpeg","William":"_WILLIAM.jpeg",
+  "Vulcan":"Vulcan.jpeg","Vulcan visse":"Vulcan_visse_.png",
+  "CMC DNA TWIST":"CMC_DNA_TWIST.jpeg","Spin L1":"Spin_L1.jpeg","Spin L2":"Spin_L2.jpeg",
+  "Prussik 8mm":"Prussik_8mm.jpeg","Prussik":"Prussik.png",
+  "Paw M":"Paw_M.jpeg","Paw L":"Paw_L.jpeg","Rescue Sender":"Rescue_Sender.jpeg",
+  "Express":"Express.jpeg","TEXORA 2m":"TEXORA_2m.jpeg","Texora MAMBA":"Texora_MAMBA.png",
+  "Sangle d'ancrage":"Sangle_d_ancrage.jpeg","Sangle cousus jaune":"Sangle_cousus_jaune_.png",
+  "Sangle Rouge":"Sangle_Rouge.png","Protecteur de corde":"Protecteur_de_corde.jpeg",
+  "Sac #1":"Sac__1.jpeg","Sac #2":"Sac__1.jpeg",
+  "Sac Sauveteur #1":"Sac_Sauveteur__1.png","Sac Sauveteur #2":"Sac_Sauveteur__1.png",
+  "Palan premonter harken wingman":"Palan_premonter_harken_wingman.jpeg",
+  "I'D L":"I_D_L.jpeg","I'D S":"I_D_S.jpeg",
+  "Longe 10'":"Longe_10_.png","Longe 30'":"Longe_30_.jpeg","Longe 25'":"Longe_25_.png",
+  "Longe":"Longe_10_.png","Longe 8'":"Longe_10_.png",
+  "Rollclip":"Rollclip.png","Flex":"Flex.jpeg","Maestro L":"Maestro_L.jpeg",
+  "Asap Lock":"Asap_Lock.jpeg","Asap":"Asap_Lock.jpeg",
+  "Asap'Sorber Axess":"Asap_Sorber_Axess.jpeg",
+  "Jane":"Jane.jpeg","Jane Ajustable":"Jane_Ajustable.jpeg",
+  "Grillion":"Grillion.png","Grillon":"Grillion.png",
+  "Poignée d'ascension":"Poigner_d_ascension.jpeg","Poigner d'ascension":"Poigner_d_ascension.jpeg",
+  "Progress Adjust":"Grillion.png","Connecteur":"Connecteur.png",
+};
+
+function getPhoto(n){return PHOTO_MAP[n]?'photos/'+PHOTO_MAP[n]:'';}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ══════════════════════════════════════════
+//  DATE PARSING
+// ══════════════════════════════════════════
+const NOW = new Date();
+
+function parseDate(str){
+  if(!str) return null;
+  str = str.trim();
+  // DD/MM/YYYY
+  let m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(m) return new Date(+m[3], +m[2]-1, +m[1]);
+  // MM/YYYY
+  m = str.match(/^(\d{1,2})\/(\d{4})$/);
+  if(m) return new Date(+m[2], +m[1]-1, 1);
+  // YYYY
+  m = str.match(/^(\d{4})$/);
+  if(m) return new Date(+m[1], 11, 31); // end of year
+  return null;
+}
+
+function monthsDiff(d1, d2){
+  return (d2.getFullYear()-d1.getFullYear())*12 + (d2.getMonth()-d1.getMonth());
+}
+
+function fmtDate(d){
+  if(!d) return '—';
+  return d.toLocaleDateString('fr-CA');
+}
+
+// ══════════════════════════════════════════
+//  FIND CAISSE FOR AN ITEM
+// ══════════════════════════════════════════
+const _caisseCache = new Map();
+function findCaisse(itemId){
+  if(_caisseCache.size===0){
+    CAISSES.forEach(c=>{
+      (c.items_contenus||[]).forEach(id=>{ _caisseCache.set(id, c.nom || c.id); });
+    });
+  }
+  return _caisseCache.get(itemId) || '—';
+}
+
+// ══════════════════════════════════════════
+//  CATEGORIZE ITEMS
+// ══════════════════════════════════════════
+let CAT_EXPIRED=[], CAT_OVERDUE=[], CAT_WATCH=[], CAT_SOON=[];
+
+function categorizeItems(){
+  CAT_EXPIRED=[]; CAT_OVERDUE=[]; CAT_WATCH=[]; CAT_SOON=[];
+  const twoMonths = new Date(NOW); twoMonths.setMonth(twoMonths.getMonth()+2);
+  const twelveAgo = new Date(NOW); twelveAgo.setMonth(twelveAgo.getMonth()-12);
+
+  ITEMS.forEach(it=>{
+    if(it.qty) return; // skip bulk surveillant items
+
+    // 1. EXPIRED — expiry date is past
+    const exp = parseDate(it.expiry);
+    if(exp && exp < NOW){
+      CAT_EXPIRED.push({...it, _reason:'Expiré '+fmtDate(exp), _date:exp});
+      return; // don't double-count
+    }
+
+    // 2. INSPECTION OVERDUE — inspDate older than 12 months
+    const insp = parseDate(it.inspDate);
+    if(insp && insp < twelveAgo){
+      CAT_OVERDUE.push({...it, _reason:'Dernière insp. '+fmtDate(insp), _date:insp});
+      return;
+    }
+
+    // 3. ETAT A SURVEILLER
+    const et = (it.etat||'').toLowerCase();
+    if(et==='a surveiller' || et==='hors service' || et==='maintenance'){
+      CAT_WATCH.push({...it, _reason:it.etat, _date:insp});
+      return;
+    }
+
+    // 4. NEXT INSPECTION within 2 months (inspDate + 12 months is within 2 months)
+    if(insp){
+      const nextInsp = new Date(insp); nextInsp.setMonth(nextInsp.getMonth()+12);
+      if(nextInsp <= twoMonths && nextInsp >= NOW){
+        CAT_SOON.push({...it, _reason:'Prochaine: '+fmtDate(nextInsp), _date:nextInsp});
+      }
+    }
+  });
+
+  // Sort each category
+  CAT_EXPIRED.sort((a,b)=>(a._date||0)-(b._date||0));
+  CAT_OVERDUE.sort((a,b)=>(a._date||0)-(b._date||0));
+  CAT_WATCH.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  CAT_SOON.sort((a,b)=>(a._date||0)-(b._date||0));
+}
+
+// ══════════════════════════════════════════
+//  RENDER TABLE ROW
+// ══════════════════════════════════════════
+function itemRow(it, statusCls){
+  const p = getPhoto(it.name);
+  const ph = p ? `<img src="${p}" alt="" onerror="this.style.display='none'">` : '';
+  const caisse = findCaisse(it.id);
+  const inspStr = it.inspDate || '—';
+  const notesShort = (it.notes||'').substring(0,60);
+  return `<tr>
+    <td class="photo-cell">${ph}</td>
+    <td class="name-cell">${esc(it.name)}</td>
+    <td class="id-cell">${esc(it.id)}</td>
+    <td class="caisse-cell">${esc(caisse)}</td>
+    <td class="date-cell">${esc(inspStr)}</td>
+    <td class="status-cell ${statusCls}">${esc(it._reason)}</td>
+    <td class="notes-cell" title="${esc(it.notes||'')}">${esc(notesShort)}</td>
+  </tr>`;
+}
+
+function tableHeader(){
+  return `<thead><tr><th>Photo</th><th>Equipement</th><th>ID</th><th>Caisse</th><th>Insp.</th><th>Statut</th><th>Notes</th></tr></thead>`;
+}
+
+// ══════════════════════════════════════════
+//  GENERATE PRINT PAGE
+// ══════════════════════════════════════════
+function genReport(mode){
+  const d = new Date().toLocaleDateString('fr-CA');
+  const showCritique = mode==='critique' || mode==='all';
+  const showWatch = mode==='all';
+  const showSoon = mode==='critique' || mode==='all';
+
+  let body = '';
+
+  if(showCritique && CAT_EXPIRED.length){
+    body += `<div class="cat-header cat-red">EXPIRE — ${CAT_EXPIRED.length} item${CAT_EXPIRED.length>1?'s':''}</div>`;
+    body += `<table class="inv-table">${tableHeader()}<tbody>${CAT_EXPIRED.map(it=>itemRow(it,'status-expired')).join('')}</tbody></table>`;
+  }
+
+  if(showCritique && CAT_OVERDUE.length){
+    body += `<div class="cat-header cat-orange">INSPECTION EN RETARD (+12 mois) — ${CAT_OVERDUE.length} item${CAT_OVERDUE.length>1?'s':''}</div>`;
+    body += `<table class="inv-table">${tableHeader()}<tbody>${CAT_OVERDUE.map(it=>itemRow(it,'status-overdue')).join('')}</tbody></table>`;
+  }
+
+  if(showWatch && CAT_WATCH.length){
+    body += `<div class="cat-header cat-yellow">ETAT A VERIFIER — ${CAT_WATCH.length} item${CAT_WATCH.length>1?'s':''}</div>`;
+    body += `<table class="inv-table">${tableHeader()}<tbody>${CAT_WATCH.map(it=>itemRow(it,'status-watch')).join('')}</tbody></table>`;
+  }
+
+  if(showSoon && CAT_SOON.length){
+    body += `<div class="cat-header cat-blue">PROCHAINE INSPECTION (< 2 mois) — ${CAT_SOON.length} item${CAT_SOON.length>1?'s':''}</div>`;
+    body += `<table class="inv-table">${tableHeader()}<tbody>${CAT_SOON.map(it=>itemRow(it,'status-soon')).join('')}</tbody></table>`;
+  }
+
+  if(!body) body = '<p style="text-align:center;padding:20px;color:#999">Aucun item a signaler.</p>';
+
+  const statsHtml = `<div class="stats-bar">
+    <span class="stat stat-red">${CAT_EXPIRED.length} expire${CAT_EXPIRED.length>1?'s':''}</span>
+    <span class="stat stat-orange">${CAT_OVERDUE.length} insp. retard</span>
+    <span class="stat stat-yellow">${CAT_WATCH.length} a verifier</span>
+    <span class="stat stat-blue">${CAT_SOON.length} prochaine insp.</span>
+  </div>`;
+
+  return `<div class="print-page">
+    <div class="print-header">
+      <div><h1>RAPPORT INSPECTIONS</h1><div class="sub">VOLO CONSTRUCTION SST — Golden Eagles</div></div>
+      <div class="meta">Genere le ${d}<br>${ITEMS.length} items analyses</div>
+    </div>
+    ${statsHtml}
+    ${body}
+    <div class="footer-brand">VOLO CONSTRUCTION SST — Golden Eagles — ${d} — A imprimer pour le superviseur</div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+//  UI
+// ══════════════════════════════════════════
+function buildSelector(){
+  categorizeItems();
+
+  // Summary cards
+  const sc = document.getElementById('summaryCards');
+  sc.innerHTML = `
+    <div class="summary-card sc-red"><div class="num">${CAT_EXPIRED.length}</div><div class="lbl">Expires</div></div>
+    <div class="summary-card sc-orange"><div class="num">${CAT_OVERDUE.length}</div><div class="lbl">Insp. retard</div></div>
+    <div class="summary-card sc-yellow"><div class="num">${CAT_WATCH.length}</div><div class="lbl">A verifier</div></div>
+    <div class="summary-card sc-blue"><div class="num">${CAT_SOON.length}</div><div class="lbl">Prochaine insp.</div></div>`;
+
+  // Buttons
+  const critCount = CAT_EXPIRED.length + CAT_OVERDUE.length + CAT_SOON.length;
+  const allCount = critCount + CAT_WATCH.length;
+  const div = document.getElementById('selButtons');
+  div.innerHTML = `
+    <button class="btn" onclick="showReport('critique')">
+      <span class="dot" style="background:#DC2626"></span>CRITIQUE (Expires + Inspections)
+      <span class="count">${critCount}</span>
+    </button>
+    <button class="btn" onclick="showReport('all')">
+      <span class="dot" style="background:#C9A84C"></span>TOUT IMPRIMER
+      <span class="count">${allCount}</span>
+    </button>
+    <button class="btn gold" onclick="showReport('all')">IMPRIMER / PDF</button>`;
+}
+
+function showReport(mode){
+  const html = genReport(mode);
+  document.getElementById('printArea').innerHTML = html;
+  document.getElementById('selector').style.display = 'none';
+  document.getElementById('printControls').style.display = 'block';
+  document.body.classList.add('printing');
+  document.querySelectorAll('.print-page').forEach(p=>p.style.display='block');
+  document.title = 'Rapport Inspections — VOLO SST — ' + new Date().toLocaleDateString('fr-CA');
+}
+
+function backToSelector(){
+  document.getElementById('printArea').innerHTML = '';
+  document.getElementById('selector').style.display = 'block';
+  document.getElementById('printControls').style.display = 'none';
+  document.body.classList.remove('printing');
+}
+
+buildSelector();
+</script>
+</body>
+</html>

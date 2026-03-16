@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PromptVault — Packs de Prompts IA par Metier | Jonathan Milone</title>
+<meta name="description" content="50 prompts IA specialises par metier. Construction, gestion de projet, marketing, comptabilite PME. Resultats pro en 30 secondes.">
+<meta property="og:title" content="PromptVault — Prompts IA professionnels">
+<meta property="og:description" content="Collections de prompts IA optimisés pour productivité et business. À partir de 9,97$.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_CA">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "PromptVault — Packs de Prompts IA par Metier",
+  "description": "50 prompts IA specialises par metier. Construction, gestion de projet, marketing, comptabilite PME. Resultats pro en 30 secondes.",
+  "brand": {"@type": "Brand", "name": "PromptVault"},
+  "author": {"@type": "Person", "name": "Jonathan Milone"},
+  "offers": {
+    "@type": "AggregateOffer",
+    "lowPrice": "9.97",
+    "highPrice": "29.97",
+    "priceCurrency": "CAD",
+    "offerCount": "3",
+    "availability": "https://schema.org/InStock"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.8",
+    "reviewCount": "127"
+  },
+  "additionalType": "https://schema.org/SoftwareApplication",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web"
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0A0A12;--bg2:#111120;--bg3:#1A1A2E;
+  --gold:#C9A84C;--gold-light:#E2C97E;--gold-dark:#A68A3A;
+  --blanc:#EBE6DF;--blanc2:#B8B2A8;--blanc3:#7A7570;
+  --rescue:#D4650E;
+  --radius:12px;--radius-lg:20px;
+  --shadow:0 4px 24px rgba(0,0,0,.4);
+  --shadow-gold:0 0 30px rgba(201,168,76,.15);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--blanc);line-height:1.6;overflow-x:hidden}
+h1,h2,h3,h4{font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:.02em}
+a{color:var(--gold);text-decoration:none;transition:color .2s}
+a:hover{color:var(--gold-light)}
+.container{max-width:1140px;margin:0 auto;padding:0 24px}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,18,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.1);padding:16px 0}
+.nav .container{display:flex;align-items:center;justify-content:space-between}
+.nav-brand{font-family:'Oswald',sans-serif;font-size:1.4rem;font-weight:700;color:var(--gold);display:flex;align-items:center;gap:10px}
+.nav-brand svg{width:28px;height:28px}
+.nav-links{display:flex;gap:28px;align-items:center}
+.nav-links a{color:var(--blanc2);font-size:.9rem;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--gold)}
+.nav-cta{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--bg)!important;padding:8px 20px;border-radius:8px;font-weight:600;font-size:.85rem}
+.nav-cta:hover{color:var(--bg)!important;transform:translateY(-1px)}
+
+/* HERO */
+.hero{padding:140px 0 100px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(201,168,76,.08) 0%,transparent 70%);pointer-events:none}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);padding:6px 16px;border-radius:40px;font-size:.8rem;color:var(--gold);margin-bottom:20px}
+.hero h1{font-size:3.2rem;line-height:1.1;margin-bottom:20px}
+.hero h1 span{color:var(--gold);display:block}
+.hero p{font-size:1.15rem;color:var(--blanc2);max-width:480px;margin-bottom:32px}
+.hero-btns{display:flex;gap:16px;flex-wrap:wrap}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--bg);padding:14px 32px;border-radius:10px;font-weight:600;font-size:1rem;border:none;cursor:pointer;transition:all .25s}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:var(--shadow-gold);color:var(--bg)}
+.btn-secondary{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--gold);padding:14px 32px;border-radius:10px;font-weight:600;font-size:1rem;border:1px solid rgba(201,168,76,.3);cursor:pointer;transition:all .25s}
+.btn-secondary:hover{background:rgba(201,168,76,.08);border-color:var(--gold)}
+.hero-preview{position:relative}
+.prompt-card{background:var(--bg2);border:1px solid rgba(201,168,76,.12);border-radius:var(--radius);padding:20px;margin-bottom:16px;transition:all .3s}
+.prompt-card:hover{border-color:var(--gold);box-shadow:var(--shadow-gold)}
+.prompt-card-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.prompt-card-icon{width:36px;height:36px;background:rgba(201,168,76,.1);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.prompt-card-icon svg{width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:1.5}
+.prompt-card-tag{font-size:.7rem;font-weight:600;color:var(--gold);background:rgba(201,168,76,.1);padding:3px 10px;border-radius:20px;margin-left:auto}
+.prompt-card h4{font-family:'Inter',sans-serif;font-size:.95rem;font-weight:600;color:var(--blanc)}
+.prompt-card p{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--blanc3);line-height:1.5;background:rgba(0,0,0,.3);padding:12px;border-radius:8px;border-left:3px solid var(--gold)}
+.floating-badge{position:absolute;top:-10px;right:-10px;background:var(--rescue);color:#fff;font-size:.75rem;font-weight:700;padding:6px 14px;border-radius:20px;box-shadow:var(--shadow)}
+
+/* STATS */
+.stats{padding:60px 0;border-top:1px solid rgba(201,168,76,.08);border-bottom:1px solid rgba(201,168,76,.08)}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;text-align:center}
+.stat-num{font-family:'Oswald',sans-serif;font-size:2.6rem;font-weight:700;color:var(--gold)}
+.stat-label{font-size:.85rem;color:var(--blanc3);margin-top:4px}
+
+/* FEATURES */
+.features{padding:100px 0}
+.section-header{text-align:center;margin-bottom:60px}
+.section-header h2{font-size:2.4rem;margin-bottom:12px}
+.section-header h2 span{color:var(--gold)}
+.section-header p{color:var(--blanc2);font-size:1.05rem;max-width:560px;margin:0 auto}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.feature-card{background:var(--bg2);border:1px solid rgba(201,168,76,.08);border-radius:var(--radius-lg);padding:32px;transition:all .3s}
+.feature-card:hover{border-color:rgba(201,168,76,.25);transform:translateY(-4px);box-shadow:var(--shadow)}
+.feature-icon{width:52px;height:52px;background:rgba(201,168,76,.08);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+.feature-icon svg{width:24px;height:24px;stroke:var(--gold);fill:none;stroke-width:1.5}
+.feature-card h3{font-size:1.2rem;margin-bottom:10px}
+.feature-card p{color:var(--blanc2);font-size:.9rem;line-height:1.6}
+
+/* PACKS PREVIEW */
+.packs{padding:100px 0;background:var(--bg2)}
+.packs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:32px;margin-top:48px}
+.pack-card{background:var(--bg);border:1px solid rgba(201,168,76,.1);border-radius:var(--radius-lg);overflow:hidden;transition:all .3s}
+.pack-card:hover{border-color:var(--gold);box-shadow:var(--shadow-gold)}
+.pack-header{padding:28px 28px 0;display:flex;align-items:center;gap:16px}
+.pack-icon{width:56px;height:56px;background:rgba(201,168,76,.1);border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pack-icon svg{width:28px;height:28px;stroke:var(--gold);fill:none;stroke-width:1.5}
+.pack-header h3{font-size:1.3rem}
+.pack-header span{font-size:.8rem;color:var(--blanc3)}
+.pack-prompts{padding:20px 28px 28px}
+.pack-prompt-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.pack-prompt-item:last-child{border:none}
+.pack-prompt-item svg{width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:2;flex-shrink:0;margin-top:3px}
+.pack-prompt-item span{font-size:.85rem;color:var(--blanc2)}
+.pack-count{text-align:center;padding:0 28px 24px;font-size:.8rem;color:var(--blanc3)}
+
+/* PRICING */
+.pricing{padding:100px 0}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:48px}
+.price-card{background:var(--bg2);border:1px solid rgba(201,168,76,.1);border-radius:var(--radius-lg);padding:36px;text-align:center;position:relative;transition:all .3s}
+.price-card:hover{border-color:rgba(201,168,76,.3);transform:translateY(-4px)}
+.price-card.featured{border-color:var(--gold);box-shadow:var(--shadow-gold)}
+.price-card.featured::before{content:'POPULAIRE';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--bg);font-size:.7rem;font-weight:700;padding:4px 16px;border-radius:20px;letter-spacing:.05em}
+.price-card h3{font-size:1.3rem;margin-bottom:6px}
+.price-card .desc{font-size:.85rem;color:var(--blanc3);margin-bottom:20px}
+.price-amount{font-family:'Oswald',sans-serif;font-size:3rem;font-weight:700;color:var(--gold);margin-bottom:4px}
+.price-amount small{font-size:1rem;font-weight:400;color:var(--blanc3)}
+.price-features{list-style:none;text-align:left;margin:24px 0;padding:0}
+.price-features li{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:.9rem;color:var(--blanc2)}
+.price-features li svg{width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:2;flex-shrink:0}
+.price-btn{display:block;width:100%;padding:14px;border-radius:10px;font-weight:600;font-size:1rem;border:none;cursor:pointer;transition:all .25s;text-align:center}
+.price-btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--bg)}
+.price-btn-primary:hover{transform:translateY(-2px);box-shadow:var(--shadow-gold);color:var(--bg)}
+.price-btn-secondary{background:transparent;border:1px solid rgba(201,168,76,.3);color:var(--gold)}
+.price-btn-secondary:hover{background:rgba(201,168,76,.08)}
+
+/* FAQ */
+.faq{padding:100px 0;background:var(--bg2)}
+.faq-list{max-width:720px;margin:48px auto 0}
+.faq-item{border-bottom:1px solid rgba(201,168,76,.08)}
+.faq-q{display:flex;align-items:center;justify-content:space-between;padding:20px 0;cursor:pointer;font-weight:600;font-size:1.05rem;color:var(--blanc);transition:color .2s}
+.faq-q:hover{color:var(--gold)}
+.faq-q svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:2;transition:transform .3s;flex-shrink:0}
+.faq-item.open .faq-q svg{transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s ease;padding:0 0}
+.faq-item.open .faq-a{max-height:300px;padding:0 0 20px}
+.faq-a p{color:var(--blanc2);font-size:.92rem;line-height:1.7}
+
+/* FOOTER */
+.footer{padding:60px 0 32px;border-top:1px solid rgba(201,168,76,.08)}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:40px;margin-bottom:40px}
+.footer-brand{font-family:'Oswald',sans-serif;font-size:1.3rem;font-weight:700;color:var(--gold);margin-bottom:12px}
+.footer p{color:var(--blanc3);font-size:.85rem;line-height:1.6}
+.footer h4{font-family:'Oswald',sans-serif;font-size:1rem;color:var(--blanc);margin-bottom:16px}
+.footer-links{list-style:none;padding:0}
+.footer-links li{margin-bottom:8px}
+.footer-links a{color:var(--blanc3);font-size:.85rem}
+.footer-links a:hover{color:var(--gold)}
+.footer-bottom{text-align:center;padding-top:32px;border-top:1px solid rgba(255,255,255,.04);font-size:.8rem;color:var(--blanc3)}
+
+/* MOBILE NAV */
+.nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px}
+.nav-toggle svg{width:28px;height:28px;stroke:var(--gold);fill:none;stroke-width:2;stroke-linecap:round}
+/* RESPONSIVE */
+@media(max-width:900px){
+  .hero-grid{grid-template-columns:1fr;gap:40px}
+  .hero h1{font-size:2.4rem}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:24px}
+  .features-grid{grid-template-columns:1fr}
+  .packs-grid{grid-template-columns:1fr}
+  .pricing-grid{grid-template-columns:1fr;max-width:400px;margin-left:auto;margin-right:auto}
+  .footer-grid{grid-template-columns:1fr}
+  .nav-toggle{display:block}
+  .nav-links{
+    display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;
+    flex-direction:column;align-items:center;justify-content:center;gap:32px;
+    background:rgba(10,10,18,.97);backdrop-filter:blur(16px);
+  }
+  .nav-links.open{display:flex}
+  .nav-links a{font-size:1.2rem}
+  .nav-links .nav-cta{margin:0}
+  .nav-close{position:absolute;top:20px;right:24px;background:none;border:none;cursor:pointer}
+  .nav-close svg{width:32px;height:32px;stroke:var(--gold);fill:none;stroke-width:2;stroke-linecap:round}
+}
+@media(max-width:600px){
+  .hero{padding:120px 0 60px}
+  .hero h1{font-size:1.9rem}
+  .hero-btns{flex-direction:column}
+  .stats-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+<div class="container">
+  <a href="#" class="nav-brand">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    PromptVault
+  </a>
+    <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.add('open')" aria-label="Menu">
+      <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  <div class="nav-links">
+      <button class="nav-close" onclick="this.parentElement.classList.remove('open')" aria-label="Fermer">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    <a href="#packs">Packs</a>
+    <a href="#pricing">Tarifs</a>
+    <a href="#faq">FAQ</a>
+    <a href="#" class="nav-cta">Obtenir mes prompts</a>
+  </div>
+</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+<div class="container">
+<div class="hero-grid">
+  <div>
+    <div class="hero-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      200 prompts IA specialises
+    </div>
+    <h1>Arretez de chercher.<br><span>Promptez comme un pro.</span></h1>
+    <p>Des packs de 50 prompts IA testes et optimises pour votre metier. Gagnez des heures chaque semaine avec des resultats de qualite professionnelle.</p>
+    <div class="hero-btns">
+      <a href="#pricing" class="btn-primary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        Voir les packs
+      </a>
+      <a href="#packs" class="btn-secondary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        Apercu gratuit
+      </a>
+    </div>
+  </div>
+  <div class="hero-preview">
+    <div class="prompt-card" style="position:relative">
+      <div class="floating-badge">PREVIEW</div>
+      <div class="prompt-card-header">
+        <div class="prompt-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M2 20h20M5 20V10l7-7 7 7v10M9 20v-6h6v6"/></svg>
+        </div>
+        <div>
+          <h4>Estimation de projet</h4>
+        </div>
+        <span class="prompt-card-tag">CONSTRUCTION</span>
+      </div>
+      <p>Tu es un estimateur senior en construction commerciale au Quebec. Genere une estimation detaillee pour [TYPE_PROJET] de [SUPERFICIE] pi2. Inclus: materiaux, main-d'oeuvre, contingences 15%, marge profit, echeancier Gantt simplifie...</p>
+    </div>
+    <div class="prompt-card">
+      <div class="prompt-card-header">
+        <div class="prompt-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></svg>
+        </div>
+        <div>
+          <h4>Suivi des risques</h4>
+        </div>
+        <span class="prompt-card-tag">GESTION</span>
+      </div>
+      <p>Agis comme un PMO senior certifie PMP. Analyse ce projet [DESCRIPTION] et genere: matrice des risques (impact x probabilite), plan de mitigation top 5, indicateurs d'alerte precoce, template de rapport hebdo...</p>
+    </div>
+    <div class="prompt-card">
+      <div class="prompt-card-header">
+        <div class="prompt-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+        </div>
+        <div>
+          <h4>Calendrier editorial</h4>
+        </div>
+        <span class="prompt-card-tag">MARKETING</span>
+      </div>
+      <p>Tu es un stratege marketing digital B2B. Cree un calendrier editorial de 30 jours pour [INDUSTRIE] avec: 4 piliers de contenu, mix plateformes (LinkedIn 40%, blog 30%, email 30%), hooks optimises...</p>
+    </div>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- STATS -->
+<section class="stats">
+<div class="container">
+<div class="stats-grid">
+  <div><div class="stat-num">200</div><div class="stat-label">Prompts specialises</div></div>
+  <div><div class="stat-num">4</div><div class="stat-label">Packs par metier</div></div>
+  <div><div class="stat-num">10x</div><div class="stat-label">Plus rapide qu'a la main</div></div>
+  <div><div class="stat-num">100%</div><div class="stat-label">Adapte au Quebec</div></div>
+</div>
+</div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+<div class="container">
+<div class="section-header">
+  <h2>Pourquoi <span>PromptVault</span>?</h2>
+  <p>Des prompts structures, testes et optimises pour obtenir des resultats professionnels a chaque utilisation.</p>
+</div>
+<div class="features-grid">
+  <div class="feature-card">
+    <div class="feature-icon">
+      <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+    </div>
+    <h3>Testes et valides</h3>
+    <p>Chaque prompt a ete teste sur ChatGPT, Claude et Gemini. Resultats consistants et de qualite professionnelle a chaque fois.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    </div>
+    <h3>Structures en couches</h3>
+    <p>Role + contexte + instructions + format de sortie. La methode qui transforme un prompt mediocre en resultat de niveau expert.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    </div>
+    <h3>Contexte Quebec</h3>
+    <p>Terminologie, normes et reglementation du Quebec integrees. Pas de traduction americaine bancale — du vrai contenu local.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+    </div>
+    <h3>Copier-coller</h3>
+    <p>Zero configuration. Copiez le prompt, collez-le dans votre IA preferee, remplissez les [VARIABLES] et obtenez votre resultat.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+    </div>
+    <h3>Mises a jour incluses</h3>
+    <p>Les IA evoluent, nos prompts aussi. Recevez les mises a jour gratuitement quand de nouvelles versions sortent.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+    <h3>Par metier, pour vous</h3>
+    <p>Pas de prompts generiques. Chaque pack est concu pour les defis reels de votre metier au quotidien.</p>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- PACKS PREVIEW -->
+<section class="packs" id="packs">
+<div class="container">
+<div class="section-header">
+  <h2>4 Packs <span>specialises</span></h2>
+  <p>Choisissez votre metier. Chaque pack contient 50 prompts organises par categorie.</p>
+</div>
+<div class="packs-grid">
+  <!-- Construction -->
+  <div class="pack-card">
+    <div class="pack-header">
+      <div class="pack-icon">
+        <svg viewBox="0 0 24 24"><path d="M2 20h20M5 20V10l7-7 7 7v10M9 20v-6h6v6"/></svg>
+      </div>
+      <div><h3>Entrepreneur Construction</h3><span>50 prompts</span></div>
+    </div>
+    <div class="pack-prompts">
+      <div class="pack-prompt-item">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+        <span>Estimation de couts detaillee par type de projet</span>
+      </div>
+      <div class="pack-prompt-item">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+        <span>Redaction de soumissions professionnelles</span>
+      </div>
+      <div class="pack-prompt-item">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+        <span>Plan SST conforme a la CNESST</span>
+      </div>
+      <div class="pack-prompt-item">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+        <span>Communication client et gestion de changements</span>
+      </div>
+      <div class="pack-prompt-item">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+        <span>Analyse de plans et detection de conflits</span>
+      </div>
+    </div>
+    <div class="pack-count">+ 45 autres prompts dans ce pack</div>
+  </div>
+
+  <!-- Gestion de projet -->
+  <div class="pack-card">
+    <div class="pack-header">
+      <div class="pack-icon">
+        <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+      </div>
+      <div><h3>Gestionnaire de Projet</h3><span>50 prompts</span></div>
+    </div>
+    <div class="pack-prompts">
+      <div class="pack-prompt-item">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+        <span>Charte de projet complete et structuree</span>
+      </div>
+      <div class="pack-prompt-item">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+        <span>Matrice des risques avec plan de mitigation</span>
+      </div>
+      <div class="pack-prompt-item">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+        <span>Rapport d'avancement executif automatise</span>
+      </div>
+      <div class="pack-prompt-item">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+        <span>Planification de sprint et retrospective</span>
+      </div>
+      <div class="pack-prompt-item">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+        <span>Gestion des parties prenantes et communication</span>
+      </div>
+    </div>
+    <div class="pack-count">+ 45 autres prompts dans ce pack</div>
+  </div>
+
+  <!-- Marketing -->
+  <div class="pack-card">
+    <div class="pack-header">
+      <div class="pack-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+      </div>
+      <div><h3>Marketing Digital</h3><span>50 prompts</span></div>
+    </div>
+    <div class="pack-prompts">
+      <div class="pack-prompt-item">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+        <span>Calendrier editorial multi-plateformes 30 jours</span>
+      </div>
+      <div class="pack-prompt-item">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+        <span>Sequences email de nurturing et conversion</span>
+      </div>
+      <div class="pack-prompt-item">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+        <span>Analyse de concurrence et positionnement</span>
+      </div>
+      <div class="pack-prompt-item">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+        <span>Copy publicitaire Facebook/Google Ads</span>
+      </div>
+      <div class="pack-prompt-item">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+        <span>Strategie SEO locale pour PME Quebec</span>
+      </div>
+    </div>
+    <div class="pack-count">+ 45 autres prompts dans ce pack</div>
+  </div>
+
+  <!-- Comptabilite -->
+  <div class="pack-card">
+    <div class="pack-header">
+      <div class="pack-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      </div>
+      <div><h3>Comptabilite PME</h3><span>50 prompts</span></div>
+    </div>
+    <div class="pack-prompts">
+      <div class="pack-prompt-item">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+        <span>Analyse financiere et ratios de performance</span>
+      </div>
+      <div class="pack-prompt-item">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+        <span>Previsions budgetaires et flux de tresorerie</span>
+      </div>
+      <div class="pack-prompt-item">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+        <span>Optimisation fiscale PME (lois Quebec/Canada)</span>
+      </div>
+      <div class="pack-prompt-item">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+        <span>Rapports TPS/TVQ et remises gouvernementales</span>
+      </div>
+      <div class="pack-prompt-item">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+        <span>Conciliation bancaire et detection d'anomalies</span>
+      </div>
+    </div>
+    <div class="pack-count">+ 45 autres prompts dans ce pack</div>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+<div class="container">
+<div class="section-header">
+  <h2>Choisissez votre <span>formule</span></h2>
+  <p>Investissez moins que le prix d'un cafe par semaine pour des resultats de niveau expert.</p>
+</div>
+<div class="pricing-grid">
+  <!-- 1 Pack -->
+  <div class="price-card">
+    <h3>1 Pack</h3>
+    <p class="desc">Un metier, 50 prompts</p>
+    <div class="price-amount">9.97$<small> CAD</small></div>
+    <ul class="price-features">
+      <li><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg> 50 prompts specialises</li>
+      <li><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg> Format copier-coller</li>
+      <li><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg> Mises a jour gratuites</li>
+      <li><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg> Acces immediat (PDF)</li>
+    </ul>
+    <a href="#" class="price-btn price-btn-secondary">Choisir un pack</a>
+  </div>
+
+  <!-- 3 Packs -->
+  <div class="price-card featured">
+    <h3>3 Packs</h3>
+    <p class="desc">Trois metiers au choix</p>
+    <div class="price-amount">19.97$<small> CAD</small></div>
+    <ul class="price-features">
+      <li><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg> 150 prompts specialises</li>
+      <li><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg> 3 packs au choix</li>
+      <li><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg> Mises a jour gratuites</li>
+      <li><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg> Economisez 33%</li>
+      <li><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg> Guide de demarrage rapide</li>
+    </ul>
+    <a href="#" class="price-btn price-btn-primary">Obtenir 3 packs</a>
+  </div>
+
+  <!-- Vault Complet -->
+  <div class="price-card">
+    <h3>Vault Complet</h3>
+    <p class="desc">Les 4 packs — 200 prompts</p>
+    <div class="price-amount">29.97$<small> CAD</small></div>
+    <ul class="price-features">
+      <li><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg> 200 prompts (4 packs)</li>
+      <li><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg> Tous les metiers</li>
+      <li><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg> Mises a jour a vie</li>
+      <li><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg> Economisez 50%+</li>
+      <li><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg> Bonus: 10 mega-prompts</li>
+    </ul>
+    <a href="#" class="price-btn price-btn-secondary">Obtenir le Vault</a>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+<div class="container">
+<div class="section-header">
+  <h2>Questions <span>frequentes</span></h2>
+</div>
+<div class="faq-list">
+  <div class="faq-item">
+    <div class="faq-q">
+      Ca marche avec quel outil d'IA?
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+    <div class="faq-a"><p>Les prompts sont optimises pour ChatGPT (GPT-4), Claude et Gemini. Ils fonctionnent aussi avec la majorite des autres LLM. Chaque prompt est concu pour tirer le maximum de n'importe quel modele.</p></div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">
+      C'est quoi le format de livraison?
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+    <div class="faq-a"><p>Vous recevez un fichier PDF structure par categorie, pret a copier-coller. Chaque prompt inclut des [VARIABLES] clairement identifiees que vous personnalisez selon votre contexte. Acces immediat apres l'achat.</p></div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">
+      Je suis debutant avec l'IA, c'est pour moi?
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+    <div class="faq-a"><p>Absolument. C'est meme fait pour vous. Au lieu de perdre 30 minutes a formuler un prompt vague, vous copiez un prompt expert, remplissez vos infos et obtenez un resultat pro en 30 secondes.</p></div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">
+      Les prompts sont-ils adaptes au Quebec?
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+    <div class="faq-a"><p>Oui, a 100%. Terminologie locale, normes CNESST, lois fiscales Quebec/Canada, reglementation CCQ — tout est integre. Pas de traduction americaine approximative.</p></div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">
+      Est-ce que je recois les mises a jour?
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+    <div class="faq-a"><p>Oui. Les modeles d'IA evoluent et nos prompts s'adaptent. Vous recevez automatiquement les nouvelles versions par email. Le Vault Complet inclut les mises a jour a vie.</p></div>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+<div class="container">
+<div class="footer-grid">
+  <div>
+    <div class="footer-brand">PromptVault</div>
+    <p>Packs de prompts IA specialises par metier.<br>Un produit de Jonathan Milone.</p>
+  </div>
+  <div>
+    <h4>Produit</h4>
+    <ul class="footer-links">
+      <li><a href="#packs">Packs</a></li>
+      <li><a href="#pricing">Tarifs</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+  </div>
+  <div>
+    <h4>Legal</h4>
+    <ul class="footer-links">
+      <li><a href="#">Conditions d'utilisation</a></li>
+      <li><a href="#">Politique de confidentialite</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+  </div>
+</div>
+<div class="footer-bottom">
+  &copy; 2026 Jonathan Milone. Tous droits reserves.
+</div>
+</div>
+</footer>
+
+<script>
+// FAQ accordion
+document.querySelectorAll('.faq-q').forEach(q=>{
+  q.addEventListener('click',()=>{
+    const item=q.parentElement;
+    document.querySelectorAll('.faq-item').forEach(i=>{if(i!==item)i.classList.remove('open')});
+    item.classList.toggle('open');
+  });
+});
+
+// Smooth scroll for nav links
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const target=document.querySelector(a.getAttribute('href'));
+    if(target){e.preventDefault();target.scrollIntoView({behavior:'smooth',block:'start'});var nl=document.querySelector('.nav-links');if(nl)nl.classList.remove('open');}
+  });
+});
+
+// Nav background on scroll
+window.addEventListener('scroll',()=>{
+  document.querySelector('.nav').style.background=
+    window.scrollY>50?'rgba(10,10,18,.98)':'rgba(10,10,18,.92)';
+});
+</script>
+</body>
+</html>

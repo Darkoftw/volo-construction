@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="view-transition" content="same-origin">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>VOLO SST — Badge Tactique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="data.js"></script>
+<script src="logo.js"></script>
+<style>
+:root {
+  --noir: #04040A;
+  --gold: #C9A84C;
+  --gold-dim: #8B7331;
+  --blanc: #EBE6DF;
+  --rescue: #D4650E;
+  --bg: #0C0608;
+  --card: #151015;
+  --muted: #8A8A9A;
+  --blue: #3B82F6;
+  --green: #22C55E;
+  --red: #EF4444;
+  --amber: #F59E0B;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:vt-fade-out .2s ease-out}
+::view-transition-new(root){animation:vt-fade-in .3s ease-in}
+@keyframes vt-fade-out{from{opacity:1}to{opacity:0}}
+@keyframes vt-fade-in{from{opacity:0}to{opacity:1}}
+body {
+  background: var(--bg);
+  color: var(--blanc);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── HEADER ── */
+.page-header {
+  display: flex; align-items: center; gap: 16px;
+  padding: 24px 32px;
+  background: linear-gradient(180deg, rgba(201,168,76,0.08) 0%, transparent 100%);
+  border-bottom: 1px solid rgba(201,168,76,0.15);
+}
+.page-header img { width: 48px; height: 48px; border-radius: 8px; }
+.page-header h1 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 24px; font-weight: 600;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--gold);
+}
+.page-header .subtitle {
+  font-size: 12px; color: var(--muted);
+  letter-spacing: 2px; text-transform: uppercase;
+}
+.back-btn {
+  margin-left: auto;
+  background: rgba(201,168,76,0.1);
+  border: 1px solid rgba(201,168,76,0.3);
+  color: var(--gold);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.back-btn:hover { background: rgba(201,168,76,0.2); }
+
+/* ── CONTROLS ── */
+.controls {
+  max-width: 900px; margin: 32px auto;
+  padding: 0 24px;
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+}
+.search-wrap {
+  position: relative; flex: 1; min-width: 240px;
+}
+.search-wrap svg {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px; stroke: var(--gold); fill: none; stroke-width: 2;
+}
+.search-input {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid rgba(201,168,76,0.25);
+  border-radius: 10px;
+  padding: 14px 14px 14px 44px;
+  color: var(--blanc);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--gold); }
+.search-input::placeholder { color: var(--muted); }
+
+select.member-select {
+  flex: 1; min-width: 240px;
+  background: var(--card);
+  border: 1px solid rgba(201,168,76,0.25);
+  border-radius: 10px;
+  padding: 14px 16px;
+  color: var(--blanc);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C9A84C' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+}
+select.member-select:focus { border-color: var(--gold); }
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold) 0%, #A8872E 100%);
+  color: var(--noir);
+  border: none;
+  padding: 14px 28px;
+  border-radius: 10px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-gold:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(201,168,76,0.3); }
+.btn-gold:active { transform: translateY(0); }
+
+.btn-batch {
+  background: rgba(201,168,76,0.1);
+  border: 1px solid rgba(201,168,76,0.3);
+  color: var(--gold);
+  padding: 14px 24px;
+  border-radius: 10px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-batch:hover { background: rgba(201,168,76,0.2); }
+
+.btn-print {
+  background: rgba(201,168,76,0.08);
+  border: 1px solid rgba(201,168,76,0.2);
+  color: var(--gold);
+  padding: 14px 24px;
+  border-radius: 10px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: none;
+}
+.btn-print:hover { background: rgba(201,168,76,0.15); }
+
+/* ── BADGE CONTAINER ── */
+.badge-container {
+  max-width: 900px; margin: 0 auto 60px;
+  padding: 0 24px;
+  display: flex; flex-wrap: wrap; gap: 32px; justify-content: center;
+}
+
+/* ── BADGE CARD ── */
+.badge-wrap {
+  perspective: 1200px;
+  width: 342px; /* 85.6mm * 4 = ~342px at 96dpi */
+  height: 216px; /* 53.98mm * 4 = ~216px */
+}
+.badge-inner {
+  position: relative;
+  width: 100%; height: 100%;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+.badge-wrap.flipped .badge-inner { transform: rotateY(180deg); }
+.badge-wrap.enter .badge-inner {
+  animation: badgeFlipIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes badgeFlipIn {
+  0% { transform: rotateY(-90deg) scale(0.8); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: rotateY(0deg) scale(1); opacity: 1; }
+}
+
+.badge-front, .badge-back {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  backface-visibility: hidden;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* ── FRONT ── */
+.badge-front {
+  background:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"),
+    linear-gradient(170deg, #1A1418 0%, #0E0B0D 40%, #121016 100%);
+  border: 1.5px solid rgba(201,168,76,0.4);
+  box-shadow:
+    0 0 0 1px rgba(201,168,76,0.1),
+    0 8px 32px rgba(0,0,0,0.6),
+    inset 0 1px 0 rgba(201,168,76,0.1);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr auto;
+  padding: 14px 16px 12px;
+  gap: 0;
+}
+
+/* Holographic shimmer */
+.badge-front::after {
+  content: '';
+  position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(201,168,76,0.06) 45%,
+    rgba(201,168,76,0.12) 50%,
+    rgba(201,168,76,0.06) 55%,
+    transparent 70%
+  );
+  transition: left 0.6s ease;
+  pointer-events: none;
+  z-index: 10;
+}
+.badge-wrap:hover .badge-front::after { left: 150%; }
+
+/* Gold corner accents */
+.badge-front::before {
+  content: '';
+  position: absolute; top: 6px; left: 6px; right: 6px; bottom: 6px;
+  border: 1px solid transparent;
+  border-image: linear-gradient(
+    135deg,
+    rgba(201,168,76,0.5) 0%, transparent 20%,
+    transparent 80%, rgba(201,168,76,0.5) 100%
+  ) 1;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Watermark eagle logo background */
+.badge-watermark {
+  position: absolute;
+  right: -10px; bottom: -10px;
+  width: 120px; height: 120px;
+  opacity: 0.06;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 1;
+  filter: brightness(1.5);
+}
+
+/* Header row */
+.badge-header {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 8px;
+}
+.badge-logo {
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  border: 1px solid rgba(201,168,76,0.3);
+  mix-blend-mode: screen;
+  filter: brightness(1.2) contrast(1.1);
+}
+.badge-title-block {
+  flex: 1;
+}
+.badge-org {
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--gold);
+  line-height: 1;
+}
+.badge-sub {
+  font-family: 'Oswald', sans-serif;
+  font-size: 8px; font-weight: 500;
+  letter-spacing: 4px;
+  color: var(--gold-dim);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Authorized stamp area (top-right corner) */
+.badge-stamp {
+  font-family: 'Oswald', sans-serif;
+  font-size: 7px; font-weight: 600;
+  letter-spacing: 1.5px;
+  color: var(--green);
+  text-transform: uppercase;
+  border: 1px solid rgba(34,197,94,0.4);
+  padding: 3px 7px;
+  border-radius: 3px;
+  text-align: center;
+  line-height: 1.3;
+  align-self: flex-start;
+}
+.badge-stamp-date {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6px;
+  color: rgba(34,197,94,0.7);
+  letter-spacing: 0.5px;
+}
+
+/* Body row */
+.badge-body {
+  grid-column: 1;
+  display: flex; flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+}
+.badge-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 18px; font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 1px;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.badge-role {
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 3px;
+  display: inline-block;
+  width: fit-content;
+}
+.badge-role.chef { background: rgba(201,168,76,0.2); color: var(--gold); border: 1px solid rgba(201,168,76,0.4); }
+.badge-role.sauveteur { background: rgba(212,101,14,0.2); color: var(--rescue); border: 1px solid rgba(212,101,14,0.4); }
+.badge-role.surveillant { background: rgba(59,130,246,0.2); color: var(--blue); border: 1px solid rgba(59,130,246,0.4); }
+.badge-role.coordonnateur { background: rgba(168,85,247,0.2); color: #A855F7; border: 1px solid rgba(168,85,247,0.4); }
+
+.badge-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px; font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 2px;
+}
+.badge-location {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+
+/* Avatar + QR column (right side) */
+.badge-right {
+  grid-row: 2 / 4;
+  grid-column: 2;
+  display: flex; flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+.badge-avatar {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(201,168,76,0.3), rgba(201,168,76,0.1));
+  border: 1.5px solid rgba(201,168,76,0.5);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Oswald', sans-serif;
+  font-size: 18px; font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 1px;
+  overflow: hidden;
+}
+.badge-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.badge-qr {
+  width: 52px; height: 52px;
+  background: var(--blanc);
+  border-radius: 4px;
+  padding: 3px;
+  display: flex; align-items: center; justify-content: center;
+}
+.badge-qr canvas, .badge-qr img { width: 46px !important; height: 46px !important; }
+
+/* Footer */
+.badge-footer {
+  grid-column: 1;
+  display: flex; align-items: center; gap: 8px;
+}
+.badge-sec-line {
+  flex: 1; height: 1px;
+  background: repeating-linear-gradient(90deg,
+    rgba(201,168,76,0.3) 0px, rgba(201,168,76,0.3) 4px,
+    transparent 4px, transparent 8px
+  );
+}
+.badge-sec-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6px;
+  color: var(--gold-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ── BACK ── */
+.badge-back {
+  transform: rotateY(180deg);
+  background:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"),
+    linear-gradient(170deg, #1A1418 0%, #0E0B0D 40%, #121016 100%);
+  border: 1.5px solid rgba(201,168,76,0.4);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  padding: 14px 16px;
+  display: flex; flex-direction: column;
+  gap: 6px;
+}
+.back-header {
+  display: flex; align-items: center; gap: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(201,168,76,0.15);
+}
+.back-header img { width: 20px; height: 20px; border-radius: 4px; opacity: 0.7; mix-blend-mode: screen; filter: brightness(1.3); }
+.back-header span {
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px; letter-spacing: 3px;
+  color: var(--gold-dim);
+}
+.back-section-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 8px; font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+.back-info {
+  font-family: 'Inter', sans-serif;
+  font-size: 8px; color: var(--muted);
+  line-height: 1.5;
+}
+.back-info strong { color: var(--blanc); font-weight: 500; }
+
+/* Certifications grid */
+.cert-grid {
+  display: flex; flex-wrap: wrap; gap: 3px;
+}
+.cert-chip {
+  font-family: 'Inter', sans-serif;
+  font-size: 6.5px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+.cert-chip.ok { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+.cert-chip.warn { background: rgba(245,158,11,0.15); color: var(--amber); border: 1px solid rgba(245,158,11,0.3); }
+.cert-chip.exp { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+.cert-chip.none { background: rgba(138,138,154,0.1); color: var(--muted); border: 1px solid rgba(138,138,154,0.2); }
+
+.back-address {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6px;
+  color: var(--gold-dim);
+  letter-spacing: 0.5px;
+  text-align: center;
+  margin-top: auto;
+  padding-top: 4px;
+  border-top: 1px solid rgba(201,168,76,0.1);
+}
+
+/* ── FLIP HINT ── */
+.flip-hint {
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: -16px;
+  margin-bottom: 24px;
+}
+.flip-hint svg { width: 14px; height: 14px; vertical-align: middle; stroke: var(--gold-dim); fill: none; stroke-width: 2; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center;
+  padding: 80px 24px;
+  color: var(--muted);
+}
+.empty-state svg { width: 64px; height: 64px; stroke: var(--gold-dim); fill: none; stroke-width: 1.5; margin-bottom: 16px; }
+.empty-state h3 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 18px; letter-spacing: 3px;
+  color: var(--gold-dim);
+  margin-bottom: 8px;
+}
+
+/* ── STATS BAR ── */
+.stats-bar {
+  max-width: 900px; margin: 0 auto 24px;
+  padding: 0 24px;
+  display: flex; gap: 12px; flex-wrap: wrap;
+  display: none;
+}
+.stats-bar.active { display: flex; }
+.stat-chip {
+  background: var(--card);
+  border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 8px;
+  padding: 10px 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.stat-chip .num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px; font-weight: 700;
+  color: var(--gold);
+}
+.stat-chip .label {
+  font-size: 11px; color: var(--muted);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+
+/* ── PRINT STYLES ── */
+@media print {
+  body { background: #fff !important; }
+  .page-header, .controls, .back-btn, .btn-print, .btn-batch, .btn-gold,
+  .flip-hint, .stats-bar, .empty-state, .search-wrap, select { display: none !important; }
+
+  .badge-container {
+    display: flex; flex-wrap: wrap; gap: 8mm; justify-content: center;
+    padding: 10mm;
+  }
+  .badge-wrap {
+    width: 85.6mm; height: 53.98mm;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .badge-front {
+    border-color: rgba(201,168,76,0.6) !important;
+    box-shadow: none !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .badge-front::after { display: none; }
+  .badge-back {
+    box-shadow: none !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  /* In print, show both sides */
+  .badge-inner { transform: none !important; }
+  .badge-wrap.flipped .badge-inner { transform: none !important; }
+
+  .badge-wrap.print-back .badge-front { display: none; }
+  .badge-wrap.print-back .badge-back { transform: none; position: relative; }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .page-header { padding: 16px; gap: 10px; }
+  .page-header h1 { font-size: 18px; letter-spacing: 2px; }
+  .page-header .subtitle { font-size: 10px; }
+  .controls { padding: 0 16px; margin: 20px auto; }
+  .badge-container { padding: 0 12px; gap: 20px; }
+  .badge-wrap { width: 100%; max-width: 342px; }
+  .back-btn { padding: 8px 14px; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="page-header">
+  <img id="headerLogo" src="" alt="VOLO">
+  <div>
+    <h1>Badge Tactique</h1>
+    <div class="subtitle">Identification Golden Eagles</div>
+  </div>
+  <a href="index.html" class="back-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Retour
+  </a>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input type="text" class="search-input" id="searchInput" placeholder="Rechercher un membre..." autocomplete="off">
+  </div>
+  <select class="member-select" id="memberSelect">
+    <option value="">-- Selectionner un membre --</option>
+  </select>
+  <button class="btn-gold" id="btnGenerate" onclick="generateSelected()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:6px"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h6"/></svg>
+    Generer
+  </button>
+  <button class="btn-batch" id="btnBatch" onclick="generateAll()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+    Toute l'equipe
+  </button>
+  <button class="btn-print" id="btnPrint" onclick="printBadges()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    Imprimer
+  </button>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar" id="statsBar">
+  <div class="stat-chip"><span class="num" id="statTotal">0</span><span class="label">Badges</span></div>
+  <div class="stat-chip"><span class="num" id="statChef">0</span><span class="label">Chefs</span></div>
+  <div class="stat-chip"><span class="num" id="statSauv">0</span><span class="label">Sauveteurs</span></div>
+  <div class="stat-chip"><span class="num" id="statSurv">0</span><span class="label">Surveillants</span></div>
+</div>
+
+<!-- BADGE AREA -->
+<div class="badge-container" id="badgeContainer">
+  <div class="empty-state">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="12" cy="11" r="3"/><path d="M7 8h1M16 8h1"/></svg>
+    <h3>Aucun badge genere</h3>
+    <p>Selectionnez un membre ou generez tous les badges de l'equipe.</p>
+  </div>
+</div>
+
+<script>
+// ── State ──
+let currentBadges = [];
+const today = new Date();
+const dateStr = today.toLocaleDateString('fr-CA');
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', () => {
+  // Logo
+  if (typeof VOLO_LOGO_B64 !== 'undefined') {
+    document.getElementById('headerLogo').src = VOLO_LOGO_B64;
+  }
+
+  // Populate select
+  const sel = document.getElementById('memberSelect');
+  const sorted = [...PERSONNEL].sort((a, b) => a.name.localeCompare(b.name));
+  sorted.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.volo;
+    opt.textContent = `${p.name} — ${p.volo} — ${p.role}`;
+    sel.appendChild(opt);
+  });
+
+  // Search filter
+  document.getElementById('searchInput').addEventListener('input', function() {
+    const q = this.value.toLowerCase().trim();
+    const options = sel.querySelectorAll('option');
+    options.forEach(o => {
+      if (!o.value) return;
+      o.style.display = o.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+    // Auto-select if only one visible
+    const visible = [...options].filter(o => o.value && o.style.display !== 'none');
+    if (visible.length === 1) sel.value = visible[0].value;
+  });
+});
+
+// ── Role helpers ──
+function getRoleClass(role) {
+  const r = (role || '').toUpperCase();
+  if (r.includes('CHEF')) return 'chef';
+  if (r.includes('COORDO')) return 'coordonnateur';
+  if (r.includes('SURVEILLANT')) return 'surveillant';
+  return 'sauveteur';
+}
+
+function getRoleLabel(role) {
+  const r = (role || '').toUpperCase();
+  if (r.includes('CHEF')) return "CHEF D'EQUIPE";
+  if (r.includes('COORDO')) return 'COORDONNATEUR';
+  if (r.includes('SURVEILLANT')) return 'SURVEILLANT';
+  return 'SAUVETEUR';
+}
+
+function getInitials(name) {
+  return (name || '').split(/\s+/).map(w => w[0]).join('').substring(0, 2).toUpperCase();
+}
+
+// ── Certs ──
+function getMemberCerts(voloId) {
+  try {
+    const raw = localStorage.getItem('volo_certs_' + voloId);
+    return raw ? JSON.parse(raw) : {};
+  } catch(e) { return {}; }
+}
+
+function getCertStatus(dateStr, durMonths) {
+  if (!dateStr) return 'none';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return 'none';
+  const exp = new Date(d);
+  exp.setMonth(exp.getMonth() + durMonths);
+  const now = new Date();
+  if (exp < now) return 'exp';
+  const warn = new Date(exp);
+  warn.setDate(warn.getDate() - 30);
+  if (now >= warn) return 'warn';
+  return 'ok';
+}
+
+// ── Generate badge HTML ──
+function createBadgeHTML(member, index) {
+  const certs = getMemberCerts(member.volo);
+  const roleClass = getRoleClass(member.role);
+  const roleLabel = getRoleLabel(member.role);
+  const initials = getInitials(member.name);
+  const qrId = 'qr_' + member.volo + '_' + index;
+  const logoSrc = typeof VOLO_LOGO_B64 !== 'undefined' ? VOLO_LOGO_B64 : '';
+
+  // Cert chips
+  const certsDefs = typeof CERTS_LIST !== 'undefined' ? CERTS_LIST : [];
+  let certChips = '';
+  certsDefs.forEach(c => {
+    const st = getCertStatus(certs[c.id], c.dur);
+    const labels = { ok: 'OK', warn: '30J', exp: 'EXP', none: '--' };
+    certChips += `<span class="cert-chip ${st}">${c.name.split('/')[0].trim().substring(0,12)} ${labels[st]}</span>`;
+  });
+
+  return `
+  <div class="badge-wrap enter" onclick="this.classList.toggle('flipped')" style="animation-delay:${index * 0.1}s">
+    <div class="badge-inner">
+      <!-- FRONT -->
+      <div class="badge-front">
+        <img class="badge-watermark" src="${logoSrc}" alt="">
+        <div class="badge-header">
+          <img class="badge-logo" src="${logoSrc}" alt="VOLO">
+          <div class="badge-title-block">
+            <div class="badge-org">VOLO SST</div>
+            <div class="badge-sub">Golden Eagles</div>
+          </div>
+          <div class="badge-stamp">
+            AUTORISE
+            <span class="badge-stamp-date">${dateStr}</span>
+          </div>
+        </div>
+        <div class="badge-body">
+          <div class="badge-name">${member.name}</div>
+          <div class="badge-role ${roleClass}">${roleLabel}</div>
+          <div class="badge-id">${member.volo}</div>
+          <div class="badge-location">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            ${member.region || ''} ${member.ville ? '— ' + member.ville : ''}
+          </div>
+        </div>
+        <div class="badge-right">
+          <div class="badge-avatar">${initials}</div>
+          <div class="badge-qr" id="${qrId}"></div>
+        </div>
+        <div class="badge-footer">
+          <div class="badge-sec-line"></div>
+          <span class="badge-sec-text">SST-${member.volo}</span>
+          <div class="badge-sec-line"></div>
+        </div>
+      </div>
+      <!-- BACK -->
+      <div class="badge-back">
+        <div class="back-header">
+          <img src="${logoSrc}" alt="">
+          <span>VOLO CONSTRUCTION SST</span>
+        </div>
+        <div class="back-section-title">Certifications</div>
+        <div class="cert-grid">${certChips}</div>
+        <div class="back-section-title">Informations</div>
+        <div class="back-info">
+          <strong>ID:</strong> ${member.id}<br>
+          <strong>Type:</strong> ${member.type || '—'}<br>
+          <strong>Region:</strong> ${member.region || '—'}
+        </div>
+        <div class="back-section-title">Urgence</div>
+        <div class="back-info">
+          <strong>Ligne urgence:</strong> 819-XXX-XXXX<br>
+          <strong>CNESST:</strong> 1-844-838-0808
+        </div>
+        <div class="back-address">
+          VOLO CONSTRUCTION INC. — ESTRIE, QC — voloinv7.netlify.app
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── Generate selected ──
+function generateSelected() {
+  const volo = document.getElementById('memberSelect').value;
+  if (!volo) return;
+  const member = PERSONNEL.find(p => p.volo === volo);
+  if (!member) return;
+
+  currentBadges = [member];
+  renderBadges([member]);
+}
+
+// ── Generate all ──
+function generateAll() {
+  const sorted = [...PERSONNEL].sort((a, b) => {
+    const order = { "CHEF D'EQUIPE": 0, "COORDONNATEUR": 1, "SAUVETEUR": 2, "SURVEILLANT": 3 };
+    const ra = (a.role || '').toUpperCase();
+    const rb = (b.role || '').toUpperCase();
+    const oa = ra.includes('CHEF') ? 0 : ra.includes('COORDO') ? 1 : ra.includes('SURVEILLANT') ? 3 : 2;
+    const ob = rb.includes('CHEF') ? 0 : rb.includes('COORDO') ? 1 : rb.includes('SURVEILLANT') ? 3 : 2;
+    if (oa !== ob) return oa - ob;
+    return a.name.localeCompare(b.name);
+  });
+  currentBadges = sorted;
+  renderBadges(sorted);
+}
+
+// ── Render ──
+function renderBadges(members) {
+  const container = document.getElementById('badgeContainer');
+  container.innerHTML = '';
+
+  if (!members.length) {
+    container.innerHTML = `<div class="empty-state">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="12" cy="11" r="3"/><path d="M7 8h1M16 8h1"/></svg>
+      <h3>Aucun badge genere</h3>
+      <p>Selectionnez un membre ou generez tous les badges.</p>
+    </div>`;
+    document.getElementById('btnPrint').style.display = 'none';
+    document.getElementById('statsBar').classList.remove('active');
+    return;
+  }
+
+  // Show print + stats
+  document.getElementById('btnPrint').style.display = '';
+  document.getElementById('statsBar').classList.add('active');
+
+  // Stats
+  let chefs = 0, sauvs = 0, survs = 0;
+  members.forEach(m => {
+    const r = (m.role || '').toUpperCase();
+    if (r.includes('CHEF') || r.includes('COORDO')) chefs++;
+    else if (r.includes('SURVEILLANT')) survs++;
+    else sauvs++;
+  });
+  document.getElementById('statTotal').textContent = members.length;
+  document.getElementById('statChef').textContent = chefs;
+  document.getElementById('statSauv').textContent = sauvs;
+  document.getElementById('statSurv').textContent = survs;
+
+  // Hint
+  container.innerHTML = `<div class="flip-hint" style="width:100%;text-align:center">
+    <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--gold-dim);fill:none;stroke-width:2;vertical-align:middle"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+    Cliquez sur un badge pour voir le verso
+  </div>`;
+
+  // Badges
+  members.forEach((m, i) => {
+    container.insertAdjacentHTML('beforeend', createBadgeHTML(m, i));
+  });
+
+  // Generate QR codes
+  setTimeout(() => {
+    members.forEach((m, i) => {
+      const el = document.getElementById('qr_' + m.volo + '_' + i);
+      if (el && typeof QRCode !== 'undefined') {
+        el.innerHTML = '';
+        new QRCode(el, {
+          text: m.volo,
+          width: 46,
+          height: 46,
+          colorDark: '#04040A',
+          colorLight: '#EBE6DF',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      }
+    });
+  }, 100);
+}
+
+// ── Print ──
+function printBadges() {
+  window.print();
+}
+</script>
+</body>
+</html>

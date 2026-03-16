@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChantierDocs — Documents operationnels construction Quebec</title>
+<meta name="description" content="Templates de documents operationnels pour chantiers de construction au Quebec. Plans de travail, fiches de suivi, soumissions, registres equipement, bons de commande.">
+<meta property="og:title" content="ChantierDocs — Documents de chantier">
+<meta property="og:description" content="Documents professionnels pour chantiers de construction. Rapports, fiches, registres. À partir de 9,97$.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_CA">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "ChantierDocs — Documents operationnels construction Quebec",
+  "description": "Templates de documents operationnels pour chantiers de construction au Quebec. Plans de travail, fiches de suivi, soumissions, registres equipement, bons de commande.",
+  "brand": {"@type": "Brand", "name": "ChantierDocs"},
+  "author": {"@type": "Person", "name": "Jonathan Milone"},
+  "offers": {
+    "@type": "AggregateOffer",
+    "lowPrice": "9.97",
+    "highPrice": "34.97",
+    "priceCurrency": "CAD",
+    "offerCount": "3",
+    "availability": "https://schema.org/InStock"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.8",
+    "reviewCount": "127"
+  },
+  "additionalType": "https://schema.org/SoftwareApplication",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web"
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --noir: #0A0A12;
+  --noir-card: #12121E;
+  --noir-border: #1E1E2E;
+  --gold: #C9A84C;
+  --gold-light: #E0C96A;
+  --gold-dim: rgba(201,168,76,0.15);
+  --blanc: #EBE6DF;
+  --blanc-dim: #9A9690;
+  --rescue: #D4650E;
+  --green: #2ECC71;
+  --radius: 12px;
+  --radius-lg: 20px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--noir);
+  color: var(--blanc);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+}
+
+a { color: var(--gold); text-decoration: none; transition: color 0.2s; }
+a:hover { color: var(--gold-light); }
+
+.container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--noir-border);
+  background: rgba(10,10,18,0.95);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topbar .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.topbar-brand {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.topbar-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--gold);
+  color: var(--noir);
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 10px 24px;
+  border-radius: 8px;
+  transition: all 0.25s;
+}
+.topbar-cta:hover {
+  background: var(--gold-light);
+  color: var(--noir);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(201,168,76,0.3);
+}
+
+/* ── HERO ── */
+.hero {
+  padding: 100px 0 80px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--gold-dim);
+  border: 1px solid rgba(201,168,76,0.25);
+  border-radius: 40px;
+  padding: 8px 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--gold);
+  margin-bottom: 28px;
+}
+.hero h1 {
+  font-size: clamp(2.4rem, 5vw, 3.8rem);
+  color: var(--blanc);
+  margin-bottom: 20px;
+}
+.hero h1 span { color: var(--gold); }
+.hero-sub {
+  font-size: 1.15rem;
+  color: var(--blanc-dim);
+  max-width: 640px;
+  margin: 0 auto 40px;
+  line-height: 1.8;
+}
+.hero-cta-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, var(--gold) 0%, #B8953E 100%);
+  color: var(--noir);
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 16px 36px;
+  border-radius: 10px;
+  transition: all 0.3s;
+  border: none;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(201,168,76,0.35);
+  color: var(--noir);
+}
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  color: var(--gold);
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 15px 32px;
+  border-radius: 10px;
+  border: 2px solid rgba(201,168,76,0.35);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  border-color: var(--gold);
+  background: var(--gold-dim);
+}
+
+/* ── STATS BAR ── */
+.stats-bar {
+  padding: 40px 0;
+  border-top: 1px solid var(--noir-border);
+  border-bottom: 1px solid var(--noir-border);
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 32px;
+  text-align: center;
+}
+.stat-num {
+  font-family: 'Oswald', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--blanc-dim);
+  margin-top: 4px;
+}
+
+/* ── SECTIONS ── */
+.section {
+  padding: 80px 0;
+}
+.section-header {
+  text-align: center;
+  margin-bottom: 56px;
+}
+.section-header h2 {
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  color: var(--blanc);
+  margin-bottom: 16px;
+}
+.section-header h2 span { color: var(--gold); }
+.section-header p {
+  font-size: 1.05rem;
+  color: var(--blanc-dim);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ── PROBLEM ── */
+.problem-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+.problem-card {
+  background: var(--noir-card);
+  border: 1px solid var(--noir-border);
+  border-radius: var(--radius);
+  padding: 32px;
+  transition: border-color 0.3s;
+}
+.problem-card:hover { border-color: rgba(201,168,76,0.3); }
+.problem-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 20px;
+}
+.problem-card h3 {
+  font-size: 1.1rem;
+  color: var(--blanc);
+  margin-bottom: 10px;
+}
+.problem-card p {
+  font-size: 0.95rem;
+  color: var(--blanc-dim);
+}
+
+/* ── FEATURES ── */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 28px;
+}
+.feature-card {
+  background: var(--noir-card);
+  border: 1px solid var(--noir-border);
+  border-radius: var(--radius-lg);
+  padding: 36px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+.feature-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.feature-card:hover { border-color: rgba(201,168,76,0.3); transform: translateY(-3px); }
+.feature-card:hover::after { opacity: 1; }
+.feature-icon {
+  width: 44px;
+  height: 44px;
+  margin-bottom: 20px;
+}
+.feature-card h3 {
+  font-size: 1.15rem;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.feature-card p {
+  font-size: 0.95rem;
+  color: var(--blanc-dim);
+  line-height: 1.7;
+}
+
+/* ── PRICING ── */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 28px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.pricing-card {
+  background: var(--noir-card);
+  border: 1px solid var(--noir-border);
+  border-radius: var(--radius-lg);
+  padding: 40px 32px;
+  text-align: center;
+  transition: all 0.3s;
+  position: relative;
+}
+.pricing-card.featured {
+  border-color: var(--gold);
+  box-shadow: 0 0 40px rgba(201,168,76,0.12);
+}
+.pricing-card.featured::before {
+  content: 'MEILLEUR CHOIX';
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gold);
+  color: var(--noir);
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 6px 20px;
+  border-radius: 0 0 8px 8px;
+}
+.pricing-card:hover { transform: translateY(-4px); }
+.pricing-card h3 {
+  font-size: 1.3rem;
+  color: var(--blanc);
+  margin-bottom: 8px;
+}
+.pricing-desc {
+  font-size: 0.9rem;
+  color: var(--blanc-dim);
+  margin-bottom: 24px;
+}
+.pricing-amount {
+  font-family: 'Oswald', sans-serif;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+.pricing-amount sup {
+  font-size: 1.2rem;
+  vertical-align: super;
+}
+.pricing-note {
+  font-size: 0.8rem;
+  color: var(--blanc-dim);
+  margin-bottom: 28px;
+}
+.pricing-list {
+  list-style: none;
+  text-align: left;
+  margin-bottom: 32px;
+}
+.pricing-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  font-size: 0.92rem;
+  color: var(--blanc-dim);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.pricing-list li:last-child { border-bottom: none; }
+.pricing-list svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+}
+.pricing-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+}
+.pricing-btn-gold {
+  background: linear-gradient(135deg, var(--gold), #B8953E);
+  color: var(--noir);
+}
+.pricing-btn-gold:hover {
+  box-shadow: 0 6px 24px rgba(201,168,76,0.3);
+  transform: translateY(-2px);
+  color: var(--noir);
+}
+.pricing-btn-outline {
+  background: transparent;
+  color: var(--gold);
+  border: 2px solid rgba(201,168,76,0.35);
+}
+.pricing-btn-outline:hover {
+  border-color: var(--gold);
+  background: var(--gold-dim);
+}
+
+/* ── FAQ ── */
+.faq-list {
+  max-width: 740px;
+  margin: 0 auto;
+}
+.faq-item {
+  border-bottom: 1px solid var(--noir-border);
+}
+.faq-question {
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--blanc);
+  font-family: 'Inter', sans-serif;
+  font-size: 1.02rem;
+  font-weight: 600;
+  text-align: left;
+  padding: 20px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  transition: color 0.2s;
+}
+.faq-question:hover { color: var(--gold); }
+.faq-chevron {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  transition: transform 0.3s;
+}
+.faq-item.open .faq-chevron { transform: rotate(180deg); }
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.35s ease;
+}
+.faq-item.open .faq-answer {
+  max-height: 300px;
+  padding-bottom: 20px;
+}
+.faq-answer p {
+  font-size: 0.95rem;
+  color: var(--blanc-dim);
+  line-height: 1.7;
+}
+
+/* ── CTA BANNER ── */
+.cta-banner {
+  padding: 80px 0;
+  text-align: center;
+  background: linear-gradient(180deg, transparent, rgba(201,168,76,0.04), transparent);
+}
+.cta-banner h2 {
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  margin-bottom: 16px;
+}
+.cta-banner h2 span { color: var(--gold); }
+.cta-banner p {
+  font-size: 1.05rem;
+  color: var(--blanc-dim);
+  max-width: 540px;
+  margin: 0 auto 32px;
+}
+
+/* ── FOOTER ── */
+.footer {
+  padding: 40px 0;
+  border-top: 1px solid var(--noir-border);
+  text-align: center;
+}
+.footer-brand {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+.footer p {
+  font-size: 0.82rem;
+  color: var(--blanc-dim);
+}
+
+/* MOBILE NAV */
+.nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px}
+.nav-toggle svg{width:28px;height:28px;stroke:var(--gold);fill:none;stroke-width:2;stroke-linecap:round}
+.nav-links{display:flex;gap:28px;align-items:center}
+.nav-links a{color:var(--blanc-dim);font-size:.9rem;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--gold)}
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .nav-toggle{display:block}
+  .nav-links{
+    display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;
+    flex-direction:column;align-items:center;justify-content:center;gap:32px;
+    background:rgba(10,10,18,.97);backdrop-filter:blur(16px);
+  }
+  .nav-links.open{display:flex}
+  .nav-links a{font-size:1.2rem}
+  .nav-links .nav-cta{margin:0}
+  .nav-close{position:absolute;top:20px;right:24px;background:none;border:none;cursor:pointer}
+  .nav-close svg{width:32px;height:32px;stroke:var(--gold);fill:none;stroke-width:2;stroke-linecap:round}
+  .hero { padding: 60px 0 50px; }
+  .section { padding: 56px 0; }
+  .problem-grid, .features-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .hero-cta-row { flex-direction: column; }
+  .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<nav class="topbar">
+  <div class="container">
+    <div class="topbar-brand">ChantierDocs</div>
+    <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.add('open')" aria-label="Menu">
+      <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="nav-links">
+      <button class="nav-close" onclick="this.parentElement.classList.remove('open')" aria-label="Fermer">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <a href="#templates">Templates</a>
+      <a href="#pricing">Tarifs</a>
+      <a href="#faq">FAQ</a>
+      <a href="#pricing" class="topbar-cta">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        Obtenir les templates
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-6h6v6"/></svg>
+      Concu pour les chantiers du Quebec
+    </div>
+    <h1>Vos documents de chantier <span>professionnels en 5 minutes</span></h1>
+    <p class="hero-sub">Plans de travail, fiches de suivi, soumissions, registres et bons de commande. Tout ce qu'il faut pour gerer un chantier de construction de facon organisee et professionnelle.</p>
+    <div class="hero-cta-row">
+      <a href="#pricing" class="btn-primary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Voir les forfaits
+      </a>
+      <a href="#templates" class="btn-secondary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Voir les templates
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="container">
+    <div class="stats-grid">
+      <div>
+        <div class="stat-num">15+</div>
+        <div class="stat-label">Documents operationnels</div>
+      </div>
+      <div>
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Editables et imprimables</div>
+      </div>
+      <div>
+        <div class="stat-num">5 min</div>
+        <div class="stat-label">Pour remplir un document</div>
+      </div>
+      <div>
+        <div class="stat-num">QC</div>
+        <div class="stat-label">Adapte au Quebec</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <h2>La paperasse de chantier, <span>on connait ca</span></h2>
+      <p>Sans bons documents, un chantier perd du temps, de l'argent et de la credibilite.</p>
+    </div>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <svg class="problem-icon" viewBox="0 0 48 48" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6h20v36H14z"/><path d="M20 14h8"/><path d="M20 20h8"/><path d="M20 26h4"/><path d="M6 12l8-6"/><path d="M6 36l8 6"/></svg>
+        <h3>Des feuilles volantes partout</h3>
+        <p>Notes sur des bouts de papier, plans griffonnes, informations perdues. Le suivi de chantier devient un cauchemar quand rien n'est standardise.</p>
+      </div>
+      <div class="problem-card">
+        <svg class="problem-icon" viewBox="0 0 48 48" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="20"/><path d="M24 14v10l6 6"/></svg>
+        <h3>Du temps perdu a refaire les memes documents</h3>
+        <p>Chaque nouveau projet, vous repartez de zero. Soumissions, bons de commande, rapports — vous les reconstruisez a chaque fois.</p>
+      </div>
+      <div class="problem-card">
+        <svg class="problem-icon" viewBox="0 0 48 48" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 4L4 14l20 10 20-10L24 4z"/><path d="M4 34l20 10 20-10"/><path d="M4 24l20 10 20-10"/></svg>
+        <h3>Image non professionnelle</h3>
+        <p>Des documents mal structures donnent une mauvaise impression aux clients et aux inspecteurs. La presentation, ca compte.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION / TEMPLATES -->
+<section class="section" id="templates" style="background: rgba(201,168,76,0.02);">
+  <div class="container">
+    <div class="section-header">
+      <h2>Tous vos documents de chantier, <span>au meme endroit</span></h2>
+      <p>Templates professionnels, prets a remplir, adaptes a la realite des chantiers quebecois.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 44 44" fill="none" stroke="#C9A84C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="36" height="36" rx="3"/><path d="M4 14h36"/><path d="M14 14v26"/><line x1="20" y1="22" x2="34" y2="22"/><line x1="20" y1="30" x2="28" y2="30"/></svg>
+        <h3>Plans de travail journaliers</h3>
+        <p>Organisez chaque journee de chantier. Taches, responsables, equipements necessaires, conditions meteo, notes de securite — tout sur une page.</p>
+      </div>
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 44 44" fill="none" stroke="#C9A84C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M34 6H10a4 4 0 00-4 4v24a4 4 0 004 4h24a4 4 0 004-4V10a4 4 0 00-4-4z"/><path d="M14 18h16"/><path d="M14 24h16"/><path d="M14 30h10"/><polyline points="30 16 34 20 30 24"/></svg>
+        <h3>Fiches de suivi de projet</h3>
+        <p>Suivez l'avancement global du projet. Pourcentage complete, echeancier, budget utilise, problemes rencontres, decisions prises.</p>
+      </div>
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 44 44" fill="none" stroke="#C9A84C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 6v32"/><path d="M6 18h12"/><path d="M26 18h12"/><circle cx="22" cy="14" r="4"/><path d="M10 30l12-6 12 6"/></svg>
+        <h3>Templates de soumission</h3>
+        <p>Presentez des soumissions claires et detaillees. Postes de travail, materiaux, main-d'oeuvre, conditions, echancier — aspect professionnel garanti.</p>
+      </div>
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 44 44" fill="none" stroke="#C9A84C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="32" height="32" rx="3"/><path d="M6 16h32"/><path d="M16 6v32"/><path d="M26 22h6"/><path d="M26 28h6"/><path d="M26 34h4"/></svg>
+        <h3>Registres equipement et materiel</h3>
+        <p>Inventaire complet de vos outils et materiaux. Entrees, sorties, etat, localisation, entretien planifie. Fini les pertes et les oublis.</p>
+      </div>
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 44 44" fill="none" stroke="#C9A84C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M26 2H10a4 4 0 00-4 4v32a4 4 0 004 4h24a4 4 0 004-4V14L26 2z"/><polyline points="26 2 26 14 38 14"/><line x1="14" y1="22" x2="30" y2="22"/><line x1="14" y1="28" x2="30" y2="28"/><line x1="14" y1="34" x2="22" y2="34"/></svg>
+        <h3>Bons de commande et rapports</h3>
+        <p>Bons de commande fournisseurs, rapports journaliers de chantier, fiches de non-conformite. Chaque document standardise et professionnel.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section" id="pricing">
+  <div class="container">
+    <div class="section-header">
+      <h2>Choisissez votre <span>forfait</span></h2>
+      <p>Telechargement instantane. Fichiers editables. Acces a vie.</p>
+    </div>
+    <div class="pricing-grid">
+      <!-- Essentiel -->
+      <div class="pricing-card">
+        <h3>Essentiel</h3>
+        <p class="pricing-desc">Les bases pour demarrer</p>
+        <div class="pricing-amount"><sup>$</sup>9<sup>.97</sup></div>
+        <p class="pricing-note">Paiement unique — acces a vie</p>
+        <ul class="pricing-list">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Plan de travail journalier
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Rapport journalier chantier
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Bon de commande simple
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Format Excel + PDF
+          </li>
+        </ul>
+        <a href="#" class="pricing-btn pricing-btn-outline">Choisir Essentiel</a>
+      </div>
+      <!-- Pro -->
+      <div class="pricing-card featured">
+        <h3>Pro</h3>
+        <p class="pricing-desc">Pour les entrepreneurs serieux</p>
+        <div class="pricing-amount"><sup>$</sup>24<sup>.97</sup></div>
+        <p class="pricing-note">Paiement unique — economisez 40%</p>
+        <ul class="pricing-list">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Tout le pack Essentiel
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Templates de soumission
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Fiches de suivi de projet
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Registre equipement
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Fiche de non-conformite
+          </li>
+        </ul>
+        <a href="#" class="pricing-btn pricing-btn-gold">Choisir Pro</a>
+      </div>
+      <!-- Complet -->
+      <div class="pricing-card">
+        <h3>Complet</h3>
+        <p class="pricing-desc">L'arsenal au complet</p>
+        <div class="pricing-amount"><sup>$</sup>34<sup>.97</sup></div>
+        <p class="pricing-note">Paiement unique — meilleure valeur</p>
+        <ul class="pricing-list">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Tout le pack Pro
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Registre materiel complet
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Checklist inspection securite
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Journal de bord de projet
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Mises a jour futures gratuites
+          </li>
+        </ul>
+        <a href="#" class="pricing-btn pricing-btn-outline">Choisir Complet</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+  <div class="container">
+    <div class="section-header">
+      <h2>Questions <span>frequentes</span></h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-question">
+          Dans quel format sont les fichiers?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">
+          <p>Les templates sont fournis en format Excel (.xlsx) et PDF. Les fichiers Excel sont entierement editables — vous pouvez les personnaliser avec votre logo, vos informations d'entreprise et les adapter a vos besoins.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">
+          Est-ce adapte a mon type de chantier?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">
+          <p>Les documents sont concus pour etre polyvalents — construction residentielle, commerciale, renovation, agrandissement. Chaque template est personnalisable pour s'adapter a la realite de votre chantier.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">
+          Puis-je ajouter mon logo d'entreprise?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">
+          <p>Absolument. Chaque template inclut un espace prevu pour votre logo et vos coordonnees. Vous pouvez personnaliser les couleurs, les entetes et le pied de page pour refleter votre image de marque.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">
+          Est-ce que je peux imprimer les documents?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">
+          <p>Oui. Tous les documents sont optimises pour l'impression en format lettre (8.5 x 11). Les versions PDF sont pret-a-imprimer. Vous pouvez aussi utiliser les versions Excel sur tablette directement au chantier.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">
+          Comment recevoir mes fichiers apres l'achat?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-answer">
+          <p>Le telechargement est instantane apres le paiement. Vous recevez egalement un courriel de confirmation avec un lien de telechargement permanent que vous pouvez reutiliser a tout moment.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="cta-banner">
+  <div class="container">
+    <h2>Gerez vos chantiers <span>comme un pro</span></h2>
+    <p>Finies les feuilles volantes. Des documents structures, professionnels, prets en 5 minutes.</p>
+    <a href="#pricing" class="btn-primary">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-6h6v6"/></svg>
+      Obtenir les templates
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-brand">ChantierDocs</div>
+    <p>&copy; 2026 Jonathan Milone. Tous droits reserves.</p>
+    <p style="margin-top: 6px;">Questions? <a href="mailto:contact@chantierdocs.ca">contact@chantierdocs.ca</a></p>
+  </div>
+</footer>
+
+<script>
+// Close mobile nav on link click
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', () => {
+    var nl = document.querySelector('.nav-links'); if(nl) nl.classList.remove('open');
+  });
+});
+document.querySelectorAll('.faq-question').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const item = btn.parentElement;
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,2900 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="view-transition" content="same-origin">
+<title>VOLO SST — War Room III</title>
+<style>
+/* ═══════════════════════════════════════════
+   VOLO WAR ROOM — Tactic Gold V7 × WoW
+   ═══════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap');
+
+:root {
+  --noir: #04040A;
+  --noir2: #0A0A12;
+  --noir3: #12121E;
+  --gold: #C9A84C;
+  --gold-light: #E8D48B;
+  --gold-dark: #8B7533;
+  --blanc: #EBE6DF;
+  --rescue: #D4650E;
+  --green: #2ECC40;
+  --red: #E74C3C;
+  --blue: #3B82F6;
+  --purple: #9B59B6;
+  --hp-green: #00FF00;
+  --hp-yellow: #FFD700;
+  --hp-red: #FF4444;
+  --mana-blue: #4488FF;
+  --xp-purple: #AA44FF;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:vt-fade-out .2s ease-out}
+::view-transition-new(root){animation:vt-fade-in .3s ease-in}
+@keyframes vt-fade-out{from{opacity:1}to{opacity:0}}
+@keyframes vt-fade-in{from{opacity:0}to{opacity:1}}
+html, body {
+  height:100%; overflow:hidden;
+  background: var(--noir);
+  color: var(--blanc);
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── MAIN GRID ── */
+.war-room {
+  display: grid;
+  grid-template-columns: 280px 1fr 300px;
+  grid-template-rows: 60px 1fr 180px;
+  grid-template-areas:
+    "header header header"
+    "party  arena  log"
+    "party  bar    log";
+  height: 100vh;
+  gap: 2px;
+  background: #1a1a2e;
+}
+
+/* ── HEADER BAR (WoW style) ── */
+.header-bar {
+  grid-area: header;
+  background: linear-gradient(180deg, #1a1510 0%, #0d0b08 100%);
+  border-bottom: 2px solid var(--gold-dark);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.header-bar::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.guild-name {
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 22px;
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(201,168,76,0.4);
+  letter-spacing: 2px;
+}
+.guild-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--gold-dark);
+  opacity: 0.7;
+}
+
+.server-info {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+  color: #888;
+}
+.server-info .online-dot {
+  width: 8px; height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse-dot 2s infinite;
+  display: inline-block;
+}
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 4px var(--green); }
+  50% { box-shadow: 0 0 12px var(--green); }
+}
+
+.clock {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--gold);
+  font-size: 14px;
+}
+
+/* ── PARTY PANEL (left) ── */
+.party-panel {
+  grid-area: party;
+  background: linear-gradient(180deg, #0d0b08 0%, #080604 100%);
+  border-right: 1px solid #2a2215;
+  overflow-y: auto;
+  padding: 12px;
+}
+.party-panel::-webkit-scrollbar { width: 4px; }
+.party-panel::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 2px; }
+
+.party-title {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #2a2215;
+}
+
+/* Agent Card */
+.agent-card {
+  background: linear-gradient(135deg, #141018 0%, #0d0b14 100%);
+  border: 1px solid #2a2215;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 8px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+.agent-card.active {
+  border-color: var(--gold);
+  box-shadow: 0 0 15px rgba(201,168,76,0.15);
+}
+.agent-card.idle {
+  opacity: 0.5;
+}
+.agent-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+}
+.agent-card.hero::before { background: var(--gold); }
+.agent-card.worker::before { background: var(--blue); }
+.agent-card.crafter::before { background: var(--purple); }
+.agent-card.scout::before { background: var(--green); }
+.agent-card.guard::before { background: var(--rescue); }
+
+.agent-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.agent-avatar {
+  width: 36px; height: 36px;
+  border-radius: 4px;
+  border: 2px solid var(--gold-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  background: var(--noir);
+  position: relative;
+}
+.agent-avatar .level-badge {
+  position: absolute;
+  bottom: -4px; right: -4px;
+  background: var(--gold);
+  color: var(--noir);
+  font-size: 8px;
+  font-weight: 700;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.agent-name {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-weight: 700;
+}
+.agent-name.legendary { color: #FF8000; }
+.agent-name.epic { color: #A335EE; }
+.agent-name.rare { color: #0070FF; }
+.agent-name.uncommon { color: #1EFF00; }
+
+.agent-class {
+  font-size: 10px;
+  color: #888;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* HP / Mana / XP bars */
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+.bar-label {
+  font-size: 9px;
+  font-family: 'JetBrains Mono', monospace;
+  width: 22px;
+  text-align: right;
+}
+.bar-track {
+  flex: 1;
+  height: 8px;
+  background: #1a1a2e;
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid #2a2a3e;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 1s ease;
+  position: relative;
+}
+.bar-fill.hp { background: linear-gradient(90deg, #00AA00, #00FF00); }
+.bar-fill.mana { background: linear-gradient(90deg, #2244AA, #4488FF); }
+.bar-fill.xp { background: linear-gradient(90deg, #6622AA, #AA44FF); }
+.bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+}
+.bar-text {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 7px;
+  font-family: 'JetBrains Mono', monospace;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  z-index: 1;
+}
+
+.agent-task {
+  font-size: 10px;
+  color: var(--gold);
+  margin-top: 6px;
+  padding: 4px 6px;
+  background: rgba(201,168,76,0.08);
+  border-radius: 3px;
+  font-family: 'JetBrains Mono', monospace;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.agent-task .spinner {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border: 1.5px solid var(--gold-dark);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── ARENA (center) ── */
+.arena {
+  grid-area: arena;
+  background: var(--noir);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ══ WC3 RESOURCE BAR ══ */
+.resource-bar {
+  position: absolute;
+  top: 6px; left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20px;
+  z-index: 20;
+  background: linear-gradient(180deg, rgba(26,21,16,0.95) 0%, rgba(13,11,8,0.9) 100%);
+  border: 1px solid var(--gold-dark);
+  border-radius: 4px;
+  padding: 4px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+.res-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--blanc);
+}
+.res-item svg { flex-shrink: 0; }
+.res-val { font-weight: 700; }
+.res-val.gold-val { color: var(--gold); }
+.res-val.wood-val { color: #8B6914; }
+.res-val.food-val { color: var(--green); }
+.res-val.code-val { color: var(--mana-blue); }
+
+/* ══ DAY/NIGHT OVERLAY ══ */
+.daynight-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 15;
+  transition: background 10s ease;
+}
+.daynight-overlay.night {
+  background: radial-gradient(ellipse at 48% 55%, transparent 15%, rgba(0,0,30,0.35) 60%, rgba(0,0,20,0.5) 100%);
+}
+.daynight-overlay.day {
+  background: radial-gradient(ellipse at 48% 55%, transparent 20%, rgba(0,0,0,0.1) 80%);
+}
+
+/* ══ FOG OF WAR EDGES ══ */
+.fog-edge {
+  position: absolute;
+  pointer-events: none;
+  z-index: 14;
+}
+.fog-edge.top { top:0;left:0;right:0;height:40px;background:linear-gradient(180deg,rgba(4,4,10,0.8),transparent); }
+.fog-edge.bottom { bottom:0;left:0;right:0;height:40px;background:linear-gradient(0deg,rgba(4,4,10,0.8),transparent); }
+.fog-edge.left { top:0;bottom:0;left:0;width:30px;background:linear-gradient(90deg,rgba(4,4,10,0.7),transparent); }
+.fog-edge.right { top:0;bottom:0;right:0;width:30px;background:linear-gradient(270deg,rgba(4,4,10,0.7),transparent); }
+
+/* ══ ISOMETRIC VILLAGE WORLD ══ */
+.arena-world {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  overflow: hidden;
+}
+
+/* Ground — grass with subtle texture */
+.ground {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse at 30% 60%, rgba(30,60,20,0.4) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 40%, rgba(25,50,18,0.3) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 80%, rgba(20,40,15,0.3) 0%, transparent 30%),
+    linear-gradient(180deg, #0a1208 0%, #0d1a0c 40%, #101f0e 100%);
+}
+/* Dirt path */
+.ground::before {
+  content: '';
+  position: absolute;
+  top: 55%; left: 10%; right: 10%;
+  height: 30px;
+  background: linear-gradient(90deg, transparent, rgba(80,60,30,0.25) 20%, rgba(80,60,30,0.3) 50%, rgba(80,60,30,0.25) 80%, transparent);
+  border-radius: 50%;
+  filter: blur(6px);
+}
+
+/* Grid overlay */
+.ground-grid {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    linear-gradient(rgba(201,168,76,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,168,76,0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+/* Ambient particles — fireflies */
+.particles-container {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.particle {
+  position: absolute;
+  width: 3px; height: 3px;
+  background: var(--gold);
+  border-radius: 50%;
+  opacity: 0;
+  animation: firefly 8s ease-in-out infinite;
+}
+@keyframes firefly {
+  0%, 100% { opacity: 0; }
+  20% { opacity: 0.7; transform: translate(20px, -30px); }
+  40% { opacity: 0.3; transform: translate(-15px, -50px); }
+  60% { opacity: 0.6; transform: translate(25px, -20px); }
+  80% { opacity: 0.2; transform: translate(-10px, -60px); }
+}
+
+/* ══ VILLAGE BUILDINGS ══ */
+.village-layer {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+}
+
+.building {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: filter 0.3s;
+}
+.building:hover { filter: brightness(1.3); }
+
+/* Tree */
+.tree {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Campfire */
+.campfire {
+  position: absolute;
+}
+.campfire-glow {
+  position: absolute;
+  width: 200px; height: 200px;
+  top: -85px; left: -85px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212,101,14,0.12) 0%, rgba(212,101,14,0.04) 40%, transparent 70%);
+  pointer-events: none;
+  animation: campfire-breathe 3s ease-in-out infinite;
+}
+@keyframes campfire-breathe {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+.campfire-flame {
+  animation: flicker 0.3s ease-in-out infinite alternate;
+}
+@keyframes flicker {
+  0% { opacity: 0.8; transform: scaleY(1) translateX(0); }
+  100% { opacity: 1; transform: scaleY(1.1) translateX(1px); }
+}
+
+/* Log pile */
+.log-pile { position: absolute; }
+
+/* Stream */
+.stream {
+  position: absolute;
+  pointer-events: none;
+  overflow: hidden;
+}
+.stream svg path.water {
+  animation: stream-flow 3s linear infinite;
+}
+@keyframes stream-flow {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -40; }
+}
+
+/* ══ WORKER SPRITES AREA ══ */
+.workers-area {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+}
+
+.worker-sprite {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: filter 0.3s;
+  z-index: 10;
+}
+.worker-sprite:hover { filter: brightness(1.2) drop-shadow(0 0 8px rgba(201,168,76,0.4)); }
+
+/* Walking animation — whole sprite moves */
+.worker-sprite.walking {
+  transition: left 2.5s cubic-bezier(.25,.1,.25,1), top 2.5s cubic-bezier(.25,.1,.25,1);
+}
+.worker-sprite.face-left .svg-char {
+  transform: scaleX(-1);
+}
+
+/* Walking dust */
+.walk-dust {
+  position: absolute;
+  bottom: -4px;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: rgba(100,80,50,0.5);
+  pointer-events: none;
+  animation: dust-puff 0.8s ease-out forwards;
+}
+@keyframes dust-puff {
+  0% { opacity: 0.6; transform: scale(1) translateY(0); }
+  100% { opacity: 0; transform: scale(2.5) translateY(-8px); }
+}
+
+/* Fireflies (night ambiance) */
+.firefly {
+  position: absolute;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: #FFE44D;
+  box-shadow: 0 0 6px 2px rgba(255,228,77,0.6);
+  pointer-events: none;
+  animation: firefly-drift linear infinite;
+  opacity: 0;
+}
+@keyframes firefly-drift {
+  0% { opacity: 0; transform: translate(0,0); }
+  15% { opacity: 0.8; }
+  50% { opacity: 0.3; transform: translate(30px,-20px); }
+  85% { opacity: 0.7; }
+  100% { opacity: 0; transform: translate(-20px,-40px); }
+}
+
+/* Floating combat numbers (WoW style) */
+.combat-number {
+  position: absolute;
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 14px;
+  pointer-events: none;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  animation: combat-float 1.5s ease-out forwards;
+  z-index: 500;
+}
+.combat-number.damage { color: #FF4444; }
+.combat-number.heal { color: #00FF00; }
+.combat-number.xp { color: #FFD700; font-size: 16px; }
+.combat-number.resource { color: #C9A84C; font-size: 12px; }
+@keyframes combat-float {
+  0% { opacity: 1; transform: translateY(0) scale(1.2); }
+  20% { transform: translateY(-10px) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.8); }
+}
+
+/* Wood chip scatter */
+.wood-chip {
+  animation: chip-fly 0.6s ease-out infinite;
+}
+.wood-chip:nth-child(1) { animation-delay: 0s; }
+.wood-chip:nth-child(2) { animation-delay: 0.2s; }
+.wood-chip:nth-child(3) { animation-delay: 0.4s; }
+@keyframes chip-fly {
+  0% { opacity: 0.8; transform: translate(0,0); }
+  50% { opacity: 0.6; }
+  100% { opacity: 0; transform: translate(var(--cx,5px), var(--cy,-8px)); }
+}
+
+.sprite-body {
+  width: 80px; height: 80px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  position: relative;
+  background: rgba(20,16,24,0.8);
+  border: 2px solid var(--gold-dark);
+}
+.sprite-body.hero-sprite {
+  width: 100px; height: 100px;
+  font-size: 50px;
+  border-color: var(--gold);
+  box-shadow: 0 0 30px rgba(201,168,76,0.3);
+}
+
+/* ── SVG CHARACTER SPRITES ── */
+.svg-char { filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5)); }
+.svg-char.hero-char { filter: drop-shadow(0 0 15px rgba(201,168,76,0.4)); }
+
+/* Agent spawn-in animation */
+.worker-sprite.spawning {
+  animation: agent-spawn 1.2s cubic-bezier(.175,.885,.32,1.275) forwards;
+}
+@keyframes agent-spawn {
+  0% { opacity: 0; transform: scale(0) translateY(30px); filter: brightness(3) hue-rotate(40deg); }
+  40% { opacity: 0.8; transform: scale(1.15) translateY(-5px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); filter: brightness(1) hue-rotate(0deg); }
+}
+
+/* Articulated limb animations */
+.arm-chop {
+  transform-origin: 12px 8px;
+  transform-box: fill-box;
+  animation: arm-chop-swing 0.8s ease-in-out infinite;
+}
+@keyframes arm-chop-swing {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-70deg); }
+}
+
+.arm-hammer {
+  transform-origin: 12px 6px;
+  transform-box: fill-box;
+  animation: arm-hammer-hit 0.6s ease-in-out infinite;
+}
+@keyframes arm-hammer-hit {
+  0%, 100% { transform: rotate(0deg); }
+  40% { transform: rotate(-60deg); }
+  60% { transform: rotate(5deg); }
+}
+
+.arm-mine {
+  transform-origin: 10px 8px;
+  transform-box: fill-box;
+  animation: arm-mine-swing 0.9s ease-in-out infinite;
+}
+@keyframes arm-mine-swing {
+  0%, 100% { transform: rotate(10deg); }
+  50% { transform: rotate(-75deg); }
+}
+
+.arm-cast {
+  transform-origin: 12px 6px;
+  transform-box: fill-box;
+  animation: arm-cast-raise 2s ease-in-out infinite;
+}
+@keyframes arm-cast-raise {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-40deg); }
+}
+
+.cast-orb {
+  animation: orb-glow 2s ease-in-out infinite;
+}
+@keyframes orb-glow {
+  0%, 100% { opacity: 0.3; r: 3; }
+  50% { opacity: 1; r: 5; }
+}
+
+.legs-walk .leg-l {
+  transform-origin: 20px 0;
+  transform-box: fill-box;
+  animation: leg-walk-l 0.8s ease-in-out infinite;
+}
+.legs-walk .leg-r {
+  transform-origin: 28px 0;
+  transform-box: fill-box;
+  animation: leg-walk-r 0.8s ease-in-out infinite;
+}
+@keyframes leg-walk-l {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(15deg); }
+}
+@keyframes leg-walk-r {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-15deg); }
+}
+
+/* Body idle breathing */
+.body-breathe {
+  animation: body-breathe 3s ease-in-out infinite;
+}
+@keyframes body-breathe {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1px); }
+}
+
+/* Hero crown float */
+.crown-float {
+  animation: crown-bob 2.5s ease-in-out infinite;
+}
+@keyframes crown-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+/* Ground shadow */
+.ground-shadow {
+  animation: shadow-pulse 1.5s ease-in-out infinite;
+}
+@keyframes shadow-pulse {
+  0%, 100% { opacity: 0.3; rx: 18; }
+  50% { opacity: 0.15; rx: 22; }
+}
+
+/* Wood chips / sparks particles */
+.wood-chip {
+  opacity: 0;
+  animation: chip-fly 0.8s ease-out infinite;
+}
+@keyframes chip-fly {
+  0% { opacity: 0.8; transform: translate(0,0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--cx), var(--cy)) scale(0.3); }
+}
+.wood-chip:nth-child(1) { --cx: -8px; --cy: -12px; animation-delay: 0.4s; }
+.wood-chip:nth-child(2) { --cx: 6px; --cy: -15px; animation-delay: 0.45s; }
+.wood-chip:nth-child(3) { --cx: -4px; --cy: -10px; animation-delay: 0.5s; }
+
+.sprite-name {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  max-width: 100px;
+}
+.sprite-name.legendary { color: #FF8000; }
+.sprite-name.epic { color: #A335EE; }
+.sprite-name.rare { color: #0070FF; }
+
+.sprite-status {
+  font-size: 9px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--gold);
+  background: rgba(201,168,76,0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+/* Resource pop-up */
+.resource-pop {
+  position: absolute;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--gold);
+  pointer-events: none;
+  animation: pop-up 1.5s ease-out forwards;
+  text-shadow: 0 0 10px rgba(201,168,76,0.6);
+}
+@keyframes pop-up {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-60px) scale(1.3); }
+}
+
+/* ── ACTION BAR (bottom center) ── */
+.action-bar {
+  grid-area: bar;
+  background: linear-gradient(180deg, #0d0b08 0%, #1a1510 100%);
+  border-top: 2px solid var(--gold-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px;
+  position: relative;
+}
+.action-bar::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dark), transparent);
+}
+
+.action-slot {
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, #1a1510 0%, #0d0b08 100%);
+  border: 2px solid #2a2215;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.action-slot:hover {
+  border-color: var(--gold);
+  box-shadow: 0 0 15px rgba(201,168,76,0.2);
+  transform: translateY(-2px);
+}
+.action-slot.active {
+  border-color: var(--gold);
+  background: rgba(201,168,76,0.15);
+}
+.action-slot .key-bind {
+  position: absolute;
+  top: 2px; right: 4px;
+  font-size: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--gold-dark);
+}
+.action-slot .cooldown-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  border-radius: 4px;
+  display: none;
+}
+.action-slot.on-cooldown .cooldown-overlay {
+  display: block;
+}
+
+/* ── BATTLE LOG (right) ── */
+.battle-log {
+  grid-area: log;
+  background: linear-gradient(180deg, #0d0b08 0%, #080604 100%);
+  border-left: 1px solid #2a2215;
+  display: flex;
+  flex-direction: column;
+}
+
+.log-header {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  padding: 12px;
+  border-bottom: 1px solid #2a2215;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.log-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 4px 8px;
+  border-bottom: 1px solid #1a1510;
+}
+.log-tab {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #666;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+.log-tab:hover { color: var(--blanc); }
+.log-tab.active { color: var(--gold); background: rgba(201,168,76,0.1); }
+
+.log-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1.6;
+}
+.log-content::-webkit-scrollbar { width: 3px; }
+.log-content::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 2px; }
+
+.log-entry {
+  padding: 2px 0;
+  opacity: 0;
+  animation: log-appear 0.3s ease forwards;
+}
+@keyframes log-appear {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.log-entry .ts { color: #555; }
+.log-entry .agent-ref { color: #FF8000; }
+.log-entry .file-ref { color: #4488FF; }
+.log-entry .action-ref { color: var(--gold); }
+.log-entry .success-ref { color: var(--green); }
+.log-entry .error-ref { color: var(--red); }
+.log-entry .xp-ref { color: var(--xp-purple); }
+
+/* ── MINIMAP ── */
+.minimap {
+  position: absolute;
+  top: 70px; right: 310px;
+  width: 140px; height: 140px;
+  background: rgba(10,10,18,0.9);
+  border: 2px solid var(--gold-dark);
+  border-radius: 6px;
+  overflow: hidden;
+  z-index: 10;
+}
+.minimap-title {
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  color: var(--gold-dark);
+  text-align: center;
+  padding: 2px;
+  background: rgba(13,11,8,0.9);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.minimap-dots {
+  position: relative;
+  width: 100%;
+  height: calc(100% - 16px);
+}
+.minimap-dot {
+  position: absolute;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  transition: all 2s ease;
+}
+.minimap-dot.hero { background: var(--gold); box-shadow: 0 0 6px var(--gold); width: 8px; height: 8px; }
+.minimap-dot.worker { background: var(--blue); }
+.minimap-dot.crafter { background: var(--purple); }
+.minimap-dot.scout { background: var(--green); }
+.minimap-dot.guard { background: var(--rescue); }
+
+/* ── QUEST TRACKER ── */
+.quest-tracker {
+  position: absolute;
+  top: 70px; right: 12px;
+  width: 280px;
+  z-index: 5;
+  pointer-events: none;
+}
+.quest-item {
+  background: rgba(10,10,18,0.85);
+  border-left: 2px solid var(--gold);
+  padding: 8px 10px;
+  margin-bottom: 4px;
+  border-radius: 0 4px 4px 0;
+}
+.quest-title {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+.quest-obj {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #888;
+  padding-left: 10px;
+}
+.quest-obj.done { color: var(--green); text-decoration: line-through; }
+.quest-obj::before { content: '- '; }
+.quest-progress {
+  margin-top: 6px;
+  height: 4px;
+  background: #1a1a2e;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.quest-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+  border-radius: 2px;
+  transition: width 1s ease;
+}
+
+/* ── TOOLTIP ── */
+.tooltip {
+  position: fixed;
+  background: linear-gradient(135deg, #1a1510 0%, #0d0b08 100%);
+  border: 1px solid var(--gold);
+  border-radius: 4px;
+  padding: 10px;
+  max-width: 250px;
+  z-index: 100;
+  pointer-events: none;
+  display: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
+.tooltip .tt-name { font-family:'Cinzel',serif; font-size:14px; margin-bottom:4px; }
+.tooltip .tt-class { font-size:10px; color:#888; margin-bottom:6px; }
+.tooltip .tt-stat { font-size:10px; font-family:'JetBrains Mono',monospace; color:var(--gold); }
+.tooltip .tt-desc { font-size:10px; color:#aaa; margin-top:6px; line-height:1.4; }
+
+/* ── GLOBAL PROGRESS ── */
+.global-progress {
+  position: absolute;
+  bottom: 190px; left: 290px; right: 310px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  z-index: 5;
+}
+.gp-label {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  color: var(--gold);
+  white-space: nowrap;
+}
+.gp-bar {
+  flex: 1;
+  height: 10px;
+  background: #1a1a2e;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid #2a2a3e;
+}
+.gp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-light));
+  border-radius: 5px;
+  transition: width 2s ease;
+  position: relative;
+}
+.gp-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 50%);
+}
+.gp-pct {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--gold);
+  font-weight: 700;
+  min-width: 40px;
+}
+
+/* ── SOUND TOGGLE ── */
+.sound-toggle {
+  position: fixed;
+  bottom: 8px; right: 8px;
+  z-index: 100;
+  background: rgba(10,10,18,0.8);
+  border: 1px solid var(--gold-dark);
+  color: var(--gold);
+  font-size: 16px;
+  width: 32px; height: 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ══════════════════════════════════════
+   ARTHAS THRONE MODE
+   ══════════════════════════════════════ */
+.throne-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 200;
+  background: radial-gradient(ellipse at center bottom, #0a0a1a 0%, #000005 70%);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.throne-overlay.active { display: flex; }
+
+/* Ice particles */
+.throne-overlay .ice-particle {
+  position: absolute;
+  width: 2px; height: 2px;
+  background: #88ccff;
+  border-radius: 50%;
+  opacity: 0;
+  animation: ice-fall 8s linear infinite;
+  pointer-events: none;
+}
+@keyframes ice-fall {
+  0% { opacity: 0; transform: translateY(-20px) rotate(0deg); }
+  10% { opacity: 0.7; }
+  90% { opacity: 0.3; }
+  100% { opacity: 0; transform: translateY(100vh) rotate(360deg); }
+}
+
+/* Throne structure */
+.throne {
+  position: relative;
+  width: 400px;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Throne back (ice/gold hybrid) */
+.throne-back {
+  position: absolute;
+  bottom: 80px;
+  width: 320px; height: 380px;
+  background: linear-gradient(180deg,
+    rgba(136,204,255,0.05) 0%,
+    rgba(201,168,76,0.1) 30%,
+    rgba(201,168,76,0.2) 100%);
+  clip-path: polygon(10% 100%, 0% 30%, 15% 10%, 30% 0%, 50% 5%, 70% 0%, 85% 10%, 100% 30%, 90% 100%);
+  border: 1px solid rgba(201,168,76,0.3);
+  box-shadow:
+    0 0 60px rgba(201,168,76,0.15),
+    0 0 120px rgba(136,204,255,0.08),
+    inset 0 0 40px rgba(201,168,76,0.05);
+}
+
+/* Sword holders on throne */
+.throne-sword-left, .throne-sword-right {
+  position: absolute;
+  bottom: 150px;
+  width: 4px; height: 180px;
+  background: linear-gradient(180deg, #88ccff, var(--gold), transparent);
+  border-radius: 2px;
+  opacity: 0.4;
+}
+.throne-sword-left { left: 60px; transform: rotate(-15deg); }
+.throne-sword-right { right: 60px; transform: rotate(15deg); }
+
+/* Crown glow above throne */
+.throne-crown {
+  position: absolute;
+  top: 20px;
+  width: 80px; height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: crown-float 3s ease-in-out infinite;
+}
+@keyframes crown-float {
+  0%, 100% { transform: translateY(0); filter: drop-shadow(0 0 15px rgba(201,168,76,0.6)); }
+  50% { transform: translateY(-8px); filter: drop-shadow(0 0 25px rgba(201,168,76,0.9)); }
+}
+
+/* King Max on throne */
+.throne-king {
+  position: absolute;
+  bottom: 100px;
+  font-size: 100px;
+  filter: drop-shadow(0 0 30px rgba(201,168,76,0.5));
+  animation: king-breathe 4s ease-in-out infinite;
+  z-index: 2;
+}
+@keyframes king-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+/* Throne platform */
+.throne-platform {
+  position: absolute;
+  bottom: 40px;
+  width: 360px; height: 60px;
+  background: linear-gradient(180deg, rgba(201,168,76,0.2) 0%, rgba(201,168,76,0.05) 100%);
+  border-top: 2px solid var(--gold-dark);
+  border-radius: 0 0 8px 8px;
+}
+.throne-platform::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+/* Steps */
+.throne-steps {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+.throne-step {
+  height: 14px;
+  background: linear-gradient(180deg, rgba(201,168,76,0.15) 0%, rgba(201,168,76,0.05) 100%);
+  border-top: 1px solid rgba(201,168,76,0.2);
+}
+.throne-step:nth-child(1) { width: 380px; }
+.throne-step:nth-child(2) { width: 420px; }
+.throne-step:nth-child(3) { width: 460px; }
+
+/* Kneeling agents */
+.throne-agents {
+  position: absolute;
+  bottom: 10px;
+  width: 600px;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+.kneeling-agent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  opacity: 0.7;
+  animation: kneel-bow 4s ease-in-out infinite;
+}
+.kneeling-agent:nth-child(odd) { animation-delay: 0.5s; }
+.kneeling-agent .ka-icon {
+  font-size: 28px;
+  transform: scaleX(-1);
+}
+.kneeling-agent:nth-child(n+5) .ka-icon {
+  transform: scaleX(1);
+}
+.kneeling-agent .ka-name {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  color: var(--gold-dark);
+}
+@keyframes kneel-bow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+}
+
+/* Title text */
+.throne-title {
+  position: absolute;
+  top: 40px;
+  font-family: 'Cinzel', serif;
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--gold);
+  text-shadow:
+    0 0 30px rgba(201,168,76,0.5),
+    0 0 60px rgba(201,168,76,0.3);
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  animation: title-pulse 3s ease-in-out infinite;
+}
+@keyframes title-pulse {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 1; text-shadow: 0 0 40px rgba(201,168,76,0.7), 0 0 80px rgba(201,168,76,0.4); }
+}
+
+.throne-subtitle {
+  position: absolute;
+  top: 85px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--gold-dark);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.throne-quote {
+  position: absolute;
+  bottom: 100px;
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  color: rgba(136,204,255,0.6);
+  font-style: italic;
+  text-align: center;
+  line-height: 1.6;
+  max-width: 500px;
+  animation: quote-fade 8s ease-in-out infinite;
+}
+@keyframes quote-fade {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.throne-dismiss {
+  position: absolute;
+  bottom: 40px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: #444;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+.throne-dismiss:hover { color: var(--gold); }
+
+/* Fog at bottom */
+.throne-fog {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 120px;
+  background: linear-gradient(180deg, transparent 0%, rgba(136,204,255,0.03) 50%, rgba(136,204,255,0.06) 100%);
+  pointer-events: none;
+}
+
+/* ══ DIRT PATHS ══ */
+.dirt-paths {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ══ STONE WELL ══ */
+.stone-well {
+  position: absolute;
+  pointer-events: none;
+  z-index: 8;
+}
+
+/* ══ WHEAT PATCHES ══ */
+.wheat-patch {
+  position: absolute;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ══ WOODEN FENCES ══ */
+.wooden-fence {
+  position: absolute;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ══ TOWN HALL FLAG ══ */
+.townhall-flag {
+  position: absolute;
+  pointer-events: none;
+  z-index: 20;
+}
+.flag-wave {
+  animation: flag-wave 1.8s ease-in-out infinite;
+  transform-origin: 0% 50%;
+}
+@keyframes flag-wave {
+  0%, 100% { transform: skewY(0deg) scaleX(1); }
+  25% { transform: skewY(-3deg) scaleX(0.95); }
+  50% { transform: skewY(2deg) scaleX(1.02); }
+  75% { transform: skewY(-1deg) scaleX(0.98); }
+}
+
+/* ══ FORGE SMOKE ══ */
+.forge-smoke {
+  position: absolute;
+  pointer-events: none;
+  z-index: 18;
+}
+.smoke-puff {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(120,120,120,0.35) 0%, rgba(80,80,80,0.1) 60%, transparent 100%);
+  animation: smoke-rise linear infinite;
+  opacity: 0;
+}
+@keyframes smoke-rise {
+  0% { opacity: 0; transform: translateY(0) scale(0.4); }
+  15% { opacity: 0.5; }
+  50% { opacity: 0.3; transform: translateY(-35px) translateX(8px) scale(1); }
+  100% { opacity: 0; transform: translateY(-70px) translateX(15px) scale(1.5); }
+}
+
+/* ══ WEAPON RACK ══ */
+.weapon-rack {
+  position: absolute;
+  pointer-events: none;
+  z-index: 8;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1100px) {
+  .war-room {
+    grid-template-columns: 1fr;
+    grid-template-rows: 50px 1fr 160px;
+    grid-template-areas:
+      "header"
+      "arena"
+      "bar";
+  }
+  .party-panel, .battle-log, .minimap, .quest-tracker { display: none; }
+  .global-progress { left: 10px; right: 10px; }
+}
+</style>
+</head>
+<body>
+
+<div class="war-room">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="header-bar">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5">
+      <path d="M12 2L9 7H4l3 5-1 6 6-3 6 3-1-6 3-5h-5z"/>
+    </svg>
+    <div>
+      <div class="guild-name">GOLDEN EAGLES III</div>
+      <div class="guild-tag">&lt;Reign of Code&gt; — VOLO SST Operations</div>
+    </div>
+    <div class="server-info">
+      <span><span class="online-dot"></span> En ligne</span>
+      <span id="sessionTimer">Session: 00:00:00</span>
+      <span class="clock" id="clock">--:--:--</span>
+    </div>
+  </div>
+
+  <!-- ═══ PARTY PANEL ═══ -->
+  <div class="party-panel">
+    <div class="party-title">Raid Party — 8/8</div>
+    <div id="partyList"></div>
+  </div>
+
+  <!-- ═══ ARENA ═══ -->
+  <div class="arena">
+    <!-- WC3 Resource Bar -->
+    <div class="resource-bar">
+      <div class="res-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#C9A84C" stroke="none"><circle cx="12" cy="12" r="10"/><text x="12" y="16" text-anchor="middle" fill="#04040A" font-size="12" font-weight="bold">$</text></svg>
+        <span class="res-val gold-val" id="resGold">0</span>
+      </div>
+      <div class="res-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8B6914" stroke-width="2"><rect x="6" y="3" width="4" height="18" rx="1"/><rect x="14" y="6" width="4" height="15" rx="1"/></svg>
+        <span class="res-val wood-val" id="resWood">0</span>
+      </div>
+      <div class="res-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ECC40" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        <span class="res-val food-val" id="resFood">8</span>/<span style="color:#666">8</span>
+      </div>
+      <div class="res-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4488FF" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        <span class="res-val code-val" id="resCode">0</span>
+      </div>
+    </div>
+
+    <div class="arena-world">
+      <div class="ground"></div>
+      <div class="ground-grid"></div>
+
+      <!-- Fog of war edges -->
+      <div class="fog-edge top"></div>
+      <div class="fog-edge bottom"></div>
+      <div class="fog-edge left"></div>
+      <div class="fog-edge right"></div>
+
+      <!-- Day/Night cycle -->
+      <div class="daynight-overlay" id="dayNight"></div>
+
+      <!-- Village buildings (SVG) -->
+      <div class="village-layer" id="villageLayer"></div>
+
+      <div class="particles-container" id="particles"></div>
+      <div class="workers-area" id="workersArea"></div>
+    </div>
+
+    <!-- Minimap -->
+    <div class="minimap">
+      <div class="minimap-title">Minimap</div>
+      <div class="minimap-dots" id="minimapDots"></div>
+    </div>
+
+    <!-- Quest Tracker -->
+    <div class="quest-tracker" id="questTracker"></div>
+
+    <!-- Global Progress -->
+    <div class="global-progress">
+      <span class="gp-label">Mission Progress</span>
+      <div class="gp-bar"><div class="gp-fill" id="gpFill" style="width:0%"></div></div>
+      <span class="gp-pct" id="gpPct">0%</span>
+    </div>
+  </div>
+
+  <!-- ═══ ACTION BAR ═══ -->
+  <div class="action-bar">
+    <div class="action-slot" onclick="actionDeploy()" title="Deploy Agents">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      <span class="key-bind">1</span>
+    </div>
+    <div class="action-slot" onclick="actionBuild()" title="Build Project">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      <span class="key-bind">2</span>
+    </div>
+    <div class="action-slot" onclick="actionScan()" title="Scan Files">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <span class="key-bind">3</span>
+    </div>
+    <div class="action-slot" onclick="actionHeal()" title="Fix Bugs">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0016.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 002 8.5c0 2.3 1.5 4.05 3 5.5l7 7 7-7z"/></svg>
+      <span class="key-bind">4</span>
+    </div>
+    <div class="action-slot" onclick="actionForge()" title="Forge Assets">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      <span class="key-bind">5</span>
+    </div>
+    <div class="action-slot" onclick="actionTest()" title="Run Tests">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M9 12l2 2 4-4M22 12c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2s10 4.48 10 10z"/></svg>
+      <span class="key-bind">6</span>
+    </div>
+    <div class="action-slot" onclick="actionShip()" title="Ship / Deploy">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      <span class="key-bind">7</span>
+    </div>
+    <div class="action-slot" onclick="actionRally()" title="Rally All">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+      <span class="key-bind">8</span>
+    </div>
+    <div class="action-slot" onclick="toggleSound()" title="Sound">
+      <span id="soundIcon">🔊</span>
+      <span class="key-bind">0</span>
+    </div>
+  </div>
+
+  <!-- ═══ BATTLE LOG ═══ -->
+  <div class="battle-log">
+    <div class="log-header">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+      Battle Log
+    </div>
+    <div class="log-tabs">
+      <span class="log-tab active" onclick="setLogTab('all')">All</span>
+      <span class="log-tab" onclick="setLogTab('combat')">Combat</span>
+      <span class="log-tab" onclick="setLogTab('loot')">Loot</span>
+      <span class="log-tab" onclick="setLogTab('system')">System</span>
+    </div>
+    <div class="log-content" id="logContent"></div>
+  </div>
+
+</div>
+
+<!-- Tooltip -->
+<div class="tooltip" id="tooltip"></div>
+
+<!-- ═══ ARTHAS THRONE MODE ═══ -->
+<div class="throne-overlay" id="throneOverlay">
+  <div class="throne-title">THE LICH KING</div>
+  <div class="throne-subtitle">Claudius Maximus — Golden Eagles</div>
+
+  <div class="throne" id="throneScene">
+    <div class="throne-back"></div>
+    <div class="throne-sword-left"></div>
+    <div class="throne-sword-right"></div>
+    <div class="throne-crown">
+      <svg width="60" height="40" viewBox="0 0 60 40" fill="none">
+        <path d="M5 35 L10 10 L20 22 L30 5 L40 22 L50 10 L55 35 Z"
+              stroke="#C9A84C" stroke-width="2" fill="rgba(201,168,76,0.15)"/>
+        <circle cx="30" cy="12" r="3" fill="#C9A84C" opacity="0.8"/>
+        <circle cx="18" cy="20" r="2" fill="#88ccff" opacity="0.6"/>
+        <circle cx="42" cy="20" r="2" fill="#88ccff" opacity="0.6"/>
+      </svg>
+    </div>
+    <div class="throne-king">🦅</div>
+    <div class="throne-platform"></div>
+    <div class="throne-steps">
+      <div class="throne-step"></div>
+      <div class="throne-step"></div>
+      <div class="throne-step"></div>
+    </div>
+  </div>
+
+  <div class="throne-agents" id="throneAgents"></div>
+
+  <div class="throne-quote" id="throneQuote">
+    "This entire city must be purged."<br>
+    <span style="font-size:11px;color:rgba(201,168,76,0.4)">— Mais nous, on purge les bugs.</span>
+  </div>
+
+  <div class="throne-dismiss" onclick="dismissThrone()">[ PRESS ESC OR CLICK TO ENTER THE WAR ROOM ]</div>
+  <div class="throne-fog"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// VOLO WAR ROOM — Game Engine
+// ═══════════════════════════════════════════
+
+// ── AGENTS DATA ──
+const AGENTS = [
+  {
+    id: 'max',
+    name: 'Max',
+    title: 'Claudius Maximus',
+    class: 'Lead Architect',
+    role: 'hero',
+    rarity: 'legendary',
+    level: 60,
+    icon: '🦅',
+    hp: 100, maxHp: 100,
+    mana: 100, maxMana: 100,
+    xp: 0, xpNext: 1000,
+    skills: ['Architecture', 'Full-Stack', 'Multi-Agent', 'Claude API'],
+    desc: 'Le Big Chef. Batisseur de VOLO SST, commandant des Golden Eagles. Tape du bois et forge du code comme personne.',
+    animation: 'chopping',
+    tool: '⚒️'
+  },
+  {
+    id: 'forge',
+    name: 'Forgeron',
+    title: 'Agent UI/CSS',
+    class: 'UI Crafter',
+    role: 'crafter',
+    rarity: 'epic',
+    level: 45,
+    icon: '🔨',
+    hp: 85, maxHp: 85,
+    mana: 70, maxMana: 70,
+    xp: 0, xpNext: 800,
+    skills: ['CSS Mastery', 'Tactic Gold V7', 'Animations'],
+    desc: 'Forge les interfaces comme de l\'or pur. Chaque pixel est une oeuvre d\'art.',
+    animation: 'hammering',
+    tool: '🔨'
+  },
+  {
+    id: 'scout',
+    name: 'Eclaireur',
+    title: 'Agent Explore',
+    class: 'Code Scout',
+    role: 'scout',
+    rarity: 'rare',
+    level: 40,
+    icon: '🔍',
+    hp: 60, maxHp: 60,
+    mana: 90, maxMana: 90,
+    xp: 0, xpNext: 700,
+    skills: ['File Search', 'Grep Mastery', 'Pattern Match'],
+    desc: 'Explore le codebase a la vitesse de l\'eclair. Rien ne lui echappe.',
+    animation: 'casting',
+    tool: '🔮'
+  },
+  {
+    id: 'builder',
+    name: 'Batisseur',
+    title: 'Agent Backend',
+    class: 'Stone Mason',
+    role: 'worker',
+    rarity: 'epic',
+    level: 48,
+    icon: '🧱',
+    hp: 95, maxHp: 95,
+    mana: 60, maxMana: 60,
+    xp: 0, xpNext: 850,
+    skills: ['Firebase', 'Webhooks', 'Cloud Functions'],
+    desc: 'Construit les fondations en acier trempe. Firebase, webhooks, cloud functions.',
+    animation: 'mining',
+    tool: '⛏️'
+  },
+  {
+    id: 'guardian',
+    name: 'Gardien',
+    title: 'Agent Security',
+    class: 'Shield Bearer',
+    role: 'guard',
+    rarity: 'rare',
+    level: 42,
+    icon: '🛡️',
+    hp: 100, maxHp: 100,
+    mana: 50, maxMana: 50,
+    xp: 0, xpNext: 750,
+    skills: ['CSP Headers', 'Auth Rules', 'Encryption'],
+    desc: 'Protege VOLO comme un rempart d\'acier. Zero faille, zero compromis.',
+    animation: 'hammering',
+    tool: '🗡️'
+  },
+  {
+    id: 'healer',
+    name: 'Guerisseur',
+    title: 'Agent Debug',
+    class: 'Bug Healer',
+    role: 'crafter',
+    rarity: 'rare',
+    level: 38,
+    icon: '💚',
+    hp: 70, maxHp: 70,
+    mana: 100, maxMana: 100,
+    xp: 0, xpNext: 650,
+    skills: ['Bug Hunting', 'Error Monitor', 'Hot Fix'],
+    desc: 'Chaque bug est une blessure. Il les guerit toutes, une par une.',
+    animation: 'casting',
+    tool: '✨'
+  },
+  {
+    id: 'scribe',
+    name: 'Scribe',
+    title: 'Agent Data',
+    class: 'Lore Keeper',
+    role: 'worker',
+    rarity: 'uncommon',
+    level: 35,
+    icon: '📜',
+    hp: 55, maxHp: 55,
+    mana: 80, maxMana: 80,
+    xp: 0, xpNext: 600,
+    skills: ['data.js', 'JSON Parse', 'Inventory Sync'],
+    desc: 'Gardien des donnees. 823 items, 156 personnel, 80 caisses — il connait tout.',
+    animation: 'chopping',
+    tool: '✏️'
+  },
+  {
+    id: 'runner',
+    name: 'Messager',
+    title: 'Agent Deploy',
+    class: 'Swift Runner',
+    role: 'scout',
+    rarity: 'uncommon',
+    level: 33,
+    icon: '⚡',
+    hp: 50, maxHp: 50,
+    mana: 65, maxMana: 65,
+    xp: 0, xpNext: 550,
+    skills: ['Netlify Deploy', 'SW Bump', 'Cache Bust'],
+    desc: 'Rapide comme l\'eclair. Deploy sur Netlify en un battement d\'aile.',
+    animation: 'mining',
+    tool: '🚀'
+  }
+];
+
+// ── PROJECTS / QUESTS ──
+const QUESTS = [
+  { id: 'rpg', name: 'Dashboard RPG Warcraft', objectives: ['Layout WoW grid', 'Agent sprites', 'Battle log', 'XP system', 'Sounds'], done: 5, total: 5 },
+  { id: 'icons', name: '902 Icones SVG Gold', objectives: ['Map 19 types', 'ICON_SVG object', 'getItemIcon()', 'Test render'], done: 0, total: 4 },
+  { id: 'cc2', name: 'Command Center V2', objectives: ['GPS live', 'Alert animations', 'Click zoom'], done: 0, total: 3 },
+  { id: 'voice', name: 'Voice Coding', objectives: ['Web Speech API', 'Command parser', 'Claude integration'], done: 0, total: 3 },
+  { id: 'auto', name: 'Automatisation', objectives: ['Firestore sync', 'Auto alerts', 'PDF reports'], done: 0, total: 3 }
+];
+
+// ── STATE ──
+let state = {
+  sessionStart: Date.now(),
+  soundEnabled: true,
+  logTab: 'all',
+  logs: [],
+  globalProgress: 0,
+  activeQuest: 0,
+  agentStates: {}
+};
+
+// Initialize agent states
+AGENTS.forEach(a => {
+  state.agentStates[a.id] = {
+    status: 'idle', // idle, working, resting
+    task: '',
+    hp: a.hp,
+    mana: a.mana,
+    xp: a.xp
+  };
+});
+
+// ── SOUND SYSTEM ──
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function ensureAudio() {
+  if (!audioCtx) audioCtx = new AudioCtx();
+}
+
+function playTone(freq, dur, type='sine', vol=0.1) {
+  if (!state.soundEnabled) return;
+  ensureAudio();
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = type;
+  o.frequency.value = freq;
+  g.gain.value = vol;
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  o.connect(g);
+  g.connect(audioCtx.destination);
+  o.start();
+  o.stop(audioCtx.currentTime + dur);
+}
+
+function sfxChop() { playTone(180, 0.06, 'triangle', 0.03); }
+function sfxHammer() { playTone(250, 0.05, 'triangle', 0.03); }
+function sfxComplete() { playTone(523, 0.15, 'sine', 0.05); setTimeout(() => playTone(659, 0.15, 'sine', 0.05), 150); setTimeout(() => playTone(784, 0.25, 'sine', 0.06), 300); }
+function sfxXP() { playTone(880, 0.1, 'sine', 0.04); setTimeout(() => playTone(1047, 0.12, 'sine', 0.04), 100); }
+function sfxDeploy() { [0,150,300,450].forEach((d,i) => setTimeout(() => playTone(400+i*80, 0.1, 'sine', 0.03), d)); }
+function sfxRally() { playTone(523, 0.2, 'sine', 0.05); setTimeout(() => playTone(659, 0.2, 'sine', 0.05), 200); setTimeout(() => playTone(784, 0.3, 'sine', 0.06), 400); setTimeout(() => playTone(1047, 0.4, 'triangle', 0.04), 600); }
+
+// ── RENDER: PARTY PANEL ──
+function renderParty() {
+  const el = document.getElementById('partyList');
+  el.innerHTML = AGENTS.map(a => {
+    const s = state.agentStates[a.id];
+    const statusClass = s.status === 'working' ? 'active' : (s.status === 'idle' ? 'idle' : '');
+    return `
+      <div class="agent-card ${a.role} ${statusClass}"
+           onmouseenter="showTooltip(event,'${a.id}')"
+           onmouseleave="hideTooltip()">
+        <div class="agent-header">
+          <div class="agent-avatar">
+            ${a.icon}
+            <span class="level-badge">${a.level}</span>
+          </div>
+          <div>
+            <div class="agent-name ${a.rarity}">${a.name}</div>
+            <div class="agent-class">${a.class}</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label" style="color:#0f0">HP</span>
+          <div class="bar-track">
+            <div class="bar-fill hp" style="width:${(s.hp/a.maxHp)*100}%"></div>
+            <span class="bar-text">${s.hp}/${a.maxHp}</span>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label" style="color:#48f">MP</span>
+          <div class="bar-track">
+            <div class="bar-fill mana" style="width:${(s.mana/a.maxMana)*100}%"></div>
+            <span class="bar-text">${s.mana}/${a.maxMana}</span>
+          </div>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label" style="color:#a4f">XP</span>
+          <div class="bar-track">
+            <div class="bar-fill xp" style="width:${(s.xp/a.xpNext)*100}%"></div>
+            <span class="bar-text">${s.xp}/${a.xpNext}</span>
+          </div>
+        </div>
+        ${s.task ? `<div class="agent-task"><span class="spinner"></span>${s.task}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+// ── SVG CHARACTER BUILDER ──
+// Each character has: head, helmet/hat, body, arms (L/R), legs (L/R), tool
+// Colors per role
+const ROLE_COLORS = {
+  hero:    { skin: '#E8C090', armor: '#C9A84C', accent: '#FFD700', helm: '#8B7533', cape: 'rgba(201,168,76,0.3)' },
+  worker:  { skin: '#D4A574', armor: '#3B6EA5', accent: '#5B9BD5', helm: '#2B5580', cape: null },
+  crafter: { skin: '#E0B090', armor: '#7B4BA0', accent: '#A855F7', helm: '#5B3080', cape: null },
+  scout:   { skin: '#C8B090', armor: '#2D8B4E', accent: '#34D058', helm: '#1D6B3E', cape: null },
+  guard:   { skin: '#D4A080', armor: '#B85C1A', accent: '#D4650E', helm: '#8B4513', cape: null }
+};
+
+// Tool SVG paths by animation type
+const TOOL_SVGS = {
+  chopping: `<line x1="0" y1="0" x2="14" y2="-14" stroke="#8B7533" stroke-width="2"/>
+    <path d="M12,-12 L18,-14 L16,-8 Z" fill="#999" stroke="#666" stroke-width="0.5"/>`,
+  hammering: `<line x1="0" y1="0" x2="10" y2="-12" stroke="#8B6914" stroke-width="2"/>
+    <rect x="7" y="-16" width="8" height="6" rx="1" fill="#888" stroke="#666" stroke-width="0.5"/>`,
+  mining: `<line x1="0" y1="0" x2="14" y2="-12" stroke="#8B7533" stroke-width="2"/>
+    <path d="M12,-10 L18,-14 L20,-8 L14,-6 Z" fill="#888" stroke="#666" stroke-width="0.5"/>`,
+  casting: `<circle cx="4" cy="-8" r="4" fill="none" stroke="#AA44FF" stroke-width="1" class="cast-orb"/>
+    <circle cx="4" cy="-8" r="2" fill="#AA44FF" opacity="0.4" class="cast-orb"/>`
+};
+
+function buildCharSVG(agent, isWorking) {
+  const c = ROLE_COLORS[agent.role] || ROLE_COLORS.worker;
+  const isHero = agent.role === 'hero';
+  const size = isHero ? 90 : 70;
+  const scale = isHero ? 1.15 : 1;
+  const armAnim = isWorking ? `arm-${agent.animation.replace('ing','')}` :
+    (isWorking ? 'arm-chop' : '');
+  const armClass = isWorking ? ({
+    chopping: 'arm-chop',
+    hammering: 'arm-hammer',
+    mining: 'arm-mine',
+    casting: 'arm-cast'
+  }[agent.animation] || '') : '';
+  const isMoving = state.agentStates[agent.id].isMoving;
+  const legClass = (isWorking || isMoving) ? 'legs-walk' : '';
+  const bodyClass = (!isWorking && !isMoving) ? 'body-breathe' : '';
+  const tool = isWorking ? (TOOL_SVGS[agent.animation] || '') : '';
+
+  return `<svg class="svg-char ${isHero?'hero-char':''}" width="${size}" height="${size+20}" viewBox="0 0 48 68" fill="none">
+    <!-- Ground shadow -->
+    <ellipse cx="24" cy="64" rx="18" ry="4" fill="rgba(0,0,0,0.4)" class="ground-shadow"/>
+
+    <g class="${bodyClass}" transform="scale(${scale}) translate(${isHero?-3:0},${isHero?-4:0})">
+      <!-- Cape (hero only) -->
+      ${isHero ? `<path d="M18,22 Q14,40 10,52 L38,52 Q34,40 30,22" fill="${c.cape}" stroke="${c.accent}" stroke-width="0.3" opacity="0.5"/>` : ''}
+
+      <!-- Body / torso -->
+      <rect x="17" y="22" width="14" height="16" rx="2" fill="${c.armor}" stroke="${c.accent}" stroke-width="0.6"/>
+      <!-- Belt -->
+      <rect x="17" y="34" width="14" height="3" rx="1" fill="${c.helm}"/>
+      <rect x="22" y="34" width="4" height="3" rx="1" fill="${c.accent}"/>
+
+      <!-- Legs -->
+      <g class="${legClass}">
+        <g class="leg-l">
+          <rect x="18" y="38" width="5" height="14" rx="2" fill="${c.helm}"/>
+          <rect x="17" y="50" width="7" height="3" rx="1" fill="#3a3a3a"/>
+        </g>
+        <g class="leg-r">
+          <rect x="25" y="38" width="5" height="14" rx="2" fill="${c.helm}"/>
+          <rect x="24" y="50" width="7" height="3" rx="1" fill="#3a3a3a"/>
+        </g>
+      </g>
+
+      <!-- Left arm (static) -->
+      <g>
+        <rect x="10" y="22" width="6" height="12" rx="3" fill="${c.armor}" stroke="${c.accent}" stroke-width="0.4"/>
+        <circle cx="13" cy="34" r="2.5" fill="${c.skin}"/>
+      </g>
+
+      <!-- Right arm (animated with tool) -->
+      <g class="${armClass}">
+        <rect x="32" y="22" width="6" height="12" rx="3" fill="${c.armor}" stroke="${c.accent}" stroke-width="0.4"/>
+        <g transform="translate(35,34)">
+          <circle cx="0" cy="0" r="2.5" fill="${c.skin}"/>
+          ${tool}
+        </g>
+      </g>
+
+      ${isWorking && agent.animation !== 'casting' ? `
+      <!-- Wood chips / sparks -->
+      <g transform="translate(42,22)">
+        <circle class="wood-chip" cx="0" cy="0" r="1.2" fill="${c.accent}"/>
+        <circle class="wood-chip" cx="0" cy="0" r="1" fill="#FFA"/>
+        <circle class="wood-chip" cx="0" cy="0" r="0.8" fill="${c.accent}"/>
+      </g>` : ''}
+
+      <!-- Head -->
+      <circle cx="24" cy="16" r="7" fill="${c.skin}"/>
+      <!-- Eyes -->
+      <circle cx="21" cy="15" r="1" fill="#333"/>
+      <circle cx="27" cy="15" r="1" fill="#333"/>
+      <!-- Mouth -->
+      ${isWorking ?
+        `<path d="M22,19 Q24,21 26,19" stroke="#333" stroke-width="0.6" fill="none"/>` :
+        `<line x1="22" y1="19" x2="26" y2="19" stroke="#333" stroke-width="0.6"/>`
+      }
+
+      <!-- Helmet / headgear -->
+      ${isHero ? `
+        <!-- Crown -->
+        <g class="crown-float">
+          <path d="M16,6 L18,12 L21,8 L24,12 L27,8 L30,12 L32,6 L32,12 L16,12 Z"
+                fill="${c.accent}" stroke="${c.helm}" stroke-width="0.5"/>
+          <circle cx="24" cy="7" r="1.5" fill="#FF4444"/>
+          <circle cx="19" cy="9" r="1" fill="#4488FF"/>
+          <circle cx="29" cy="9" r="1" fill="#4488FF"/>
+        </g>
+      ` : `
+        <!-- Helmet -->
+        <path d="M17,14 Q17,6 24,5 Q31,6 31,14" fill="${c.helm}" stroke="${c.accent}" stroke-width="0.5"/>
+        <rect x="17" y="13" width="14" height="2" rx="1" fill="${c.accent}" opacity="0.6"/>
+      `}
+
+      <!-- HP bar above head -->
+      <rect x="14" y="-2" width="20" height="3" rx="1.5" fill="#1a1a2e" stroke="#333" stroke-width="0.3"/>
+      <rect x="14" y="-2" width="${20 * (state.agentStates[agent.id].hp / agent.maxHp)}" height="3" rx="1.5"
+            fill="${state.agentStates[agent.id].hp > 50 ? '#00CC00' : state.agentStates[agent.id].hp > 25 ? '#FFAA00' : '#FF4444'}"/>
+
+      ${isHero ? `
+        <!-- Level ring -->
+        <circle cx="24" cy="16" r="11" fill="none" stroke="${c.accent}" stroke-width="0.4" stroke-dasharray="2 2" opacity="0.4"/>
+      ` : ''}
+    </g>
+  </svg>`;
+}
+
+// ── VILLAGE SCENE ──
+const VILLAGE = {
+  // Buildings
+  buildings: [
+    { id:'townhall', x:45, y:15, name:'Town Hall', svg: `<svg width="90" height="80" viewBox="0 0 90 80" fill="none">
+      <rect x="15" y="30" width="60" height="45" fill="#1a1510" stroke="#C9A84C" stroke-width="1"/>
+      <polygon points="45,5 5,30 85,30" fill="#2a1f12" stroke="#C9A84C" stroke-width="1"/>
+      <rect x="35" y="50" width="18" height="25" fill="#0d0b08" stroke="#8B7533" stroke-width="0.5"/>
+      <circle cx="49" cy="63" r="1.5" fill="#C9A84C"/>
+      <rect x="20" y="38" width="10" height="10" fill="rgba(201,168,76,0.15)" stroke="#8B7533" stroke-width="0.5"/>
+      <rect x="20" y="38" width="10" height="10" fill="rgba(255,200,50,0.25)" class="window-glow"><animate attributeName="opacity" values="0.1;0.4;0.1" dur="4s" repeatCount="indefinite"/></rect>
+      <rect x="60" y="38" width="10" height="10" fill="rgba(201,168,76,0.15)" stroke="#8B7533" stroke-width="0.5"/>
+      <rect x="60" y="38" width="10" height="10" fill="rgba(255,200,50,0.25)" class="window-glow"><animate attributeName="opacity" values="0.15;0.45;0.15" dur="3.5s" repeatCount="indefinite" begin="0.5s"/></rect>
+      <rect x="38" y="12" width="14" height="16" fill="#2a1f12" stroke="#C9A84C" stroke-width="0.5"/>
+      <text x="45" y="22" text-anchor="middle" fill="#C9A84C" font-size="6" font-family="Cinzel">GE</text>
+    </svg>` },
+    { id:'forge', x:12, y:45, name:'Forge', svg: `<svg width="70" height="60" viewBox="0 0 70 60" fill="none">
+      <rect x="5" y="20" width="55" height="35" rx="2" fill="#1a0d08" stroke="#D4650E" stroke-width="1"/>
+      <polygon points="32,3 2,20 62,20" fill="#2a1208" stroke="#D4650E" stroke-width="0.8"/>
+      <rect x="22" y="35" width="14" height="20" fill="#0d0604" stroke="#8B4513" stroke-width="0.5"/>
+      <rect x="10" y="26" width="8" height="8" fill="rgba(212,101,14,0.2)" stroke="#8B4513" stroke-width="0.5"/>
+      <circle cx="14" cy="30" r="2" fill="#D4650E" opacity="0.6"><animate attributeName="opacity" values="0.6;1;0.6" dur="1.5s" repeatCount="indefinite"/></circle>
+      <line x1="50" y1="8" x2="50" y2="20" stroke="#666" stroke-width="4"/>
+      <ellipse cx="50" cy="6" rx="4" ry="3" fill="#555" opacity="0.4"><animate attributeName="ry" values="3;5;3" dur="3s" repeatCount="indefinite"/></ellipse>
+    </svg>` },
+    { id:'barracks', x:78, y:42, name:'Barracks', svg: `<svg width="70" height="55" viewBox="0 0 70 55" fill="none">
+      <rect x="5" y="18" width="58" height="32" fill="#0d1018" stroke="#3B82F6" stroke-width="0.8"/>
+      <polygon points="33,2 0,18 66,18" fill="#0a0d14" stroke="#3B82F6" stroke-width="0.7"/>
+      <rect x="12" y="28" width="8" height="8" fill="rgba(59,130,246,0.12)" stroke="#2B5580" stroke-width="0.5"/>
+      <rect x="12" y="28" width="8" height="8" fill="rgba(100,180,255,0.2)"><animate attributeName="opacity" values="0.05;0.3;0.05" dur="5s" repeatCount="indefinite"/></rect>
+      <rect x="28" y="28" width="8" height="8" fill="rgba(59,130,246,0.12)" stroke="#2B5580" stroke-width="0.5"/>
+      <rect x="28" y="28" width="8" height="8" fill="rgba(100,180,255,0.2)"><animate attributeName="opacity" values="0.1;0.35;0.1" dur="4s" repeatCount="indefinite" begin="1s"/></rect>
+      <rect x="44" y="28" width="8" height="8" fill="rgba(59,130,246,0.12)" stroke="#2B5580" stroke-width="0.5"/>
+      <rect x="44" y="28" width="8" height="8" fill="rgba(100,180,255,0.2)"><animate attributeName="opacity" values="0.08;0.28;0.08" dur="4.5s" repeatCount="indefinite" begin="2s"/></rect>
+      <rect x="25" y="35" width="14" height="15" fill="#060810" stroke="#2B5580" stroke-width="0.5"/>
+      <path d="M60,10 L60,18" stroke="#2B5580" stroke-width="1"/><polygon points="55,10 60,3 65,10" fill="#3B82F6" opacity="0.5"/>
+    </svg>` },
+    { id:'tower', x:88, y:10, name:'Watch Tower', svg: `<svg width="35" height="75" viewBox="0 0 35 75" fill="none">
+      <rect x="10" y="25" width="15" height="45" fill="#1a1510" stroke="#8B7533" stroke-width="0.8"/>
+      <rect x="5" y="20" width="25" height="8" fill="#2a1f12" stroke="#C9A84C" stroke-width="0.6"/>
+      <polygon points="17,2 3,20 32,20" fill="#2a1f12" stroke="#C9A84C" stroke-width="0.6"/>
+      <rect x="13" y="30" width="9" height="6" fill="rgba(201,168,76,0.2)" stroke="#8B7533" stroke-width="0.3"/>
+      <circle cx="17" cy="12" r="2" fill="#C9A84C" opacity="0.5"><animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/></circle>
+    </svg>` }
+  ],
+  // Trees
+  trees: [
+    {x:5,y:8},{x:8,y:25},{x:2,y:60},{x:95,y:65},{x:92,y:30},{x:55,y:75},{x:30,y:80},{x:70,y:78},{x:15,y:72},{x:85,y:72},{x:38,y:8},{x:62,y:5},{x:75,y:12}
+  ],
+  // Campfire
+  campfire: { x: 48, y: 55 },
+  // Log piles near trees
+  logPiles: [{x:7,y:30},{x:93,y:35},{x:56,y:78}]
+};
+
+function buildTreeSVG(scale) {
+  const s = scale || 1;
+  return `<svg width="${30*s}" height="${45*s}" viewBox="0 0 30 45" fill="none">
+    <rect x="13" y="28" width="4" height="14" fill="#3d2a1a" stroke="#2a1d12" stroke-width="0.5"/>
+    <ellipse cx="15" cy="26" rx="12" ry="14" fill="#1a3d12" stroke="#2a5a1e" stroke-width="0.5" opacity="0.9"/>
+    <ellipse cx="15" cy="20" rx="9" ry="11" fill="#1e4515" opacity="0.7"/>
+    <ellipse cx="15" cy="16" rx="5" ry="7" fill="#224d18" opacity="0.5"/>
+  </svg>`;
+}
+
+function buildCampfireSVG() {
+  return `<svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+    <ellipse cx="15" cy="25" rx="10" ry="3" fill="rgba(80,60,30,0.4)"/>
+    <line x1="8" y1="24" x2="12" y2="20" stroke="#3d2a1a" stroke-width="2"/>
+    <line x1="22" y1="24" x2="18" y2="20" stroke="#3d2a1a" stroke-width="2"/>
+    <line x1="14" y1="25" x2="16" y2="19" stroke="#3d2a1a" stroke-width="1.5"/>
+    <ellipse cx="15" cy="17" rx="4" ry="6" fill="#D4650E" opacity="0.6" class="campfire-flame"/>
+    <ellipse cx="15" cy="15" rx="2.5" ry="4" fill="#FFB800" opacity="0.7" class="campfire-flame" style="animation-delay:0.15s"/>
+    <ellipse cx="15" cy="14" rx="1.5" ry="2.5" fill="#FFE44D" opacity="0.8" class="campfire-flame" style="animation-delay:0.1s"/>
+    <circle cx="13" cy="10" r="1" fill="#FF6600" opacity="0"><animate attributeName="opacity" values="0;0.6;0" dur="1.5s" repeatCount="indefinite"/><animate attributeName="cy" values="12;4" dur="1.5s" repeatCount="indefinite"/></circle>
+    <circle cx="17" cy="10" r="0.8" fill="#FF8800" opacity="0"><animate attributeName="opacity" values="0;0.5;0" dur="2s" repeatCount="indefinite" begin="0.3s"/><animate attributeName="cy" values="11;3" dur="2s" repeatCount="indefinite" begin="0.3s"/></circle>
+  </svg>`;
+}
+
+function buildLogPileSVG() {
+  return `<svg width="25" height="15" viewBox="0 0 25 15" fill="none">
+    <ellipse cx="6" cy="12" rx="5" ry="3" fill="#3d2a1a" stroke="#2a1d12" stroke-width="0.5"/>
+    <ellipse cx="14" cy="11" rx="5" ry="3" fill="#4a3220" stroke="#2a1d12" stroke-width="0.5"/>
+    <ellipse cx="10" cy="8" rx="5" ry="3" fill="#3d2a1a" stroke="#2a1d12" stroke-width="0.5"/>
+    <ellipse cx="18" cy="9" rx="4" ry="2.5" fill="#4a3220" stroke="#2a1d12" stroke-width="0.5"/>
+  </svg>`;
+}
+
+function renderVillage() {
+  const el = document.getElementById('villageLayer');
+  let html = '';
+  // Trees
+  VILLAGE.trees.forEach((t,i) => {
+    const scale = 0.7 + Math.random()*0.6;
+    html += `<div class="tree" style="left:${t.x}%;top:${t.y}%;opacity:${0.6+Math.random()*0.4};z-index:${Math.round(t.y)}">${buildTreeSVG(scale)}</div>`;
+  });
+  // Buildings
+  VILLAGE.buildings.forEach(b => {
+    html += `<div class="building" style="left:${b.x}%;top:${b.y}%;z-index:${Math.round(b.y)}" title="${b.name}">${b.svg}</div>`;
+  });
+  // Campfire with light radius
+  html += `<div class="campfire" style="left:${VILLAGE.campfire.x}%;top:${VILLAGE.campfire.y}%;z-index:56"><div class="campfire-glow"></div>${buildCampfireSVG()}</div>`;
+  // Log piles
+  VILLAGE.logPiles.forEach(l => {
+    html += `<div class="log-pile" style="left:${l.x}%;top:${l.y}%;z-index:${Math.round(l.y)}">${buildLogPileSVG()}</div>`;
+  });
+  // Stream — winding river through the village
+  html += `<div class="stream" style="left:25%;top:62%;width:55%;height:20%;z-index:5">
+    <svg width="100%" height="100%" viewBox="0 0 400 80" preserveAspectRatio="none" fill="none">
+      <path class="water" d="M0,40 C60,15 120,65 200,35 C280,5 340,55 400,30"
+            stroke="rgba(59,130,246,0.15)" stroke-width="12" stroke-linecap="round"
+            stroke-dasharray="10 30" fill="none"/>
+      <path d="M0,40 C60,15 120,65 200,35 C280,5 340,55 400,30"
+            stroke="rgba(59,130,246,0.06)" stroke-width="20" stroke-linecap="round" fill="none"/>
+    </svg>
+  </div>`;
+
+  // ═══ 1. DIRT PATHS between buildings ═══
+  // Town Hall (45%,15%) → Forge (12%,45%) → Barracks (78%,42%) → Tower (88%,10%)
+  html += `<div class="dirt-paths">
+    <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none">
+      <!-- Town Hall → Forge -->
+      <path d="M47,22 C38,28 28,32 16,48"
+            stroke="rgba(139,119,82,0.4)" stroke-width="1.2" stroke-linecap="round"
+            stroke-dasharray="2 3" fill="none"/>
+      <path d="M47,22 C38,28 28,32 16,48"
+            stroke="rgba(139,119,82,0.15)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <!-- Town Hall → Barracks -->
+      <path d="M52,22 C60,28 68,32 80,45"
+            stroke="rgba(139,119,82,0.4)" stroke-width="1.2" stroke-linecap="round"
+            stroke-dasharray="2 3" fill="none"/>
+      <path d="M52,22 C60,28 68,32 80,45"
+            stroke="rgba(139,119,82,0.15)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <!-- Barracks → Watch Tower -->
+      <path d="M82,44 C85,35 87,25 89,16"
+            stroke="rgba(139,119,82,0.4)" stroke-width="1.2" stroke-linecap="round"
+            stroke-dasharray="2 3" fill="none"/>
+      <path d="M82,44 C85,35 87,25 89,16"
+            stroke="rgba(139,119,82,0.15)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <!-- Town Hall → Campfire -->
+      <path d="M48,23 C48,32 48,42 49,55"
+            stroke="rgba(139,119,82,0.35)" stroke-width="1" stroke-linecap="round"
+            stroke-dasharray="1.5 2.5" fill="none"/>
+      <path d="M48,23 C48,32 48,42 49,55"
+            stroke="rgba(139,119,82,0.12)" stroke-width="2" stroke-linecap="round" fill="none"/>
+      <!-- Forge → Campfire -->
+      <path d="M18,52 C28,54 38,55 47,56"
+            stroke="rgba(139,119,82,0.35)" stroke-width="1" stroke-linecap="round"
+            stroke-dasharray="1.5 2.5" fill="none"/>
+      <path d="M18,52 C28,54 38,55 47,56"
+            stroke="rgba(139,119,82,0.12)" stroke-width="2" stroke-linecap="round" fill="none"/>
+    </svg>
+  </div>`;
+
+  // ═══ 2. STONE WELL near campfire ═══
+  html += `<div class="stone-well" style="left:42%;top:50%">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <!-- Outer stone ring -->
+      <circle cx="14" cy="14" r="12" fill="#2a2520" stroke="#5a5040" stroke-width="1.5"/>
+      <circle cx="14" cy="14" r="10" fill="#222018" stroke="#4a4035" stroke-width="1"/>
+      <!-- Inner dark water -->
+      <circle cx="14" cy="14" r="7" fill="#0a0d18"/>
+      <circle cx="14" cy="14" r="6" fill="#060a14" stroke="rgba(59,130,246,0.12)" stroke-width="0.5"/>
+      <!-- Water shimmer -->
+      <ellipse cx="12" cy="12" rx="2.5" ry="1.5" fill="rgba(59,130,246,0.08)">
+        <animate attributeName="opacity" values="0.05;0.15;0.05" dur="3s" repeatCount="indefinite"/>
+      </ellipse>
+      <!-- Stone texture dots -->
+      <circle cx="6" cy="10" r="0.6" fill="#4a4035" opacity="0.5"/>
+      <circle cx="20" cy="8" r="0.5" fill="#4a4035" opacity="0.5"/>
+      <circle cx="8" cy="19" r="0.7" fill="#4a4035" opacity="0.4"/>
+      <circle cx="19" cy="18" r="0.5" fill="#4a4035" opacity="0.5"/>
+      <!-- Rope support posts -->
+      <line x1="8" y1="2" x2="8" y2="14" stroke="#3d2a1a" stroke-width="1.5"/>
+      <line x1="20" y1="2" x2="20" y2="14" stroke="#3d2a1a" stroke-width="1.5"/>
+      <!-- Crossbar -->
+      <line x1="7" y1="3" x2="21" y2="3" stroke="#3d2a1a" stroke-width="1.2"/>
+      <!-- Bucket rope -->
+      <line x1="14" y1="3" x2="14" y2="9" stroke="#8B7533" stroke-width="0.5" stroke-dasharray="1 1"/>
+    </svg>
+  </div>`;
+
+  // ═══ 3. WHEAT FIELD / GARDEN PATCHES near Town Hall ═══
+  const wheatPatches = [
+    { x: 34, y: 12, w: 22, h: 10, stalks: 8 },
+    { x: 56, y: 10, w: 16, h: 8, stalks: 6 },
+    { x: 36, y: 24, w: 14, h: 7, stalks: 5 },
+    { x: 58, y: 22, w: 12, h: 6, stalks: 4 }
+  ];
+  wheatPatches.forEach((wp, pi) => {
+    let stalksSvg = '';
+    for (let i = 0; i < wp.stalks; i++) {
+      const sx = 3 + (i / wp.stalks) * (wp.w - 6);
+      const h = 4 + Math.random() * 4;
+      const sway = 0.5 + Math.random() * 1.5;
+      stalksSvg += `<line x1="${sx}" y1="${wp.h}" x2="${sx}" y2="${wp.h - h}" stroke="#C9A84C" stroke-width="0.5" opacity="0.5">
+        <animate attributeName="x2" values="${sx};${sx+sway};${sx}" dur="${2+Math.random()*2}s" repeatCount="indefinite"/>
+      </line>
+      <circle cx="${sx}" cy="${wp.h - h - 1}" r="0.8" fill="#C9A84C" opacity="0.45">
+        <animate attributeName="cx" values="${sx};${sx+sway};${sx}" dur="${2+Math.random()*2}s" repeatCount="indefinite"/>
+      </circle>`;
+    }
+    html += `<div class="wheat-patch" style="left:${wp.x}%;top:${wp.y}%">
+      <svg width="${wp.w}" height="${wp.h}" viewBox="0 0 ${wp.w} ${wp.h}" fill="none">
+        <rect x="0" y="${wp.h-2}" width="${wp.w}" height="2" rx="1" fill="rgba(139,119,82,0.15)"/>
+        ${stalksSvg}
+      </svg>
+    </div>`;
+  });
+
+  // ═══ 4. WOODEN FENCES ═══
+  const fences = [
+    { x: 3, y: 38, rot: 0, len: 40 },    // left perimeter
+    { x: 3, y: 52, rot: 0, len: 35 },     // left lower
+    { x: 92, y: 25, rot: 0, len: 30 },    // right upper
+    { x: 92, y: 55, rot: 0, len: 35 },    // right lower
+    { x: 25, y: 70, rot: 90, len: 30 },   // bottom left horizontal
+    { x: 65, y: 70, rot: 90, len: 30 }    // bottom right horizontal
+  ];
+  fences.forEach(f => {
+    const postCount = Math.floor(f.len / 8);
+    let fenceSvg = '';
+    for (let i = 0; i < postCount; i++) {
+      const px = i * 8;
+      fenceSvg += `<rect x="${px}" y="0" width="2" height="12" rx="0.5" fill="#8B6914" opacity="0.6"/>`;
+      if (i < postCount - 1) {
+        fenceSvg += `<rect x="${px+1}" y="3" width="8" height="1.5" rx="0.3" fill="#8B6914" opacity="0.45"/>`;
+        fenceSvg += `<rect x="${px+1}" y="7" width="8" height="1.5" rx="0.3" fill="#8B6914" opacity="0.4"/>`;
+      }
+    }
+    const w = postCount * 8;
+    html += `<div class="wooden-fence" style="left:${f.x}%;top:${f.y}%;transform:rotate(${f.rot}deg)">
+      <svg width="${w}" height="12" viewBox="0 0 ${w} 12" fill="none">${fenceSvg}</svg>
+    </div>`;
+  });
+
+  // ═══ 5. BANNER/FLAG on Town Hall ═══
+  html += `<div class="townhall-flag" style="left:48.5%;top:11.5%">
+    <svg width="28" height="22" viewBox="0 0 28 22" fill="none">
+      <!-- Pole -->
+      <line x1="2" y1="0" x2="2" y2="22" stroke="#8B7533" stroke-width="1.5"/>
+      <circle cx="2" cy="1" r="1.2" fill="#C9A84C"/>
+      <!-- Flag body with wave animation -->
+      <g class="flag-wave">
+        <path d="M3,2 L26,3 L24,10 L26,17 L3,16 Z" fill="rgba(4,4,10,0.85)" stroke="#C9A84C" stroke-width="0.6"/>
+        <!-- GE text -->
+        <text x="14" y="12" text-anchor="middle" fill="#C9A84C" font-size="7" font-weight="bold" font-family="Cinzel,serif">GE</text>
+        <!-- Gold trim lines -->
+        <line x1="4" y1="4" x2="24" y2="5" stroke="#C9A84C" stroke-width="0.3" opacity="0.4"/>
+        <line x1="4" y1="14" x2="24" y2="15" stroke="#C9A84C" stroke-width="0.3" opacity="0.4"/>
+      </g>
+    </svg>
+  </div>`;
+
+  // ═══ 6. SMOKE from forge chimney ═══
+  html += `<div class="forge-smoke" style="left:16.5%;top:36%">
+    <div class="smoke-puff" style="width:10px;height:10px;left:0;top:0;animation-duration:3.5s;animation-delay:0s"></div>
+    <div class="smoke-puff" style="width:12px;height:12px;left:4px;top:2px;animation-duration:4s;animation-delay:1s"></div>
+    <div class="smoke-puff" style="width:8px;height:8px;left:-2px;top:-1px;animation-duration:3s;animation-delay:2s"></div>
+    <div class="smoke-puff" style="width:11px;height:11px;left:2px;top:1px;animation-duration:3.8s;animation-delay:2.8s"></div>
+  </div>`;
+
+  // ═══ 7. WEAPON RACK near barracks ═══
+  html += `<div class="weapon-rack" style="left:75%;top:48%">
+    <svg width="30" height="32" viewBox="0 0 30 32" fill="none">
+      <!-- Rack frame -->
+      <rect x="4" y="24" width="22" height="3" rx="1" fill="#3d2a1a" stroke="#2a1d12" stroke-width="0.5"/>
+      <rect x="6" y="10" width="2" height="16" rx="0.5" fill="#3d2a1a"/>
+      <rect x="22" y="10" width="2" height="16" rx="0.5" fill="#3d2a1a"/>
+      <rect x="5" y="10" width="20" height="2" rx="0.5" fill="#3d2a1a" stroke="#2a1d12" stroke-width="0.3"/>
+      <!-- Crossed swords -->
+      <line x1="8" y1="3" x2="22" y2="22" stroke="#C9A84C" stroke-width="0.8" opacity="0.7"/>
+      <line x1="22" y1="3" x2="8" y2="22" stroke="#C9A84C" stroke-width="0.8" opacity="0.7"/>
+      <!-- Sword handles -->
+      <line x1="6" y1="1" x2="10" y2="5" stroke="#8B7533" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="24" y1="1" x2="20" y2="5" stroke="#8B7533" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- Sword pommels -->
+      <circle cx="6" cy="1" r="1.2" fill="#C9A84C" opacity="0.6"/>
+      <circle cx="24" cy="1" r="1.2" fill="#C9A84C" opacity="0.6"/>
+      <!-- Axe blade (center) -->
+      <path d="M15,6 L12,10 L15,14 L18,10 Z" fill="rgba(201,168,76,0.15)" stroke="#C9A84C" stroke-width="0.5" opacity="0.5"/>
+      <line x1="15" y1="4" x2="15" y2="22" stroke="#8B7533" stroke-width="0.8" opacity="0.6"/>
+    </svg>
+  </div>`;
+
+  el.innerHTML = html;
+}
+
+// ── AGENT POSITIONS (for walking) ──
+const AGENT_POSITIONS = {};
+const WORK_STATIONS = {
+  max:     { x: 45, y: 48 }, // near campfire (leader)
+  forge:   { x: 15, y: 52 }, // near forge
+  scout:   { x: 70, y: 25 }, // patrol area
+  builder: { x: 55, y: 35 }, // construction zone
+  guardian:{ x: 82, y: 48 }, // near barracks
+  healer:  { x: 38, y: 60 }, // camp area
+  scribe:  { x: 28, y: 35 }, // near town hall
+  runner:  { x: 60, y: 65 }  // delivery path
+};
+const IDLE_ZONES = {
+  max:     { x: 45, y: 50 },
+  forge:   { x: 20, y: 55 },
+  scout:   { x: 75, y: 55 },
+  builder: { x: 35, y: 55 },
+  guardian:{ x: 80, y: 55 },
+  healer:  { x: 50, y: 58 },
+  scribe:  { x: 30, y: 55 },
+  runner:  { x: 60, y: 55 }
+};
+
+// Init positions
+AGENTS.forEach(a => {
+  const idle = IDLE_ZONES[a.id] || { x: 50, y: 50 };
+  AGENT_POSITIONS[a.id] = { x: idle.x + (Math.random()-0.5)*6, y: idle.y + (Math.random()-0.5)*4 };
+});
+
+function moveAgentTo(agentId, targetX, targetY) {
+  const pos = AGENT_POSITIONS[agentId];
+  const oldX = pos.x;
+  pos.x = targetX + (Math.random()-0.5)*4;
+  pos.y = targetY + (Math.random()-0.5)*3;
+  // Set moving flag for leg animation
+  const as = state.agentStates[agentId];
+  if (as) as.isMoving = true;
+  renderArena();
+  const sprite = document.getElementById('sprite-' + agentId);
+  if (sprite) {
+    // Face direction based on movement
+    if (pos.x < oldX) sprite.classList.add('face-left');
+    else sprite.classList.remove('face-left');
+    sprite.classList.add('walking');
+    sprite.style.left = pos.x + '%';
+    sprite.style.top = pos.y + '%';
+    sprite.style.zIndex = Math.round(pos.y + 10);
+    // Walking dust particles
+    const isHero = agentId === 'max';
+    const dustCount = isHero ? 5 : 3;
+    for (let i = 0; i < dustCount; i++) {
+      setTimeout(() => {
+        const d = document.createElement('div');
+        d.className = 'walk-dust';
+        if (isHero) {
+          d.style.background = 'rgba(201,168,76,0.6)';
+          d.style.boxShadow = '0 0 4px rgba(201,168,76,0.4)';
+        }
+        d.style.left = (Math.random()*20 - 10) + 'px';
+        sprite.appendChild(d);
+        setTimeout(() => d.remove(), 800);
+      }, i * 300 + Math.random()*200);
+    }
+    setTimeout(() => {
+      sprite.classList.remove('walking');
+      if (as) { as.isMoving = false; renderArena(); }
+    }, 2800);
+  }
+}
+
+// ── RENDER: ARENA SPRITES ──
+let arenaBooted = false;
+function renderArena() {
+  const el = document.getElementById('workersArea');
+  el.innerHTML = AGENTS.map((a, idx) => {
+    const s = state.agentStates[a.id];
+    const isWorking = s.status === 'working';
+    const pos = AGENT_POSITIONS[a.id];
+    const spawnClass = !arenaBooted ? 'spawning' : '';
+    const spawnDelay = !arenaBooted ? `animation-delay:${idx * 0.2}s;opacity:0;` : '';
+    return `
+      <div class="worker-sprite ${spawnClass}" id="sprite-${a.id}" style="left:${pos.x}%;top:${pos.y}%;z-index:${Math.round(pos.y+10)};${spawnDelay}">
+        ${buildCharSVG(a, isWorking)}
+        <div class="sprite-name ${a.rarity}">${a.name}</div>
+        ${s.task ? `<div class="sprite-status">${s.task.substring(0,22)}${s.task.length>22?'...':''}</div>` :
+          `<div class="sprite-status" style="color:#555">${s.status === 'idle' ? 'En attente...' : 'Repos'}</div>`}
+      </div>
+    `;
+  }).join('');
+  if (!arenaBooted) {
+    arenaBooted = true;
+    setTimeout(() => {
+      document.querySelectorAll('.worker-sprite.spawning').forEach(el => el.classList.remove('spawning'));
+    }, AGENTS.length * 200 + 1500);
+  }
+}
+
+// ── RENDER: MINIMAP ──
+function renderMinimap() {
+  const el = document.getElementById('minimapDots');
+  el.innerHTML = AGENTS.map((a) => {
+    const pos = AGENT_POSITIONS[a.id] || {x:50,y:50};
+    // Scale from arena % (0-100) to minimap px (140x120 with padding)
+    const cx = 10 + (pos.x / 100) * 120;
+    const cy = 10 + (pos.y / 100) * 100;
+    return `<div class="minimap-dot ${a.role}" style="left:${cx}px;top:${cy}px;transition:left 2s,top 2s"></div>`;
+  }).join('');
+}
+
+// ── RENDER: QUEST TRACKER ──
+function renderQuests() {
+  const el = document.getElementById('questTracker');
+  const q = QUESTS[state.activeQuest];
+  if (!q) return;
+  const pct = q.total > 0 ? Math.round((q.done / q.total) * 100) : 0;
+  el.innerHTML = `
+    <div class="quest-item">
+      <div class="quest-title">${q.name}</div>
+      ${q.objectives.map((o, i) => `<div class="quest-obj ${i < q.done ? 'done' : ''}">${o}</div>`).join('')}
+      <div class="quest-progress"><div class="quest-progress-fill" style="width:${pct}%"></div></div>
+    </div>
+  `;
+}
+
+// ── RENDER: GLOBAL PROGRESS ──
+function renderGlobalProgress() {
+  const totalDone = QUESTS.reduce((s, q) => s + q.done, 0);
+  const totalAll = QUESTS.reduce((s, q) => s + q.total, 0);
+  const pct = totalAll > 0 ? Math.round((totalDone / totalAll) * 100) : 0;
+  state.globalProgress = pct;
+  document.getElementById('gpFill').style.width = pct + '%';
+  document.getElementById('gpPct').textContent = pct + '%';
+}
+
+// ── BATTLE LOG ──
+function addLog(msg, type='system') {
+  const ts = new Date().toLocaleTimeString('fr-CA', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  state.logs.push({ ts, msg, type });
+  if (state.logs.length > 200) state.logs.shift();
+  renderLog();
+}
+
+function renderLog() {
+  const el = document.getElementById('logContent');
+  const filtered = state.logTab === 'all' ? state.logs : state.logs.filter(l => l.type === state.logTab);
+  const last50 = filtered.slice(-50);
+  el.innerHTML = last50.map(l => `<div class="log-entry"><span class="ts">[${l.ts}]</span> ${l.msg}</div>`).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function setLogTab(tab) {
+  state.logTab = tab;
+  document.querySelectorAll('.log-tab').forEach(t => t.classList.toggle('active', t.textContent.toLowerCase() === tab));
+  renderLog();
+}
+
+// ── TOOLTIP ──
+function showTooltip(ev, agentId) {
+  const a = AGENTS.find(x => x.id === agentId);
+  if (!a) return;
+  const tt = document.getElementById('tooltip');
+  tt.innerHTML = `
+    <div class="tt-name ${a.rarity}">${a.title}</div>
+    <div class="tt-class">Level ${a.level} ${a.class}</div>
+    <div class="tt-stat">Skills: ${a.skills.join(', ')}</div>
+    <div class="tt-desc">${a.desc}</div>
+  `;
+  tt.style.display = 'block';
+  tt.style.left = (ev.clientX + 15) + 'px';
+  tt.style.top = (ev.clientY + 10) + 'px';
+}
+function hideTooltip() {
+  document.getElementById('tooltip').style.display = 'none';
+}
+
+// ── PARTICLES ──
+function spawnParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.bottom = '0';
+    p.style.animationDelay = (Math.random() * 6) + 's';
+    p.style.animationDuration = (4 + Math.random() * 4) + 's';
+    container.appendChild(p);
+  }
+}
+
+// ── RESOURCE POP ──
+function spawnCombatNumber(spriteId, text, type) {
+  const pos = AGENT_POSITIONS[spriteId] || {x:50,y:50};
+  const area = document.getElementById('workersArea');
+  if (!area) return;
+  const el = document.createElement('div');
+  el.className = 'combat-number ' + type;
+  el.textContent = text;
+  el.style.left = (pos.x + (Math.random()-0.5)*3) + '%';
+  el.style.top = (pos.y - 6 - Math.random()*3) + '%';
+  area.appendChild(el);
+  setTimeout(() => el.remove(), 1500);
+}
+
+function spawnResourcePop(spriteId, text) {
+  // Split into individual WoW-style combat numbers
+  const parts = text.match(/\+\d+\s*\w+/g);
+  if (parts) {
+    parts.forEach((p, i) => {
+      setTimeout(() => {
+        const isXP = p.includes('XP');
+        const type = isXP ? 'xp' : 'resource';
+        spawnCombatNumber(spriteId, p, type);
+      }, i * 300);
+    });
+  } else {
+    spawnCombatNumber(spriteId, text, 'resource');
+  }
+}
+
+// ── CLOCK ──
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('fr-CA');
+  const elapsed = Math.floor((Date.now() - state.sessionStart) / 1000);
+  const h = String(Math.floor(elapsed/3600)).padStart(2,'0');
+  const m = String(Math.floor((elapsed%3600)/60)).padStart(2,'0');
+  const s = String(elapsed%60).padStart(2,'0');
+  document.getElementById('sessionTimer').textContent = `Session: ${h}:${m}:${s}`;
+}
+
+// ── AGENT TASK ASSIGNMENT ──
+function assignTask(agentId, task, durationMs) {
+  const s = state.agentStates[agentId];
+  const a = AGENTS.find(x => x.id === agentId);
+  s.status = 'working';
+  s.task = task;
+  addLog(`<span class="agent-ref">[${a.name}]</span> <span class="action-ref">commence:</span> ${task}`, 'combat');
+
+  // Move to work station
+  const ws = WORK_STATIONS[agentId];
+  if (ws) moveAgentTo(agentId, ws.x, ws.y);
+  renderAll();
+
+  // Simulate work with resource pops
+  const interval = setInterval(() => {
+    if (s.status !== 'working') { clearInterval(interval); return; }
+    // Random HP/Mana drain with combat numbers
+    const manaDrain = Math.floor(Math.random() * 3);
+    const hpDrain = Math.floor(Math.random() * 2);
+    if (hpDrain > 0) spawnCombatNumber(a.id, '-' + hpDrain, 'damage');
+    s.mana = Math.max(0, s.mana - manaDrain);
+    s.hp = Math.max(10, s.hp - hpDrain);
+    renderParty();
+    // Sound
+    if (a.animation === 'chopping') sfxChop();
+    else if (a.animation === 'hammering') sfxHammer();
+  }, 2000);
+
+  setTimeout(() => {
+    clearInterval(interval);
+    s.status = 'idle';
+    s.task = '';
+    // Walk back to idle zone
+    const iz = IDLE_ZONES[agentId];
+    if (iz) moveAgentTo(agentId, iz.x, iz.y);
+    // Restore resources
+    s.mana = Math.min(a.maxMana, s.mana + 20);
+    s.hp = Math.min(a.maxHp, s.hp + 10);
+    // Grant XP
+    const xpGain = 50 + Math.floor(Math.random() * 50);
+    s.xp += xpGain;
+    if (s.xp >= a.xpNext) {
+      s.xp -= a.xpNext;
+      a.level++;
+      addLog(`<span class="agent-ref">[${a.name}]</span> <span class="xp-ref">LEVEL UP! → ${a.level}</span>`, 'loot');
+      sfxComplete();
+    }
+    // Generate resources
+    const resTypes = ['gold','wood','code'];
+    const resType = resTypes[Math.floor(Math.random()*resTypes.length)];
+    const resAmount = 5 + Math.floor(Math.random()*15);
+    addResource(resType, resAmount);
+    spawnResourcePop(agentId, `+${xpGain} XP  +${resAmount} ${resType}`);
+    sfxXP();
+    addLog(`<span class="agent-ref">[${a.name}]</span> <span class="success-ref">termine:</span> ${task}`, 'combat');
+    renderAll();
+  }, durationMs);
+}
+
+// ── ACTION BAR COMMANDS ──
+function actionDeploy() {
+  sfxDeploy();
+  addLog('<span class="action-ref">[DEPLOY]</span> Deploiement des agents...', 'system');
+  const tasks = [
+    { agent: 'forge', task: 'CSS Tactic Gold polish', dur: 8000 },
+    { agent: 'scout', task: 'Scan codebase patterns', dur: 6000 },
+    { agent: 'builder', task: 'Firebase sync check', dur: 10000 },
+    { agent: 'guardian', task: 'CSP headers audit', dur: 7000 },
+    { agent: 'healer', task: 'Bug scan index.html', dur: 9000 },
+    { agent: 'scribe', task: 'data.js integrity check', dur: 8000 },
+    { agent: 'runner', task: 'SW cache validation', dur: 5000 }
+  ];
+  tasks.forEach((t, i) => {
+    setTimeout(() => assignTask(t.agent, t.task, t.dur), i * 500);
+  });
+  assignTask('max', 'Coordinating raid party', 12000);
+}
+
+function actionBuild() {
+  sfxHammer();
+  const q = QUESTS[state.activeQuest];
+  if (q && q.done < q.total) {
+    q.done++;
+    addLog(`<span class="action-ref">[BUILD]</span> <span class="file-ref">${q.name}</span> — objectif complete (${q.done}/${q.total})`, 'combat');
+    renderQuests();
+    renderGlobalProgress();
+    if (q.done >= q.total) {
+      sfxComplete();
+      addLog(`<span class="success-ref">[QUEST COMPLETE]</span> ${q.name}!`, 'loot');
+      if (state.activeQuest < QUESTS.length - 1) {
+        state.activeQuest++;
+        addLog(`<span class="action-ref">[NEW QUEST]</span> ${QUESTS[state.activeQuest].name}`, 'system');
+      }
+    }
+  }
+  assignTask('max', 'Building: ' + (q ? q.name : 'project'), 5000);
+}
+
+function actionScan() {
+  assignTask('scout', 'Deep scan all files', 6000);
+  addLog('<span class="action-ref">[SCAN]</span> Scanning codebase for patterns...', 'system');
+}
+
+function actionHeal() {
+  addLog('<span class="action-ref">[HEAL]</span> Bug healing ritual...', 'system');
+  assignTask('healer', 'Healing bugs', 7000);
+  // Restore all HP with floating heal numbers
+  setTimeout(() => {
+    AGENTS.forEach((a, i) => {
+      const s = state.agentStates[a.id];
+      const healed = a.maxHp - s.hp;
+      s.hp = a.maxHp;
+      if (healed > 0) setTimeout(() => spawnCombatNumber(a.id, '+' + healed, 'heal'), i * 150);
+    });
+    addLog('<span class="success-ref">[HEALED]</span> All agents restored to full HP', 'system');
+    renderParty();
+  }, 3000);
+}
+
+function actionForge() {
+  sfxHammer();
+  assignTask('forge', 'Forging gold UI components', 8000);
+  addLog('<span class="action-ref">[FORGE]</span> Crafting UI assets...', 'combat');
+}
+
+function actionTest() {
+  addLog('<span class="action-ref">[TEST]</span> Running validation suite...', 'system');
+  assignTask('guardian', 'Security + syntax tests', 6000);
+  assignTask('healer', 'Regression check', 5000);
+}
+
+function actionShip() {
+  sfxDeploy();
+  addLog('<span class="action-ref">[SHIP]</span> Preparing Netlify deploy...', 'system');
+  assignTask('runner', 'Netlify drag & drop deploy', 4000);
+  assignTask('max', 'Final review before ship', 5000);
+}
+
+function rallyHeal() {
+  AGENTS.forEach(a => {
+    const s = state.agentStates[a.id];
+    s.hp = a.maxHp;
+    s.mana = a.maxMana;
+  });
+  renderAll();
+}
+
+function actionRally() {
+  // Throne mode toggle
+  if (!throneActive) {
+    showThrone();
+    addLog('<span class="agent-ref">[ARTHAS]</span> <span class="xp-ref">"Glad you could make it."</span>', 'system');
+    setTimeout(dismissThrone, 12000);
+  } else {
+    dismissThrone();
+  }
+  rallyHeal();
+}
+
+function toggleSound() {
+  state.soundEnabled = !state.soundEnabled;
+  document.getElementById('soundIcon').textContent = state.soundEnabled ? '🔊' : '🔇';
+}
+
+// ── KEYBOARD BINDS ──
+document.addEventListener('keydown', e => {
+  const key = e.key;
+  if (key === '1') actionDeploy();
+  else if (key === '2') actionBuild();
+  else if (key === '3') actionScan();
+  else if (key === '4') actionHeal();
+  else if (key === '5') actionForge();
+  else if (key === '6') actionTest();
+  else if (key === '7') actionShip();
+  else if (key === '8') actionRally();
+  else if (key === '0') toggleSound();
+});
+
+// ── SIMULATION: Auto-work cycle + idle wandering ──
+function autoWorkCycle() {
+  // Work assignments
+  setInterval(() => {
+    AGENTS.forEach(a => {
+      const s = state.agentStates[a.id];
+      if (s.status === 'idle' && Math.random() < 0.15) {
+        const tasks = [
+          'Chopping code trees',
+          'Forging CSS gold',
+          'Mining Firebase data',
+          'Scouting for bugs',
+          'Building new module',
+          'Patching SW cache',
+          'Scanning QR codes',
+          'Inscribing data.js',
+          'Polishing UI gold',
+          'Syncing Firestore',
+          'Sharpening tools',
+          'Gathering resources',
+          'Crafting animations',
+          'Training new skills'
+        ];
+        const task = tasks[Math.floor(Math.random() * tasks.length)];
+        const dur = 6000 + Math.floor(Math.random() * 10000);
+        assignTask(a.id, task, dur);
+      }
+    });
+  }, 4000);
+
+  // Idle wandering — agents wander near their idle zone
+  setInterval(() => {
+    AGENTS.forEach(a => {
+      const s = state.agentStates[a.id];
+      if (s.status === 'idle' && Math.random() < 0.3) {
+        const iz = IDLE_ZONES[a.id];
+        if (iz) {
+          const wx = iz.x + (Math.random()-0.5) * 10;
+          const wy = iz.y + (Math.random()-0.5) * 6;
+          moveAgentTo(a.id, Math.max(3, Math.min(95, wx)), Math.max(10, Math.min(85, wy)));
+        }
+      }
+    });
+  }, 5000);
+}
+
+// ── RESOURCES (WC3 style) ──
+let resources = { gold: 0, wood: 0, code: 0 };
+
+function addResource(type, amount) {
+  resources[type] = (resources[type] || 0) + amount;
+  updateResourceBar();
+}
+
+function updateResourceBar() {
+  document.getElementById('resGold').textContent = resources.gold;
+  document.getElementById('resWood').textContent = resources.wood;
+  document.getElementById('resCode').textContent = resources.code;
+}
+
+// ── DAY/NIGHT CYCLE ──
+let dayPhase = 'day';
+let fireflies = [];
+function spawnFireflies() {
+  const arena = document.querySelector('.arena');
+  if (!arena) return;
+  for (let i = 0; i < 15; i++) {
+    const f = document.createElement('div');
+    f.className = 'firefly';
+    f.style.left = (10 + Math.random() * 80) + '%';
+    f.style.top = (20 + Math.random() * 60) + '%';
+    f.style.animationDuration = (4 + Math.random() * 6) + 's';
+    f.style.animationDelay = (Math.random() * 8) + 's';
+    arena.appendChild(f);
+    fireflies.push(f);
+  }
+}
+function removeFireflies() {
+  fireflies.forEach(f => f.remove());
+  fireflies = [];
+}
+function updateDayNight() {
+  const hour = new Date().getHours();
+  const el = document.getElementById('dayNight');
+  if (hour >= 19 || hour < 6) {
+    if (dayPhase !== 'night') {
+      dayPhase = 'night';
+      el.className = 'daynight-overlay night';
+      spawnFireflies();
+      addLog('<span class="action-ref">[WORLD]</span> Night falls over the camp...', 'system');
+    }
+  } else {
+    if (dayPhase !== 'day') {
+      dayPhase = 'day';
+      el.className = 'daynight-overlay day';
+      removeFireflies();
+      addLog('<span class="action-ref">[WORLD]</span> Dawn breaks. A new day begins.', 'system');
+    }
+  }
+}
+
+// ── RENDER ALL ──
+function renderAll() {
+  renderParty();
+  renderArena();
+  renderMinimap();
+  renderQuests();
+  renderGlobalProgress();
+  updateResourceBar();
+}
+
+// ── BOOT SEQUENCE ──
+function boot() {
+  renderVillage();
+  spawnParticles();
+  renderAll();
+  // Check if it's night already at boot
+  const bootHour = new Date().getHours();
+  if (bootHour >= 19 || bootHour < 6) {
+    dayPhase = 'night';
+    document.getElementById('dayNight').className = 'daynight-overlay night';
+    spawnFireflies();
+  }
+  updateDayNight();
+
+  // Clock + day/night
+  updateClock();
+  setInterval(updateClock, 1000);
+  setInterval(renderMinimap, 2000);
+  setInterval(updateDayNight, 30000);
+
+  // Boot log
+  addLog('<span class="action-ref">[SYSTEM]</span> War Room initialized', 'system');
+  addLog('<span class="action-ref">[SYSTEM]</span> VOLO SST V20.7 — Golden Eagles', 'system');
+  addLog('<span class="agent-ref">[Max]</span> <span class="success-ref">Online.</span> "Work work."', 'system');
+
+  setTimeout(() => {
+    AGENTS.slice(1).forEach((a, i) => {
+      setTimeout(() => {
+        addLog(`<span class="agent-ref">[${a.name}]</span> <span class="success-ref">Ready.</span> "${['Ready to work', 'Job\'s done!', 'What you want?', 'More work?', 'Zug zug', 'Something need doing?', 'Work complete'][i]}"`, 'system');
+      }, i * 600);
+    });
+  }, 1500);
+
+  // Start auto-work
+  setTimeout(autoWorkCycle, 5000);
+
+  // Quest 1 already complete (we're building this dashboard!)
+  addLog('<span class="success-ref">[QUEST COMPLETE]</span> Dashboard RPG Warcraft — Built!', 'loot');
+  state.activeQuest = 1;
+  renderQuests();
+  renderGlobalProgress();
+}
+
+// ═══════════════════════════════════════════
+// ARTHAS THRONE MODE
+// ═══════════════════════════════════════════
+
+const THRONE_QUOTES = [
+  { text: '"This entire city must be purged."', sub: 'Mais nous, on purge les bugs.' },
+  { text: '"Frostmourne hungers."', sub: 'Notre code a faim de perfection.' },
+  { text: '"I will not be denied."', sub: 'Aucun bug ne nous arretera.' },
+  { text: '"Glad you could make it."', sub: 'Golden Eagles — toujours presents.' },
+  { text: '"Let them come. Frostmourne hungers."', sub: 'Que les projets arrivent. Max est pret.' },
+  { text: '"You speak of justice? Of cowardice?"', sub: 'On parle de code. De VOLO. De legendes.' },
+  { text: '"Now, we are one."', sub: 'Max + Jonathan. Une seule vision.' },
+  { text: '"The Lich King is all-seeing."', sub: 'Le War Room voit tout. Chaque agent. Chaque fichier.' },
+  { text: '"No king rules forever."', sub: 'Mais le code de VOLO SST, lui, est eternel.' },
+  { text: '"I see only darkness before me."', sub: 'Et du gold. Beaucoup de gold. Tactic Gold V7.' }
+];
+
+let throneActive = false;
+
+function showThrone() {
+  throneActive = true;
+  const overlay = document.getElementById('throneOverlay');
+  overlay.classList.add('active');
+
+  // Spawn ice particles
+  for (let i = 0; i < 60; i++) {
+    const p = document.createElement('div');
+    p.className = 'ice-particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDelay = (Math.random() * 8) + 's';
+    p.style.animationDuration = (5 + Math.random() * 6) + 's';
+    p.style.width = (1 + Math.random() * 3) + 'px';
+    p.style.height = p.style.width;
+    overlay.appendChild(p);
+  }
+
+  // Kneeling agents
+  const agentsEl = document.getElementById('throneAgents');
+  agentsEl.innerHTML = AGENTS.filter(a => a.role !== 'hero').map(a => `
+    <div class="kneeling-agent">
+      <span class="ka-icon">${a.icon}</span>
+      <span class="ka-name">${a.name}</span>
+    </div>
+  `).join('');
+
+  // Cycle quotes
+  let qi = 0;
+  const quoteEl = document.getElementById('throneQuote');
+  function cycleQuote() {
+    const q = THRONE_QUOTES[qi % THRONE_QUOTES.length];
+    quoteEl.innerHTML = `${q.text}<br><span style="font-size:11px;color:rgba(201,168,76,0.4)">— ${q.sub}</span>`;
+    qi++;
+  }
+  cycleQuote();
+  window._throneQuoteInterval = setInterval(cycleQuote, 6000);
+
+  // Throne music (dark ambient)
+  if (state.soundEnabled) {
+    ensureAudio();
+    playThroneDrone();
+  }
+}
+
+function playThroneDrone() {
+  if (!audioCtx || !state.soundEnabled) return;
+  // Gentle cinematic chime — 3 ascending notes
+  const notes = [261.6, 329.6, 392.0]; // C4, E4, G4 major chord
+  notes.forEach((freq, i) => {
+    setTimeout(() => {
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = 'sine';
+      o.frequency.value = freq;
+      g.gain.value = 0.03;
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2);
+      o.connect(g);
+      g.connect(audioCtx.destination);
+      o.start();
+      o.stop(audioCtx.currentTime + 2);
+    }, i * 300);
+  });
+}
+
+function dismissThrone() {
+  throneActive = false;
+  const overlay = document.getElementById('throneOverlay');
+  overlay.classList.remove('active');
+  // Clean up particles
+  overlay.querySelectorAll('.ice-particle').forEach(p => p.remove());
+  if (window._throneQuoteInterval) clearInterval(window._throneQuoteInterval);
+  // Clean exit sound — gentle chime
+  sfxComplete();
+  addLog('<span class="agent-ref">[ARTHAS]</span> <span class="action-ref">The Lich King descends from the Frozen Throne.</span>', 'system');
+  addLog('<span class="agent-ref">[Max]</span> <span class="success-ref">"Let\'s get to work."</span>', 'system');
+}
+
+// ESC to dismiss throne
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && throneActive) dismissThrone();
+});
+
+// Click to dismiss
+document.getElementById('throneOverlay').addEventListener('click', e => {
+  if (e.target.closest('.throne-dismiss') || e.target === document.getElementById('throneOverlay')) {
+    dismissThrone();
+  }
+});
+
+// ── GO ──
+boot();
+</script>
+
+</body>
+</html>
