@@ -7297,7 +7297,10 @@ function saveStockHistory(grpId,entry){const h=getStockHistory(grpId);h.unshift(
 function openCaisseModule(){
   try{
     const user=PERSONNEL.find(p=>p.volo==='V'+state.pin);
-    if(user) localStorage.setItem('volo_caisse_user', JSON.stringify(user));
+    if(user){
+      localStorage.setItem('volo_caisse_user', JSON.stringify(user));
+      localStorage.setItem('volo_caisse_pin', state.pin);
+    }
   }catch(e){}
   window.location.href='caisses-stock.html';
 }

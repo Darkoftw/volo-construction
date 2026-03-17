@@ -1139,11 +1139,20 @@ function pluralizeName(name, count) {
 function safeGetLS(k){try{return localStorage.getItem(k);}catch(e){return null;}}
 function safeSetLS(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 
-// ---- USER CONTEXT (passé depuis index.html) ----
+// ---- USER CONTEXT (passé depuis index.html via openCaisseModule) ----
 let CURRENT_USER = null;
 try{
-  const raw = localStorage.getItem('volo_caisse_user');
-  if(raw) CURRENT_USER = JSON.parse(raw);
+  // Priorité: volo_caisse_pin (set à chaque openCaisseModule) + lookup PERSONNEL
+  const pin = localStorage.getItem('volo_caisse_pin')||'';
+  if(pin.length===4 && typeof PERSONNEL!=='undefined'){
+    const u = PERSONNEL.find(p=>p.volo==='V'+pin);
+    if(u) CURRENT_USER = u;
+  }
+  // Fallback: volo_caisse_user (objet JSON stocké)
+  if(!CURRENT_USER){
+    const raw = localStorage.getItem('volo_caisse_user');
+    if(raw) CURRENT_USER = JSON.parse(raw);
+  }
 }catch(e){}
 
 function getUserName(){
@@ -2343,26 +2352,8 @@ function openItemModal(id){
         </div>`:''}
       </div>
 
-      <!-- ASSIGN QUICK FORM -->
-      <div style="margin-bottom:16px">
-        <div style="font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:2px;color:var(--muted);margin-bottom:6px">ASSIGNATION RAPIDE</div>
-        <div style="display:flex;gap:8px">
-          <input id="assignInput" type="text" placeholder="Nom du sauveteur..."
-            value="${item.assignee||''}"
-            style="flex:1;padding:8px 12px;background:rgba(4,4,10,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.8rem;outline:none"
-            onfocus="this.style.borderColor='rgba(212,160,23,.45)'"
-            onblur="this.style.borderColor='var(--border)'">
-          <input id="destInput" type="text" placeholder="Destination..."
-            value="${item.location||''}"
-            style="flex:1;padding:8px 12px;background:rgba(4,4,10,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.8rem;outline:none"
-            onfocus="this.style.borderColor='rgba(201,168,76,.5)'"
-            onblur="this.style.borderColor='var(--border)'">
-          <button onclick="assignItem('${id}')"
-            style="padding:8px 14px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--goldL));border:none;color:#04040A;font-family:'Oswald',sans-serif;font-size:.65rem;letter-spacing:1px;cursor:pointer;white-space:nowrap">
-            OK ASSIGNER
-          </button>
-        </div>
-      </div>
+      <!-- ASSIGN QUICK FORM — Inspecteur matériel seulement -->
+      ${_isInspecteurMateriel()?'<div style="margin-bottom:16px"><div style="font-family:Oswald,sans-serif;font-size:.6rem;letter-spacing:2px;color:var(--muted);margin-bottom:6px">ASSIGNATION RAPIDE</div><div style="display:flex;gap:8px"><input id="assignInput" type="text" placeholder="Nom du sauveteur..." value="'+(item.assignee||'')+'" style="flex:1;padding:8px 12px;background:rgba(4,4,10,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:Inter,sans-serif;font-size:.8rem;outline:none"><input id="destInput" type="text" placeholder="Destination..." value="'+(item.location||'')+'" style="flex:1;padding:8px 12px;background:rgba(4,4,10,.6);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-family:Inter,sans-serif;font-size:.8rem;outline:none"><button onclick="assignItem(\''+id+'\')" style="padding:8px 14px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--goldL));border:none;color:#04040A;font-family:Oswald,sans-serif;font-size:.65rem;letter-spacing:1px;cursor:pointer;white-space:nowrap">OK ASSIGNER</button></div></div>':''}
 
       <!-- HISTORIQUE -->
       ${item.history.length?`
@@ -2474,6 +2465,7 @@ function changeStatus(id, newStatus){
 }
 
 function assignItem(id){
+  if(!_isInspecteurMateriel()){toast('Accès refusé — inspecteur matériel requis','red');return;}
   const item = UI_ITEMS.find(i=>i.id===id);
   if(!item) return;
   const newAssignee = document.getElementById('assignInput').value.trim();
