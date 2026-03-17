@@ -70,6 +70,16 @@
         }
       }
     },
+    "aegis": {
+      "commands": {
+        ".read": true,
+        ".write": true
+      },
+      "daemon": {
+        ".read": true,
+        ".write": true
+      }
+    },
     "$other": {
       ".read": false,
       ".write": false

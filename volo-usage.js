@@ -342,7 +342,7 @@ function _refreshUsageCatList(){
   if(!window._usageSelectedItems) window._usageSelectedItems=[];
   const selectedIds=window._usageSelectedItems.map(i=>i.id);
   const q=(window._usageSearchQ||'').toLowerCase();
-  const _prioCats=['Cordages','Sac Premonter #1','Sac Premonter #2','Sauveteur 1','Sauveteur 2','Harnais sauveteur','Premier de corder'];
+  const _prioCats=['Cordages','Sac Manoeuvre #1','Sac Manoeuvre #2','Sauveteur 1','Sauveteur 2','Harnais sauveteur','Premier de cordée'];
   const categories=[...new Set(ITEMS.map(i=>i.cat).filter(c=>c))].sort((a,b)=>{
     const pa=_prioCats.indexOf(a),pb=_prioCats.indexOf(b);
     if(pa!==-1&&pb!==-1) return pa-pb;
@@ -440,7 +440,7 @@ function renderUsageTracker(){
   </div>`;
 
   // Item selection (by category) — priorité cordes, sacs, harnais
-  const _prioCats=['Cordages','Sac Premonter #1','Sac Premonter #2','Sauveteur 1','Sauveteur 2','Harnais sauveteur','Premier de corder'];
+  const _prioCats=['Cordages','Sac Manoeuvre #1','Sac Manoeuvre #2','Sauveteur 1','Sauveteur 2','Harnais sauveteur','Premier de cordée'];
   const categories=[...new Set(ITEMS.map(i=>i.cat).filter(c=>c))].sort((a,b)=>{
     const pa=_prioCats.indexOf(a),pb=_prioCats.indexOf(b);
     if(pa!==-1&&pb!==-1) return pa-pb;

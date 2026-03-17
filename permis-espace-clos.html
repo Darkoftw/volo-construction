@@ -216,7 +216,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 
 <!-- TOP BAR -->
 <div class="top-bar">
-  <a href="index.html" class="btn-back">&#9664;</a>
+  <a href="v2/index.html" class="btn-back" onclick="event.preventDefault();if(history.length>1){history.back()}else{location.href='v2/index.html'}">&#9664;</a>
   <img src="eagle_tactic.png" alt="VOLO">
   <h1>PERMIS D'ENTREE — ESPACE CLOS <span>RSST ARTICLES 298-310</span></h1>
 </div>

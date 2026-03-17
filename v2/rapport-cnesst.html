@@ -6,64 +6,45 @@
 <meta name="view-transition" content="same-origin">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>VOLO SST — Rapport CNESST</title>
-<link rel="icon" href="eagle_tactic.png">
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="../eagle_tactic.png">
+<link rel="stylesheet" href="v2-glass.css">
+<script>
+function _vDeobf(v){if(!v)return v;try{return decodeURIComponent(escape(atob(v)))}catch(e){return v}}
+// Role gate — SURVEILLANT blocked
+(function(){
+  try {
+    var role = (_vDeobf(localStorage.getItem('volo_last_role'))||'').toUpperCase();
+    if(role === 'SURVEILLANT'){
+      document.title = 'Accès restreint';
+      document.addEventListener('DOMContentLoaded', function(){
+        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#04040A;color:#C9A84C;font-family:sans-serif;text-align:center;padding:20px"><div><div style="font-size:2rem;margin-bottom:16px">&#128274;</div><div style="font-size:18px;font-weight:700;letter-spacing:2px;margin-bottom:8px">ACCES RESTREINT</div><div style="font-size:13px;color:#5A5660;margin-bottom:20px">Cette page est reservee aux sauveteurs et chefs d equipe.</div><a href="index.html" style="display:inline-block;padding:10px 24px;background:rgba(201,168,76,.15);border:1px solid #C9A84C;border-radius:10px;color:#C9A84C;text-decoration:none;font-size:13px;letter-spacing:1px">RETOUR ACCUEIL</a></div></div>';
+      });
+    }
+  } catch(e){}
+})();
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="data.js"></script>
-<script src="cnesst-reglements.js"></script>
-<script src="logo.js"></script>
-<script src="king-logo.js"></script>
+<script src="../firebase-config.js"></script>
+<script src="../data.js"></script>
+<script src="../cnesst-reglements.js"></script>
+<script src="../logo.js"></script>
+<script src="../king-logo.js"></script>
 <style>
-:root{
-  --noir:#04040A;--bg:#04040A;--card:rgba(201,168,76,.04);--card2:rgba(201,168,76,.02);
-  --txt:#EBE6DF;--blanc:#EBE6DF;--muted:#8A8A9A;
-  --rescue:#D4650E;--gold:#C9A84C;--green:#27AE60;--red:#C0392B;--blue:#3B82F6;
-  --border:rgba(201,168,76,.12);
-}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:var(--noir);color:var(--txt);min-height:100vh;-webkit-font-smoothing:antialiased}
-@view-transition{navigation:auto}
-/* -- View Transitions -- */
-@keyframes vt-fade-in{from{opacity:0}to{opacity:1}}
-@keyframes vt-fade-out{from{opacity:1}to{opacity:0}}
-@keyframes vt-slide-from-right{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}
-@keyframes vt-slide-to-left{from{transform:translateX(0);opacity:1}to{transform:translateX(-30px);opacity:0}}
-@keyframes vt-slide-from-left{from{transform:translateX(-30px);opacity:0}to{transform:translateX(0);opacity:1}}
-@keyframes vt-slide-to-right{from{transform:translateX(0);opacity:1}to{transform:translateX(30px);opacity:0}}
-
-::view-transition-old(root){animation:.25s ease-out both vt-fade-out}
-::view-transition-new(root){animation:.25s ease-out both vt-fade-in}
-
-::view-transition-old(page-content){animation:.3s ease-out both vt-slide-to-left}
-::view-transition-new(page-content){animation:.3s ease-in both vt-slide-from-right}
-
-.header{view-transition-name:main-header}
-::view-transition-old(main-header){animation:.2s ease-out both vt-fade-out}
-::view-transition-new(main-header){animation:.2s ease-in both vt-fade-in}
-
-@media(prefers-reduced-motion:reduce){
-  ::view-transition-old(root),::view-transition-new(root),
-  ::view-transition-old(page-content),::view-transition-new(page-content),
-  ::view-transition-old(main-header),::view-transition-new(main-header){animation-duration:.01s}
-}
-input,select,textarea{font-size:16px!important}
-
-/* ═══ HEADER ═══ */
+/* Page-specific CSS -- rapport-cnesst */
 .top-bar{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,var(--noir) 0%,rgba(4,4,10,.95) 100%);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:12px}
 .top-bar img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold)}
-.top-bar h1{font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:2px;color:var(--gold);flex:1}
-.btn-back{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:8px;color:var(--gold);padding:6px 14px;font-size:12px;font-family:'Oswald',sans-serif;letter-spacing:1px;cursor:pointer;text-decoration:none;display:flex;align-items:center;gap:4px;transition:all .2s}
+.top-bar h1{font-family:'Bricolage Grotesque',sans-serif;font-size:16px;letter-spacing:2px;color:var(--gold);flex:1}
+.btn-back{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:8px;color:var(--gold);padding:6px 14px;font-size:12px;font-family:'Bricolage Grotesque',sans-serif;letter-spacing:1px;cursor:pointer;text-decoration:none;display:flex;align-items:center;gap:4px;transition:all .2s}
 .btn-back:hover{background:rgba(201,168,76,.12);border-color:rgba(201,168,76,.3)}
 
 /* ═══ HERO ═══ */
 .hero{text-align:center;padding:30px 20px 20px;background:linear-gradient(180deg,rgba(201,168,76,.06) 0%,transparent 100%)}
 .hero img{width:80px;height:80px;margin-bottom:12px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);box-shadow:0 0 24px rgba(201,168,76,.25)}
-.hero h2{font-family:'Oswald',sans-serif;font-size:24px;letter-spacing:4px;color:var(--gold);margin-bottom:4px}
+.hero h2{font-family:'Bricolage Grotesque',sans-serif;font-size:24px;letter-spacing:4px;color:var(--gold);margin-bottom:4px}
 .hero p{color:var(--muted);font-size:13px}
 
 /* ═══ SCORE GAUGE ═══ */
@@ -74,13 +55,13 @@ input,select,textarea{font-size:16px!important}
 .gauge .bg{stroke:rgba(201,168,76,.1)}
 .gauge .fill{stroke:var(--green);transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1),stroke .3s;filter:drop-shadow(0 0 6px currentColor)}
 .gauge-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.gauge-score{font-family:'Oswald',sans-serif;font-size:40px;font-weight:700;color:var(--txt)}
-.gauge-sub{font-size:11px;color:var(--gold);letter-spacing:2px;font-family:'Oswald',sans-serif}
+.gauge-score{font-family:'Bricolage Grotesque',sans-serif;font-size:40px;font-weight:700;color:var(--txt)}
+.gauge-sub{font-size:11px;color:var(--gold);letter-spacing:2px;font-family:'Bricolage Grotesque',sans-serif}
 
 /* ═══ STATS ROW ═══ */
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 16px 20px}
 .stat-card{background:rgba(201,168,76,.04);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:10px;padding:10px 8px;text-align:center}
-.stat-val{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700}
+.stat-val{font-family:'Bricolage Grotesque',sans-serif;font-size:22px;font-weight:700}
 .stat-lbl{font-size:10px;color:var(--muted);letter-spacing:1px;margin-top:2px}
 
 /* ═══ SECTIONS ═══ */
@@ -88,8 +69,8 @@ input,select,textarea{font-size:16px!important}
 .section:hover{border-color:rgba(201,168,76,.25)}
 .sec-head{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;border-bottom:1px solid transparent;transition:border-color .2s}
 .sec-head:hover{border-bottom-color:var(--border)}
-.sec-num{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#9A7A2E);color:var(--noir);font-family:'Oswald',sans-serif;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.sec-title{flex:1;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:1.5px;color:var(--txt)}
+.sec-num{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#9A7A2E);color:var(--noir);font-family:'Bricolage Grotesque',sans-serif;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sec-title{flex:1;font-family:'Bricolage Grotesque',sans-serif;font-size:14px;letter-spacing:1.5px;color:var(--txt)}
 .sec-status{font-size:14px;min-width:20px;text-align:center}
 .sec-chevron{color:var(--muted);font-size:12px;transition:transform .3s}
 .sec-chevron.open{transform:rotate(180deg)}
@@ -99,7 +80,7 @@ input,select,textarea{font-size:16px!important}
 /* ═══ FORM ELEMENTS ═══ */
 .field{margin-bottom:12px}
 .field label{display:block;font-size:11px;color:var(--gold);letter-spacing:1px;margin-bottom:4px;font-weight:600}
-.field input,.field select,.field textarea{width:100%;background:rgba(4,4,10,.6);border:1px solid rgba(201,168,76,.1);border-radius:8px;color:var(--txt);padding:10px 12px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
+.field input,.field select,.field textarea{width:100%;background:rgba(4,4,10,.6);border:1px solid rgba(201,168,76,.1);border-radius:8px;color:var(--txt);padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold)}
 .field textarea{resize:vertical;min-height:60px}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -128,13 +109,13 @@ input,select,textarea{font-size:16px!important}
 
 /* ═══ EAGLE SST M SECTION ═══ */
 .ai-card{background:linear-gradient(135deg,rgba(201,168,76,.06),rgba(4,4,10,.8));backdrop-filter:blur(12px);border:1px solid rgba(201,168,76,.2);border-radius:14px;padding:20px;margin:8px 0}
-.ai-btn{width:100%;padding:16px 20px;border-radius:12px;border:2px solid var(--gold);background:linear-gradient(135deg,rgba(201,168,76,.2),rgba(201,168,76,.08));color:var(--gold);font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s;position:relative;overflow:hidden}
+.ai-btn{width:100%;padding:16px 20px;border-radius:12px;border:2px solid var(--gold);background:linear-gradient(135deg,rgba(201,168,76,.2),rgba(201,168,76,.08));color:var(--gold);font-family:'Bricolage Grotesque',sans-serif;font-size:16px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s;position:relative;overflow:hidden}
 .ai-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,168,76,.15),transparent);opacity:0;transition:opacity .3s}
 .ai-btn:hover::before{opacity:1}
 .ai-btn:hover{border-color:#E8C95C;transform:translateY(-1px);box-shadow:0 4px 20px rgba(201,168,76,.25)}
 .ai-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
 .ai-result{margin-top:16px;padding:16px;background:rgba(4,4,10,.5);backdrop-filter:blur(8px);border-radius:12px;border:1px solid rgba(201,168,76,.15)}
-.ai-result h4{font-family:'Oswald',sans-serif;font-size:13px;color:var(--gold);letter-spacing:1.5px;margin-bottom:8px}
+.ai-result h4{font-family:'Bricolage Grotesque',sans-serif;font-size:13px;color:var(--gold);letter-spacing:1.5px;margin-bottom:8px}
 .ai-obs{padding:6px 0;border-bottom:1px solid rgba(201,168,76,.06);font-size:13px;line-height:1.5}
 .ai-risk{display:flex;align-items:center;gap:6px;padding:6px 0;font-size:13px}
 @keyframes eaglePulse{0%,100%{box-shadow:0 0 8px rgba(201,168,76,.2)}50%{box-shadow:0 0 20px rgba(201,168,76,.4)}}
@@ -142,7 +123,7 @@ input,select,textarea{font-size:16px!important}
 
 /* ═══ GENERATE BTN ═══ */
 .gen-wrap{padding:20px 16px 40px;text-align:center}
-.gen-btn{width:100%;padding:18px;border-radius:14px;border:2px solid var(--rescue);background:linear-gradient(135deg,rgba(212,101,14,.15),rgba(212,101,14,.05));color:var(--rescue);font-family:'Oswald',sans-serif;font-size:18px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s;position:relative;overflow:hidden}
+.gen-btn{width:100%;padding:18px;border-radius:14px;border:2px solid var(--rescue);background:linear-gradient(135deg,rgba(212,101,14,.15),rgba(212,101,14,.05));color:var(--rescue);font-family:'Bricolage Grotesque',sans-serif;font-size:18px;letter-spacing:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s;position:relative;overflow:hidden}
 .gen-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(212,101,14,.12),transparent);opacity:0;transition:opacity .3s}
 .gen-btn:hover::before{opacity:1}
 .gen-btn:hover{border-color:#E87A2E;transform:translateY(-1px);box-shadow:0 4px 20px rgba(212,101,14,.25)}
@@ -169,7 +150,7 @@ input,select,textarea{font-size:16px!important}
   padding:16px 18px;
   max-width:340px;
   box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 1px rgba(201,168,76,.1);
-  font-family:'Inter',sans-serif;
+  font-family:'DM Sans',sans-serif;
   font-size:13px;
   line-height:1.6;
   margin:auto;
@@ -178,7 +159,7 @@ input,select,textarea{font-size:16px!important}
   background:rgba(4,4,10,.4);
 }
 [popover] .pop-title{
-  font-family:'Oswald',sans-serif;
+  font-family:'Bricolage Grotesque',sans-serif;
   font-size:13px;
   letter-spacing:1.5px;
   color:var(--gold,#C9A84C);
@@ -195,16 +176,16 @@ input,select,textarea{font-size:16px!important}
   border:1px solid rgba(201,168,76,.25);background:rgba(201,168,76,.06);
   color:var(--gold,#C9A84C);font-size:11px;font-weight:700;
   cursor:pointer;transition:all .2s;flex-shrink:0;
-  font-family:'Inter',sans-serif;line-height:1;
+  font-family:'DM Sans',sans-serif;line-height:1;
   padding:0;vertical-align:middle;
 }
 .pop-trigger:hover{background:rgba(201,168,76,.15);border-color:var(--gold)}
 
 /* ═══ ARTICLES RSST ═══ */
 .rsst-search-wrap{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-.rsst-search{flex:1;min-width:180px;background:rgba(4,4,10,.6);border:1px solid rgba(201,168,76,.15);border-radius:8px;color:var(--txt);padding:10px 12px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
+.rsst-search{flex:1;min-width:180px;background:rgba(4,4,10,.6);border:1px solid rgba(201,168,76,.15);border-radius:8px;color:var(--txt);padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
 .rsst-search:focus{border-color:var(--gold)}
-.rsst-cat-select{background:rgba(4,4,10,.6);border:1px solid rgba(201,168,76,.15);border-radius:8px;color:var(--txt);padding:10px 12px;font-family:'Inter',sans-serif;font-size:13px;outline:none;min-width:140px;cursor:pointer}
+.rsst-cat-select{background:rgba(4,4,10,.6);border:1px solid rgba(201,168,76,.15);border-radius:8px;color:var(--txt);padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;min-width:140px;cursor:pointer}
 .rsst-cat-select:focus{border-color:var(--gold)}
 .rsst-results{max-height:500px;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .rsst-card{background:rgba(201,168,76,.03);border:1px solid rgba(201,168,76,.08);border-radius:10px;margin-bottom:8px;overflow:hidden;transition:border-color .2s}
@@ -243,17 +224,18 @@ input,select,textarea{font-size:16px!important}
 </style>
 </head>
 <body>
+<div class="orb orb-rescue"></div><div class="orb orb-blue"></div><div class="vhs-line"></div>
 
 <!-- TOP BAR -->
 <div class="top-bar">
-  <img id="topBarLogo" src="eagle_tactic.png" alt="Eagle" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none'}">
+  <img id="topBarLogo" src="../eagle_tactic.png" alt="Eagle" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none'}">
   <h1>RAPPORT CNESST</h1>
-  <a href="index.html" class="btn-back"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> RETOUR</a>
+  <a href="index.html" class="volo-retour" onclick="event.preventDefault();if(history.length>1){history.back()}else{location.href='index.html'}">&larr; RETOUR</a>
 </div>
 
 <!-- HERO -->
 <div class="hero">
-  <img id="heroLogo" src="eagle_tactic.png" alt="Eagle SST" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none'}">
+  <img id="heroLogo" src="../eagle_tactic.png" alt="Eagle SST" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none'}">
   <h2>RAPPORT DE CONFORMITE <button class="pop-trigger" popovertarget="pop-rapport-info" style="margin-left:8px;vertical-align:middle">?</button></h2>
   <p>Sante et Securite au Travail — CNESST</p>
 </div>
@@ -289,10 +271,13 @@ input,select,textarea{font-size:16px!important}
   <div class="ai-card">
     <div style="text-align:center;margin-bottom:16px">
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:6px"><path d="M12 2L9 7H4l3 5-3 5h5l3 5 3-5h5l-3-5 3-5h-5z"/></svg>
-      <div style="font-family:'Oswald',sans-serif;font-size:17px;letter-spacing:3px;color:var(--gold)">EAGLE SST M <button class="pop-trigger" popovertarget="pop-eagle-sst" style="margin-left:6px;vertical-align:middle">?</button></div>
+      <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:17px;letter-spacing:3px;color:var(--gold)">EAGLE SST M <button class="pop-trigger" popovertarget="pop-eagle-sst" style="margin-left:6px;vertical-align:middle">?</button></div>
       <div style="font-size:12px;color:var(--muted);margin-top:4px">Analyse avancee de conformite et recommandations</div>
     </div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:12px;text-align:center">Cle API securisee cote serveur</div>
+    <div class="field" style="margin-bottom:12px">
+      <label>CLE D'ACCES EAGLE SST M (optionnel — sauvee localement)</label>
+      <input type="password" id="apiKeyInput" placeholder="sk-ant-..." style="font-family:'JetBrains Mono',monospace;font-size:12px!important">
+    </div>
     <button class="ai-btn" id="btnAI" onclick="runAIAnalysis()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L9 7H4l3 5-3 5h5l3 5 3-5h5l-3-5 3-5h-5z"/></svg>
       EAGLE SST M
@@ -356,6 +341,8 @@ input,select,textarea{font-size:16px!important}
 //  VOLO SST — Rapport CNESST Generator
 //  PDF professionnel + Eagle SST M
 // ══════════════════════════════════════════
+
+function escapeHtml(t){if(!t)return'';const d=document.createElement('div');d.textContent=t;return d.innerHTML;}
 
 // ── CONFIG ──
 var RAPPORT_CONFIG = {
@@ -583,7 +570,7 @@ function renderSections() {
   html += renderSection(2, '2.', 'COMITÉ DE SANTÉ ET SÉCURITÉ', pers.chefs.length > 0 ? '✓' : '⚠', function() {
     var tbl = '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>NOM</th><th>VOLO ID</th><th>RÔLE</th><th>RÉGION</th></tr></thead><tbody>';
     pers.chefs.forEach(function(p) {
-      tbl += '<tr><td style="font-weight:600;color:var(--gold)">' + p.name + '</td><td style="font-family:JetBrains Mono,monospace;color:var(--rescue)">' + (p.volo||p.id) + '</td><td>' + (p.role||'') + '</td><td style="color:var(--muted)">' + (p.region||'') + '</td></tr>';
+      tbl += '<tr><td style="font-weight:600;color:var(--gold)">' + p.name + '</td><td style="font-family:var(--fn-mono);color:var(--rescue)">' + (p.volo||p.id) + '</td><td>' + (p.role||'') + '</td><td style="color:var(--muted)">' + (p.region||'') + '</td></tr>';
     });
     tbl += '</tbody></table></div>';
     tbl += '<div style="margin-top:10px;font-size:12px;color:var(--muted)">Total personnel : <b style="color:var(--blue)">' + pers.total + '</b> — Sauveteurs : <b style="color:var(--rescue)">' + pers.sauveteurs.length + '</b> — Surveillants : <b style="color:var(--blue)">' + pers.surveillants.length + '</b></div>';
@@ -600,7 +587,7 @@ function renderSections() {
       var c = equip.byCat[cat];
       tbl += '<tr>' +
         '<td style="font-weight:600">' + cat + '</td>' +
-        '<td style="text-align:center;font-family:JetBrains Mono,monospace">' + c.total + '</td>' +
+        '<td style="text-align:center;font-family:var(--fn-mono)">' + c.total + '</td>' +
         '<td style="text-align:center"><span class="badge badge-ok">' + c.ok + '</span></td>' +
         '<td style="text-align:center">' + (c.inspect > 0 ? '<span class="badge badge-warn">' + c.inspect + '</span>' : '<span style="color:var(--muted)">0</span>') + '</td>' +
         '<td style="text-align:center">' + (c.maint > 0 ? '<span class="badge badge-exp">' + c.maint + '</span>' : '<span style="color:var(--muted)">0</span>') + '</td>' +
@@ -634,7 +621,7 @@ function renderSections() {
       if (!hasCerts && shown >= 30) return;
       shown++;
       tbl += '<tr><td style="font-weight:500;white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis">' + row.name + '</td>';
-      tbl += '<td style="font-family:JetBrains Mono,monospace;font-size:10px;color:var(--rescue)">' + row.volo + '</td>';
+      tbl += '<td style="font-family:var(--fn-mono);font-size:10px;color:var(--rescue)">' + row.volo + '</td>';
       row.certs.forEach(function(c) {
         var cls = c.status === 'ok' ? 'badge-ok' : c.status === 'warn' ? 'badge-warn' : c.status === 'exp' ? 'badge-exp' : 'badge-na';
         var txt = c.status === 'ok' ? '✓' : c.status === 'warn' ? '!' : c.status === 'exp' ? '✕' : '—';
@@ -658,7 +645,7 @@ function renderSections() {
     if (incidents.total === 0) return '<div style="color:var(--green);text-align:center;padding:20px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" style="vertical-align:middle;margin-right:6px"><polyline points="20,6 9,17 4,12"/></svg>Aucun incident enregistre</div>';
     var tbl = '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>DATE</th><th>TYPE</th><th>DESCRIPTION</th><th>STATUT</th></tr></thead><tbody>';
     incidents.incidents.concat(incidents.urgences).slice(0, 20).forEach(function(inc) {
-      tbl += '<tr><td style="white-space:nowrap;font-family:JetBrains Mono,monospace;font-size:11px">' + (inc.date || inc.ts || '—').substring(0, 10) + '</td>';
+      tbl += '<tr><td style="white-space:nowrap;font-family:var(--fn-mono);font-size:11px">' + (inc.date || inc.ts || '—').substring(0, 10) + '</td>';
       tbl += '<td><span class="badge badge-exp">' + (inc.type || 'INCIDENT') + '</span></td>';
       tbl += '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">' + (inc.note || inc.description || inc.details || '—') + '</td>';
       tbl += '<td>' + (inc.resolved ? '<span class="badge badge-ok">Résolu</span>' : '<span class="badge badge-warn">Ouvert</span>') + '</td></tr>';
@@ -687,16 +674,16 @@ function renderSections() {
     var pickons = hist.transactions.filter(function(h){ return h.mode === 'PICK-ON'; });
     var pickoffs = hist.transactions.filter(function(h){ return h.mode === 'PICK-OFF'; });
     var content = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">' +
-      '<div style="text-align:center;padding:10px;background:var(--card2);border-radius:8px"><div style="font-family:Oswald,sans-serif;font-size:22px;color:var(--rescue)">' + pickons.length + '</div><div style="font-size:10px;color:var(--muted)">PICK-ON</div></div>' +
-      '<div style="text-align:center;padding:10px;background:var(--card2);border-radius:8px"><div style="font-family:Oswald,sans-serif;font-size:22px;color:var(--blue)">' + pickoffs.length + '</div><div style="font-size:10px;color:var(--muted)">PICK-OFF</div></div>' +
-      '<div style="text-align:center;padding:10px;background:var(--card2);border-radius:8px"><div style="font-family:Oswald,sans-serif;font-size:22px;color:var(--green)">' + hist.total + '</div><div style="font-size:10px;color:var(--muted)">TOTAL</div></div>' +
+      '<div style="text-align:center;padding:10px;background:var(--card2);border-radius:8px"><div style="font-family:var(--fn-display);font-size:22px;color:var(--rescue)">' + pickons.length + '</div><div style="font-size:10px;color:var(--muted)">PICK-ON</div></div>' +
+      '<div style="text-align:center;padding:10px;background:var(--card2);border-radius:8px"><div style="font-family:var(--fn-display);font-size:22px;color:var(--blue)">' + pickoffs.length + '</div><div style="font-size:10px;color:var(--muted)">PICK-OFF</div></div>' +
+      '<div style="text-align:center;padding:10px;background:var(--card2);border-radius:8px"><div style="font-family:var(--fn-display);font-size:22px;color:var(--green)">' + hist.total + '</div><div style="font-size:10px;color:var(--muted)">TOTAL</div></div>' +
     '</div>';
     // Last 10 transactions
     if (hist.transactions.length > 0) {
       content += '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>DATE</th><th>TYPE</th><th>DESTINATION</th><th>ITEMS</th></tr></thead><tbody>';
       hist.transactions.slice(-10).reverse().forEach(function(h) {
         var badge = h.mode === 'PICK-ON' ? 'badge-warn' : 'badge-ok';
-        content += '<tr><td style="font-family:JetBrains Mono,monospace;font-size:11px">' + (h.date || h.ts || '').substring(0, 10) + '</td>';
+        content += '<tr><td style="font-family:var(--fn-mono);font-size:11px">' + (h.date || h.ts || '').substring(0, 10) + '</td>';
         content += '<td><span class="badge ' + badge + '">' + (h.mode || '—') + '</span></td>';
         content += '<td>' + (h.destination || h.dest || '—') + '</td>';
         content += '<td style="text-align:center;font-weight:600">' + (h.items_count || 0) + '</td></tr>';
@@ -881,10 +868,18 @@ async function runAIAnalysis() {
     '}';
 
   try {
-    // Server-side proxy — API key stays on Netlify (env var ANTHROPIC_API_KEY)
-    var response = await fetch('/api/claude', {
+    // Direct browser call — proxy timeout too short for Claude responses
+    var apiKey = document.getElementById('apiKeyInput').value.trim() || (sessionStorage.getItem('_vk')?atob(sessionStorage.getItem('_vk')):'');
+    if (!apiKey) throw new Error('Entrez votre cle API dans le champ ci-dessus.');
+
+    var response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 4096,
@@ -946,23 +941,23 @@ function renderAIResults() {
 
   var html = '<div class="ai-result">' +
     '<h4>RAPPORT EAGLE SST M</h4>' +
-    '<div style="font-size:13px;line-height:1.6;color:var(--txt);margin-bottom:16px">' + (ai.resume || '') + '</div>';
+    '<div style="font-size:13px;line-height:1.6;color:var(--txt);margin-bottom:16px">' + escapeHtml(ai.resume || '') + '</div>';
 
   if (ai.score_estime) {
-    html += '<div style="text-align:center;margin-bottom:16px"><span style="font-family:Oswald,sans-serif;font-size:28px;color:' + (ai.score_estime >= 80 ? 'var(--green)' : ai.score_estime >= 50 ? '#F39C12' : 'var(--red)') + '">' + ai.score_estime + '/100</span><div style="font-size:11px;color:var(--muted)">SCORE EAGLE SST M</div></div>';
+    html += '<div style="text-align:center;margin-bottom:16px"><span style="font-family:var(--fn-display);font-size:28px;color:' + (ai.score_estime >= 80 ? 'var(--green)' : ai.score_estime >= 50 ? '#F39C12' : 'var(--red)') + '">' + escapeHtml(String(ai.score_estime)) + '/100</span><div style="font-size:11px;color:var(--muted)">SCORE EAGLE SST M</div></div>';
   }
 
   // Points forts
   if (ai.points_forts && ai.points_forts.length > 0) {
     html += '<h4 style="color:var(--green)">POINTS FORTS</h4>';
-    ai.points_forts.forEach(function(p) { html += '<div class="ai-obs"><span style="color:var(--green)">+</span> ' + p + '</div>'; });
+    ai.points_forts.forEach(function(p) { html += '<div class="ai-obs"><span style="color:var(--green)">+</span> ' + escapeHtml(p) + '</div>'; });
     html += '<div style="height:12px"></div>';
   }
 
   // Observations
   if (ai.observations && ai.observations.length > 0) {
     html += '<h4>OBSERVATIONS</h4>';
-    ai.observations.forEach(function(o) { html += '<div class="ai-obs">• ' + o + '</div>'; });
+    ai.observations.forEach(function(o) { html += '<div class="ai-obs">• ' + escapeHtml(o) + '</div>'; });
     html += '<div style="height:12px"></div>';
   }
 
@@ -971,7 +966,7 @@ function renderAIResults() {
     html += '<h4 style="color:var(--red)">RISQUES IDENTIFIES</h4>';
     ai.risques.forEach(function(r) {
       var color = riskColors[r.niveau] || 'var(--muted)';
-      html += '<div class="ai-risk"><span class="badge" style="background:' + color + '20;color:' + color + ';border:1px solid ' + color + '40">' + r.niveau + '</span><span>' + r.description + '</span></div>';
+      html += '<div class="ai-risk"><span class="badge" style="background:' + color + '20;color:' + color + ';border:1px solid ' + color + '40">' + escapeHtml(r.niveau) + '</span><span>' + escapeHtml(r.description) + '</span></div>';
     });
     html += '<div style="height:12px"></div>';
   }
@@ -981,7 +976,7 @@ function renderAIResults() {
     html += '<h4 style="color:var(--rescue)">NON-CONFORMITÉS</h4>';
     html += '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>ÉLÉMENT</th><th>RÉFÉRENCE</th><th>ACTION</th></tr></thead><tbody>';
     ai.non_conformites.forEach(function(nc) {
-      html += '<tr><td style="font-weight:600;color:var(--rescue)">' + nc.element + '</td><td style="font-family:JetBrains Mono,monospace;font-size:10px">' + nc.reference_legale + '</td><td>' + nc.action_requise + '</td></tr>';
+      html += '<tr><td style="font-weight:600;color:var(--rescue)">' + escapeHtml(nc.element) + '</td><td style="font-family:var(--fn-mono);font-size:10px">' + escapeHtml(nc.reference_legale) + '</td><td>' + escapeHtml(nc.action_requise) + '</td></tr>';
     });
     html += '</tbody></table></div><div style="height:12px"></div>';
   }
@@ -989,7 +984,7 @@ function renderAIResults() {
   // Recommandations
   if (ai.recommandations && ai.recommandations.length > 0) {
     html += '<h4 style="color:var(--gold)">RECOMMANDATIONS</h4>';
-    ai.recommandations.forEach(function(r, i) { html += '<div class="ai-obs"><span style="color:var(--gold);font-weight:700">' + (i+1) + '.</span> ' + r + '</div>'; });
+    ai.recommandations.forEach(function(r, i) { html += '<div class="ai-obs"><span style="color:var(--gold);font-weight:700">' + (i+1) + '.</span> ' + escapeHtml(r) + '</div>'; });
     html += '<div style="height:12px"></div>';
   }
 
@@ -998,7 +993,7 @@ function renderAIResults() {
     html += '<h4 style="color:var(--blue)">PLAN D\'ACTION PRIORITAIRE</h4>';
     html += '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>P</th><th>ACTION</th><th>ÉCHÉANCE</th><th>RESP.</th></tr></thead><tbody>';
     ai.plan_action.forEach(function(a) {
-      html += '<tr><td style="text-align:center;font-weight:700;color:var(--gold)">' + a.priorite + '</td><td>' + a.action + '</td><td style="white-space:nowrap;font-size:11px">' + a.echeance + '</td><td style="font-size:11px;color:var(--blue)">' + a.responsable + '</td></tr>';
+      html += '<tr><td style="text-align:center;font-weight:700;color:var(--gold)">' + escapeHtml(String(a.priorite)) + '</td><td>' + escapeHtml(a.action) + '</td><td style="white-space:nowrap;font-size:11px">' + escapeHtml(a.echeance) + '</td><td style="font-size:11px;color:var(--blue)">' + escapeHtml(a.responsable) + '</td></tr>';
     });
     html += '</tbody></table></div>';
   }
@@ -1837,7 +1832,7 @@ document.addEventListener('DOMContentLoaded', function() {
   rptState.periode_debut = start.toISOString().slice(0, 10);
 
   // Try to get responsable from localStorage
-  var lastVolo = localStorage.getItem('volo_last_volo');
+  var lastVolo = _vDeobf(localStorage.getItem('volo_last_volo'));
   if (lastVolo && typeof PERSONNEL !== 'undefined') {
     var p = PERSONNEL.find(function(p) { return p.volo === lastVolo || p.id === lastVolo; });
     if (p) rptState.responsable = p.name;
@@ -1877,27 +1872,33 @@ function loadRsstArticles() {
     return;
   }
 
-  firebase.firestore().collection('articles_rsst').get()
-    .then(function(snapshot) {
-      _rsstArticles = [];
-      snapshot.forEach(function(doc) {
-        var d = doc.data();
-        d._id = doc.id;
-        _rsstArticles.push(d);
+  try {
+    var fs = window.firebaseFS || firebase.firestore();
+    fs.collection('articles_rsst').get()
+      .then(function(snapshot) {
+        _rsstArticles = [];
+        snapshot.forEach(function(doc) {
+          var d = doc.data();
+          d._id = doc.id;
+          _rsstArticles.push(d);
+        });
+        _rsstLoaded = true;
+        // Sort by categorie then titre
+        _rsstArticles.sort(function(a, b) {
+          var ca = (a.categorie || '').localeCompare(b.categorie || '');
+          if (ca !== 0) return ca;
+          return (a.titre || '').localeCompare(b.titre || '');
+        });
+        renderRsstArticles(_rsstArticles);
+      })
+      .catch(function(err) {
+        console.warn('[RSST] Erreur chargement articles:', err);
+        resultsEl.innerHTML = '<div class="rsst-empty">Erreur de chargement — ' + escapeHtml(err.message || String(err)) + '</div>';
       });
-      _rsstLoaded = true;
-      // Sort by categorie then titre
-      _rsstArticles.sort(function(a, b) {
-        var ca = (a.categorie || '').localeCompare(b.categorie || '');
-        if (ca !== 0) return ca;
-        return (a.titre || '').localeCompare(b.titre || '');
-      });
-      renderRsstArticles(_rsstArticles);
-    })
-    .catch(function(err) {
-      console.warn('[RSST] Erreur chargement articles:', err);
-      resultsEl.innerHTML = '<div class="rsst-empty">Erreur de chargement — ' + (err.message || err) + '</div>';
-    });
+  } catch(e) {
+    console.warn('[RSST] Firebase init error:', e);
+    resultsEl.innerHTML = '<div class="rsst-empty">Firestore non disponible — ' + escapeHtml(e.message || String(e)) + '</div>';
+  }
 }
 
 function filterRsstArticles() {

@@ -5,67 +5,23 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <meta name="view-transition" content="same-origin">
 <title>VOLO SST — Pointage</title>
-<link rel="manifest" href="manifest.json">
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="manifest" href="../manifest.json">
+<link rel="stylesheet" href="v2-glass.css">
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <style>
-:root{
-  --bg:#0C0608;
-  --card:rgba(28,16,18,.90);--card2:rgba(38,22,26,.94);--cardSolid:#1C1012;
-  --gold:#C9A84C;--goldL:#E8C84A;
-  --rescue:#E65100;--rescueL:#FF6D00;--rescueD:#BF360C;--rescueGlow:rgba(230,81,0,.15);
-  --red:#C0392B;--green:#27AE60;--orange:#E67E22;
-  --txt:#F5F0EB;--muted:#C9BAA9;--border:rgba(68,40,46,.55);
-  --blue:#3B82F6;--radius:14px;--radius-sm:10px;--radius-lg:18px;
-}
-body.light{
-  --bg:#F8FAFC;--card:rgba(255,255,255,.96);--card2:rgba(241,245,249,.98);--cardSolid:#fff;
-  --gold:#C2410C;--goldL:#EA580C;
-  --rescue:#E65100;--rescueL:#EA580C;--rescueD:#BF360C;--rescueGlow:rgba(230,81,0,.09);
-  --txt:#0F172A;--muted:#64748B;--border:rgba(203,213,225,.9);
-}
-*{margin:0;padding:0;box-sizing:border-box;}
-body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.028;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:256px 256px;}
-body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;min-height:100vh;min-height:100dvh;overflow-x:hidden;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;transition:background .3s,color .2s;}
-@view-transition{navigation:auto}
-/* -- View Transitions -- */
-@keyframes vt-fade-in{from{opacity:0}to{opacity:1}}
-@keyframes vt-fade-out{from{opacity:1}to{opacity:0}}
-@keyframes vt-slide-from-right{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}
-@keyframes vt-slide-to-left{from{transform:translateX(0);opacity:1}to{transform:translateX(-30px);opacity:0}}
-@keyframes vt-slide-from-left{from{transform:translateX(-30px);opacity:0}to{transform:translateX(0);opacity:1}}
-@keyframes vt-slide-to-right{from{transform:translateX(0);opacity:1}to{transform:translateX(30px);opacity:0}}
-
-::view-transition-old(root){animation:.25s ease-out both vt-fade-out}
-::view-transition-new(root){animation:.25s ease-out both vt-fade-in}
-
-::view-transition-old(page-content){animation:.3s ease-out both vt-slide-to-left}
-::view-transition-new(page-content){animation:.3s ease-in both vt-slide-from-right}
-
-.header{view-transition-name:main-header}
-::view-transition-old(main-header){animation:.2s ease-out both vt-fade-out}
-::view-transition-new(main-header){animation:.2s ease-in both vt-fade-in}
-
-@media(prefers-reduced-motion:reduce){
-  ::view-transition-old(root),::view-transition-new(root),
-  ::view-transition-old(page-content),::view-transition-new(page-content),
-  ::view-transition-old(main-header),::view-transition-new(main-header){animation-duration:.01s}
-}
-.gold-bar{height:3px;background:linear-gradient(90deg,transparent 0%,var(--rescue) 20%,var(--gold) 50%,var(--rescue) 80%,transparent 100%);background-size:200% 100%;animation:shimmer 3s linear infinite;position:relative;z-index:200;}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* ── Page-specific: pointage.html ── */
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @keyframes pulseGlow{0%,100%{box-shadow:0 0 20px rgba(230,81,0,.2)}50%{box-shadow:0 0 40px rgba(230,81,0,.45)}}
 @keyframes pulseDot{0%,100%{opacity:1}50%{opacity:.3}}
-.net-badge{position:fixed;top:10px;right:14px;display:flex;align-items:center;gap:5px;font-size:.65em;font-family:'JetBrains Mono',monospace;z-index:150;padding:4px 12px;background:rgba(28,16,18,.92);border:1px solid var(--border);border-radius:20px;backdrop-filter:blur(10px);}
-body.light .net-badge{background:rgba(248,250,252,.95);}
+.net-badge{position:fixed;top:10px;right:14px;display:flex;align-items:center;gap:5px;font-size:.65em;font-family:'JetBrains Mono',monospace;z-index:150;padding:4px 12px;background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;backdrop-filter:blur(10px);}
 .net-dot{width:7px;height:7px;border-radius:50%;}
 .net-dot.on{background:var(--green);box-shadow:0 0 6px var(--green);}
 .net-dot.off{background:var(--red);box-shadow:0 0 6px var(--red);animation:pulseDot 1.5s infinite;}
 .container{max-width:480px;margin:0 auto;padding:12px 16px 100px;min-height:100vh;min-height:100dvh;position:relative;z-index:1;}
 .header{text-align:center;padding:14px 0 10px;position:relative;}
-.header h1{font-family:'Oswald',sans-serif;font-size:1.35em;font-weight:600;color:var(--rescue);letter-spacing:3px;text-shadow:0 0 20px rgba(230,81,0,.2);}
+.header h1{font-family:'Bricolage Grotesque',sans-serif;font-size:1.35em;font-weight:600;color:var(--rescue);letter-spacing:3px;text-shadow:0 0 20px rgba(230,81,0,.2);}
 .header .sub{font-size:.7em;color:var(--muted);letter-spacing:2px;margin-top:2px;}
-.back-btn{position:absolute;left:0;top:50%;transform:translateY(-50%);background:none;border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:var(--radius-sm);font-size:.72em;font-family:'Oswald',sans-serif;letter-spacing:1px;cursor:pointer;transition:all .2s;}
+.back-btn{position:absolute;left:0;top:50%;transform:translateY(-50%);background:none;border:1px solid var(--glass-border);color:var(--muted);padding:6px 12px;border-radius:var(--radius-sm);font-size:.72em;font-family:'Bricolage Grotesque',sans-serif;letter-spacing:1px;cursor:pointer;transition:all .2s;}
 .back-btn:hover{border-color:var(--rescue);color:var(--rescue);}
 .eagle-logo{width:72px;height:72px;border-radius:50%;margin-bottom:8px;border:2.5px solid var(--gold);object-fit:cover;box-shadow:0 0 24px rgba(201,168,76,.35),0 0 60px rgba(201,168,76,.12);animation:float 3s ease-in-out infinite,pulseGlow 3s ease-in-out infinite;}
 .eagle-fallback{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#9A8230);display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:8px;border:2.5px solid var(--gold);box-shadow:0 0 24px rgba(201,168,76,.35);animation:float 3s ease-in-out infinite;}
@@ -73,66 +29,66 @@ body.light .net-badge{background:rgba(248,250,252,.95);}
 .clock-display{text-align:center;margin:12px 0;}
 .clock-display .time{font-family:'JetBrains Mono',monospace;font-size:2.4em;color:var(--rescue);text-shadow:0 0 20px rgba(230,81,0,.2);}
 .clock-display .date{font-size:.78em;color:var(--muted);margin-top:4px;}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px;backdrop-filter:blur(12px);transition:border-color .2s;}
+.card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px;margin-bottom:14px;backdrop-filter:blur(12px);transition:border-color .2s;}
 .card-glow{box-shadow:0 0 24px rgba(230,81,0,.12);}
-.btn{width:100%;padding:16px;border:none;border-radius:var(--radius-sm);font-family:'Oswald',sans-serif;font-size:1.05em;letter-spacing:2px;cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);font-weight:600;}
+.btn{width:100%;padding:16px;border:none;border-radius:var(--radius-sm);font-family:'Bricolage Grotesque',sans-serif;font-size:1.05em;letter-spacing:2px;cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);font-weight:600;}
 .btn-gold{background:linear-gradient(135deg,var(--rescue),var(--rescueD));color:#fff;box-shadow:0 4px 16px rgba(230,81,0,.25);}
 .btn-gold:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(230,81,0,.4);}
 .btn-green{background:linear-gradient(135deg,var(--green),#2ECC71);color:#fff;}
 .btn-green:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(39,174,96,.35);}
 .btn-red{background:linear-gradient(135deg,var(--red),#E74C3C);color:#fff;}
 .btn-red:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(192,57,43,.35);}
-.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--muted);}
+.btn-outline{background:transparent;border:1.5px solid var(--glass-border);color:var(--muted);}
 .btn-outline:hover{border-color:var(--rescue);color:var(--rescueL);}
 .btn-disabled{opacity:.4;pointer-events:none;}
 .btn:active{transform:translateY(0)!important;}
-.qr-scan-btn{display:flex;align-items:center;justify-content:center;gap:8px;margin:14px auto 0;padding:12px 24px;background:transparent;border:1.5px solid rgba(230,81,0,.45);color:var(--rescueL);border-radius:var(--radius-sm);font-family:'Oswald',sans-serif;font-size:.9em;letter-spacing:2px;cursor:pointer;transition:all .3s;width:80%;max-width:280px;}
+.qr-scan-btn{display:flex;align-items:center;justify-content:center;gap:8px;margin:14px auto 0;padding:12px 24px;background:transparent;border:1.5px solid rgba(230,81,0,.45);color:var(--rescueL);border-radius:var(--radius-sm);font-family:'Bricolage Grotesque',sans-serif;font-size:.9em;letter-spacing:2px;cursor:pointer;transition:all .3s;width:80%;max-width:280px;}
 .qr-scan-btn:hover,.qr-scan-btn:active{background:var(--rescue);color:#fff;transform:scale(1.02);}
 .qr-scan-btn svg{width:20px;height:20px;}
 .pin-row{display:flex;gap:10px;justify-content:center;margin:16px 0;}
-.pin-dot{width:52px;height:60px;border-radius:var(--radius-sm);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--rescue);font-weight:700;transition:all .25s;background:var(--cardSolid);}
+.pin-dot{width:52px;height:60px;border-radius:var(--radius-sm);border:1.5px solid var(--glass-border);display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--rescue);font-weight:700;transition:all .25s;background:var(--surface);}
 .pin-dot.filled{border-color:var(--rescue);box-shadow:0 0 16px rgba(230,81,0,.2);}
 .numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:300px;margin:0 auto;}
-.numpad button{padding:16px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--txt);font-family:'Oswald',sans-serif;font-size:1.4em;cursor:pointer;transition:all .2s;}
-.numpad button:hover{background:var(--card2);border-color:rgba(230,81,0,.4);}
+.numpad button{padding:16px;border:1px solid var(--glass-border);border-radius:var(--radius-sm);background:var(--glass);color:var(--text);font-family:'Bricolage Grotesque',sans-serif;font-size:1.4em;cursor:pointer;transition:all .2s;}
+.numpad button:hover{background:var(--glass-hover);border-color:rgba(230,81,0,.4);}
 .numpad button:active{background:rgba(230,81,0,.15);color:var(--rescue);border-color:var(--rescue);}
 .user-badge{text-align:center;padding:14px;background:rgba(230,81,0,.06);border-radius:var(--radius);border:1px solid rgba(230,81,0,.18);margin:12px 0;}
-.user-badge .name{font-family:'Oswald',sans-serif;font-size:1.25em;color:var(--rescue);letter-spacing:2px;}
+.user-badge .name{font-family:'Bricolage Grotesque',sans-serif;font-size:1.25em;color:var(--rescue);letter-spacing:2px;}
 .user-badge .role{font-size:.78em;color:var(--muted);margin-top:2px;}
 .user-badge .uid{font-family:'JetBrains Mono',monospace;font-size:.72em;color:var(--muted);margin-top:4px;}
 .status-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:.75em;font-weight:600;}
 .status-badge.on-site{background:rgba(39,174,96,.15);color:var(--green);border:1px solid rgba(39,174,96,.3);}
-.status-badge.off-site{background:rgba(184,169,154,.1);color:var(--muted);border:1px solid var(--border);}
+.status-badge.off-site{background:rgba(184,169,154,.1);color:var(--muted);border:1px solid var(--glass-border);}
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;}
-.stat-card{text-align:center;padding:14px 10px;background:var(--card);border-radius:var(--radius-sm);border:1px solid var(--border);}
-.stat-card .num{font-family:'Oswald',sans-serif;font-size:1.6em;font-weight:600;}
+.stat-card{text-align:center;padding:14px 10px;background:var(--glass);border-radius:var(--radius-sm);border:1px solid var(--glass-border);}
+.stat-card .num{font-family:'Bricolage Grotesque',sans-serif;font-size:1.6em;font-weight:600;}
 .stat-card .lbl{font-size:.62em;color:var(--muted);letter-spacing:1.5px;margin-top:2px;}
-.search-box{width:100%;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--txt);font-family:'Inter',sans-serif;font-size:.9em;outline:none;margin-bottom:10px;transition:border-color .15s;}
+.search-box{width:100%;padding:12px 16px;background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9em;outline:none;margin-bottom:10px;transition:border-color .15s;}
 .search-box:focus{border-color:var(--rescue);box-shadow:0 0 0 3px rgba(230,81,0,.08);}
 .search-box::placeholder{color:var(--muted);}
 .lieu-list{display:flex;flex-direction:column;gap:6px;max-height:380px;overflow-y:auto;padding-right:4px;}
-.lieu-item{padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .2s;display:flex;justify-content:space-between;align-items:center;}
-.lieu-item:hover{background:var(--card2);border-color:rgba(230,81,0,.35);transform:translateX(3px);}
+.lieu-item{padding:14px 16px;background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius-sm);cursor:pointer;transition:all .2s;display:flex;justify-content:space-between;align-items:center;}
+.lieu-item:hover{background:var(--glass-hover);border-color:rgba(230,81,0,.35);transform:translateX(3px);}
 .lieu-item.sel{background:rgba(230,81,0,.08);border-color:var(--rescue);}
-.lieu-item .ln{font-weight:500;color:var(--txt);}
+.lieu-item .ln{font-weight:500;color:var(--text);}
 .lieu-item .lr{font-size:.72em;color:var(--muted);margin-top:2px;}
-.receipt{background:var(--card);border:1.5px solid var(--rescue);border-radius:var(--radius);padding:20px;margin:16px 0;box-shadow:0 0 24px rgba(230,81,0,.08);}
-.receipt-header{text-align:center;padding-bottom:12px;border-bottom:1px dashed var(--border);margin-bottom:12px;}
-.receipt-header .mode{font-family:'Oswald',sans-serif;font-size:1.3em;letter-spacing:3px;}
+.receipt{background:var(--glass);border:1.5px solid var(--rescue);border-radius:var(--radius);padding:20px;margin:16px 0;box-shadow:0 0 24px rgba(230,81,0,.08);}
+.receipt-header{text-align:center;padding-bottom:12px;border-bottom:1px dashed var(--glass-border);margin-bottom:12px;}
+.receipt-header .mode{font-family:'Bricolage Grotesque',sans-serif;font-size:1.3em;letter-spacing:3px;}
 .rrow{display:flex;justify-content:space-between;padding:6px 0;font-size:.9em;}
 .rrow .rl{color:var(--muted);}
-.rrow .rv{color:var(--txt);font-weight:500;text-align:right;max-width:60%;}
+.rrow .rv{color:var(--text);font-weight:500;text-align:right;max-width:60%;}
 .receipt-hours{text-align:center;padding:16px 0;margin:12px 0;background:rgba(39,174,96,.08);border-radius:var(--radius-sm);border:1px solid rgba(39,174,96,.2);}
-.receipt-hours .big{font-family:'Oswald',sans-serif;font-size:2em;color:var(--green);}
+.receipt-hours .big{font-family:'Bricolage Grotesque',sans-serif;font-size:2em;color:var(--green);}
 .receipt-hours .lbl{font-size:.72em;color:var(--muted);letter-spacing:2px;}
-.onsite-item{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;font-size:.85em;transition:border-color .15s;}
+.onsite-item{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius-sm);margin-bottom:6px;font-size:.85em;transition:border-color .15s;}
 .onsite-item:hover{border-color:rgba(230,81,0,.3);}
-.onsite-item .on-name{color:var(--txt);font-weight:500;}
+.onsite-item .on-name{color:var(--text);font-weight:500;}
 .onsite-item .on-lieu{color:var(--muted);font-size:.75em;margin-top:2px;}
 .onsite-item .on-time{font-family:'JetBrains Mono',monospace;font-size:.8em;}
-.hist-item{padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;font-size:.85em;display:flex;justify-content:space-between;align-items:center;transition:border-color .15s;}
+.hist-item{padding:10px 14px;background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius-sm);margin-bottom:6px;font-size:.85em;display:flex;justify-content:space-between;align-items:center;transition:border-color .15s;}
 .hist-item:hover{border-color:rgba(230,81,0,.3);}
-.hist-item .h-mode{font-family:'Oswald',sans-serif;letter-spacing:1px;font-size:.85em;}
+.hist-item .h-mode{font-family:'Bricolage Grotesque',sans-serif;letter-spacing:1px;font-size:.85em;}
 .hist-item .h-info{text-align:right;font-size:.75em;color:var(--muted);}
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-120px);padding:12px 24px;border-radius:var(--radius-sm);font-size:.85em;font-weight:600;z-index:300;transition:transform .35s cubic-bezier(.4,0,.2,1);white-space:nowrap;backdrop-filter:blur(12px);}
 .toast.show{transform:translateX(-50%) translateY(0);}
@@ -141,24 +97,24 @@ body.light .net-badge{background:rgba(248,250,252,.95);}
 .toast-warn{background:rgba(230,126,34,.95);color:#fff;}
 .toast-info{background:rgba(52,152,219,.95);color:#fff;}
 .qr-overlay{position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:250;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:24px 20px;}
-.qr-overlay .qr-title{font-family:'Oswald',sans-serif;color:var(--rescue);font-size:1.2em;letter-spacing:2px;margin-bottom:14px;margin-top:20px;}
+.qr-overlay .qr-title{font-family:'Bricolage Grotesque',sans-serif;color:var(--rescue);font-size:1.2em;letter-spacing:2px;margin-bottom:14px;margin-top:20px;}
 #qr-reader{width:100%;max-width:340px;border-radius:var(--radius);overflow:hidden;border:2px solid var(--rescue);box-shadow:0 0 30px rgba(230,81,0,.2);}
 .qr-hint{color:var(--muted);font-size:.8em;margin-top:14px;text-align:center;max-width:300px;line-height:1.5;}
-.step-label{font-family:'Oswald',sans-serif;font-size:.7em;color:var(--muted);letter-spacing:3px;text-align:center;margin-bottom:8px;text-transform:uppercase;}
-.custom-input{width:100%;padding:12px 16px;background:var(--cardSolid);border:1.5px solid var(--rescue);border-radius:var(--radius-sm);color:var(--txt);font-family:'Inter',sans-serif;font-size:.9em;outline:none;margin-top:10px;}
+.step-label{font-family:'Bricolage Grotesque',sans-serif;font-size:.7em;color:var(--muted);letter-spacing:3px;text-align:center;margin-bottom:8px;text-transform:uppercase;}
+.custom-input{width:100%;padding:12px 16px;background:var(--surface);border:1.5px solid var(--rescue);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9em;outline:none;margin-top:10px;}
 .custom-input:focus{box-shadow:0 0 0 3px rgba(230,81,0,.12);}
-.theme-pill{position:fixed;bottom:20px;right:20px;z-index:160;background:var(--card2);border:1px solid var(--border);border-radius:30px;display:flex;align-items:center;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.3);}
+.theme-pill{position:fixed;bottom:20px;right:20px;z-index:160;background:var(--glass);border:1px solid var(--glass-border);border-radius:30px;display:flex;align-items:center;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.3);}
 .theme-pill button{padding:8px 14px;background:none;border:none;cursor:pointer;font-size:14px;color:var(--muted);transition:all .15s;}
 .theme-pill button.active{background:rgba(230,81,0,.15);color:var(--rescueL);}
-.theme-pill button:hover:not(.active){color:var(--txt);}
+.theme-pill button:hover:not(.active){color:var(--text);}
 ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(230,81,0,.35);border-radius:4px;}
 .hidden{display:none!important;}
 .ptg-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
-.ptg-modal{background:var(--cardSolid);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-.ptg-modal h3{font-family:'Oswald',sans-serif;letter-spacing:2px;margin-bottom:12px;color:var(--rescue);font-size:16px}
+.ptg-modal{background:var(--surface);border:1px solid var(--glass-border);border-radius:var(--radius);padding:24px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.ptg-modal h3{font-family:'Bricolage Grotesque',sans-serif;letter-spacing:2px;margin-bottom:12px;color:var(--rescue);font-size:16px}
 .ptg-modal p{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5}
 .ptg-modal .ptg-modal-btns{display:flex;gap:10px}
-.ptg-modal .ptg-modal-btns button{flex:1;padding:12px;border-radius:10px;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:1px;cursor:pointer;border:1px solid var(--border);transition:all .2s}
+.ptg-modal .ptg-modal-btns button{flex:1;padding:12px;border-radius:10px;font-family:'Bricolage Grotesque',sans-serif;font-size:14px;letter-spacing:1px;cursor:pointer;border:1px solid var(--glass-border);transition:all .2s}
 /* === MOBILE 480px FINE-TUNING === */
 @media(max-width:480px){
   .container{padding-left:12px;padding-right:12px;padding-bottom:calc(100px + env(safe-area-inset-bottom,0px));overflow-x:hidden;}
@@ -196,9 +152,10 @@ body.light .net-badge{background:rgba(248,250,252,.95);}
 </style>
 </head>
 <body>
+<div class="orb orb-rescue"></div><div class="orb orb-blue"></div><div class="vhs-line"></div>
 <div id="pickOnActiveBanner"></div>
 <script>
-(function(){try{var h=JSON.parse(localStorage.getItem('volo_history')||'[]'),closed=new Set();h.forEach(function(tx){if(tx.statut==='ANNULÉ'||tx.statut==='RETOURNÉ')closed.add((tx.original_timestamp||tx.timestamp)+tx.sauveteur_id)});var active=h.filter(function(tx){return tx.statut==='ACTIF'&&tx.mode==='PICK-ON'&&!closed.has(tx.timestamp+tx.sauveteur_id)});if(active.length===0)return;var totalItems=active.reduce(function(n,tx){try{return n+JSON.parse(tx.items||'[]').length}catch(e){return n}},0);document.getElementById('pickOnActiveBanner').innerHTML='<div onclick="window.location.href=\'index.html\'" style="position:sticky;top:0;z-index:9999;padding:10px 16px;background:linear-gradient(135deg,rgba(230,81,0,.95),rgba(192,57,43,.9));color:#fff;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:2px solid #E65100"><span style="font-size:20px;font-weight:bold">!</span><div style="flex:1"><div style="font-weight:800;font-size:13px;letter-spacing:1px;font-family:Oswald,sans-serif">PICK ON ACTIF — '+totalItems+' item'+(totalItems>1?'s':'')+' sorti'+(totalItems>1?'s':'')+'</div><div style="font-size:10px;opacity:.85">Toucher pour retourner au Pick-Off</div></div><span style="font-size:16px">→</span></div>';}catch(e){}})();
+(function(){try{var h=JSON.parse(localStorage.getItem('volo_history')||'[]'),closed=new Set();h.forEach(function(tx){if(tx.statut==='ANNULÉ'||tx.statut==='RETOURNÉ')closed.add((tx.original_timestamp||tx.timestamp)+tx.sauveteur_id)});var active=h.filter(function(tx){return tx.statut==='ACTIF'&&tx.mode==='PICK-ON'&&!closed.has(tx.timestamp+tx.sauveteur_id)});if(active.length===0)return;var totalItems=active.reduce(function(n,tx){try{return n+JSON.parse(tx.items||'[]').length}catch(e){return n}},0);document.getElementById('pickOnActiveBanner').innerHTML='<div onclick="window.location.href=\'index.html\'" style="position:sticky;top:0;z-index:9999;padding:10px 16px;background:linear-gradient(135deg,rgba(230,81,0,.95),rgba(192,57,43,.9));color:#fff;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:2px solid #E65100"><span style="font-size:20px;font-weight:bold">!</span><div style="flex:1"><div style="font-weight:800;font-size:13px;letter-spacing:1px;font-family:var(--fn-display)">PICK ON ACTIF — '+totalItems+' item'+(totalItems>1?'s':'')+' sorti'+(totalItems>1?'s':'')+'</div><div style="font-size:10px;opacity:.85">Toucher pour retourner au Pick-Off</div></div><span style="font-size:16px">→</span></div>';}catch(e){}})();
 
 // -- View Transitions -- smooth navigation --
 (function(){
@@ -226,16 +183,16 @@ body.light .net-badge{background:rgba(248,250,252,.95);}
   <button id="th-dark" class="active" title="Mode sombre" aria-label="Mode sombre"></button>
   <button id="th-light" title="Mode clair" aria-label="Mode clair"></button>
 </div>
-<audio id="eagleAudio" preload="none"><source src="eagle.mp3" type="audio/mpeg"></audio>
+<audio id="eagleAudio" preload="none"><source src="../eagle.mp3" type="audio/mpeg"></audio>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="error-monitor.js"></script>
-<script src="data.js?v=20"></script>
-<script src="volo-crypto.js"></script>
-<script src="firebase-config.js"></script>
-<script src="firebase-service.js"></script>
-<script src="volo-network.js"></script>
-<script src="king-logo.js"></script>
+<script src="../error-monitor.js"></script>
+<script src="../data.js?v=20"></script>
+<script src="../volo-crypto.js"></script>
+<script src="../firebase-config.js"></script>
+<script src="../firebase-service.js"></script>
+<script src="../volo-network.js"></script>
+<script src="../king-logo.js"></script>
 <script>
 // ══════════════════════════════════════════════════
 //  VOLO SST — MODULE POINTAGE D'HEURES
@@ -317,8 +274,8 @@ function startClock(){clearInterval(clockInt);clockInt=setInterval(()=>{const el
 function vibrate(ms=30){try{navigator.vibrate(ms)}catch{}}
 
 // ── LOGO HELPERS ──
-const LOGO_BIG=`<img src="eagle_tactic.png" class="eagle-logo" alt="Golden Eagles" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none';this.nextElementSibling.style.display='flex'}"><div class="eagle-fallback" style="display:none">GE</div>`;
-const LOGO_MED=`<img src="eagle_tactic.png" class="eagle-accueil" alt="Golden Eagles" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none'}">`;
+const LOGO_BIG=`<img src="../eagle_tactic.png" class="eagle-logo" alt="Golden Eagles" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none';this.nextElementSibling.style.display='flex'}"><div class="eagle-fallback" style="display:none">GE</div>`;
+const LOGO_MED=`<img src="../eagle_tactic.png" class="eagle-accueil" alt="Golden Eagles" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none'}">`;
 
 // ── RENDER ──
 function render(){
@@ -348,9 +305,9 @@ function rPIN(app){
   if(state.pin.length===4){
     const u=PERSONNEL.find(p=>p.volo==='V'+state.pin);
     if(u) identified='<div class="user-badge" style="margin-top:14px"><div class="name">'+u.name+'</div><div class="role">'+u.role+' — '+u.region+'</div><div class="uid">'+u.id+' | '+u.volo+'</div></div>';
-    else  identified='<div style="text-align:center;margin-top:14px;color:var(--red);font-weight:600;font-family:\'Oswald\',sans-serif;letter-spacing:1px">✗ Code '+state.pin+' non reconnu</div>';
+    else  identified='<div style="text-align:center;margin-top:14px;color:var(--red);font-weight:600;font-family:var(--fn-display);letter-spacing:1px">✗ Code '+state.pin+' non reconnu</div>';
   }
-  app.innerHTML='<div style="margin-bottom:10px"><a href="index.html" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:13px;font-family:\'Inter\',sans-serif;text-decoration:none">◀ INVENTAIRE</a></div>'
+  app.innerHTML='<div style="margin-bottom:10px"><a href="index.html" class="volo-retour" onclick="event.preventDefault();if(history.length>1){history.back()}else{location.href=\'index.html\'}">&larr; RETOUR</a></div>'
     +'<div class="header" style="padding-bottom:4px"><div style="display:flex;flex-direction:column;align-items:center">'+LOGO_BIG+'<h1>POINTAGE</h1><div class="sub">THE GOLDEN EAGLES</div></div></div>'
     +'<div class="clock-display"><div class="time" id="liveClock">'+fmtTime(new Date())+'</div><div class="date">'+fmtDate(new Date())+'</div></div>'
     +'<div class="card"><div class="step-label">ENTREZ VOTRE CODE PIN</div><div class="pin-row">'+dots+'</div><div class="numpad">'+nums+'</div>'+identified+'</div>'
@@ -379,7 +336,7 @@ function rAccueil(app){
   const today=new Date().toDateString();
   const todayH=getHistory().filter(e=>e.mode==='DÉPART'&&new Date(e.timestamp).toDateString()===today).reduce((a,e)=>a+(e.heures_minutes||0),0);
   const th=Math.floor(todayH/60),tm=todayH%60;
-  app.innerHTML='<div style="display:flex;gap:10px;margin-bottom:10px"><a href="index.html" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:13px;font-family:\'Inter\',sans-serif;text-decoration:none">◀ INVENTAIRE</a></div>'
+  app.innerHTML='<div style="display:flex;gap:10px;margin-bottom:10px"><a href="index.html" class="volo-retour" onclick="event.preventDefault();if(history.length>1){history.back()}else{location.href=\'index.html\'}">&larr; RETOUR</a></div>'
     +'<div class="header"><button class="back-btn" onclick="logout()">DÉCONNEXION</button><h1>POINTAGE</h1><div class="sub">THE GOLDEN EAGLES</div></div>'
     +'<div class="user-badge"><div style="display:flex;flex-direction:column;align-items:center">'+LOGO_MED+'</div>'
     +'<div class="name">'+escapeHtml(state.user.name)+'</div><div class="role">'+escapeHtml(state.user.role)+' — '+escapeHtml(state.user.region)+'</div><div class="uid">'+escapeHtml(state.user.id)+' | '+escapeHtml(state.user.volo)+'</div>'
@@ -412,7 +369,7 @@ function startMode(mode,isChangeLieu){
         closePtgModal();
         const c=calcH(me.arrival);
         const now=new Date();const ts=fmtTS(now);
-        const depPayload={type:'POINTAGE',mode:'DEPART',sauveteur_id:state.user.id,sauveteur_nom:state.user.name,sauveteur_volo:state.user.volo,role:state.user.role,lieu:me.lieu,region:me.region||'',mission_type:'',heures:c.display,heures_minutes:c.totalMin,timestamp:ts,force_close:true};
+        const depPayload={type:'POINTAGE',mode:'DÉPART',sauveteur_id:state.user.id,sauveteur_nom:state.user.name,sauveteur_volo:state.user.volo,role:state.user.role,lieu:me.lieu,region:me.region||'',mission_type:'',heures:c.display,heures_minutes:c.totalMin,timestamp:ts,force_close:true};
         addHistory(depPayload);
         if(navigator.onLine){
           fetch(WEBHOOK_POINTAGE,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(depPayload)}).catch(()=>{const q=getQueue();q.push(depPayload);setQueue(q);});
@@ -495,9 +452,9 @@ function rConfirm(app){
   app.innerHTML='<div class="header"><button class="back-btn" onclick="state.step='+(isDep?"'accueil'":"'mission'")+';render()">← RETOUR</button><h1>✓ CONFIRMER</h1><div class="sub">'+state.mode+'</div></div>'
     +'<div class="receipt"><div class="receipt-header"><div class="mode" style="color:'+(isDep?'var(--red)':'var(--green)')+'">'+(isDep?'':'')+' '+state.mode+'</div></div>'
     +'<div class="rrow"><span class="rl">Nom</span><span class="rv">'+escapeHtml(state.user.name)+'</span></div>'
-    +'<div class="rrow"><span class="rl">ID</span><span class="rv" style="font-family:\'JetBrains Mono\',monospace;font-size:.85em">'+escapeHtml(state.user.id)+'</span></div>'
+    +'<div class="rrow"><span class="rl">ID</span><span class="rv" style="font-family:var(--fn-mono);font-size:.85em">'+escapeHtml(state.user.id)+'</span></div>'
     +'<div class="rrow"><span class="rl">Lieu</span><span class="rv">'+(state.lieu?escapeHtml(state.lieu.nom):'—')+'</span></div>'
-    +(!isDep?'<div class="rrow"><span class="rl">Type</span><span class="rv" style="color:var(--gold);font-weight:600">'+state.missionType+'</span></div>':'')
+    +(!isDep?'<div class="rrow"><span class="rl">Type</span><span class="rv" style="color:var(--gold);font-weight:600">'+escapeHtml(state.missionType)+'</span></div>':'')
     +'<div class="rrow"><span class="rl">Date/Heure</span><span class="rv">'+fmtTS(now)+'</span></div>'
     +hBlock+'</div>'
     +'<button class="btn '+(isDep?'btn-red':'btn-green')+'" onclick="doPointage()">'+(isDep?'CONFIRMER DÉPART':'CONFIRMER ARRIVÉE')+'</button>'
@@ -511,8 +468,7 @@ async function doPointage(){
   if(isDep){const me=onSite.find(e=>e.id===state.user.id);if(me){const c=calcH(me.arrival);hDisp=c.display;hMin=c.totalMin;}onSite=onSite.filter(e=>e.id!==state.user.id);}
   else{onSite=onSite.filter(e=>e.id!==state.user.id);onSite.push({id:state.user.id,nom:state.user.name,role:state.user.role,lieu:state.lieu.nom,region:state.lieu.region,missionType:state.missionType,arrival:now.toISOString()});}
   setOnSite(onSite);
-  const modeClean=state.mode==='ARRIVÉE'?'ARRIVEE':'DEPART';
-  const payload={type:'POINTAGE',mode:modeClean,sauveteur_id:state.user.id,sauveteur_nom:state.user.name,sauveteur_volo:state.user.volo,role:state.user.role,lieu:state.lieu?state.lieu.nom:'',region:state.lieu?state.lieu.region:'',mission_type:state.mode==='ARRIVÉE'?state.missionType:'',heures:hDisp,heures_minutes:hMin,timestamp:ts};
+  const payload={type:'POINTAGE',mode:state.mode,sauveteur_id:state.user.id,sauveteur_nom:state.user.name,sauveteur_volo:state.user.volo,role:state.user.role,lieu:state.lieu?state.lieu.nom:'',region:state.lieu?state.lieu.region:'',mission_type:state.mode==='ARRIVÉE'?state.missionType:'',heures:hDisp,heures_minutes:hMin,timestamp:ts};
   addHistory(payload);
   if(navigator.onLine){
     try{const r=await fetch(WEBHOOK_POINTAGE,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
@@ -532,10 +488,10 @@ function rReceipt(app){
   app.innerHTML='<div class="header"><h1>'+(isDep?'':'')+' '+state.mode+'</h1><div class="sub">POINTAGE ENREGISTRÉ</div></div>'
     +'<div class="receipt card-glow"><div class="receipt-header"><div class="mode" style="color:'+(isDep?'var(--red)':'var(--green)')+'">✓ '+state.mode+' CONFIRMÉ'+(isDep?'':'E')+'</div></div>'
     +'<div class="rrow"><span class="rl">Nom</span><span class="rv">'+escapeHtml(state.user.name)+'</span></div>'
-    +'<div class="rrow"><span class="rl">ID</span><span class="rv" style="font-family:\'JetBrains Mono\',monospace">'+escapeHtml(state.user.id)+'</span></div>'
+    +'<div class="rrow"><span class="rl">ID</span><span class="rv" style="font-family:var(--fn-mono)">'+escapeHtml(state.user.id)+'</span></div>'
     +'<div class="rrow"><span class="rl">Lieu</span><span class="rv">'+(state.lieu?escapeHtml(state.lieu.nom):'—')+'</span></div>'
     +'<div class="rrow"><span class="rl">Heure</span><span class="rv">'+state.ts+'</span></div>'
-    +(!isDep?'<div class="rrow"><span class="rl">Type</span><span class="rv" style="color:var(--gold);font-weight:600">'+state.missionType+'</span></div>':'')
+    +(!isDep?'<div class="rrow"><span class="rl">Type</span><span class="rv" style="color:var(--gold);font-weight:600">'+escapeHtml(state.missionType)+'</span></div>':'')
     +(isDep&&state._h?'<div class="receipt-hours"><div class="lbl">HEURES TRAVAILLÉES</div><div class="big">'+state._h+'</div></div>':'')
     +'</div>'
     +'<button class="btn btn-gold" onclick="window.open(\'index.html\',\'_self\')">← RETOUR À L\'APP</button>'
@@ -549,7 +505,7 @@ function rOnSite(app){
     const c=calcH(e.arrival);const col=c.h>=10?'var(--red)':c.h>=8?'var(--orange)':'var(--green)';
     return '<div class="onsite-item" data-n="'+escapeHtml(e.nom.toLowerCase())+'"><div><div class="on-name">'+escapeHtml(e.nom)+'</div><div class="on-lieu">'+escapeHtml(e.lieu)+(e.region?' — '+escapeHtml(e.region):'')+'</div>'+(e.missionType?'<div style="font-size:.62em;color:var(--gold);margin-top:2px">'+escapeHtml(e.missionType)+'</div>':'')+'</div>'
       +'<div style="text-align:right"><div class="on-time" style="color:'+col+'">'+c.display+'</div><div style="font-size:.65em;color:var(--muted)">depuis '+new Date(e.arrival).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit',hour12:false})+'</div></div></div>';
-  }).join(''):'<div class="card" style="text-align:center;color:var(--muted);font-family:\'Oswald\',sans-serif;letter-spacing:1px">Personne n\'est pointé actuellement</div>';
+  }).join(''):'<div class="card" style="text-align:center;color:var(--muted);font-family:var(--fn-display);letter-spacing:1px">Personne n\'est pointé actuellement</div>';
   app.innerHTML='<div class="header"><button class="back-btn" onclick="state.step=\'accueil\';render()">← RETOUR</button><h1>SUR LE TERRAIN</h1><div class="sub">'+onSite.length+' PERSONNE'+(onSite.length>1?'S':'')+'</div></div>'
     +'<input class="search-box" placeholder="Rechercher..." oninput="document.querySelectorAll(\'.onsite-item\').forEach(e=>e.style.display=e.dataset.n.includes(this.value.toLowerCase())?\'flex\':\'none\')">'
     +'<div id="onSiteList">'+items+'</div>';
@@ -562,7 +518,7 @@ function rHistory(app){
     const isDep=e.mode==='DÉPART';
     return '<div class="hist-item"><div><div class="h-mode" style="color:'+(isDep?'var(--red)':'var(--green)')+'">'+(isDep?'':'')+' '+e.mode+'</div><div style="font-size:.75em;color:var(--muted)">'+escapeHtml(e.sauveteur_nom)+' — '+escapeHtml(e.lieu)+'</div></div>'
       +'<div class="h-info"><div>'+(e.timestamp.split(' ')[1]||'')+'</div><div>'+(e.timestamp.split(' ')[0]||'')+'</div>'+(isDep&&e.heures?'<div style="color:var(--green);font-weight:600">'+e.heures+'</div>':'')+'</div></div>';
-  }).join(''):'<div class="card" style="text-align:center;color:var(--muted);font-family:\'Oswald\',sans-serif;letter-spacing:1px">Aucun historique</div>';
+  }).join(''):'<div class="card" style="text-align:center;color:var(--muted);font-family:var(--fn-display);letter-spacing:1px">Aucun historique</div>';
   app.innerHTML='<div class="header"><button class="back-btn" onclick="state.step=\'accueil\';render()">← RETOUR</button><h1>HISTORIQUE</h1><div class="sub">DERNIERS POINTAGES</div></div>'
     +items
     +(hist.length?'<button class="btn btn-outline" onclick="confirmClearHistory()" style="margin-top:14px;font-size:.8em">EFFACER L\'HISTORIQUE</button>':'');
@@ -606,10 +562,12 @@ function openQRScanner(){
     +'<div class="qr-title">SCANNER VOTRE BADGE</div><div id="qr-reader"></div>'
     +'<div class="qr-hint">Placez le QR code de votre badge devant la caméra.<br>La connexion sera automatique.</div>';
   document.body.appendChild(overlay);
+  qrScanner = true;
   startQrScan();
 }
 function closeQRScanner(){
   stopQrScan();
+  qrScanner = null;
   const ov=document.getElementById('qr-overlay');if(ov)ov.remove();
 }
 function onQRSuccess(data){
@@ -644,11 +602,23 @@ function confirmClearHistory(){
 // ── INIT ──
 applyTheme();
 updateNet();
-// Auto-login: use volo_last_volo (non-sensitive VOLO ID) instead of plaintext PIN
-const savedVolo=localStorage.getItem('volo_last_volo');
-if(savedVolo){const u=PERSONNEL.find(p=>p.volo===savedVolo);if(u){state.pin=savedVolo.replace('V','');state.user=u;state.step='accueil';}}
+// Decode obfuscated localStorage (base64)
+function _ptgDeobf(v){if(!v)return v;try{return decodeURIComponent(escape(atob(v)))}catch(e){return v}}
+// Auto-login: 1) URL ?pin= param, 2) volo_last_volo localStorage (obfuscated), 3) volo_pin localStorage
+(function(){
+  var params=new URLSearchParams(window.location.search);
+  var pinParam=params.get('pin');
+  if(pinParam){
+    var u=PERSONNEL.find(function(p){return p.volo==='V'+pinParam});
+    if(u){state.pin=pinParam;state.user=u;state.step='accueil';if(window.history.replaceState)window.history.replaceState({},'',window.location.pathname);return;}
+  }
+  var savedVolo=_ptgDeobf(localStorage.getItem('volo_last_volo'));
+  if(savedVolo){var u=PERSONNEL.find(function(p){return p.volo===savedVolo});if(u){state.pin=savedVolo.replace('V','');state.user=u;state.step='accueil';return;}}
+  var savedPin=_ptgDeobf(localStorage.getItem('volo_pin'));
+  if(savedPin){var u=PERSONNEL.find(function(p){return p.volo==='V'+savedPin});if(u){state.pin=savedPin;state.user=u;state.step='accueil';return;}}
+})();
 render();
 </script>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}</script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('../sw.js').catch(function(){});}</script>
 </body>
 </html>

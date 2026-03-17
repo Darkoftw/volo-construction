@@ -7,70 +7,38 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0C0608">
 <title>VOLO SST — Plan de Travail en Sauvetage</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="v2-glass.css">
+<script>
+function _vDeobf(v){if(!v)return v;try{return decodeURIComponent(escape(atob(v)))}catch(e){return v}}
+// Role gate — SURVEILLANT blocked
+(function(){
+  try {
+    var role = (_vDeobf(localStorage.getItem('volo_last_role'))||'').toUpperCase();
+    if(role === 'SURVEILLANT'){
+      document.title = 'Accès restreint';
+      document.addEventListener('DOMContentLoaded', function(){
+        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#04040A;color:#C9A84C;font-family:sans-serif;text-align:center;padding:20px"><div><div style="font-size:2rem;margin-bottom:16px">&#128274;</div><div style="font-size:18px;font-weight:700;letter-spacing:2px;margin-bottom:8px">ACCES RESTREINT</div><div style="font-size:13px;color:#5A5660;margin-bottom:20px">Cette page est reservee aux sauveteurs et chefs d equipe.</div><a href="index.html" style="display:inline-block;padding:10px 24px;background:rgba(201,168,76,.15);border:1px solid #C9A84C;border-radius:10px;color:#C9A84C;text-decoration:none;font-size:13px;letter-spacing:1px">RETOUR ACCUEIL</a></div></div>';
+      });
+    }
+  } catch(e){}
+})();
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
---bg:#0C0608;--card:rgba(28,16,18,.90);--card2:rgba(38,22,26,.94);--cardSolid:#1C1012;
---gold:#C9A84C;--goldL:#E8C84A;
---rescue:#D4650E;--rescueL:#E8873A;--rescueD:#A84E0B;--rescueGlow:rgba(201,168,76,.12);
---red:#C0392B;--green:#27AE60;--orange:#E67E22;
---txt:#F5F0EB;--muted:#C9BAA9;--border:rgba(68,40,46,.55);--blue:#3B82F6;
---glow:0 0 30px rgba(201,168,76,.08);
---radius:14px;--radius-sm:10px;--radius-lg:18px;
-}
-body.light{
---bg:#F8FAFC;--card:rgba(255,255,255,.96);--card2:rgba(241,245,249,.98);--cardSolid:#fff;
---gold:#C9A84C;--goldL:#E8C84A;
---rescue:#D4650E;--rescueL:#E8873A;--rescueD:#A84E0B;--rescueGlow:rgba(201,168,76,.09);
---txt:#0F172A;--muted:#64748B;--border:rgba(203,213,225,.9);
-}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;transition:background .22s,color .15s}
-@view-transition{navigation:auto}
-/* -- View Transitions -- */
-@keyframes vt-fade-in{from{opacity:0}to{opacity:1}}
-@keyframes vt-fade-out{from{opacity:1}to{opacity:0}}
-@keyframes vt-slide-from-right{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}
-@keyframes vt-slide-to-left{from{transform:translateX(0);opacity:1}to{transform:translateX(-30px);opacity:0}}
-@keyframes vt-slide-from-left{from{transform:translateX(-30px);opacity:0}to{transform:translateX(0);opacity:1}}
-@keyframes vt-slide-to-right{from{transform:translateX(0);opacity:1}to{transform:translateX(30px);opacity:0}}
-
-::view-transition-old(root){animation:.25s ease-out both vt-fade-out}
-::view-transition-new(root){animation:.25s ease-out both vt-fade-in}
-
-::view-transition-old(page-content){animation:.3s ease-out both vt-slide-to-left}
-::view-transition-new(page-content){animation:.3s ease-in both vt-slide-from-right}
-
-.header{view-transition-name:main-header}
-::view-transition-old(main-header){animation:.2s ease-out both vt-fade-out}
-::view-transition-new(main-header){animation:.2s ease-in both vt-fade-in}
-
-@media(prefers-reduced-motion:reduce){
-  ::view-transition-old(root),::view-transition-new(root),
-  ::view-transition-old(page-content),::view-transition-new(page-content),
-  ::view-transition-old(main-header),::view-transition-new(main-header){animation-duration:.01s}
-}
-body::before{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.025'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.6}
-.app{max-width:480px;margin:0 auto;min-height:100vh;position:relative;z-index:1}
-.gold-bar{height:4px;background:linear-gradient(90deg,#8A7530,var(--gold),var(--goldL),var(--gold),#8A7530);background-size:300% 100%;animation:shimmer 4s ease infinite}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-@keyframes fadeSlide{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.4)}50%{box-shadow:0 0 20px 10px rgba(201,168,76,.1)}}
+/* ── Page-specific keyframes ── */
 @keyframes recording{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(192,57,43,.6)}50%{transform:scale(1.08);box-shadow:0 0 20px 8px rgba(192,57,43,.2)}}
 .header{display:flex;align-items:center;justify-content:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);backdrop-filter:blur(16px);position:sticky;top:0;z-index:50;background:rgba(12,6,8,.94)}
-.header .title{font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:3px;color:var(--gold)}
+.header .title{font-family:'Bricolage Grotesque',sans-serif;font-size:16px;letter-spacing:3px;color:var(--gold)}
 .header .step-label{font-size:12px;color:var(--muted);letter-spacing:1px}
 .screen{padding:20px;min-height:calc(100vh - 76px);animation:fadeSlide .4s cubic-bezier(.22,1,.36,1)}
-h2{font-family:'Oswald',sans-serif;font-size:22px;letter-spacing:3px;color:var(--gold);margin-bottom:14px;text-align:center}
-h3{font-family:'Oswald',sans-serif;font-size:15px;letter-spacing:2px;color:var(--goldL);margin-bottom:10px}
+h2{font-family:'Bricolage Grotesque',sans-serif;font-size:22px;letter-spacing:3px;color:var(--gold);margin-bottom:14px;text-align:center}
+h3{font-family:'Bricolage Grotesque',sans-serif;font-size:15px;letter-spacing:2px;color:var(--goldL);margin-bottom:10px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;transition:all .3s,background .22s,border .22s;backdrop-filter:blur(12px)}
 .theme-pill{position:fixed;bottom:20px;right:16px;z-index:999;display:flex;gap:4px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:4px;backdrop-filter:blur(16px);box-shadow:0 4px 16px rgba(0,0,0,.3)}
 .theme-pill button{padding:6px 10px;border:none;border-radius:16px;cursor:pointer;font-size:14px;background:transparent;transition:background .2s}
 .theme-pill button.active{background:rgba(201,168,76,.12);}
 .card.selected{border-color:var(--green);background:var(--card2)}
-.btn{width:100%;padding:14px;border:none;border-radius:var(--radius);font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;transition:all .25s;font-weight:600}
+.btn{width:100%;padding:14px;border:none;border-radius:var(--radius);font-family:'Bricolage Grotesque',sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;transition:all .25s;font-weight:600}
 .btn-gold{background:linear-gradient(135deg,var(--gold),#8A7530);color:#fff;box-shadow:0 4px 16px rgba(201,168,76,.25)}
 .btn-green{background:linear-gradient(135deg,#2ecc71,#1a8a47);color:#fff}
 .btn-blue{background:linear-gradient(135deg,#3B82F6,#2563EB);color:#fff}
@@ -80,14 +48,14 @@ h3{font-family:'Oswald',sans-serif;font-size:15px;letter-spacing:2px;color:var(-
 .btn-nav{display:flex;gap:10px;margin-top:16px}
 .btn-nav .btn{flex:1}
 .form-group{margin-bottom:14px}
-.form-label{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;color:var(--gold);margin-bottom:6px;display:block}
-.form-input{width:100%;padding:12px 14px;background:var(--cardSolid);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--txt);font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border .2s}
+.form-label{font-family:'Bricolage Grotesque',sans-serif;font-size:12px;letter-spacing:2px;color:var(--gold);margin-bottom:6px;display:block}
+.form-input{width:100%;padding:12px 14px;background:var(--cardSolid);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--txt);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border .2s}
 .form-input:focus{border-color:var(--gold)}
 .form-input::placeholder{color:rgba(184,169,154,.5)}
 select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23C9A84C' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
 textarea.form-input{resize:vertical;min-height:80px;font-size:13px;line-height:1.5}
 .toggle-row{display:flex;gap:10px;margin-bottom:12px}
-.toggle-btn{flex:1;padding:12px;border-radius:var(--radius-sm);text-align:center;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;border:2px solid var(--border);background:var(--card);color:var(--muted);transition:all .25s}
+.toggle-btn{flex:1;padding:12px;border-radius:var(--radius-sm);text-align:center;font-family:'Bricolage Grotesque',sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;border:2px solid var(--border);background:var(--card);color:var(--muted);transition:all .25s}
 .toggle-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.1)}
 .check-grid{display:grid;grid-template-columns:1fr;gap:6px}
 .check-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .2s;font-size:13px}
@@ -109,31 +77,31 @@ textarea.form-input{resize:vertical;min-height:80px;font-size:13px;line-height:1
 .mic-btn.recording{animation:recording 1.5s infinite;background:rgba(192,57,43,.3);border-color:var(--red)}
 .preview-box{background:rgba(39,174,96,.06);border:1px solid rgba(39,174,96,.3);border-radius:var(--radius-sm);padding:12px;margin-top:8px;font-size:13px;line-height:1.6;white-space:pre-wrap}
 .preview-actions{display:flex;gap:8px;margin-top:8px}
-.preview-actions button{flex:1;padding:8px;border-radius:8px;border:none;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1px;cursor:pointer}
+.preview-actions button{flex:1;padding:8px;border-radius:8px;border:none;font-family:'Bricolage Grotesque',sans-serif;font-size:12px;letter-spacing:1px;cursor:pointer}
 .badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;letter-spacing:1px}
 .badge-green{background:rgba(39,174,96,.15);color:var(--green)}
 .badge-red{background:rgba(192,57,43,.15);color:var(--red)}
 .badge-gold{background:rgba(201,168,76,.15);color:var(--gold)}
 .recap-section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px}
-.recap-section h4{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;color:var(--gold);margin-bottom:8px}
+.recap-section h4{font-family:'Bricolage Grotesque',sans-serif;font-size:13px;letter-spacing:2px;color:var(--gold);margin-bottom:8px}
 .recap-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid rgba(68,40,46,.3)}
 .recap-row:last-child{border:none}
 .recap-row .label{color:var(--muted)}
 .recap-row .value{color:var(--txt);font-weight:600;text-align:right;max-width:60%}
 .na-toggle{display:flex;gap:8px;margin-bottom:8px}
-.na-toggle button{padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1px;cursor:pointer;transition:all .2s}
+.na-toggle button{padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:'Bricolage Grotesque',sans-serif;font-size:12px;letter-spacing:1px;cursor:pointer;transition:all .2s}
 .na-toggle button.active-na{border-color:var(--muted);background:rgba(184,169,154,.1);color:var(--txt)}
 .na-toggle button.active-oui{border-color:var(--gold);background:rgba(201,168,76,.1);color:var(--gold)}
 .zone-card{background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px}
 .pin-overlay{position:fixed;inset:0;background:rgba(12,6,8,.95);z-index:100;display:flex;align-items:center;justify-content:center}
 .pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:240px;margin:0 auto}
-.pin-key{padding:16px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-family:'Oswald',sans-serif;font-size:22px;text-align:center;cursor:pointer;transition:all .2s}
+.pin-key{padding:16px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-family:'Bricolage Grotesque',sans-serif;font-size:22px;text-align:center;cursor:pointer;transition:all .2s}
 .pin-key:active{background:rgba(201,168,76,.1);border-color:var(--gold)}
 .weather-chips{display:flex;flex-wrap:wrap;gap:6px}
 .weather-chip{padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:12px;cursor:pointer;transition:all .2s}
 .weather-chip.active{border-color:var(--blue);background:rgba(59,130,246,.1);color:var(--blue)}
 .equipe-slot{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px}
-.equipe-slot .poste{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:2px;color:var(--gold);margin-bottom:6px}
+.equipe-slot .poste{font-family:'Bricolage Grotesque',sans-serif;font-size:11px;letter-spacing:2px;color:var(--gold);margin-bottom:6px}
 
 /* ===== DICTATION OVERLAY ===== */
 .dictee-overlay{position:fixed;inset:0;background:rgba(12,6,8,.97);z-index:200;display:flex;flex-direction:column;overflow-y:auto}
@@ -145,7 +113,7 @@ textarea.form-input{resize:vertical;min-height:80px;font-size:13px;line-height:1
 .dictee-body{flex:1;display:flex;flex-direction:column;padding:20px;overflow-y:auto}
 .dictee-prompt{text-align:center;margin-bottom:20px}
 .dictee-prompt .dp-icon{font-size:40px;margin-bottom:8px}
-.dictee-prompt .dp-title{font-family:'Oswald',sans-serif;font-size:18px;letter-spacing:2px;color:var(--gold)}
+.dictee-prompt .dp-title{font-family:'Bricolage Grotesque',sans-serif;font-size:18px;letter-spacing:2px;color:var(--gold)}
 .dictee-prompt .dp-hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
 .dictee-prompt .dp-example{font-size:11px;color:var(--blue);margin-top:8px;padding:8px 12px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:8px;text-align:left;font-style:italic}
 .dictee-mic{text-align:center;margin:16px 0}
@@ -155,7 +123,7 @@ textarea.form-input{resize:vertical;min-height:80px;font-size:13px;line-height:1
 .dictee-transcript{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin:12px 0;min-height:60px;font-size:13px;line-height:1.6;max-height:200px;overflow-y:auto}
 .dictee-transcript.empty{color:var(--muted);text-align:center;font-style:italic}
 .dictee-actions{display:flex;gap:10px;margin-top:auto;padding-top:16px;flex-shrink:0}
-.dictee-actions button{flex:1;padding:14px;border-radius:var(--radius);font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:1px;cursor:pointer;border:none;transition:all .2s}
+.dictee-actions button{flex:1;padding:14px;border-radius:var(--radius);font-family:'Bricolage Grotesque',sans-serif;font-size:14px;letter-spacing:1px;cursor:pointer;border:none;transition:all .2s}
 .dictee-nav-prev{background:var(--card);color:var(--muted);border:1px solid var(--border)!important}
 .dictee-nav-next{background:var(--blue);color:#fff}
 .dictee-nav-next.finish{background:var(--gold)}
@@ -164,17 +132,17 @@ textarea.form-input{resize:vertical;min-height:80px;font-size:13px;line-height:1
 @keyframes spin{to{transform:rotate(360deg)}}
 .dictee-review{padding:16px}
 .dictee-review-section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px}
-.dictee-review-section h4{font-family:'Oswald',sans-serif;font-size:13px;color:var(--gold);letter-spacing:1px;margin-bottom:8px}
+.dictee-review-section h4{font-family:'Bricolage Grotesque',sans-serif;font-size:13px;color:var(--gold);letter-spacing:1px;margin-bottom:8px}
 .dictee-review-field{display:flex;justify-content:space-between;align-items:flex-start;padding:4px 0;font-size:12px;border-bottom:1px solid rgba(68,40,46,.3)}
 .dictee-review-field:last-child{border-bottom:none}
 .dictee-review-field .label{color:var(--muted);width:35%;flex-shrink:0}
 .dictee-review-field .value{color:var(--txt);text-align:right}
 .pt-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
 .pt-modal{background:#1C1012;border:1px solid var(--border);border-radius:14px;padding:24px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-.pt-modal h3{font-family:'Oswald',sans-serif;letter-spacing:2px;margin-bottom:12px;color:var(--gold);font-size:16px}
-.pt-modal textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:rgba(12,6,8,.6);color:var(--txt);font-family:'Inter',sans-serif;font-size:13px;resize:vertical;margin-bottom:14px}
+.pt-modal h3{font-family:'Bricolage Grotesque',sans-serif;letter-spacing:2px;margin-bottom:12px;color:var(--gold);font-size:16px}
+.pt-modal textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:rgba(12,6,8,.6);color:var(--txt);font-family:'DM Sans',sans-serif;font-size:13px;resize:vertical;margin-bottom:14px}
 .pt-modal .pt-modal-btns{display:flex;gap:10px}
-.pt-modal .pt-modal-btns button{flex:1;padding:12px;border-radius:10px;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:1px;cursor:pointer;border:1px solid var(--border);transition:all .2s}
+.pt-modal .pt-modal-btns button{flex:1;padding:12px;border-radius:10px;font-family:'Bricolage Grotesque',sans-serif;font-size:14px;letter-spacing:1px;cursor:pointer;border:1px solid var(--border);transition:all .2s}
 /* === MOBILE 480px FINE-TUNING === */
 @media(max-width:480px){
   .app{overflow-x:hidden;}
@@ -234,18 +202,20 @@ textarea.form-input{resize:vertical;min-height:80px;font-size:13px;line-height:1
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="error-monitor.js"></script>
-<script src="data.js?v=20"></script>
-<script src="firebase-config.js"></script>
-<script src="firebase-service.js"></script>
-<script src="volo-network.js"></script>
-<script src="logo.js"></script>
-<script src="king-logo.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="../error-monitor.js"></script>
+<script src="../data.js?v=20"></script>
+<script src="../firebase-config.js"></script>
+<script src="../firebase-service.js"></script>
+<script src="../volo-network.js"></script>
+<script src="../logo.js"></script>
+<script src="../king-logo.js"></script>
 </head>
 <body>
+<div class="orb orb-rescue"></div><div class="orb orb-blue"></div><div class="vhs-line"></div>
 <div id="pickOnActiveBanner"></div>
 <script>
-(function(){try{var h=JSON.parse(localStorage.getItem('volo_history')||'[]'),closed=new Set();h.forEach(function(tx){if(tx.statut==='ANNULÉ'||tx.statut==='RETOURNÉ')closed.add((tx.original_timestamp||tx.timestamp)+tx.sauveteur_id)});var active=h.filter(function(tx){return tx.statut==='ACTIF'&&tx.mode==='PICK-ON'&&!closed.has(tx.timestamp+tx.sauveteur_id)});if(active.length===0)return;var totalItems=active.reduce(function(n,tx){try{return n+JSON.parse(tx.items||'[]').length}catch(e){return n}},0);document.getElementById('pickOnActiveBanner').innerHTML='<div onclick="window.location.href=\'index.html\'" style="position:sticky;top:0;z-index:9999;padding:10px 16px;background:linear-gradient(135deg,rgba(201,168,76,.95),rgba(138,117,48,.9));color:#fff;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:2px solid #C9A84C"><span style="font-size:20px;font-weight:bold">!</span><div style="flex:1"><div style="font-weight:800;font-size:13px;letter-spacing:1px;font-family:Oswald,sans-serif">PICK ON ACTIF — '+totalItems+' item'+(totalItems>1?'s':'')+' sorti'+(totalItems>1?'s':'')+'</div><div style="font-size:10px;opacity:.85">Toucher pour retourner au Pick-Off</div></div><span style="font-size:16px">→</span></div>';}catch(e){}})();
+(function(){try{var h=JSON.parse(localStorage.getItem('volo_history')||'[]'),closed=new Set();h.forEach(function(tx){if(tx.statut==='ANNULÉ'||tx.statut==='RETOURNÉ')closed.add((tx.original_timestamp||tx.timestamp)+tx.sauveteur_id)});var active=h.filter(function(tx){return tx.statut==='ACTIF'&&tx.mode==='PICK-ON'&&!closed.has(tx.timestamp+tx.sauveteur_id)});if(active.length===0)return;var totalItems=active.reduce(function(n,tx){try{return n+JSON.parse(tx.items||'[]').length}catch(e){return n}},0);document.getElementById('pickOnActiveBanner').innerHTML='<div onclick="window.location.href=\'index.html\'" style="position:sticky;top:0;z-index:9999;padding:10px 16px;background:linear-gradient(135deg,rgba(201,168,76,.95),rgba(138,117,48,.9));color:#fff;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:2px solid #C9A84C"><span style="font-size:20px;font-weight:bold">!</span><div style="flex:1"><div style="font-weight:800;font-size:13px;letter-spacing:1px;font-family:var(--fn-display)">PICK ON ACTIF — '+totalItems+' item'+(totalItems>1?'s':'')+' sorti'+(totalItems>1?'s':'')+'</div><div style="font-size:10px;opacity:.85">Toucher pour retourner au Pick-Off</div></div><span style="font-size:16px">→</span></div>';}catch(e){}})();
 
 // -- View Transitions -- smooth navigation --
 (function(){
@@ -268,7 +238,7 @@ textarea.form-input{resize:vertical;min-height:80px;font-size:13px;line-height:1
 <div class="app">
 <div class="gold-bar"></div>
 <div class="header">
-  <img src="eagle_tactic.png" alt="GE" style="width:36px;height:36px;border-radius:50%;border:2px solid rgba(201,168,76,.35);flex-shrink:0" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none';this.nextElementSibling.style.display='block'}"><span style="font-size:28px;display:none">GE</span>
+  <img src="../eagle_tactic.png" alt="GE" style="width:36px;height:36px;border-radius:50%;border:2px solid rgba(201,168,76,.35);flex-shrink:0" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none';this.nextElementSibling.style.display='block'}"><span style="font-size:28px;display:none">GE</span>
   <div style="text-align:center">
     <div class="title">PLAN DE TRAVAIL</div>
     <div class="step-label" id="stepLabel">SAUVETAGE TECHNIQUE</div>
@@ -281,8 +251,8 @@ textarea.form-input{resize:vertical;min-height:80px;font-size:13px;line-height:1
 <!-- PIN OVERLAY FOR CONFIRMATION -->
 <div id="pinOverlay" class="pin-overlay" style="display:none">
 <div style="max-width:340px;width:100%;padding:20px;text-align:center">
-  <img src="eagle_tactic.png" alt="Golden Eagles" style="width:80px;height:80px;margin:0 auto 12px;display:block;border-radius:50%;border:2px solid rgba(201,168,76,.35);box-shadow:0 0 20px rgba(201,168,76,.3)" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none'}">
-  <div style="font-family:Oswald;font-size:18px;letter-spacing:3px;color:var(--gold);margin-bottom:4px">SIGNATURE DU CHEF</div>
+  <img src="../eagle_tactic.png" alt="Golden Eagles" style="width:80px;height:80px;margin:0 auto 12px;display:block;border-radius:50%;border:2px solid rgba(201,168,76,.35);box-shadow:0 0 20px rgba(201,168,76,.3)" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none'}">
+  <div style="font-family:Bricolage Grotesque;font-size:18px;letter-spacing:3px;color:var(--gold);margin-bottom:4px">SIGNATURE DU CHEF</div>
   <div style="font-size:12px;color:var(--muted);margin-bottom:20px">Entrez le PIN du chef d'équipe pour confirmer</div>
   <div id="pinDots" style="display:flex;gap:10px;justify-content:center;margin-bottom:16px"></div>
   <div class="pin-pad" id="pinPad"></div>
@@ -291,7 +261,7 @@ textarea.form-input{resize:vertical;min-height:80px;font-size:13px;line-height:1
 </div>
 </div>
 
-<audio id="eagleAudio" preload="none"><source src="eagle.mp3" type="audio/mpeg"></audio>
+<audio id="eagleAudio" preload="none"><source src="../eagle.mp3" type="audio/mpeg"></audio>
 
 <!-- THEME PILL -->
 <div class="theme-pill">
@@ -303,7 +273,7 @@ textarea.form-input{resize:vertical;min-height:80px;font-size:13px;line-height:1
 <div id="dicteeOverlay" class="dictee-overlay" style="display:none">
   <div class="dictee-header">
     <div>
-      <div style="font-family:Oswald;font-size:14px;letter-spacing:2px;color:var(--blue)">MODE DICTÉE</div>
+      <div style="font-family:Bricolage Grotesque;font-size:14px;letter-spacing:2px;color:var(--blue)">MODE DICTÉE</div>
       <div style="font-size:10px;color:var(--muted)" id="dicteeStepLabel">ÉTAPE 1/8</div>
     </div>
     <button onclick="closeDicteeMode()" style="padding:6px 14px;border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:8px;cursor:pointer;font-size:12px">X Quitter</button>
@@ -326,13 +296,26 @@ const PT_CONFIG = {
   MAX_PLANS: 100
 };
 
+// ===== Feature flag: dictee vocale =====
+var FEAT_DICTEE = true; // default ON, overridden by Firebase
+try{
+  firebase.database().ref('config/features/dictee_vocale').on('value',function(snap){
+    FEAT_DICTEE = snap.val()===true;
+    // Re-render si une function render existe
+    if(typeof render==='function') try{render();}catch(e){}
+    // Masquer/afficher le dictee overlay HTML
+    var ov=document.getElementById('dicteeOverlay');
+    if(ov) ov.style.display = FEAT_DICTEE ? '' : 'none';
+  });
+}catch(e){}
+
 // ===== SECURITY MODULE =====
 const VOLO_SEC = {
   async sign(payload) {
     payload.volo_ts = Date.now();
     const msg = JSON.stringify({t:payload.type||'',ts:payload.volo_ts,u:payload.user_id||''});
     const enc = new TextEncoder().encode(msg);
-    const key = await crypto.subtle.importKey('raw', new TextEncoder().encode('volo-sst-eagles-' + (localStorage.getItem('volo_last_volo')||'')), {name:'HMAC',hash:'SHA-256'}, false, ['sign']);
+    const key = await crypto.subtle.importKey('raw', new TextEncoder().encode('volo-sst-eagles-' + (_vDeobf(localStorage.getItem('volo_last_volo'))||'')), {name:'HMAC',hash:'SHA-256'}, false, ['sign']);
     const sig = await crypto.subtle.sign('HMAC', key, enc);
     payload.volo_auth = Array.from(new Uint8Array(sig)).map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,16);
     return payload;
@@ -375,7 +358,7 @@ async function callClaude(messages, opts = {}) {
       const r = await fetch(PT_CONFIG.CLAUDE_PROXY, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...body, volo_auth: localStorage.getItem('volo_last_volo')||'' })
+        body: JSON.stringify({ ...body, volo_auth: _vDeobf(localStorage.getItem('volo_last_volo'))||'' })
       });
       if (r.ok) return await r.json();
     } catch(e) { /* proxy not available */ }
@@ -875,7 +858,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('btn-light').classList.toggle('active', th==='light');
   // Use volo_last_volo (non-sensitive) + legacy transfer fallback
   const transferVolo = sessionStorage.getItem('volo_transfer_volo');
-  const savedVolo = localStorage.getItem('volo_last_volo');
+  const savedVolo = _vDeobf(localStorage.getItem('volo_last_volo'));
   const volo = transferVolo || savedVolo;
   if(transferVolo) sessionStorage.removeItem('volo_transfer_volo');
   // Clean legacy PIN from URL if present
@@ -921,26 +904,26 @@ function renderHome(){
   const todayPlans = plans.filter(p=>p.date===new Date().toISOString().slice(0,10));
   return `
     <div style="text-align:center;padding-top:20px">
-      <img src="eagle_tactic.png" alt="Golden Eagles" style="width:100px;height:100px;margin:0 auto 16px;display:block;border-radius:50%;border:2px solid rgba(201,168,76,.35);box-shadow:0 0 20px rgba(201,168,76,.25)" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none'}">
+      <img src="../eagle_tactic.png" alt="Golden Eagles" style="width:100px;height:100px;margin:0 auto 16px;display:block;border-radius:50%;border:2px solid rgba(201,168,76,.35);box-shadow:0 0 20px rgba(201,168,76,.25)" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none'}">
       <h2 style="font-size:26px">PLAN DE TRAVAIL</h2>
       <p style="font-size:13px;color:var(--muted);letter-spacing:2px;margin-bottom:24px">SAUVETAGE TECHNIQUE — VOLO RESCUE</p>
       ${currentUser?`<div style="font-size:12px;color:var(--blue);margin-bottom:20px">UTILISATEUR: ${currentUser.name} — ${currentUser.role}</div>`:''}
       <div style="display:flex;gap:12px;margin-bottom:12px">
         <div style="flex:1;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center">
-          <div style="font-size:28px;font-weight:700;color:var(--gold);font-family:Oswald">${todayPlans.length}</div>
+          <div style="font-size:28px;font-weight:700;color:var(--gold);font-family:var(--fn-display)">${todayPlans.length}</div>
           <div style="font-size:10px;color:var(--muted);letter-spacing:2px">AUJOURD'HUI</div>
         </div>
         <div style="flex:1;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center">
-          <div style="font-size:28px;font-weight:700;color:var(--gold);font-family:Oswald">${plans.length}</div>
+          <div style="font-size:28px;font-weight:700;color:var(--gold);font-family:var(--fn-display)">${plans.length}</div>
           <div style="font-size:10px;color:var(--muted);letter-spacing:2px">TOTAL</div>
         </div>
       </div>
       <button class="btn btn-gold" onclick="startNewPlan()" style="margin-top:8px;font-size:20px;padding:18px">
         ＋ NOUVEAU PLAN
       </button>
-      <button class="btn btn-outline" onclick="startDicteeMode()" style="margin-top:10px;font-size:16px;padding:14px;border-color:var(--blue);color:var(--blue)">
+      ${FEAT_DICTEE?`<button class="btn btn-outline" onclick="startDicteeMode()" style="margin-top:10px;font-size:16px;padding:14px;border-color:var(--blue);color:var(--blue)">
         MODE DICTÉE GUIDÉE
-      </button>
+      </button>`:''}
       <div style="font-size:10px;color:var(--muted);margin-top:4px">VOLOSST FORMATION</div>
       ${todayPlans.length?`
         <div style="margin-top:20px;text-align:left">
@@ -963,9 +946,9 @@ function renderHome(){
         </div>
       `:''}
       <button class="btn btn-outline" onclick="plan.step=8;render()" style="margin-top:16px">HISTORIQUE (${plans.length})</button>
-      <button onclick="loadFullTestScenario()" style="margin-top:10px;padding:10px 20px;background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(124,58,237,.05));border:1px solid rgba(124,58,237,.4);border-radius:10px;color:rgba(180,130,255,1);font-size:12px;cursor:pointer;letter-spacing:1.5px;font-family:Oswald,sans-serif;display:block;width:100%"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v6l5 8a3 3 0 01-2.6 4.5H6.6A3 3 0 014 17l5-8V3z"/><line x1="9" y1="3" x2="15" y2="3"/></svg> SITUATION TEST — PDF COMPLET</button>
+      <button onclick="loadFullTestScenario()" style="margin-top:10px;padding:10px 20px;background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(124,58,237,.05));border:1px solid rgba(124,58,237,.4);border-radius:10px;color:rgba(180,130,255,1);font-size:12px;cursor:pointer;letter-spacing:1.5px;font-family:var(--fn-display);display:block;width:100%"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v6l5 8a3 3 0 01-2.6 4.5H6.6A3 3 0 014 17l5-8V3z"/><line x1="9" y1="3" x2="15" y2="3"/></svg> SITUATION TEST — PDF COMPLET</button>
       <div style="margin-top:16px">
-        <a href="#" onclick="event.preventDefault();if(currentUser)sessionStorage.setItem('volo_transfer_volo',currentUser.volo);window.open('index.html','_self')" style="color:var(--muted);font-size:12px;text-decoration:none">← Retour à l'inventaire</a>
+        <a href="index.html" class="volo-retour" onclick="event.preventDefault();if(history.length>1){history.back()}else{location.href='index.html'}">&larr; RETOUR</a>
       </div>
     </div>`;
 }
@@ -1121,7 +1104,7 @@ function renderZoneCard(zone, idx, type){
         `).join('')}
         ${(zone.customPrev||[]).map(opt=>`
           <div class="check-item checked" style="border-color:var(--gold)">
-            <div class="box" style="border-color:var(--gold);background:var(--gold);color:#000">&check;</div>
+            <div class="box" style="border-color:var(--gold);background:var(--gold);color:#04040A">&check;</div>
             <span>${opt}</span>
             <button onclick="removeCustomPrev('${prefix}',${idx},'${escQuote(opt)}')" style="margin-left:auto;background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px">X</button>
           </div>
@@ -1129,7 +1112,7 @@ function renderZoneCard(zone, idx, type){
       </div>
       <div style="display:flex;gap:6px;margin-top:6px">
         <input type="text" class="form-input" id="autre_${prefix}_${idx}" style="font-size:12px;flex:1" placeholder="Autre moyen préventif..." onkeydown="if(event.key==='Enter'){addCustomPrev('${prefix}',${idx});event.preventDefault()}">
-        <button onclick="addCustomPrev('${prefix}',${idx})" style="padding:8px 14px;background:var(--gold);border:none;border-radius:8px;color:#fff;font-family:Oswald;font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap">＋ AJOUTER</button>
+        <button onclick="addCustomPrev('${prefix}',${idx})" style="padding:8px 14px;background:var(--gold);border:none;border-radius:8px;color:#fff;font-family:var(--fn-display);font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap">＋ AJOUTER</button>
       </div>
     </div>`;
 }
@@ -1200,7 +1183,7 @@ function renderStep4(){
       `).join('')}
       ${(plan.epiCustom||[]).map(item=>`
         <div class="check-item checked" style="border-color:var(--gold)">
-          <div class="box" style="border-color:var(--gold);background:var(--gold);color:#000">&check;</div>
+          <div class="box" style="border-color:var(--gold);background:var(--gold);color:#04040A">&check;</div>
           <span>${item}</span>
           <button onclick="removeCustomItem('epiCustom','${escQuote(item)}')" style="margin-left:auto;background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px">X</button>
         </div>
@@ -1208,7 +1191,7 @@ function renderStep4(){
     </div>
     <div style="display:flex;gap:6px;margin-bottom:16px">
       <input type="text" class="form-input" id="custom_epi" style="font-size:12px;flex:1" placeholder="Autre EPI..." onkeydown="if(event.key==='Enter'){addCustomItem('epiCustom','custom_epi');event.preventDefault()}">
-      <button onclick="addCustomItem('epiCustom','custom_epi')" style="padding:8px 14px;background:var(--gold);border:none;border-radius:8px;color:#fff;font-family:Oswald;font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap">＋ AJOUTER</button>
+      <button onclick="addCustomItem('epiCustom','custom_epi')" style="padding:8px 14px;background:var(--gold);border:none;border-radius:8px;color:#fff;font-family:var(--fn-display);font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap">＋ AJOUTER</button>
     </div>
     
     <hr class="section-sep">
@@ -1222,7 +1205,7 @@ function renderStep4(){
       `).join('')}
       ${(plan.permisCustom||[]).map(item=>`
         <div class="check-item checked" style="border-color:var(--gold)">
-          <div class="box" style="border-color:var(--gold);background:var(--gold);color:#000">&check;</div>
+          <div class="box" style="border-color:var(--gold);background:var(--gold);color:#04040A">&check;</div>
           <span>${item}</span>
           <button onclick="removeCustomItem('permisCustom','${escQuote(item)}')" style="margin-left:auto;background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px">X</button>
         </div>
@@ -1230,7 +1213,7 @@ function renderStep4(){
     </div>
     <div style="display:flex;gap:6px;margin-bottom:16px">
       <input type="text" class="form-input" id="custom_permis" style="font-size:12px;flex:1" placeholder="Autre permis..." onkeydown="if(event.key==='Enter'){addCustomItem('permisCustom','custom_permis');event.preventDefault()}">
-      <button onclick="addCustomItem('permisCustom','custom_permis')" style="padding:8px 14px;background:var(--gold);border:none;border-radius:8px;color:#fff;font-family:Oswald;font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap">＋ AJOUTER</button>
+      <button onclick="addCustomItem('permisCustom','custom_permis')" style="padding:8px 14px;background:var(--gold);border:none;border-radius:8px;color:#fff;font-family:var(--fn-display);font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap">＋ AJOUTER</button>
     </div>
     
     <hr class="section-sep">
@@ -1244,7 +1227,7 @@ function renderStep4(){
       `).join('')}
       ${(plan.equipementsCustom||[]).map(item=>`
         <div class="check-item checked" style="border-color:var(--gold)">
-          <div class="box" style="border-color:var(--gold);background:var(--gold);color:#000">&check;</div>
+          <div class="box" style="border-color:var(--gold);background:var(--gold);color:#04040A">&check;</div>
           <span>${item}</span>
           <button onclick="removeCustomItem('equipementsCustom','${escQuote(item)}')" style="margin-left:auto;background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px">X</button>
         </div>
@@ -1252,7 +1235,7 @@ function renderStep4(){
     </div>
     <div style="display:flex;gap:6px;margin-bottom:12px">
       <input type="text" class="form-input" id="custom_equip" style="font-size:12px;flex:1" placeholder="Autre équipement..." onkeydown="if(event.key==='Enter'){addCustomItem('equipementsCustom','custom_equip');event.preventDefault()}">
-      <button onclick="addCustomItem('equipementsCustom','custom_equip')" style="padding:8px 14px;background:var(--gold);border:none;border-radius:8px;color:#fff;font-family:Oswald;font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap">＋ AJOUTER</button>
+      <button onclick="addCustomItem('equipementsCustom','custom_equip')" style="padding:8px 14px;background:var(--gold);border:none;border-radius:8px;color:#fff;font-family:var(--fn-display);font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap">＋ AJOUTER</button>
     </div>
     
     ${renderEagleAssistBtn(4)}
@@ -1346,7 +1329,7 @@ function renderStep5(){
         `).join('')}
         ${(plan.securiteAncrages.customRisques||[]).map(r=>`
           <div class="check-item checked" style="border-color:var(--gold)">
-            <div class="box" style="border-color:var(--gold);background:var(--gold);color:#000">&check;</div>
+            <div class="box" style="border-color:var(--gold);background:var(--gold);color:#04040A">&check;</div>
             <span>${r}</span>
             <button onclick="removeAncrageCustom('${escQuote(r)}')" style="margin-left:auto;background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px">X</button>
           </div>
@@ -1354,7 +1337,7 @@ function renderStep5(){
       </div>
       <div style="display:flex;gap:6px;margin-bottom:8px">
         <input type="text" class="form-input" id="ancrage_custom" style="font-size:12px;flex:1" placeholder="Autre risque..." onkeydown="if(event.key==='Enter'){addAncrageCustom();event.preventDefault()}">
-        <button onclick="addAncrageCustom()" style="padding:8px 14px;background:var(--gold);border:none;border-radius:8px;color:#fff;font-family:Oswald;font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap">＋ AJOUTER</button>
+        <button onclick="addAncrageCustom()" style="padding:8px 14px;background:var(--gold);border:none;border-radius:8px;color:#fff;font-family:var(--fn-display);font-size:12px;letter-spacing:1px;cursor:pointer;white-space:nowrap">＋ AJOUTER</button>
       </div>
       <input type="text" class="form-input" placeholder="Moyens de contrôle / mesures..." value="${plan.securiteAncrages.comment||''}" oninput="plan.securiteAncrages.comment=this.value" style="font-size:12px">
     `:''}
@@ -1562,7 +1545,7 @@ async function launchRecapAnalysis(){
   // Show loading in the container
   container.innerHTML = `
     <div style="border:1px solid rgba(59,130,246,.3);background:rgba(59,130,246,.04);border-radius:var(--radius);padding:14px">
-      <h4 style="font-family:Oswald;font-size:13px;color:var(--blue);letter-spacing:1px;margin-bottom:8px">RECOMMANDATIONS EAGLE SST</h4>
+      <h4 style="font-family:var(--fn-display);font-size:13px;color:var(--blue);letter-spacing:1px;margin-bottom:8px">RECOMMANDATIONS EAGLE SST</h4>
       <div style="text-align:center;padding:12px;color:var(--muted);font-size:11px">
         <div class="spinner" style="width:24px;height:24px;border:3px solid var(--border);border-top:3px solid var(--blue);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 8px"></div>
         Analyse de sécurité en cours...
@@ -1590,7 +1573,7 @@ async function launchRecapAnalysis(){
   } catch(e){
     container.innerHTML = `<div style="border:1px solid rgba(201,168,76,.3);background:rgba(201,168,76,.04);border-radius:var(--radius);padding:14px;text-align:center">
       <div style="font-size:24px;margin-bottom:6px">GE</div>
-      <div style="font-family:Oswald;font-size:12px;color:var(--orange);letter-spacing:1px;margin-bottom:6px">ANALYSE EAGLE SST NON DISPONIBLE</div>
+      <div style="font-family:var(--fn-display);font-size:12px;color:var(--orange);letter-spacing:1px;margin-bottom:6px">ANALYSE EAGLE SST NON DISPONIBLE</div>
       <div style="color:var(--muted);font-size:11px">${esc(e.message)}</div>
     </div>`;
   }
@@ -1652,7 +1635,7 @@ function handleConfirmPin(key){
 function renderConfirmed(){
   return `
     <div style="text-align:center;padding-top:20px">
-      <img src="eagle_tactic.png" alt="Golden Eagles" style="width:140px;height:140px;margin:0 auto 16px;display:block;border-radius:50%;border:2px solid rgba(201,168,76,.35);box-shadow:0 0 30px rgba(201,168,76,.3);animation:pulse 2s infinite" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none'}">
+      <img src="../eagle_tactic.png" alt="Golden Eagles" style="width:140px;height:140px;margin:0 auto 16px;display:block;border-radius:50%;border:2px solid rgba(201,168,76,.35);box-shadow:0 0 30px rgba(201,168,76,.3);animation:pulse 2s infinite" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.style.display='none'}">
       <h2 style="font-size:28px;color:var(--green);margin-bottom:4px">PLAN CONFIRMÉ!</h2>
       <div style="font-size:13px;color:var(--muted);margin-bottom:20px">${plan.timestamp}</div>
       <div class="card" style="text-align:left">
@@ -2025,7 +2008,7 @@ function renderHistorique(){
             <div class="badge badge-green">OK</div>
             <div style="font-size:10px;color:var(--muted);margin-top:2px">${p.timestamp?p.timestamp.split(' ')[1]:''}</div>
             ${p.revisions&&p.revisions.length?`<div style="font-size:10px;color:var(--orange)">×${p.revisions.length}</div>`:''}
-            <button onclick="event.stopPropagation();viewPlanPDF(${i})" style="margin-top:4px;padding:4px 10px;background:var(--gold);border:none;border-radius:6px;color:#fff;font-size:10px;font-family:Oswald;letter-spacing:1px;cursor:pointer">PDF</button>
+            <button onclick="event.stopPropagation();viewPlanPDF(${i})" style="margin-top:4px;padding:4px 10px;background:var(--gold);border:none;border-radius:6px;color:#fff;font-size:10px;font-family:var(--fn-display);letter-spacing:1px;cursor:pointer">PDF</button>
           </div>
         </div>
       </div>
@@ -2068,6 +2051,7 @@ function _doRevisePlan(){
 
 // ===== DICTÉE VOCALE =====
 function renderDicteeButton(fieldKey, label){
+  if(!FEAT_DICTEE) return '';
   return `
     <div style="margin-top:8px;margin-bottom:12px">
       <button class="mic-btn" id="mic_${fieldKey}" onclick="startDictation('${fieldKey}')">
@@ -2120,6 +2104,7 @@ function stopRecording(){
 }
 
 function startDictation(fieldKey){
+  if(!FEAT_DICTEE){ showToast('Dictée vocale désactivée','err'); return; }
   if(!PT_CONFIG.WHISPER_PROXY && !PT_CONFIG.OPENAI_API_KEY){
     showToast(' Clé OpenAI non configurée (OPENAI_API_KEY)','err');
     return;
@@ -2181,7 +2166,7 @@ function showDicteePreview(fieldKey, text, rawText){
   const container = document.getElementById('preview_'+fieldKey);
   container.style.display = 'block';
   container.innerHTML = `
-    <div class="preview-box">${esc(text)}</div>
+    <div class="preview-box">${text}</div>
     <div class="preview-actions">
       <button style="background:var(--green);color:#fff" onclick="applyDictee('${fieldKey}',true)">Confirmer</button>
       <button style="background:var(--card);color:var(--txt);border:1px solid var(--border)" onclick="applyDictee('${fieldKey}',false)">Modifier</button>
@@ -2289,6 +2274,7 @@ let dicteeState = {
 };
 
 function startDicteeMode(){
+  if(!FEAT_DICTEE){ showToast('Dictée vocale désactivée','err'); return; }
   if(!PT_CONFIG.WHISPER_PROXY && !PT_CONFIG.OPENAI_API_KEY){
     showToast(' Clé OpenAI non configurée — ajoutez OPENAI_API_KEY dans le config','err');
     return;
@@ -2343,7 +2329,7 @@ function renderDicteeStep(){
       <button class="dictee-mic-btn ${isRec?'recording':transcript?'done':''}" onclick="toggleDicteeMic()">
         ${isRec?'':transcript?'<span style="color:#22C55E;font-weight:700">OK</span>':''}
       </button>
-      <div style="font-size:11px;color:${isRec?'var(--red)':transcript?'var(--green)':'var(--muted)'};margin-top:8px;font-family:Oswald;letter-spacing:1px">
+      <div style="font-size:11px;color:${isRec?'var(--red)':transcript?'var(--green)':'var(--muted)'};margin-top:8px;font-family:var(--fn-display);letter-spacing:1px">
         ${isRec?' ÉCOUTE EN COURS... Appuyez pour arrêter':transcript?'Capté — Appuyez pour re-dicter':'Appuyez pour parler'}
       </div>
     </div>
@@ -2368,6 +2354,7 @@ function renderDicteeStep(){
 }
 
 async function toggleDicteeMic(){
+  if(!FEAT_DICTEE) return;
   const prompt = DICTEE_PROMPTS[dicteeState.step];
   
   // If recording, stop and transcribe
@@ -2472,7 +2459,7 @@ async function processDicteeWithClaude(){
   body.innerHTML = `
     <div class="dictee-loading">
       <div class="spinner"></div>
-      <div style="font-family:Oswald;font-size:18px;color:var(--blue);letter-spacing:2px;margin-bottom:8px">EAGLE SST STRUCTURE VOTRE PLAN...</div>
+      <div style="font-family:var(--fn-display);font-size:18px;color:var(--blue);letter-spacing:2px;margin-bottom:8px">EAGLE SST STRUCTURE VOTRE PLAN...</div>
       <div style="font-size:12px;color:var(--muted)">Analyse en cours — quelques secondes</div>
     </div>
   `;
@@ -2587,14 +2574,14 @@ function showDicteeReview(parsed){
     <div class="dictee-review">
       <div style="text-align:center;margin-bottom:16px">
         <div style="font-size:36px;margin-bottom:8px"></div>
-        <div style="font-family:Oswald;font-size:18px;color:var(--green);letter-spacing:2px">PLAN STRUCTURÉ PAR EAGLE SST</div>
+        <div style="font-family:var(--fn-display);font-size:18px;color:var(--green);letter-spacing:2px">PLAN STRUCTURÉ PAR EAGLE SST</div>
         <div style="font-size:11px;color:var(--muted);margin-top:4px">Vérifiez et corrigez si nécessaire avant d'appliquer</div>
       </div>
       
       <div class="dictee-review-section">
         <h4>MISSION</h4>
         <div class="dictee-review-field"><span class="label">Site / Cie</span><span class="value">${esc(parsed.cie||'—')}</span></div>
-        <div class="dictee-review-field"><span class="label">Type</span><span class="value" style="color:var(--gold)">${(parsed.installationType||[]).join(' + ')||'—'}</span></div>
+        <div class="dictee-review-field"><span class="label">Type</span><span class="value" style="color:var(--gold)">${esc((parsed.installationType||[]).join(' + '))||'—'}</span></div>
         <div class="dictee-review-field"><span class="label">Responsable</span><span class="value">${esc(parsed.responsable||'—')}</span></div>
         <div class="dictee-review-field"><span class="label">Temps estimé</span><span class="value">${parsed.tempsEstime?((parsed.tempsEstime.jours||0)?parsed.tempsEstime.jours+'j ':'')+(parsed.tempsEstime.heures||0)+'h'+String(parsed.tempsEstime.minutes||0).padStart(2,'0'):'—'}</span></div>
       </div>
@@ -2606,24 +2593,24 @@ function showDicteeReview(parsed){
 
       <div class="dictee-review-section">
         <h4>ZONES</h4>
-        ${(parsed.zonesRisque||[]).filter(z=>z.lieu).map(z=>`<div class="dictee-review-field"><span class="label" style="color:#856404"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#EAB308;margin-right:4px"></span>${esc(z.lieu)}</span><span class="value">${z.type||'—'} • ${(z.preventif||[]).join(', ')||'—'}</span></div>`).join('')||'<div style="color:var(--muted);font-size:11px">—</div>'}
-        ${(parsed.zonesChute||[]).filter(z=>z.lieu).map(z=>`<div class="dictee-review-field"><span class="label" style="color:#721C24"> ${esc(z.lieu)}</span><span class="value">${z.type||'—'} • ${(z.preventif||[]).join(', ')||'—'}</span></div>`).join('')}
+        ${(parsed.zonesRisque||[]).filter(z=>z.lieu).map(z=>`<div class="dictee-review-field"><span class="label" style="color:#856404"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#EAB308;margin-right:4px"></span>${esc(z.lieu)}</span><span class="value">${esc(z.type)||'—'} • ${esc((z.preventif||[]).join(', '))||'—'}</span></div>`).join('')||'<div style="color:var(--muted);font-size:11px">—</div>'}
+        ${(parsed.zonesChute||[]).filter(z=>z.lieu).map(z=>`<div class="dictee-review-field"><span class="label" style="color:#721C24"> ${esc(z.lieu)}</span><span class="value">${esc(z.type)||'—'} • ${esc((z.preventif||[]).join(', '))||'—'}</span></div>`).join('')}
       </div>
 
       <div class="dictee-review-section">
         <h4>EPI / PERMIS / ÉQUIPEMENTS</h4>
-        <div class="dictee-review-field"><span class="label">EPI (${epi.length})</span><span class="value">${epi.join(', ')||'—'}</span></div>
-        <div class="dictee-review-field"><span class="label">Permis (${permis.length})</span><span class="value">${permis.join(', ')||'—'}</span></div>
-        <div class="dictee-review-field"><span class="label">Équipements (${equip.length})</span><span class="value">${equip.join(', ')||'—'}</span></div>
+        <div class="dictee-review-field"><span class="label">EPI (${epi.length})</span><span class="value">${esc(epi.join(', '))||'—'}</span></div>
+        <div class="dictee-review-field"><span class="label">Permis (${permis.length})</span><span class="value">${esc(permis.join(', '))||'—'}</span></div>
+        <div class="dictee-review-field"><span class="label">Équipements (${equip.length})</span><span class="value">${esc(equip.join(', '))||'—'}</span></div>
       </div>
 
       <div class="dictee-review-section">
         <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4650E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c.5 3.5 4 6 4 10a4 4 0 11-8 0c0-4 3.5-6.5 4-10z"/></svg> ANALYSE DE RISQUE</h4>
         <div class="dictee-review-field"><span class="label" style="color:var(--red)">Dangers</span><span class="value">${esc(parsed.dangers||'—')}</span></div>
         <div class="dictee-review-field"><span class="label" style="color:var(--green)">Mesures</span><span class="value">${esc(parsed.mesuresRisques||'—')}</span></div>
-        <div class="dictee-review-field"><span class="label">Météo</span><span class="value">${(parsed.meteo?.conditions||[]).join(', ')||'—'} ${parsed.meteo?.temperature?'• '+parsed.meteo.temperature+'°C':''}</span></div>
+        <div class="dictee-review-field"><span class="label">Météo</span><span class="value">${esc((parsed.meteo?.conditions||[]).join(', '))||'—'} ${parsed.meteo?.temperature?'• '+esc(String(parsed.meteo.temperature))+'°C':''}</span></div>
         <div class="dictee-review-field"><span class="label">Travaux adj.</span><span class="value">${parsed.travauxAdj?.active?esc(parsed.travauxAdj.quoi):'N/A'}</span></div>
-        <div class="dictee-review-field"><span class="label">Ancrages</span><span class="value">${parsed.securiteAncrages?.active?(parsed.securiteAncrages.risques||[]).join(', '):'N/A'}</span></div>
+        <div class="dictee-review-field"><span class="label">Ancrages</span><span class="value">${parsed.securiteAncrages?.active?esc((parsed.securiteAncrages.risques||[]).join(', ')):'N/A'}</span></div>
         <div class="dictee-review-field"><span class="label">Cadenassage</span><span class="value">${esc(parsed.cadenassage||'N/A')}</span></div>
       </div>
 
@@ -2632,7 +2619,7 @@ function showDicteeReview(parsed){
         <div class="dictee-review-field"><span class="label">Endroits</span><span class="value">${esc(parsed.endroitsSauvetage||'—')}</span></div>
         <div class="dictee-review-field"><span class="label">Débrayable</span><span class="value" style="color:${parsed.debrayable?'var(--green)':'var(--muted)'}">${parsed.debrayable?'OUI':'NON'}</span></div>
         <div class="dictee-review-field"><span class="label">Procédures</span><span class="value">${esc(parsed.procedures||'—')}</span></div>
-        <div class="dictee-review-field"><span class="label">Communication</span><span class="value">${(parsed.communication||[]).join(', ')||'—'}</span></div>
+        <div class="dictee-review-field"><span class="label">Communication</span><span class="value">${esc((parsed.communication||[]).join(', '))||'—'}</span></div>
       </div>
 
       <!-- RECOMMANDATIONS EAGLE SST -->
@@ -2679,14 +2666,14 @@ async function analyzeWithClaude(parsed){
       
       <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 12px;padding:10px;background:rgba(28,16,18,.5);border-radius:8px">
         <div>
-          <span style="font-family:Oswald;font-size:28px;color:${scoreColor}">${analysis.score}</span>
+          <span style="font-family:var(--fn-display);font-size:28px;color:${scoreColor}">${esc(String(analysis.score))}</span>
           <span style="font-size:11px;color:var(--muted)">/100</span>
         </div>
-        <div style="font-family:Oswald;font-size:14px;letter-spacing:2px;color:${verdictColor};padding:4px 12px;border:1px solid ${verdictColor};border-radius:6px">
-          ${analysis.verdict}
+        <div style="font-family:var(--fn-display);font-size:14px;letter-spacing:2px;color:${verdictColor};padding:4px 12px;border:1px solid ${verdictColor};border-radius:6px">
+          ${esc(analysis.verdict)}
         </div>
       </div>
-      
+
       ${(analysis.critiques||[]).length?`
         <div style="margin-bottom:10px">
           <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:4px">CRITIQUES</div>
@@ -2695,7 +2682,7 @@ async function analyzeWithClaude(parsed){
           `).join('')}
         </div>
       `:''}
-      
+
       ${(analysis.avertissements||[]).length?`
         <div style="margin-bottom:10px">
           <div style="font-size:11px;font-weight:700;color:var(--orange);margin-bottom:4px">AVERTISSEMENTS</div>
@@ -2704,7 +2691,7 @@ async function analyzeWithClaude(parsed){
           `).join('')}
         </div>
       `:''}
-      
+
       ${(analysis.suggestions||[]).length?`
         <div>
           <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:4px">SUGGESTIONS</div>
@@ -2714,7 +2701,7 @@ async function analyzeWithClaude(parsed){
         </div>
       `:''}
     `;
-    
+
   } catch(e){
     console.error('Safety analysis error:', e);
     container.innerHTML = `
@@ -3001,7 +2988,7 @@ function renderEagleAssistBtn(stepNum){
   // Only show if API is available
   if(!PT_CONFIG.CLAUDE_PROXY && !PT_CONFIG.CLAUDE_API_KEY) return '';
   return `<button onclick="launchStepAssist(${stepNum})" id="eagleBtn${stepNum}" 
-    style="width:100%;margin-top:14px;padding:10px 14px;background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(59,130,246,.04));border:1px solid rgba(59,130,246,.35);border-radius:10px;color:var(--blue);font-size:11px;font-family:Oswald;letter-spacing:1.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+    style="width:100%;margin-top:14px;padding:10px 14px;background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(59,130,246,.04));border:1px solid rgba(59,130,246,.35);border-radius:10px;color:var(--blue);font-size:11px;font-family:var(--fn-display);letter-spacing:1.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
     <span style="font-size:16px">GE</span> EAGLE SST — SUGGESTIONS POUR CETTE ÉTAPE
   </button>`;
 }
@@ -3093,7 +3080,7 @@ async function launchStepAssist(stepNum){
     const result = JSON.parse(clean);
     renderStepAssistResultV2(container, result.suggestions||[], stepNum);
   } catch(e){
-    container.innerHTML = `<div style="padding:8px 12px;border:1px solid rgba(201,168,76,.3);border-radius:8px;font-size:10px;color:var(--gold)">Eagle indisponible: ${e.message}</div>`;
+    container.innerHTML = `<div style="padding:8px 12px;border:1px solid rgba(201,168,76,.3);border-radius:8px;font-size:10px;color:var(--gold)">Eagle indisponible: ${esc(e.message)}</div>`;
   } finally {
     if(btn){ btn.disabled=false; btn.innerHTML='<span style="font-size:16px">GE</span> EAGLE SST — ACTUALISER SUGGESTIONS'; }
   }
@@ -3137,8 +3124,8 @@ function renderRecapAnalysisUI(container, analysis, scoreColor, verdictColor){
       return `<div style="display:flex;align-items:flex-start;gap:6px;padding:7px 8px;margin:3px 0;background:${bg};border-left:3px solid ${borderColor};border-radius:0 7px 7px 0">
         <span style="font-size:10.5px;flex:1;line-height:1.45;color:var(--txt)">${escHtml(txt)}</span>
         <div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0">
-          <button onclick="eagleRecapApply(${idx})" style="padding:3px 9px;background:${borderColor};border:none;border-radius:5px;color:#fff;font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer;white-space:nowrap">APPLIQUER</button>
-          <button onclick="eagleRecapEdit(${idx})" style="padding:3px 9px;background:none;border:1px solid ${borderColor};border-radius:5px;color:${labelColor};font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer;white-space:nowrap">MODIFIER</button>
+          <button onclick="eagleRecapApply(${idx})" style="padding:3px 9px;background:${borderColor};border:none;border-radius:5px;color:#fff;font-size:9px;font-family:var(--fn-display);letter-spacing:1px;cursor:pointer;white-space:nowrap">APPLIQUER</button>
+          <button onclick="eagleRecapEdit(${idx})" style="padding:3px 9px;background:none;border:1px solid ${borderColor};border-radius:5px;color:${labelColor};font-size:9px;font-family:var(--fn-display);letter-spacing:1px;cursor:pointer;white-space:nowrap">MODIFIER</button>
         </div>
       </div>`;
     }).join('');
@@ -3164,25 +3151,25 @@ function renderRecapAnalysisUI(container, analysis, scoreColor, verdictColor){
     <div style="margin-top:10px;padding:10px;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.25);border-radius:8px">
       <div style="font-size:9px;color:var(--gold);font-weight:700;letter-spacing:1.5px;margin-bottom:6px">MODIFIER VOS RÉPONSES EXISTANTES</div>
       <div style="display:flex;flex-wrap:wrap;gap:5px">
-        ${editFields.map(f=>`<button onclick="eagleOpenFieldEditor('${f.champ}')" style="padding:5px 10px;background:none;border:1px solid rgba(201,168,76,.4);border-radius:7px;color:var(--gold);font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer">${f.label}</button>`).join('')}
+        ${editFields.map(f=>`<button onclick="eagleOpenFieldEditor('${f.champ}')" style="padding:5px 10px;background:none;border:1px solid rgba(201,168,76,.4);border-radius:7px;color:var(--gold);font-size:9px;font-family:var(--fn-display);letter-spacing:1px;cursor:pointer">${f.label}</button>`).join('')}
       </div>
     </div>` : '';
 
   container.innerHTML = `
     <div style="border:1px solid rgba(59,130,246,.3);background:rgba(59,130,246,.04);border-radius:var(--radius);padding:14px">
-      <h4 style="font-family:Oswald;font-size:13px;color:var(--blue);letter-spacing:1px;margin-bottom:8px">RECOMMANDATIONS EAGLE SST</h4>
+      <h4 style="font-family:var(--fn-display);font-size:13px;color:var(--blue);letter-spacing:1px;margin-bottom:8px">RECOMMANDATIONS EAGLE SST</h4>
       <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 12px;padding:10px;background:var(--card);border-radius:8px">
-        <div><span style="font-family:Oswald;font-size:28px;color:${scoreColor}">${analysis.score}</span><span style="font-size:11px;color:var(--muted)">/100</span></div>
-        <div style="font-family:Oswald;font-size:14px;letter-spacing:2px;color:${verdictColor};padding:4px 12px;border:1px solid ${verdictColor};border-radius:6px">${analysis.verdict}</div>
+        <div><span style="font-family:var(--fn-display);font-size:28px;color:${scoreColor}">${escHtml(String(analysis.score))}</span><span style="font-size:11px;color:var(--muted)">/100</span></div>
+        <div style="font-family:var(--fn-display);font-size:14px;letter-spacing:2px;color:${verdictColor};padding:4px 12px;border:1px solid ${verdictColor};border-radius:6px">${escHtml(analysis.verdict)}</div>
       </div>
       ${critiqueRows}${avertRows}${suggRows}
       ${(critiques.length||avertissements.length||suggestions.length) ? `
       <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px">
-        <button onclick="eagleRecapApplyGroup('dangers')" style="flex:1;min-width:110px;padding:7px;background:rgba(192,57,43,.1);border:1px solid var(--red);border-radius:7px;color:var(--red);font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer">TOUT→ DANGERS</button>
-        <button onclick="eagleRecapApplyGroup('mesuresRisques')" style="flex:1;min-width:110px;padding:7px;background:rgba(230,126,34,.08);border:1px solid var(--orange);border-radius:7px;color:var(--orange);font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer">TOUT→ MESURES</button>
-        <button onclick="eagleRecapApplyGroup('procedures')" style="flex:1;min-width:110px;padding:7px;background:rgba(39,174,96,.08);border:1px solid var(--green);border-radius:7px;color:var(--green);font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer">TOUT→ PROCÉDURES</button>
+        <button onclick="eagleRecapApplyGroup('dangers')" style="flex:1;min-width:110px;padding:7px;background:rgba(192,57,43,.1);border:1px solid var(--red);border-radius:7px;color:var(--red);font-size:9px;font-family:var(--fn-display);letter-spacing:1px;cursor:pointer">TOUT→ DANGERS</button>
+        <button onclick="eagleRecapApplyGroup('mesuresRisques')" style="flex:1;min-width:110px;padding:7px;background:rgba(230,126,34,.08);border:1px solid var(--orange);border-radius:7px;color:var(--orange);font-size:9px;font-family:var(--fn-display);letter-spacing:1px;cursor:pointer">TOUT→ MESURES</button>
+        <button onclick="eagleRecapApplyGroup('procedures')" style="flex:1;min-width:110px;padding:7px;background:rgba(39,174,96,.08);border:1px solid var(--green);border-radius:7px;color:var(--green);font-size:9px;font-family:var(--fn-display);letter-spacing:1px;cursor:pointer">TOUT→ PROCÉDURES</button>
       </div>
-      <button onclick="eagleRecapApplyAll()" style="width:100%;margin-top:6px;padding:10px;background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(39,174,96,.1));border:1.5px solid var(--blue);border-radius:7px;color:var(--blue);font-size:10px;font-family:Oswald;letter-spacing:1.5px;cursor:pointer;font-weight:700">APPLIQUER TOUTES LES SUGGESTIONS</button>
+      <button onclick="eagleRecapApplyAll()" style="width:100%;margin-top:6px;padding:10px;background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(39,174,96,.1));border:1.5px solid var(--blue);border-radius:7px;color:var(--blue);font-size:10px;font-family:var(--fn-display);letter-spacing:1.5px;cursor:pointer;font-weight:700">APPLIQUER TOUTES LES SUGGESTIONS</button>
       ` : '<div style="color:var(--green);font-size:11px;text-align:center;padding:8px">Plan complet — aucun oubli détecté</div>'}
       ${editButtons}
     </div>`;
@@ -3259,13 +3246,13 @@ function _eagleDrawer(initialText, title, onConfirm){
   overlay.innerHTML = `
     <div style="background:var(--card);border-radius:16px 16px 0 0;padding:18px 16px 24px;width:100%;max-width:540px;border-top:2px solid var(--blue);box-shadow:0 -8px 30px rgba(0,0,0,.4)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div style="font-family:Oswald;font-size:13px;color:var(--blue);letter-spacing:1.5px">${escHtml(title)}</div>
+        <div style="font-family:var(--fn-display);font-size:13px;color:var(--blue);letter-spacing:1.5px">${escHtml(title)}</div>
         <button onclick="document.getElementById('eagleEditOverlay').remove()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0 4px">X</button>
       </div>
       <textarea id="eagleDrawerTA" style="width:100%;box-sizing:border-box;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--txt);padding:12px;font-size:12px;min-height:110px;font-family:inherit;resize:vertical;line-height:1.5">${escHtml(initialText)}</textarea>
       <div style="display:flex;gap:8px;margin-top:10px">
-        <button onclick="document.getElementById('eagleEditOverlay').remove()" style="flex:1;padding:13px;background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:Oswald;font-size:12px;cursor:pointer">ANNULER</button>
-        <button id="eagleDrawerConfirm" style="flex:2;padding:13px;background:var(--blue);border:none;border-radius:10px;color:#fff;font-family:Oswald;font-size:13px;letter-spacing:1.5px;cursor:pointer">APPLIQUER AU PLAN</button>
+        <button onclick="document.getElementById('eagleEditOverlay').remove()" style="flex:1;padding:13px;background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:var(--fn-display);font-size:12px;cursor:pointer">ANNULER</button>
+        <button id="eagleDrawerConfirm" style="flex:2;padding:13px;background:var(--blue);border:none;border-radius:10px;color:#fff;font-family:var(--fn-display);font-size:13px;letter-spacing:1.5px;cursor:pointer">APPLIQUER AU PLAN</button>
       </div>
     </div>`;
   document.body.appendChild(overlay);
@@ -3299,19 +3286,19 @@ function renderStepAssistResultV2(container, suggestions, stepNum){
       <span style="font-size:13px;flex-shrink:0;margin-top:1px">${icon}</span>
       <div style="flex:1;min-width:0">
         <div style="font-size:10.5px;color:var(--txt);margin-bottom:4px;line-height:1.4">${escHtml(s.texte||s.label||'')}</div>
-        <div style="font-size:9px;color:var(--muted);margin-bottom:5px">${s.label||''} ${s.scenario?'• '+s.scenario:''}</div>
+        <div style="font-size:9px;color:var(--muted);margin-bottom:5px">${escHtml(s.label||'')} ${s.scenario?'• '+escHtml(s.scenario):''}</div>
         <div style="display:flex;gap:5px;flex-wrap:wrap">
-          <button onclick="eagleStepApply(${i})" style="padding:4px 10px;background:${border};border:none;border-radius:6px;color:#fff;font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer">APPLIQUER</button>
-          <button onclick="eagleStepEdit(${i})" style="padding:4px 10px;background:none;border:1px solid ${border};border-radius:6px;color:${border};font-size:9px;font-family:Oswald;letter-spacing:1px;cursor:pointer">MODIFIER</button>
+          <button onclick="eagleStepApply(${i})" style="padding:4px 10px;background:${border};border:none;border-radius:6px;color:#fff;font-size:9px;font-family:var(--fn-display);letter-spacing:1px;cursor:pointer">APPLIQUER</button>
+          <button onclick="eagleStepEdit(${i})" style="padding:4px 10px;background:none;border:1px solid ${border};border-radius:6px;color:${border};font-size:9px;font-family:var(--fn-display);letter-spacing:1px;cursor:pointer">MODIFIER</button>
         </div>
       </div>
     </div>`;
   }).join('');
 
   container.innerHTML = `<div style="border:1px solid rgba(59,130,246,.25);border-radius:10px;padding:12px;margin-top:4px;background:rgba(59,130,246,.03)">
-    <div style="font-family:Oswald;font-size:11px;color:var(--blue);letter-spacing:1.5px;margin-bottom:8px">SUGGESTIONS EAGLE SST — ÉTAPE ${stepNum}</div>
+    <div style="font-family:var(--fn-display);font-size:11px;color:var(--blue);letter-spacing:1.5px;margin-bottom:8px">SUGGESTIONS EAGLE SST — ÉTAPE ${stepNum}</div>
     ${chips}
-    <button onclick="eagleStepApplyAll()" style="width:100%;margin-top:6px;padding:8px;background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(39,174,96,.1));border:1.5px solid var(--blue);border-radius:8px;color:var(--blue);font-size:10px;font-family:Oswald;letter-spacing:1.5px;cursor:pointer">TOUT APPLIQUER (${suggestions.length})</button>
+    <button onclick="eagleStepApplyAll()" style="width:100%;margin-top:6px;padding:8px;background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(39,174,96,.1));border:1.5px solid var(--blue);border-radius:8px;color:var(--blue);font-size:10px;font-family:var(--fn-display);letter-spacing:1.5px;cursor:pointer">TOUT APPLIQUER (${suggestions.length})</button>
   </div>`;
 }
 
@@ -3376,14 +3363,14 @@ function eagleEditOpen(text, champ, preventif, type){
   const label = champLabels[champ] || champ;
 
   overlay.innerHTML = `<div style="background:var(--card);border-radius:16px 16px 0 0;padding:20px;width:100%;max-width:520px;border-top:2px solid var(--blue)">
-    <div style="font-family:Oswald;font-size:13px;color:var(--blue);letter-spacing:1.5px;margin-bottom:4px">MODIFIER LA SUGGESTION</div>
+    <div style="font-family:var(--fn-display);font-size:13px;color:var(--blue);letter-spacing:1.5px;margin-bottom:4px">MODIFIER LA SUGGESTION</div>
     <div style="font-size:10px;color:var(--muted);margin-bottom:12px">→ Sera injecté dans : <strong>${label}</strong></div>
-    <textarea id="eagleEditTA" style="width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--txt);padding:10px 12px;font-size:12px;min-height:90px;font-family:inherit;resize:vertical">${text}</textarea>
+    <textarea id="eagleEditTA" style="width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--txt);padding:10px 12px;font-size:12px;min-height:90px;font-family:inherit;resize:vertical">${esc(text)}</textarea>
     <div style="display:flex;gap:8px;margin-top:10px">
       <button onclick="document.getElementById('eagleEditOverlay').remove()" 
-        style="flex:1;padding:12px;background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:Oswald;font-size:12px;cursor:pointer">ANNULER</button>
+        style="flex:1;padding:12px;background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:var(--fn-display);font-size:12px;cursor:pointer">ANNULER</button>
       <button onclick="eagleEditConfirm('${champ}',${JSON.stringify(preventif||[])},${JSON.stringify(type||'')})"
-        style="flex:2;padding:12px;background:var(--blue);border:none;border-radius:8px;color:#fff;font-family:Oswald;font-size:13px;letter-spacing:1.5px;cursor:pointer">INJECTER DANS LE PLAN</button>
+        style="flex:2;padding:12px;background:var(--blue);border:none;border-radius:8px;color:#fff;font-family:var(--fn-display);font-size:13px;letter-spacing:1.5px;cursor:pointer">INJECTER DANS LE PLAN</button>
     </div>
   </div>`;
   document.body.appendChild(overlay);

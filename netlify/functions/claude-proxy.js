@@ -5,7 +5,7 @@
 // ══════════════════════════════════════════
 exports.handler = async function(event, context) {
   const CORS = {
-    'Access-Control-Allow-Origin': 'https://voloinv7.netlify.app',
+    'Access-Control-Allow-Origin': event.headers.origin && (event.headers.origin.endsWith('.netlify.app') || event.headers.origin === 'https://voloinv7.netlify.app' || event.headers.origin === 'https://volosst.netlify.app') ? event.headers.origin : 'https://voloinv7.netlify.app',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Content-Type': 'application/json'
@@ -37,8 +37,8 @@ exports.handler = async function(event, context) {
     return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'messages array required' }) };
   }
 
-  // Cap max_tokens to keep response fast (Netlify 26s limit)
-  const maxTokens = Math.min(payload.max_tokens || 2048, 2048);
+  // Cap max_tokens (Netlify Pro: 26s timeout)
+  const maxTokens = Math.min(payload.max_tokens || 4096, 4096);
 
   try {
     const controller = new AbortController();

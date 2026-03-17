@@ -2,7 +2,7 @@
 //  VOLO SST — Service Worker
 //  Cache-first pour assets, network-first pour API
 // ══════════════════════════════════════════
-const CACHE_NAME = 'volo-sst-v31.0';
+const CACHE_NAME = 'volo-sst-v34.0';
 const ASSETS = [
   '/index.html',
   '/agenda.html',
@@ -19,7 +19,7 @@ const ASSETS = [
   '/presentation.html',
   '/badge-tactique.html',
   '/lexique.html',
-  '/dashboard-rpg.html',
+  /* '/dashboard-rpg.html', — retiré: fichier inexistant, cassait cache.addAll() */
   '/voice-command.html',
   '/volo-automation.html',
   '/cnesst-reglements.js',
@@ -39,10 +39,23 @@ const ASSETS = [
   '/mode-terrain.html',
   '/volo-network.js',
   '/error-monitor.js',
+  '/data.js',
   '/eagle_tactic.png',
   '/eagle_crown.jpg',
   '/eagle.mp3',
-  '/manifest.json'
+  '/manifest.json',
+  '/v2/index.html',
+  '/v2/caisses-stock.html',
+  '/v2/agenda.html',
+  '/v2/plan-travail.html',
+  '/v2/dashboard-superviseur.html',
+  '/v2/rapport-cnesst.html',
+  '/v2/qr.html',
+  '/v2/tracker-chantier.html',
+  '/v2/pointage.html',
+  '/v2/presentation.html',
+  '/v2/lexique.html',
+  '/v2/v2-glass.css'
 ];
 
 // Install — cache les assets critiques
