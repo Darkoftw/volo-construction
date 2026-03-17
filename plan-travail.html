@@ -938,10 +938,10 @@ function renderHome(){
       <button class="btn btn-gold" onclick="startNewPlan()" style="margin-top:8px;font-size:20px;padding:18px">
         ＋ NOUVEAU PLAN
       </button>
-      <button class="btn btn-outline" onclick="startDicteeMode()" style="margin-top:10px;font-size:16px;padding:14px;border-color:var(--blue);color:var(--blue)">
+      <button class="btn btn-outline" style="margin-top:10px;font-size:16px;padding:14px;border-color:#333;color:#5A5660;opacity:.4;pointer-events:none;cursor:default">
         MODE DICTÉE GUIDÉE
       </button>
-      <div style="font-size:10px;color:var(--muted);margin-top:4px">VOLOSST FORMATION</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px">EN PAUSE — Whisper API</div>
       ${todayPlans.length?`
         <div style="margin-top:20px;text-align:left">
           <h3 style="text-align:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> PLANS DU JOUR</h3>
@@ -963,7 +963,7 @@ function renderHome(){
         </div>
       `:''}
       <button class="btn btn-outline" onclick="plan.step=8;render()" style="margin-top:16px">HISTORIQUE (${plans.length})</button>
-      <button onclick="loadFullTestScenario()" style="margin-top:10px;padding:10px 20px;background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(124,58,237,.05));border:1px solid rgba(124,58,237,.4);border-radius:10px;color:rgba(180,130,255,1);font-size:12px;cursor:pointer;letter-spacing:1.5px;font-family:Oswald,sans-serif;display:block;width:100%"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v6l5 8a3 3 0 01-2.6 4.5H6.6A3 3 0 014 17l5-8V3z"/><line x1="9" y1="3" x2="15" y2="3"/></svg> SITUATION TEST — PDF COMPLET</button>
+      <button style="margin-top:10px;padding:10px 20px;background:rgba(50,50,50,.2);border:1px solid #333;border-radius:10px;color:#5A5660;font-size:12px;letter-spacing:1.5px;font-family:Oswald,sans-serif;display:block;width:100%;opacity:.4;pointer-events:none;cursor:default"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5A5660" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v6l5 8a3 3 0 01-2.6 4.5H6.6A3 3 0 014 17l5-8V3z"/><line x1="9" y1="3" x2="15" y2="3"/></svg> SITUATION TEST — EN PAUSE</button>
       <div style="margin-top:16px">
         <a href="index.html" onclick="event.preventDefault();if(currentUser)sessionStorage.setItem('volo_transfer_volo',currentUser.volo);if(history.length>1){history.back()}else{location.href='index.html'}" style="color:var(--muted);font-size:12px;text-decoration:none">← Retour à l'inventaire</a>
       </div>
@@ -1472,7 +1472,20 @@ function renderStep6(){
         <button class="btn btn-outline" onclick="launchRecapAnalysis()" id="btnAnalyse" style="width:100%;border-color:var(--blue);color:var(--blue);font-size:13px;padding:12px">
           ANALYSE EAGLE SST — Vérification sécurité
         </button>
-      ` : ''}
+      ` : `
+        <div style="padding:12px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);border-radius:12px">
+          <div style="font-family:Oswald;font-size:12px;letter-spacing:1.5px;color:var(--gold);margin-bottom:8px">CHECKLIST SÉCURITÉ (SANS IA)</div>
+          <div style="font-size:11px;color:var(--txt);line-height:1.6">
+            <div style="margin-bottom:4px">• Harnais et ancrage vérifiés pour chaque zone en hauteur?</div>
+            <div style="margin-bottom:4px">• Permis espace clos si applicable?</div>
+            <div style="margin-bottom:4px">• Détecteur 4 gaz calibré et testé?</div>
+            <div style="margin-bottom:4px">• Communication radio fonctionnelle entre tous les postes?</div>
+            <div style="margin-bottom:4px">• Plan de sauvetage connu de toute l'équipe?</div>
+            <div style="margin-bottom:4px">• Numéros d'urgence affichés (911, centre antipoison)?</div>
+            <div>• AED et trousse premiers soins accessibles?</div>
+          </div>
+        </div>
+      `}
     </div>
     
     <div style="margin-top:20px">
@@ -2997,13 +3010,50 @@ function startNewPlan(){
 // ===== EAGLE SST — INJECTION DES SUGGESTIONS =====
 // ===== EAGLE SST — ASSIST PAR STEP =====
 
+// Conseils statiques par step (quand pas d'API key)
+const EAGLE_STATIC_TIPS = {
+  3: [
+    {titre:'Zone de chute en hauteur',desc:'Toute zone où un travailleur évolue à plus de 3m — prévoir ligne de vie, harnais, ancrage certifié.',ex:'Ex: "Toit du bâtiment B — chute libre 8m — ligne de vie horizontale + harnais 5 pts"'},
+    {titre:'Espace clos identifié?',desc:'Réservoir, fosse, silo, cuve = permis espace clos obligatoire (RSST art. 300).',ex:'Ex: "Cuve #3 — espace clos — permis + trépied + détecteur 4 gaz"'},
+    {titre:'Zone d\'opération adjacente',desc:'Vérifier les risques des travaux adjacents: soudure, découpe, engins mobiles.',ex:'Ex: "Atelier soudure adjacent — risque étincelles — écran ignifuge + périmètre 5m"'}
+  ],
+  4: [
+    {titre:'EPI de base manquant?',desc:'Casque CSA, lunettes, gants, bottes à cap, harnais si hauteur > 3m.',ex:'Ex: Ajouter "Protection auditive" si bruit > 85 dB'},
+    {titre:'Permis requis?',desc:'A.S.T., permis espace clos, permis de feu, permis de travail en hauteur selon la situation.',ex:'Ex: "Permis de feu" si soudure/découpe à proximité'},
+    {titre:'Équipement de sauvetage',desc:'Trépied, treuil, civière, corde de sauvetage, AED si travail isolé.',ex:'Ex: Ajouter "AED" si chantier éloigné des secours'}
+  ],
+  5: [
+    {titre:'Dangers environnementaux',desc:'Météo, chaleur/froid extrême, foudre, vents forts > 40km/h.',ex:'Ex: "Risque de foudre — arrêt des travaux si orage à moins de 10km"'},
+    {titre:'Mesures de contrôle',desc:'Cadenassage, périmètre de sécurité, signalisation, vigie, communication radio.',ex:'Ex: "Cadenassage LOTO sur disjoncteur #12 + cadenas personnel rouge"'},
+    {titre:'Plan de communication',desc:'Radio, cellulaire, sifflet, signal visuel — qui appelle le 911?',ex:'Ex: "Radio canal 4 — chef = Jonathan — appel 911 = Danny"'}
+  ]
+};
+
 function renderEagleAssistBtn(stepNum){
-  // Only show if API is available
-  if(!PT_CONFIG.CLAUDE_PROXY && !PT_CONFIG.CLAUDE_API_KEY) return '';
-  return `<button onclick="launchStepAssist(${stepNum})" id="eagleBtn${stepNum}" 
-    style="width:100%;margin-top:14px;padding:10px 14px;background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(59,130,246,.04));border:1px solid rgba(59,130,246,.35);border-radius:10px;color:var(--blue);font-size:11px;font-family:Oswald;letter-spacing:1.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
-    <span style="font-size:16px">GE</span> EAGLE SST — SUGGESTIONS POUR CETTE ÉTAPE
-  </button>`;
+  // Si API dispo → bouton IA
+  if(PT_CONFIG.CLAUDE_PROXY || PT_CONFIG.CLAUDE_API_KEY){
+    return '<button onclick="launchStepAssist('+stepNum+')" id="eagleBtn'+stepNum+'" '+
+      'style="width:100%;margin-top:14px;padding:10px 14px;background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(59,130,246,.04));border:1px solid rgba(59,130,246,.35);border-radius:10px;color:var(--blue);font-size:11px;font-family:Oswald;letter-spacing:1.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">'+
+      '<span style="font-size:16px">GE</span> EAGLE SST — SUGGESTIONS POUR CETTE ÉTAPE'+
+    '</button>';
+  }
+  // Sinon → conseils statiques éditables
+  const tips = EAGLE_STATIC_TIPS[stepNum];
+  if(!tips) return '';
+  return '<div style="margin-top:14px;border:1px solid rgba(201,168,76,.25);border-radius:12px;overflow:hidden">'+
+    '<div style="padding:10px 14px;background:rgba(201,168,76,.08);display:flex;align-items:center;gap:8px;cursor:pointer" onclick="const p=this.nextElementSibling;p.style.display=p.style.display===\'none\'?\'block\':\'none\'">'+
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'+
+      '<span style="font-family:Oswald;font-size:11px;letter-spacing:1.5px;color:var(--gold);flex:1">CONSEILS SST — EXEMPLES</span>'+
+      '<span style="color:var(--muted);font-size:10px">▾</span>'+
+    '</div>'+
+    '<div style="display:none;padding:10px 14px">'+
+      tips.map(t=>'<div style="margin-bottom:10px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:10px">'+
+        '<div style="font-family:Oswald;font-size:12px;letter-spacing:1px;color:var(--gold);margin-bottom:4px">'+t.titre+'</div>'+
+        '<div style="font-size:11px;color:var(--txt);line-height:1.4;margin-bottom:6px">'+t.desc+'</div>'+
+        '<div style="font-size:10px;color:var(--blue);padding:6px 8px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:6px;font-style:italic">'+t.ex+'</div>'+
+      '</div>').join('')+
+    '</div>'+
+  '</div>';
 }
 
 // Prompts contextuels par step
