@@ -6014,40 +6014,16 @@ function startPickOff(){
   setState({step:2,mode:'pickoff',scanned:[],sceaux:{},depot:null,dest:null,remorques:[],sauvs:[],numProjet:'',personneRessource:'',detailsJob:'',_showAllPickoff:false});
 }
 
-// ═══ EPI SIMPLIFIE — Flow demande/retour EPI sans wizard complet ═══
+// ═══ EPI SIMPLIFIE — Flow demande/retour EPI ═══
+// Surveillant: scan QR ou entre le code item — PAS de liste browsable
+// Le sauveteur/chef remet l'EPI physiquement après validation
 function renderEpiRequest(){
   const isDemande=state._epiMode==='demande';
   const title=isDemande?'DEMANDE EPI':'RETOUR EPI';
   const user=PERSONNEL.find(p=>p.volo==='V'+state.pin);
   const userName=user?user.name:'Utilisateur';
-  const scannedIds=state.scanned.map(s=>s.id);
-  const q=(state.itemQ||'').toLowerCase();
 
-  // Filtrer items EPI seulement
-  const EPI_CATS=["EPI","EPI Sauveteur","Casques sauveteur","Chienne de Travail","Vêtement","Surveillant"];
-  const EPI_NAMES=["casque","gant","lunette","botte","chienne","veste","combinaison","tychem","coquille"];
-  let available=ITEMS.filter(i=>!scannedIds.includes(i.id));
-  available=available.filter(i=>EPI_CATS.includes(i.cat)||EPI_NAMES.some(n=>(i.name||'').toLowerCase().includes(n))||i.id.startsWith("SURV-")||i.id.startsWith("CSQ-")||i.id.startsWith("CHT-"));
-  if(q) available=available.filter(i=>(i.name||'').toLowerCase().includes(q)||(i.id||'').toLowerCase().includes(q));
-
-  // Si retour EPI — montrer les items que cet user a sorti
-  if(!isDemande){
-    const h=getHistory();
-    const myEpiItems=[];
-    h.forEach(tx=>{
-      if(tx.mode==='EPI-OUT'&&tx.statut==='ACTIF'&&(tx.sauveteur_id===(user?user.id:''))){
-        try{JSON.parse(tx.items||'[]').forEach(it=>myEpiItems.push(it));}catch(e){}
-      }
-    });
-    if(myEpiItems.length>0){
-      const myIds=myEpiItems.map(i=>i.id);
-      available=ITEMS.filter(i=>myIds.includes(i.id)&&!scannedIds.includes(i.id));
-    }
-  }
-
-  const shown=available.slice(0,30);
-
-  let html='<button class="top-back" onclick="setState({step:0})"><svg style="width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;vertical-align:middle" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> RETOUR</button>';
+  let html='<button class="top-back" onclick="stopQrScanner();setState({step:0,scanned:[],_epiMode:null,_epiScan:false,_epiCode:\'\'})"><svg style="width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;vertical-align:middle" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> RETOUR</button>';
 
   // Header
   html+='<div style="text-align:center;padding:16px 0 8px">';
@@ -6055,58 +6031,68 @@ function renderEpiRequest(){
   html+='<div style="font-size:12px;color:var(--muted);margin-top:4px">'+escapeHtml(userName)+' — V'+state.pin+'</div>';
   html+='</div>';
 
-  // Items sélectionnés
+  // Items scannés/ajoutés
   if(state.scanned.length>0){
     html+='<div style="padding:8px 16px;margin-bottom:8px">';
-    html+='<div style="font-family:Oswald,sans-serif;font-size:11px;letter-spacing:2px;color:var(--gold);margin-bottom:8px">SELECTIONNES ('+state.scanned.length+')</div>';
+    html+='<div style="font-family:Oswald,sans-serif;font-size:11px;letter-spacing:2px;color:var(--gold);margin-bottom:8px">EPI VALIDES ('+state.scanned.length+')</div>';
     state.scanned.forEach(s=>{
-      html+='<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--card);border:1px solid '+(isDemande?'rgba(59,130,246,.3)':'rgba(230,81,0,.3)')+';border-radius:8px;margin-bottom:4px">';
-      html+='<span style="font-size:12px;flex:1;color:var(--txt)">'+escapeHtml(s.name)+'</span>';
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--card);border:1px solid rgba(39,174,96,.3);border-radius:10px;margin-bottom:4px">';
+      html+='<svg style="width:16px;height:16px;stroke:#27AE60;stroke-width:2;fill:none" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+      html+='<span style="font-size:13px;flex:1;color:var(--txt);font-weight:500">'+escapeHtml(s.name)+'</span>';
       html+='<span style="font-family:JetBrains Mono,monospace;font-size:9px;color:var(--gold)">'+escapeHtml(s.id)+'</span>';
       html+='<button onclick="state.scanned=state.scanned.filter(x=>x.id!==\''+escapeHtml(s.id)+'\');render()" style="width:24px;height:24px;border-radius:50%;border:1px solid rgba(192,57,43,.3);background:rgba(192,57,43,.1);color:var(--red);font-size:12px;cursor:pointer">✕</button>';
       html+='</div>';
     });
-    // Bouton confirmer
-    html+='<button onclick="submitEpi()" style="width:100%;margin-top:12px;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,'+(isDemande?'#3B82F6,#60A5FA':'#E65100,#FF8A50')+');color:#fff;font-family:Oswald,sans-serif;font-size:15px;font-weight:700;letter-spacing:2px;cursor:pointer;min-height:48px">'+(isDemande?'CONFIRMER DEMANDE':'CONFIRMER RETOUR')+' ('+state.scanned.length+')</button>';
+    html+='<button onclick="submitEpi()" style="width:100%;margin-top:12px;padding:16px;border:none;border-radius:12px;background:linear-gradient(135deg,'+(isDemande?'#3B82F6,#60A5FA':'#E65100,#FF8A50')+');color:#fff;font-family:Oswald,sans-serif;font-size:16px;font-weight:700;letter-spacing:2px;cursor:pointer;min-height:52px">'+(isDemande?'CONFIRMER DEMANDE':'CONFIRMER RETOUR')+' ('+state.scanned.length+')</button>';
     html+='</div>';
   }
 
-  // Scan QR / Manuel toggle
-  html+='<div style="display:flex;gap:10px;padding:8px 16px;margin-bottom:4px">';
-  html+='<button style="flex:1;font-size:13px;letter-spacing:2px;padding:12px;border-radius:10px;font-family:Oswald,sans-serif;cursor:pointer;min-height:48px;border:none;'+(state._epiScan?'background:linear-gradient(135deg,#2ecc71,#1a8a47);color:#fff;box-shadow:0 4px 12px rgba(39,174,96,.25)':'background:rgba(10,10,16,.5);border:1px solid var(--border);color:var(--muted)')+'" onclick="state._epiScan=true;render()"><svg style="width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;vertical-align:middle;margin-right:4px" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg> SCAN QR</button>';
-  html+='<button style="flex:1;font-size:13px;letter-spacing:2px;padding:12px;border-radius:10px;font-family:Oswald,sans-serif;cursor:pointer;min-height:48px;border:none;'+(!state._epiScan?'background:linear-gradient(135deg,var(--rescue),var(--rescueD));color:#fff;box-shadow:0 4px 12px rgba(230,81,0,.25)':'background:rgba(10,10,16,.5);border:1px solid var(--border);color:var(--muted)')+'" onclick="state._epiScan=false;render()"><svg style="width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;vertical-align:middle;margin-right:4px" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> MANUEL</button>';
+  // Instructions
+  html+='<div style="padding:0 16px 12px;text-align:center">';
+  html+='<div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:14px">';
+  html+='<svg style="width:32px;height:32px;stroke:'+(isDemande?'var(--blue)':'var(--rescue)')+';stroke-width:1.5;fill:none;margin-bottom:8px" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/><line x1="21" y1="14" x2="21" y2="21"/><line x1="14" y1="21" x2="21" y2="21"/></svg>';
+  html+='<div style="font-family:Oswald,sans-serif;font-size:14px;letter-spacing:2px;color:var(--txt);margin-bottom:6px">'+(isDemande?'SCANNE OU ENTRE LE CODE':'SCANNE L\'EPI A RETOURNER')+'</div>';
+  html+='<div style="font-size:12px;color:var(--muted);line-height:1.5">'+(isDemande?'Scanne le QR code de l\'EPI qu\'on te remet, ou entre son code manuellement.':'Scanne le QR code de l\'EPI que tu retournes.')+'</div>';
+  html+='</div>';
   html+='</div>';
 
-  // Scanner QR si activé
-  if(state._epiScan){
+  // Scan QR / Code manuel toggle
+  html+='<div style="display:flex;gap:10px;padding:0 16px 8px">';
+  html+='<button style="flex:1;font-size:13px;letter-spacing:2px;padding:12px;border-radius:10px;font-family:Oswald,sans-serif;cursor:pointer;min-height:48px;border:none;'+(state._epiScan!==false?'background:linear-gradient(135deg,#2ecc71,#1a8a47);color:#fff;box-shadow:0 4px 12px rgba(39,174,96,.25)':'background:rgba(10,10,16,.5);border:1px solid var(--border);color:var(--muted)')+'" onclick="state._epiScan=true;render()"><svg style="width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;vertical-align:middle;margin-right:4px" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg> SCAN QR</button>';
+  html+='<button style="flex:1;font-size:13px;letter-spacing:2px;padding:12px;border-radius:10px;font-family:Oswald,sans-serif;cursor:pointer;min-height:48px;border:none;'+(state._epiScan===false?'background:linear-gradient(135deg,var(--rescue),var(--rescueD));color:#fff;box-shadow:0 4px 12px rgba(230,81,0,.25)':'background:rgba(10,10,16,.5);border:1px solid var(--border);color:var(--muted)')+'" onclick="state._epiScan=false;render()"><svg style="width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;vertical-align:middle;margin-right:4px" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> CODE</button>';
+  html+='</div>';
+
+  // Scanner QR
+  if(state._epiScan!==false){
     html+='<div id="qr-reader" style="border-radius:14px;overflow:hidden;border:2px solid var(--gold);margin:0 16px 8px;position:relative"></div>';
     html+='<div style="display:flex;align-items:center;gap:8px;margin:0 16px 12px">';
-    html+='<p style="font-size:12px;color:var(--muted);margin:0;flex:1">Approche le QR code EPI dans le cadre</p>';
+    html+='<p style="font-size:12px;color:var(--muted);margin:0;flex:1">Approche le QR code dans le cadre</p>';
     html+='<button onclick="swapCamera()" style="height:32px;padding:0 14px;border-radius:8px;border:1px solid rgba(59,130,246,.3);background:rgba(59,130,246,.1);color:#3B82F6;font-size:18px;cursor:pointer" title="Changer camera">⇄</button>';
     html+='</div>';
-  }
-
-  // Recherche
-  html+='<div style="padding:0 16px 8px">';
-  html+='<input type="text" placeholder="Rechercher un EPI..." value="'+escapeHtml(state.itemQ||'')+'" oninput="state.itemQ=this.value;render()" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:14px;font-family:Inter,sans-serif">';
-  html+='</div>';
-
-  // Liste items
-  html+='<div style="padding:0 16px;max-height:400px;overflow-y:auto;-webkit-overflow-scrolling:touch">';
-  if(shown.length===0){
-    html+='<div style="text-align:center;padding:30px;color:var(--muted)">Aucun EPI disponible</div>';
-  }
-  shown.forEach(item=>{
-    html+='<div class="card" onclick="state.scanned.push({id:\''+escapeHtml(item.id)+'\',name:\''+escapeHtml(item.name).replace(/'/g,"\\\\'")+'\',cat:\''+escapeHtml(item.cat||'')+'\',fromGroup:\''+escapeHtml(item.cat||'')+'\'});render()" style="padding:10px 12px;margin-bottom:4px;cursor:pointer;display:flex;align-items:center;gap:10px">';
-    html+='<div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>';
-    html+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+escapeHtml(item.name)+'</div><div style="font-size:10px;color:var(--muted)">'+escapeHtml(item.cat||'')+'</div></div>';
-    html+='<span style="font-family:JetBrains Mono,monospace;font-size:9px;color:var(--gold)">'+escapeHtml(item.id)+'</span>';
+  } else {
+    // Entrée code manuelle
+    html+='<div style="padding:0 16px 8px">';
+    html+='<div style="display:flex;gap:8px">';
+    html+='<input id="epiCodeInput" type="text" placeholder="Ex: SURV-001, CSQ-003..." value="'+escapeHtml(state._epiCode||'')+'" oninput="state._epiCode=this.value" style="flex:1;padding:14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:15px;font-family:JetBrains Mono,monospace;text-transform:uppercase">';
+    html+='<button onclick="_addEpiByCode()" style="padding:14px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--gold),#A8893E);color:var(--bg);font-family:Oswald,sans-serif;font-size:14px;letter-spacing:1px;cursor:pointer;min-height:48px;font-weight:700">OK</button>';
     html+='</div>';
-  });
-  if(available.length>30) html+='<div style="text-align:center;padding:10px;color:var(--muted);font-size:11px">+'+(available.length-30)+' items — affinez la recherche</div>';
-  html+='</div>';
+    html+='</div>';
+  }
 
   return html;
+}
+
+function _addEpiByCode(){
+  const code=(state._epiCode||'').trim().toUpperCase();
+  if(!code){showToast('Entre un code item','err');return;}
+  const item=ITEMS.find(i=>i.id===code);
+  if(!item){showToast('Code '+code+' non trouvé','err');return;}
+  if(state.scanned.find(s=>s.id===code)){showToast(item.name+' déjà ajouté','err');return;}
+  try{navigator.vibrate&&navigator.vibrate(100)}catch(e){}
+  showToast(item.name+' ajouté','ok');
+  state.scanned=[...state.scanned,{...item,scanTime:new Date()}];
+  state._epiCode='';
+  render();
 }
 
 function submitEpi(){
