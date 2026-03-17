@@ -3025,20 +3025,12 @@ function renderAccueil(){
       </div>
     </div>
     `:''}
-    <!-- ═══ INVENTAIRE — Chef only (sauveteurs font seulement Pick-On/Off EPI) ═══ -->
-    ${isChef?`
+    <!-- ═══ INVENTAIRE — Chef + Sauveteur ═══ -->
+    ${!isSurv?`
     <div class="td-group-label" style="color:#C9A84C"><div class="td-group-line" style="background:#C9A84C"></div>INVENTAIRE<div class="td-group-line" style="background:#C9A84C"></div></div>
     <div class="td-grid">
-      <div class="td-card" style="--accent:#C9A84C" onclick="openCaisseModule()">
-        <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-        <div class="td-card-name">INVENTAIRE</div>
-        <div class="td-card-sub">Suivi en temps reel</div>
-      </div>
-      <div class="td-card" style="--accent:#C9A84C" onclick="window.open('qr.html','_self')">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><line x1="21" y1="14" x2="21" y2="21"/><line x1="14" y1="21" x2="21" y2="21"/></svg>
-        <div class="td-card-name">QR INVENTAIRE</div>
-        <div class="td-card-sub">Scanner + Generer</div>
-      </div>
+      ${isChef?'<div class="td-card" style="--accent:#C9A84C" onclick="openCaisseModule()"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg><div class="td-card-name">INVENTAIRE</div><div class="td-card-sub">Suivi en temps reel</div></div>':''}
+      ${isChef?'<div class="td-card" style="--accent:#C9A84C" onclick="window.open(\'qr.html\',\'_self\')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><line x1="21" y1="14" x2="21" y2="21"/><line x1="14" y1="21" x2="21" y2="21"/></svg><div class="td-card-name">QR INVENTAIRE</div><div class="td-card-sub">Scanner + Generer</div></div>':''}
       <div class="td-card" style="--accent:#C9A84C" onclick="setState({step:10})">
         <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
         <div class="td-card-name">HISTORIQUE</div>
@@ -3052,10 +3044,8 @@ function renderAccueil(){
       </div>
     </div>`:''}
 
-    <!-- EPI sauveteur: plus nécessaire, sauveteurs ont accès au Pick-On/Off complet -->
-
-    <!-- ═══ TERRAIN — Chef only (Loi 25 QC: GPS tracking + surveillance temps reel = consentement ecrit requis) ═══ -->
-    ${isChef?`
+    <!-- ═══ TERRAIN — Chef + Sauveteur ═══ -->
+    ${!isSurv?`
     <div class="td-group-label" style="color:#E65100"><div class="td-group-line" style="background:#E65100"></div>TERRAIN<div class="td-group-line" style="background:#E65100"></div></div>
     <div class="td-grid">
       <div class="td-card" style="--accent:#E65100" onclick="setState({step:9})">
@@ -3088,36 +3078,20 @@ function renderAccueil(){
       </div>
     </div>
 
-    <!-- ═══ SUPERVISION — Chef only (surveillance employes = encadrement legal requis) ═══ -->
+    <!-- ═══ SUPERVISION — Chef + Sauveteur (command center chef only) ═══ -->
     <div class="td-group-label" style="color:#3B82F6"><div class="td-group-line" style="background:#3B82F6"></div>SUPERVISION<div class="td-group-line" style="background:#3B82F6"></div></div>
     <div class="td-grid">
       <div class="td-card" style="--accent:#3B82F6" onclick="window.open('plan-travail.html?pin='+state.pin,'_self')">
         <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
         <div class="td-card-name">PLAN TRAVAIL</div>
-        <div class="td-card-sub">Sauvetage + Eagle</div>
+        <div class="td-card-sub">Sauvetage</div>
       </div>
-      <div class="td-card" style="--accent:#3B82F6" onclick="window.open('command-center.html','_blank')">
-        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        <div class="td-card-name">COMMAND CENTER</div>
-        <div class="td-card-sub">Battle station</div>
-      </div>
-      <!-- STAND BY: Voice — commandes vocales pour rapports, en attente validation legale -->
-      <div class="td-card" style="--accent:#333;opacity:.35;pointer-events:none;position:relative">
-        <svg viewBox="0 0 24 24" style="opacity:.4"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-        <div class="td-card-name" style="color:#5A5660">VOICE</div>
-        <div class="td-card-sub" style="color:#3A3640">EN PAUSE</div>
-      </div>
+      ${isChef?'<div class="td-card" style="--accent:#3B82F6" onclick="window.open(\'command-center.html\',\'_blank\')"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><div class="td-card-name">COMMAND CENTER</div><div class="td-card-sub">Battle station</div></div>':''}
     </div>
 
-    <!-- ═══ CONFORMITE — Chef only sauf Espace clos (DESACTIVE: Rapport CNESST IA = exercice potentiel sans accreditation) ═══ -->
+    <!-- ═══ CONFORMITE — Chef + Sauveteur ═══ -->
     <div class="td-group-label" style="color:#D4650E"><div class="td-group-line" style="background:#D4650E"></div>CONFORMITE<div class="td-group-line" style="background:#D4650E"></div></div>
     <div class="td-grid">
-      <!-- STAND BY: Eagle SST / Rapport CNESST IA — analyse IA sans accreditation = risque exercice illegal -->
-      <div class="td-card" style="--accent:#333;opacity:.35;pointer-events:none;position:relative">
-        <svg viewBox="0 0 24 24" style="opacity:.4"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        <div class="td-card-name" style="color:#5A5660">RAPPORTS</div>
-        <div class="td-card-sub" style="color:#3A3640">EN PAUSE</div>
-      </div>
       <div class="td-card" style="--accent:#D4650E" onclick="window.open('plan-sauvetage.html','_self')">
         <svg viewBox="0 0 24 24"><path d="M12 2L4 7v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V7l-8-5z"/><path d="M9 12l2 2 4-4"/></svg>
         <div class="td-card-name">PLANS SAUVETAGE</div>
@@ -3136,8 +3110,8 @@ function renderAccueil(){
     </div>
     `:''}
 
-    <!-- ═══ ESPACE CLOS — Visible par tous (sauveteur + surveillant + chef) — obligation SST ═══ -->
-    <div class="td-grid" style="margin-top:${isChef?'0':'8'}px">
+    <!-- ═══ ESPACE CLOS — Visible par tous ═══ -->
+    <div class="td-grid" style="margin-top:8px">
       <div class="td-card" style="--accent:#C0392B" onclick="window.open('permis-espace-clos.html','_self')">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         <div class="td-card-name">ESPACE CLOS</div>
