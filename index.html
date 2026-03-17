@@ -1839,8 +1839,9 @@ function isUserSurv(){
   return r==='SURVEILLANT';
 }
 
-// ── Helper: current user is CHEF D'ÉQUIPE? ──
+// ── Helper: current user is CHEF D'ÉQUIPE? (V0205 = Jonathan = CHEF_OVERRIDE) ──
 function isUserChef(){
+  if(state.pin==='0205') return true;
   const user=PERSONNEL.find(p=>p.volo==='V'+state.pin);
   return user&&(user.role||'').toUpperCase().includes('CHEF');
 }
