@@ -2482,6 +2482,7 @@ function renderStep(){
     case 15:return renderMesGains();
     case 16:return renderUsageTracker();
     case 17:return renderMainChat();
+    case 18:return renderEpiRequest();
     default:return '';
   }
 }
@@ -2997,12 +2998,12 @@ function renderAccueil(){
     ${isSurv?`
     <div class="td-group-label" style="color:#3B82F6"><div class="td-group-line" style="background:#3B82F6"></div>EPI<div class="td-group-line" style="background:#3B82F6"></div></div>
     <div class="td-grid">
-      <div class="td-card" style="--accent:#3B82F6" onclick="state._survEpiMode=true;forceStartPickOn()">
+      <div class="td-card" style="--accent:#3B82F6" onclick="setState({step:18,_epiMode:'demande',scanned:[],itemQ:'',catFilter:'all'})">
         <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
         <div class="td-card-name">DEMANDE EPI</div>
         <div class="td-card-sub">Casque, gants, EPI</div>
       </div>
-      <div class="td-card" style="--accent:#3B82F6" onclick="state._survEpiMode=true;startPickOff()">
+      <div class="td-card" style="--accent:#3B82F6" onclick="setState({step:18,_epiMode:'retour',scanned:[],itemQ:'',catFilter:'all'})">
         <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
         <div class="td-card-name">RETOUR EPI</div>
         <div class="td-card-sub">Remettre equipement</div>
@@ -3040,12 +3041,12 @@ function renderAccueil(){
     ${(!isChef&&!isSurv)?`
     <div class="td-group-label" style="color:#3B82F6"><div class="td-group-line" style="background:#3B82F6"></div>EPI<div class="td-group-line" style="background:#3B82F6"></div></div>
     <div class="td-grid">
-      <div class="td-card" style="--accent:#3B82F6" onclick="state._survEpiMode=true;forceStartPickOn()">
+      <div class="td-card" style="--accent:#3B82F6" onclick="setState({step:18,_epiMode:'demande',scanned:[],itemQ:'',catFilter:'all'})">
         <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
         <div class="td-card-name">DEMANDE EPI</div>
         <div class="td-card-sub">Casque, gants, EPI</div>
       </div>
-      <div class="td-card" style="--accent:#3B82F6" onclick="state._survEpiMode=true;startPickOff()">
+      <div class="td-card" style="--accent:#3B82F6" onclick="setState({step:18,_epiMode:'retour',scanned:[],itemQ:'',catFilter:'all'})">
         <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
         <div class="td-card-name">RETOUR EPI</div>
         <div class="td-card-sub">Remettre equipement</div>
@@ -6004,6 +6005,139 @@ function startPickOff(){
   window._pickoffExpected=null;
   window._pickoffOriginalTx=null;
   setState({step:2,mode:'pickoff',scanned:[],sceaux:{},depot:null,dest:null,remorques:[],sauvs:[],numProjet:'',personneRessource:'',detailsJob:'',_showAllPickoff:false});
+}
+
+// ═══ EPI SIMPLIFIE — Flow demande/retour EPI sans wizard complet ═══
+function renderEpiRequest(){
+  const isDemande=state._epiMode==='demande';
+  const title=isDemande?'DEMANDE EPI':'RETOUR EPI';
+  const user=PERSONNEL.find(p=>p.volo==='V'+state.pin);
+  const userName=user?user.name:'Utilisateur';
+  const scannedIds=state.scanned.map(s=>s.id);
+  const q=(state.itemQ||'').toLowerCase();
+
+  // Filtrer items EPI seulement
+  const EPI_CATS=["EPI","EPI Sauveteur","Casques sauveteur","Chienne de Travail","Vêtement","Surveillant"];
+  const EPI_NAMES=["casque","gant","lunette","botte","chienne","veste","combinaison","tychem","coquille"];
+  let available=ITEMS.filter(i=>!scannedIds.includes(i.id));
+  available=available.filter(i=>EPI_CATS.includes(i.cat)||EPI_NAMES.some(n=>(i.name||'').toLowerCase().includes(n))||i.id.startsWith("SURV-")||i.id.startsWith("CSQ-")||i.id.startsWith("CHT-"));
+  if(q) available=available.filter(i=>(i.name||'').toLowerCase().includes(q)||(i.id||'').toLowerCase().includes(q));
+
+  // Si retour EPI — montrer les items que cet user a sorti
+  if(!isDemande){
+    const h=getHistory();
+    const myEpiItems=[];
+    h.forEach(tx=>{
+      if(tx.mode==='EPI-OUT'&&tx.statut==='ACTIF'&&(tx.sauveteur_id===(user?user.id:''))){
+        try{JSON.parse(tx.items||'[]').forEach(it=>myEpiItems.push(it));}catch(e){}
+      }
+    });
+    if(myEpiItems.length>0){
+      const myIds=myEpiItems.map(i=>i.id);
+      available=ITEMS.filter(i=>myIds.includes(i.id)&&!scannedIds.includes(i.id));
+    }
+  }
+
+  const shown=available.slice(0,30);
+
+  let html='<button class="top-back" onclick="setState({step:0})"><svg style="width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;vertical-align:middle" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> RETOUR</button>';
+
+  // Header
+  html+='<div style="text-align:center;padding:16px 0 8px">';
+  html+='<div style="font-family:Oswald,sans-serif;font-size:18px;letter-spacing:3px;color:'+(isDemande?'var(--blue)':'var(--rescue)')+'">'+title+'</div>';
+  html+='<div style="font-size:12px;color:var(--muted);margin-top:4px">'+escapeHtml(userName)+' — V'+state.pin+'</div>';
+  html+='</div>';
+
+  // Items sélectionnés
+  if(state.scanned.length>0){
+    html+='<div style="padding:8px 16px;margin-bottom:8px">';
+    html+='<div style="font-family:Oswald,sans-serif;font-size:11px;letter-spacing:2px;color:var(--gold);margin-bottom:8px">SELECTIONNES ('+state.scanned.length+')</div>';
+    state.scanned.forEach(s=>{
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--card);border:1px solid '+(isDemande?'rgba(59,130,246,.3)':'rgba(230,81,0,.3)')+';border-radius:8px;margin-bottom:4px">';
+      html+='<span style="font-size:12px;flex:1;color:var(--txt)">'+escapeHtml(s.name)+'</span>';
+      html+='<span style="font-family:JetBrains Mono,monospace;font-size:9px;color:var(--gold)">'+escapeHtml(s.id)+'</span>';
+      html+='<button onclick="state.scanned=state.scanned.filter(x=>x.id!==\''+escapeHtml(s.id)+'\');render()" style="width:24px;height:24px;border-radius:50%;border:1px solid rgba(192,57,43,.3);background:rgba(192,57,43,.1);color:var(--red);font-size:12px;cursor:pointer">✕</button>';
+      html+='</div>';
+    });
+    // Bouton confirmer
+    html+='<button onclick="submitEpi()" style="width:100%;margin-top:12px;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,'+(isDemande?'#3B82F6,#60A5FA':'#E65100,#FF8A50')+');color:#fff;font-family:Oswald,sans-serif;font-size:15px;font-weight:700;letter-spacing:2px;cursor:pointer;min-height:48px">'+(isDemande?'CONFIRMER DEMANDE':'CONFIRMER RETOUR')+' ('+state.scanned.length+')</button>';
+    html+='</div>';
+  }
+
+  // Recherche
+  html+='<div style="padding:8px 16px">';
+  html+='<input type="text" placeholder="Rechercher un EPI..." value="'+escapeHtml(state.itemQ||'')+'" oninput="state.itemQ=this.value;render()" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--txt);font-size:14px;font-family:Inter,sans-serif">';
+  html+='</div>';
+
+  // Liste items
+  html+='<div style="padding:0 16px;max-height:400px;overflow-y:auto;-webkit-overflow-scrolling:touch">';
+  if(shown.length===0){
+    html+='<div style="text-align:center;padding:30px;color:var(--muted)">Aucun EPI disponible</div>';
+  }
+  shown.forEach(item=>{
+    html+='<div class="card" onclick="state.scanned.push({id:\''+escapeHtml(item.id)+'\',name:\''+escapeHtml(item.name).replace(/'/g,"\\\\'")+'\',cat:\''+escapeHtml(item.cat||'')+'\',fromGroup:\''+escapeHtml(item.cat||'')+'\'});render()" style="padding:10px 12px;margin-bottom:4px;cursor:pointer;display:flex;align-items:center;gap:10px">';
+    html+='<div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>';
+    html+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+escapeHtml(item.name)+'</div><div style="font-size:10px;color:var(--muted)">'+escapeHtml(item.cat||'')+'</div></div>';
+    html+='<span style="font-family:JetBrains Mono,monospace;font-size:9px;color:var(--gold)">'+escapeHtml(item.id)+'</span>';
+    html+='</div>';
+  });
+  if(available.length>30) html+='<div style="text-align:center;padding:10px;color:var(--muted);font-size:11px">+'+(available.length-30)+' items — affinez la recherche</div>';
+  html+='</div>';
+
+  return html;
+}
+
+function submitEpi(){
+  if(!state.scanned.length){showToast('Aucun item selectionne','err');return;}
+  const isDemande=state._epiMode==='demande';
+  const user=PERSONNEL.find(p=>p.volo==='V'+state.pin);
+  const ts=tsNow();
+
+  const payload={
+    type:isDemande?'EPI-OUT':'EPI-IN',
+    mode:isDemande?'EPI-OUT':'EPI-IN',
+    sauveteur_nom:user?user.name:'Inconnu',
+    sauveteur_id:user?user.id:'',
+    destination:'EPI',
+    depot:'EPI',
+    remorque:'',
+    num_projet:'',
+    items:JSON.stringify(state.scanned.map(s=>({id:s.id,name:s.name,cat:s.cat||''}))),
+    nb_items:state.scanned.length,
+    statut:'ACTIF',
+    timestamp:ts
+  };
+
+  // Save to history
+  saveToHistory(payload);
+
+  // Si retour EPI → marquer les EPI-OUT correspondants comme RETOURNÉ
+  if(!isDemande){
+    const h=getHistory();
+    state.scanned.forEach(item=>{
+      const orig=h.find(tx=>tx.mode==='EPI-OUT'&&tx.statut==='ACTIF'&&tx.items&&tx.items.includes(item.id));
+      if(orig){
+        const retPayload={type:'EPI-IN',mode:'EPI-IN',sauveteur_nom:payload.sauveteur_nom,sauveteur_id:payload.sauveteur_id,items:JSON.stringify([{id:item.id,name:item.name}]),nb_items:1,statut:'RETOURNÉ',original_id:orig.id||'',original_timestamp:orig.timestamp,timestamp:ts,destination:'EPI',depot:'EPI',remorque:''};
+        saveToHistory(retPayload);
+      }
+    });
+  }
+
+  // Webhook
+  fetch(VOLO_WH_M,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+  .then(r=>{if(!r.ok)showToast('Erreur serveur','err');})
+  .catch(()=>{
+    try{const q=JSON.parse(localStorage.getItem('volo_queue')||'[]');q.push(payload);localStorage.setItem('volo_queue',JSON.stringify(q));}catch(e){}
+    showToast('Hors-ligne — sauvé local','off');
+  });
+
+  // Dual-write Firestore
+  try{if(typeof VoloData!=='undefined'&&VoloData.saveTransaction)VoloData.saveTransaction(payload);}catch(e){}
+
+  if(navigator.vibrate)navigator.vibrate([100,50,100]);
+  try{document.getElementById('eaglecry').play().catch(()=>{});}catch(e){}
+  showToast((isDemande?'EPI sortis':'EPI retournés')+' — '+state.scanned.length+' items','ok');
+  setState({step:0,scanned:[],_epiMode:null,itemQ:'',catFilter:'all'});
 }
 
 function doValidation(){
