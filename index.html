@@ -1853,6 +1853,14 @@ function isUserChef(){
   return user&&(user.role||'').toUpperCase().includes('CHEF');
 }
 
+// ── Helper: inspecteur matériel = peut modifier/détruire/bouger équipement ──
+// Chefs + Danny Alie (V0116) + Charles Vigeant (V0181) + Jonathan (V0205) + Cédric Lapointe-Stewart (V0115)
+function isInspecteurMateriel(){
+  if(isUserChef()) return true;
+  const INSPECTEUR_PINS=['0116','0181','0205','0115'];
+  return INSPECTEUR_PINS.includes(state.pin);
+}
+
 // ── Helper: is user currently punched IN (pointage)? ──
 function isPointageActive(){
   try{
@@ -2333,6 +2341,11 @@ function render(stepChanged){
   try{ if(state.showModal) html+=renderModal(); }catch(e){ console.error('renderModal crash',e); }
   app.innerHTML=html;
 
+  // ── Scroll restore immédiat après innerHTML (évite flash/jump sur scan) ──
+  if(!stepChanged&&(state.step===5||state.step===6||state.step===7)){
+    window.scrollTo({top:savedScroll,behavior:'instant'});
+  }
+
   // ── Weather widget + animated counters (accueil only) ──
   if(state.step===0){
     fetchWeather().then(w=>{const s=document.getElementById('weatherSlot');if(s){if(state.step===0&&w&&w.temp!==undefined){s.textContent=Math.round(w.temp)+'°';}else{s.innerHTML=renderWeatherWidget(w);}}}).catch(()=>{});
@@ -2776,8 +2789,8 @@ function renderAccueil(){
     <svg style="width:16px;height:16px;stroke:#C9A84C;stroke-width:1.5;fill:none" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
   </div>
 
-  <!-- TD PICK ACTIONS — Chef only (sauveteurs utilisent EPI simplifie) -->
-  ${isChef?`
+  <!-- TD PICK ACTIONS — Chef + Sauveteur (surveillants utilisent EPI simplifie) -->
+  ${!isSurv?`
   <div class="td-picks">
     <div class="td-pick td-pick-on ${myPO.length>0?'td-pick-locked':''}" onclick="${myPO.length>0?'confirmSecondPickOn()':'startPickOn()'}">
       <svg style="width:30px;height:30px;stroke:${myPO.length>0?'#4A464F':'#27AE60'};stroke-width:1.5;fill:none" viewBox="0 0 24 24"><path d="M21 8l-2-3H5L3 8"/><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 12v4"/><path d="M9 14h6"/></svg>
@@ -2794,8 +2807,8 @@ function renderAccueil(){
   </div>
   `:''}
 
-  <!-- ═══ EAGLE EYE + ALERTES + TRANSACTIONS — Chef only ═══ -->
-  ${isChef?`
+  <!-- ═══ EAGLE EYE — Chef + Sauveteur ═══ -->
+  ${!isSurv?`
   <div class="ee-slim">
     <div class="ee-slim-left">
       <div class="ee-mini-radar">
@@ -2874,7 +2887,7 @@ function renderAccueil(){
   <!-- CONTENT -->
   <div style="padding:14px 16px 100px" class="accueil-anim">
 
-    ${isChef?((()=>{
+    ${!isSurv?((()=>{
       const alerts=getEquipmentAlerts();
       const critical=alerts.filter(a=>a.severity==='critical');
       const urgent=alerts.filter(a=>a.severity==='urgent');
@@ -2966,8 +2979,8 @@ function renderAccueil(){
       '</div>';
     })()):''}
 
-    <!-- DERNIÈRES TRANSACTIONS — Chef only -->
-    ${isChef?(()=>{
+    <!-- DERNIÈRES TRANSACTIONS — Chef + Sauveteur -->
+    ${!isSurv?(()=>{
       const hist=getHistory().filter(tx=>tx.mode==='PICK-ON'||tx.mode==='PICK-OFF').slice(0,5);
       if(!hist.length) return '';
       const isOpen=localStorage.getItem('volo_tx_panel_open')!=='0';
@@ -3039,22 +3052,7 @@ function renderAccueil(){
       </div>
     </div>`:''}
 
-    <!-- ═══ EPI Pick-On/Off — Visible par sauveteurs + surveillants (pas besoin chef) ═══ -->
-    ${(!isChef&&!isSurv)?`
-    <div class="td-group-label" style="color:#3B82F6"><div class="td-group-line" style="background:#3B82F6"></div>EPI<div class="td-group-line" style="background:#3B82F6"></div></div>
-    <div class="td-grid">
-      <div class="td-card" style="--accent:#3B82F6" onclick="setState({step:18,_epiMode:'demande',scanned:[],itemQ:'',catFilter:'all'})">
-        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-        <div class="td-card-name">DEMANDE EPI</div>
-        <div class="td-card-sub">Casque, gants, EPI</div>
-      </div>
-      <div class="td-card" style="--accent:#3B82F6" onclick="setState({step:18,_epiMode:'retour',scanned:[],itemQ:'',catFilter:'all'})">
-        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-        <div class="td-card-name">RETOUR EPI</div>
-        <div class="td-card-sub">Remettre equipement</div>
-      </div>
-    </div>
-    `:''}
+    <!-- EPI sauveteur: plus nécessaire, sauveteurs ont accès au Pick-On/Off complet -->
 
     <!-- ═══ TERRAIN — Chef only (Loi 25 QC: GPS tracking + surveillance temps reel = consentement ecrit requis) ═══ -->
     ${isChef?`

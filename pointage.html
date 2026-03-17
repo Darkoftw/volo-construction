@@ -263,13 +263,14 @@ const LIEUX=[
 ];
 const WEBHOOK_POINTAGE='/api/webhook-pointage';
 let state={step:'pin',pin:'',user:null,mode:null,lieu:null,lieuCustom:'',missionType:'STANDARD',ts:null,_h:'',_m:0};
+let _pinFromUrl=false;
 // Auto-login si pin dans URL (vient de index.html)
 (function(){
   try{
     const p=new URLSearchParams(window.location.search).get('pin');
     if(p&&p.length===4){
       const u=PERSONNEL.find(x=>x.volo==='V'+p);
-      if(u){state.pin=p;state.user=u;state.step='accueil';}
+      if(u){state.pin=p;state.user=u;state.step='accueil';_pinFromUrl=true;}
     }
   }catch(e){}
 })();
@@ -390,7 +391,7 @@ function rAccueil(app){
   const todayH=getHistory().filter(e=>e.mode==='DÉPART'&&new Date(e.timestamp).toDateString()===today).reduce((a,e)=>a+(e.heures_minutes||0),0);
   const th=Math.floor(todayH/60),tm=todayH%60;
   app.innerHTML='<div style="display:flex;gap:10px;margin-bottom:10px"><a href="index.html" onclick="event.preventDefault();if(history.length>1){history.back()}else{location.href=\'index.html\'}" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:13px;font-family:\'Inter\',sans-serif;text-decoration:none">◀ INVENTAIRE</a></div>'
-    +'<div class="header"><button class="back-btn" onclick="logout()">DÉCONNEXION</button><h1>POINTAGE</h1><div class="sub">THE GOLDEN EAGLES</div></div>'
+    +'<div class="header">'+(_pinFromUrl?'':'<button class="back-btn" onclick="logout()">DÉCONNEXION</button>')+'<h1>POINTAGE</h1><div class="sub">THE GOLDEN EAGLES</div></div>'
     +'<div class="user-badge"><div style="display:flex;flex-direction:column;align-items:center">'+LOGO_MED+'</div>'
     +'<div class="name">'+escapeHtml(state.user.name)+'</div><div class="role">'+escapeHtml(state.user.role)+' — '+escapeHtml(state.user.region)+'</div><div class="uid">'+escapeHtml(state.user.id)+' | '+escapeHtml(state.user.volo)+'</div>'
     +(me?'<div style="margin-top:8px"><span class="status-badge on-site">● Sur site depuis '+calcH(me.arrival).display+' — '+escapeHtml(me.lieu)+'</span></div>'

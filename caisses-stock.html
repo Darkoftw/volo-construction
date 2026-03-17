@@ -2271,25 +2271,25 @@ function openItemModal(id){
         <button class="modal-close" onclick="closeModal()" aria-label="Fermer">X</button>
       </div>
 
-      <!-- STATUS ACTIONS -->
+      <!-- STATUS ACTIONS — Inspecteur matériel seulement -->
+      ${_isInspecteurMateriel()?`
       <div style="font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:2px;color:var(--muted);margin-bottom:8px">CHANGER STATUT</div>
       <div class="modal-status-bar">
-        ${statusActions.map(a=>`
-          <button class="modal-action-btn" onclick="changeStatus('${id}','${a.s}')"
-            style="background:${a.bg};border-color:${a.border};color:${a.color};${item.status===a.s?'outline:2px solid '+a.border+';font-weight:700':''}"
-          >${a.label}</button>
-        `).join('')}
+        ${statusActions.map(a=>'<button class="modal-action-btn" onclick="changeStatus(\''+id+'\',\''+a.s+'\')" style="background:'+a.bg+';border-color:'+a.border+';color:'+a.color+';'+(item.status===a.s?'outline:2px solid '+a.border+';font-weight:700':'')+'">'+a.label+'</button>').join('')}
       </div>
       ${item.caisse_id?(()=>{
         const caisseItems=UI_ITEMS.filter(i=>i.caisse_id===item.caisse_id);
         const caisseNom=item.caisse_nom||item.caisse_id;
-        return caisseItems.length>1?`
-      <div style="margin-top:10px;padding:10px 12px;background:rgba(212,160,23,.08);border:1px solid rgba(212,160,23,.2);border-radius:10px">
-        <div style="font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:2px;color:var(--gold);margin-bottom:8px">APPLIQUER À TOUT : ${escapeHtml(caisseNom).toUpperCase()} (${caisseItems.length} items)</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px">
-          ${statusActions.map(a=>`<button onclick="changeCaisseStatus('${item.caisse_id}','${a.s}')" style="flex:1;min-width:70px;padding:8px 6px;border-radius:8px;border:1px solid ${a.border};background:${a.bg};color:${a.color};font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:1px;cursor:pointer;transition:all .2s" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">${a.label} ×${caisseItems.length}</button>`).join('')}
-        </div>
-      </div>`:''})():''}
+        return caisseItems.length>1?'<div style="margin-top:10px;padding:10px 12px;background:rgba(212,160,23,.08);border:1px solid rgba(212,160,23,.2);border-radius:10px"><div style="font-family:Oswald,sans-serif;font-size:.6rem;letter-spacing:2px;color:var(--gold);margin-bottom:8px">APPLIQUER À TOUT : '+escapeHtml(caisseNom).toUpperCase()+' ('+caisseItems.length+' items)</div><div style="display:flex;flex-wrap:wrap;gap:6px">'+statusActions.map(a=>'<button onclick="changeCaisseStatus(\''+item.caisse_id+'\',\''+a.s+'\')" style="flex:1;min-width:70px;padding:8px 6px;border-radius:8px;border:1px solid '+a.border+';background:'+a.bg+';color:'+a.color+';font-family:Oswald,sans-serif;font-size:.6rem;letter-spacing:1px;cursor:pointer;transition:all .2s" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1">'+a.label+' ×'+caisseItems.length+'</button>').join('')+'</div></div>':'';})():''}
+      `:`
+      <div style="padding:10px 12px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:10px;margin-bottom:8px">
+        <div style="font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:2px;color:var(--blue);margin-bottom:6px">AJOUTER UNE NOTE</div>
+        <textarea id="sauveteurNote-${id}" rows="2" placeholder="Note sur cet équipement..."
+          style="width:100%;margin-bottom:6px;padding:8px 10px;background:rgba(4,4,10,.6);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-family:Inter,sans-serif;font-size:.75rem;resize:none"></textarea>
+        <button onclick="addSauveteurNote('${id}')"
+          style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(59,130,246,.3);background:rgba(59,130,246,.1);color:var(--blue);font-family:'Oswald',sans-serif;font-size:.65rem;letter-spacing:1px;cursor:pointer">ENREGISTRER NOTE</button>
+      </div>
+      `}
 
       <!-- DETAILS GRID -->
       <div class="detail-grid">
@@ -2381,7 +2381,8 @@ function openItemModal(id){
       </div>
       `:''}
 
-      <!-- DESTRUCTION -->
+      <!-- DESTRUCTION — Inspecteur matériel seulement -->
+      ${_isInspecteurMateriel()?`
       <div id="destroySection-${item.id}" style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px">
         <button onclick="document.getElementById('destroyConfirm-${item.id}').style.display='block';this.style.display='none'"
           style="width:100%;padding:10px;border-radius:10px;background:rgba(107,33,168,.1);border:1px solid rgba(107,33,168,.3);color:var(--destruct);font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:2px;cursor:pointer">
@@ -2400,6 +2401,7 @@ function openItemModal(id){
           </div>
         </div>
       </div>
+      `:``}
     </div>
   </div>`;
 }
@@ -2410,6 +2412,7 @@ function closeModal(){
 
 // Change status for ALL items in a caisse at once
 function changeCaisseStatus(caisseId, newStatus){
+  if(!_isInspecteurMateriel()){toast('Accès refusé — inspecteur matériel requis','red');return;}
   const items = UI_ITEMS.filter(i=>i.caisse_id===caisseId);
   if(!items.length) return;
   const userName = getUserName();
@@ -2438,7 +2441,27 @@ function changeCaisseStatus(caisseId, newStatus){
   toast(`${cName} — ${count} items → ${getStatusLabel(newStatus)}`, newStatus==='disponible'?'green':newStatus==='manquant'?'red':'gold');
 }
 
+// Sauveteur ajoute une note (tracée avec VOLO ID + timestamp)
+function addSauveteurNote(id){
+  const el=document.getElementById('sauveteurNote-'+id);
+  if(!el) return;
+  const note=el.value.trim();
+  if(!note){toast('Écris une note avant','red');return;}
+  const item=UI_ITEMS.find(i=>i.id===id);
+  if(!item) return;
+  const voloId=CURRENT_USER?CURRENT_USER.volo||'?':'?';
+  const userName=getUserName();
+  const ts=new Date().toLocaleString('fr-CA');
+  const entry='['+ts+' — '+userName+' ('+voloId+')] '+note;
+  item.notes=item.notes?(item.notes+'\n'+entry):entry;
+  item.history.unshift({a:'NOTE',by:userName,at:ts,dest:note.substring(0,50)});
+  closeModal();
+  applyFilters();
+  toast('Note ajoutée sur '+item.name,'green');
+}
+
 function changeStatus(id, newStatus){
+  if(!_isInspecteurMateriel()){toast('Accès refusé — inspecteur matériel requis','red');return;}
   const item = UI_ITEMS.find(i=>i.id===id);
   if(!item) return;
   item.history.unshift({a:newStatus.toUpperCase(),by:getUserName(),at:new Date().toLocaleString('fr-CA'),dest:item.location||'?'});
@@ -2609,6 +2632,7 @@ function submitAddItem(){
 // ---- DESTRUCTION SYSTEM ----
 function getDestroyedIds(){try{return JSON.parse(safeGetLS('volo_destroyed')||'[]')}catch(e){return[]}}
 function destroyItem(id){
+  if(!_isInspecteurMateriel()){toast('Accès refusé — inspecteur matériel requis','red');return;}
   // Save with note + date
   const noteEl=document.getElementById('destroyNote-'+id);
   const note=noteEl?noteEl.value.trim():'';
@@ -3459,9 +3483,18 @@ function markInspected(caisseId) {
 }
 
 function _isChefUser() {
-  if (!CURRENT_USER) return false; // No user = no chef access
+  if (!CURRENT_USER) return false;
   const role = (CURRENT_USER.role || '').toUpperCase();
   return role.includes('CHEF') || role.includes('COORD');
+}
+
+// Inspecteur matériel: peut modifier/détruire/bouger équipement
+// Chefs + Danny Alie V0116 + Charles Vigeant V0181 + Jonathan V0205 + Cédric Lapointe-Stewart V0115
+function _isInspecteurMateriel() {
+  if (_isChefUser()) return true;
+  if (!CURRENT_USER) return false;
+  const volo = CURRENT_USER.volo || '';
+  return ['V0116','V0181','V0205','V0115'].includes(volo);
 }
 
 function editCaisse(caisseId) {
