@@ -293,7 +293,7 @@ section{padding:80px 0}
   <div class="hero-sub">GOLDEN EAGLES — GESTION SST TERRAIN</div>
   <div class="hero-version">V20.7 — APPLICATION SST TEMPS REEL</div>
   <div class="hero-bar"></div>
-  <div class="hero-tagline">Inventaire, geofencing GPS, notifications push, rapports CNESST et intelligence artificielle — tout en une seule application terrain.</div>
+  <div class="hero-tagline">Inventaire, notifications push, rapports CNESST et conformite — tout en une seule application terrain.</div>
   <div class="hero-scroll">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 13l5 5 5-5M7 6l5 5 5-5"/></svg>
   </div>
@@ -601,10 +601,10 @@ section{padding:80px 0}
     </div>
 
     <div class="feature-card reveal" style="transition-delay:.1s">
-      <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-      <div class="feature-name">GPS GEOFENCING</div>
-      <div class="feature-desc">Detection automatique d'entree/sortie de zone. Auto-pointage GPS, calcul Haversine, rayon configurable.</div>
-      <div class="feature-tag">watchPosition + Leaflet</div>
+      <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <div class="feature-name">POINTAGE TERRAIN</div>
+      <div class="feature-desc">Pointage d'heures sur chantier. Arrivee, depart, lieu, historique complet et calcul automatique des heures.</div>
+      <div class="feature-tag">Webhook + localStorage</div>
     </div>
 
     <div class="feature-card reveal" style="transition-delay:.15s">
@@ -623,9 +623,9 @@ section{padding:80px 0}
 
     <div class="feature-card reveal" style="transition-delay:.25s">
       <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></svg></div>
-      <div class="feature-name">RAPPORTS CNESST IA</div>
-      <div class="feature-desc">Generation automatique de rapports conformite. Analyse IA Claude avec score, recommandations, PDF A4 professionnel.</div>
-      <div class="feature-tag">Claude API + jsPDF</div>
+      <div class="feature-name">RAPPORTS CNESST</div>
+      <div class="feature-desc">Generation de rapports conformite. Score, recommandations, PDF A4 professionnel pret pour inspection.</div>
+      <div class="feature-tag">jsPDF + autoTable</div>
     </div>
 
     <div class="feature-card reveal" style="transition-delay:.3s">
@@ -770,8 +770,8 @@ section{padding:80px 0}
       <div class="cnesst-item">
         <div class="cnesst-check"><svg viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg></div>
         <div>
-          <div class="cnesst-label">Analyse IA conformite</div>
-          <div class="cnesst-ref">Claude API + scoring</div>
+          <div class="cnesst-label">Scoring conformite</div>
+          <div class="cnesst-ref">Auto-evaluation + checklist</div>
         </div>
       </div>
     </div>
@@ -793,10 +793,8 @@ section{padding:80px 0}
     <span class="tech-pill">Leaflet.js</span>
     <span class="tech-pill">jsQR</span>
     <span class="tech-pill">jsPDF</span>
-    <span class="tech-pill">Claude API</span>
     <span class="tech-pill">Netlify CDN</span>
     <span class="tech-pill">Service Worker</span>
-    <span class="tech-pill">Web Geolocation</span>
     <span class="tech-pill">Open-Meteo</span>
   </div>
 </section>
@@ -812,7 +810,6 @@ section{padding:80px 0}
     <a href="index.html" onclick="event.preventDefault();if(history.length>1){history.back()}else{location.href='index.html'}" class="footer-link">APPLICATION</a>
     <a href="dashboard-superviseur.html" class="footer-link">DASHBOARD</a>
     <a href="rapport-cnesst.html" class="footer-link">RAPPORT CNESST</a>
-    <a href="tracker-chantier.html" class="footer-link">TRACKER GPS</a>
   </div>
 </footer>
 
