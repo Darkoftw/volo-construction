@@ -6348,6 +6348,9 @@ function _completePinLogin(profile){
     _setSensitive('volo_last_volo',profile.volo||('V'+state.pin));
     _setSensitive('volo_pin',state.pin);
     localStorage.setItem('volo_session_ts',Date.now().toString());
+    // Set caisses-stock user context (pour liens directs alertes→inventaire)
+    localStorage.setItem('volo_caisse_pin',state.pin);
+    localStorage.setItem('volo_caisse_user',JSON.stringify(profile));
   }catch(e){}
   // Si login initial (pas encore loggé) → accueil conditionnel
   if(!state.loggedIn){
