@@ -430,7 +430,7 @@ input, select, textarea { font-size: 16px !important; }
 
 <!-- ═══ TOP BAR ═══ -->
 <div class="top-bar">
-  <a href="index.html" class="btn-back">&#8592; RETOUR</a>
+  <a href="index.html" onclick="event.preventDefault();if(history.length>1){history.back()}else{location.href='index.html'}" class="btn-back">&#8592; RETOUR</a>
   <img src="eagle_tactic.png" alt="Eagle" onerror="this.style.display='none'">
   <h1>ASAT — ANALYSE DE SÉCURITÉ
     <span>GUIDE DE RÉFÉRENCE TERRAIN</span>

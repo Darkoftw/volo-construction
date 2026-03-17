@@ -92,7 +92,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;min-he
 
 <div class="mt-container" id="app">
   <div class="mt-header">
-    <div class="mt-back" onclick="window.open('index.html','_self')">
+    <div class="mt-back" onclick="if(history.length>1){history.back()}else{location.href='index.html'}">
       <svg style="width:20px;height:20px;stroke:var(--gold);stroke-width:2;fill:none" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </div>
     <div>

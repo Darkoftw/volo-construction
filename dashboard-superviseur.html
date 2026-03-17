@@ -500,7 +500,7 @@ tr:hover td{background:var(--rescueGlow)}
   <div class="header-wrap">
     <div class="header">
       <div class="header-left">
-        <a href="index.html" style="width:36px;height:36px;border-radius:10px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:16px;text-decoration:none;transition:all .2s;flex-shrink:0" title="Retour">&larr;</a>
+        <a href="index.html" onclick="event.preventDefault();if(history.length>1){history.back()}else{location.href='index.html'}" style="width:36px;height:36px;border-radius:10px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:16px;text-decoration:none;transition:all .2s;flex-shrink:0" title="Retour">&larr;</a>
         <img src="eagle_tactic.png" alt="Golden Eagles" onerror="if(typeof KING_LOGO_B64!=='undefined')this.src=KING_LOGO_B64;else this.style.display='none'">
         <div class="header-brand">
           <div class="title">GOLDEN EAGLES</div>

@@ -350,7 +350,7 @@ function rPIN(app){
     if(u) identified='<div class="user-badge" style="margin-top:14px"><div class="name">'+u.name+'</div><div class="role">'+u.role+' — '+u.region+'</div><div class="uid">'+u.id+' | '+u.volo+'</div></div>';
     else  identified='<div style="text-align:center;margin-top:14px;color:var(--red);font-weight:600;font-family:\'Oswald\',sans-serif;letter-spacing:1px">✗ Code '+state.pin+' non reconnu</div>';
   }
-  app.innerHTML='<div style="margin-bottom:10px"><a href="index.html" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:13px;font-family:\'Inter\',sans-serif;text-decoration:none">◀ INVENTAIRE</a></div>'
+  app.innerHTML='<div style="margin-bottom:10px"><a href="index.html" onclick="event.preventDefault();if(history.length>1){history.back()}else{location.href=\'index.html\'}" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:13px;font-family:\'Inter\',sans-serif;text-decoration:none">◀ INVENTAIRE</a></div>'
     +'<div class="header" style="padding-bottom:4px"><div style="display:flex;flex-direction:column;align-items:center">'+LOGO_BIG+'<h1>POINTAGE</h1><div class="sub">THE GOLDEN EAGLES</div></div></div>'
     +'<div class="clock-display"><div class="time" id="liveClock">'+fmtTime(new Date())+'</div><div class="date">'+fmtDate(new Date())+'</div></div>'
     +'<div class="card"><div class="step-label">ENTREZ VOTRE CODE PIN</div><div class="pin-row">'+dots+'</div><div class="numpad">'+nums+'</div>'+identified+'</div>'
@@ -379,7 +379,7 @@ function rAccueil(app){
   const today=new Date().toDateString();
   const todayH=getHistory().filter(e=>e.mode==='DÉPART'&&new Date(e.timestamp).toDateString()===today).reduce((a,e)=>a+(e.heures_minutes||0),0);
   const th=Math.floor(todayH/60),tm=todayH%60;
-  app.innerHTML='<div style="display:flex;gap:10px;margin-bottom:10px"><a href="index.html" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:13px;font-family:\'Inter\',sans-serif;text-decoration:none">◀ INVENTAIRE</a></div>'
+  app.innerHTML='<div style="display:flex;gap:10px;margin-bottom:10px"><a href="index.html" onclick="event.preventDefault();if(history.length>1){history.back()}else{location.href=\'index.html\'}" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:13px;font-family:\'Inter\',sans-serif;text-decoration:none">◀ INVENTAIRE</a></div>'
     +'<div class="header"><button class="back-btn" onclick="logout()">DÉCONNEXION</button><h1>POINTAGE</h1><div class="sub">THE GOLDEN EAGLES</div></div>'
     +'<div class="user-badge"><div style="display:flex;flex-direction:column;align-items:center">'+LOGO_MED+'</div>'
     +'<div class="name">'+escapeHtml(state.user.name)+'</div><div class="role">'+escapeHtml(state.user.role)+' — '+escapeHtml(state.user.region)+'</div><div class="uid">'+escapeHtml(state.user.id)+' | '+escapeHtml(state.user.volo)+'</div>'
@@ -538,7 +538,7 @@ function rReceipt(app){
     +(!isDep?'<div class="rrow"><span class="rl">Type</span><span class="rv" style="color:var(--gold);font-weight:600">'+state.missionType+'</span></div>':'')
     +(isDep&&state._h?'<div class="receipt-hours"><div class="lbl">HEURES TRAVAILLÉES</div><div class="big">'+state._h+'</div></div>':'')
     +'</div>'
-    +'<button class="btn btn-gold" onclick="window.open(\'index.html\',\'_self\')">← RETOUR À L\'APP</button>'
+    +'<button class="btn btn-gold" onclick="if(history.length>1){history.back()}else{location.href=\'index.html\'}">← RETOUR À L\'APP</button>'
     +'<button class="btn btn-outline" onclick="state.step=\'accueil\';state.mode=null;state.lieu=null;render()" style="margin-top:10px">NOUVEAU POINTAGE</button>';
 }
 

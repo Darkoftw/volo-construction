@@ -913,7 +913,7 @@ body::after{
 <header class="app-header">
   <div class="header-inner">
     <div class="header-left">
-      <a href="index.html" class="back-btn" title="Retour" aria-label="Retour à l'accueil">←</a>
+      <a href="index.html" onclick="event.preventDefault();if(history.length>1){history.back()}else{location.href='index.html'}" class="back-btn" title="Retour" aria-label="Retour à l'accueil">←</a>
       <div class="logo-ring">
         <img src="eagle_tactic.png" alt="Golden Eagles" onerror="if(typeof KING_LOGO_B64!=='undefined'){this.src=KING_LOGO_B64}else{this.parentElement.innerHTML='GE'}">
       </div>

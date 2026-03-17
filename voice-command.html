@@ -1346,7 +1346,7 @@ function goBack() {
   if (isListening) toggleListening();
   if (window.speechSynthesis) window.speechSynthesis.cancel();
   if (window.opener) window.close();
-  else window.location.href = 'index.html';
+  else if(history.length>1){history.back()}else{window.location.href = 'index.html';}
 }
 
 // ── RESIZE ──

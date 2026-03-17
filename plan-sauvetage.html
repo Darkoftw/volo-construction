@@ -124,7 +124,7 @@ input,select,textarea{font-size:16px!important}
 <div class="top-bar">
   <img src="eagle_tactic.png" alt="Eagle" onerror="if(typeof KING_LOGO_B64!=='undefined')this.src=KING_LOGO_B64;else this.style.display='none'">
   <h1>PLAN DE SAUVETAGE</h1>
-  <a href="index.html" class="btn-back">← RETOUR</a>
+  <a href="index.html" onclick="event.preventDefault();if(history.length>1){history.back()}else{location.href='index.html'}" class="btn-back">← RETOUR</a>
 </div>
 
 <div class="hero">

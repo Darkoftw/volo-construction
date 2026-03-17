@@ -965,7 +965,7 @@ function renderHome(){
       <button class="btn btn-outline" onclick="plan.step=8;render()" style="margin-top:16px">HISTORIQUE (${plans.length})</button>
       <button onclick="loadFullTestScenario()" style="margin-top:10px;padding:10px 20px;background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(124,58,237,.05));border:1px solid rgba(124,58,237,.4);border-radius:10px;color:rgba(180,130,255,1);font-size:12px;cursor:pointer;letter-spacing:1.5px;font-family:Oswald,sans-serif;display:block;width:100%"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v6l5 8a3 3 0 01-2.6 4.5H6.6A3 3 0 014 17l5-8V3z"/><line x1="9" y1="3" x2="15" y2="3"/></svg> SITUATION TEST — PDF COMPLET</button>
       <div style="margin-top:16px">
-        <a href="#" onclick="event.preventDefault();if(currentUser)sessionStorage.setItem('volo_transfer_volo',currentUser.volo);window.open('index.html','_self')" style="color:var(--muted);font-size:12px;text-decoration:none">← Retour à l'inventaire</a>
+        <a href="index.html" onclick="event.preventDefault();if(currentUser)sessionStorage.setItem('volo_transfer_volo',currentUser.volo);if(history.length>1){history.back()}else{location.href='index.html'}" style="color:var(--muted);font-size:12px;text-decoration:none">← Retour à l'inventaire</a>
       </div>
     </div>`;
 }

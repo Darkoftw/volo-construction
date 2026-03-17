@@ -824,7 +824,7 @@ body.light .toast{background:#fff;color:#0F172A;box-shadow:0 4px 20px rgba(0,0,0
       <div class="header-sub">THE GOLDEN EAGLES · SAUVETAGE TECHNIQUE</div>
     </div>
     <div class="header-actions">
-      <button class="btn" onclick="window.location.href='index.html'" title="Retour à l'accueil">← Accueil</button>
+      <button class="btn" onclick="if(history.length>1){history.back()}else{location.href='index.html'}" title="Retour à l'accueil">← Accueil</button>
       <button class="btn btn-ghost-gold" id="btn-lexique"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> Lexique</button>
       <button class="btn btn-ghost-rescue" id="btn-scan" onclick="openScanModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg> Scanner</button>
       <button class="btn btn-ghost-rescue" id="btn-print"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Imprimer</button>

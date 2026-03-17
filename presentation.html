@@ -809,7 +809,7 @@ section{padding:80px 0}
   <div class="footer-text">VOLO SST V20.7 — GOLDEN EAGLES — VOLO CONSTRUCTION — 2026</div>
   <div class="footer-credit">Developpe par Jonathan Milone</div>
   <div class="footer-links">
-    <a href="index.html" class="footer-link">APPLICATION</a>
+    <a href="index.html" onclick="event.preventDefault();if(history.length>1){history.back()}else{location.href='index.html'}" class="footer-link">APPLICATION</a>
     <a href="dashboard-superviseur.html" class="footer-link">DASHBOARD</a>
     <a href="rapport-cnesst.html" class="footer-link">RAPPORT CNESST</a>
     <a href="tracker-chantier.html" class="footer-link">TRACKER GPS</a>
