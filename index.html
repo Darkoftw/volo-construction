@@ -1451,9 +1451,16 @@ function dismissSplash(){
   if(!s||s.classList.contains('bye'))return;
   s.classList.add('bye');
   try{document.getElementById('eaglecry').play().catch(()=>{});}catch(e){}
+  try{sessionStorage.setItem('volo_splash_done','1');}catch(e){}
   setTimeout(()=>{s.remove();},600);
 }
-setTimeout(dismissSplash,4800);
+// Skip splash si deja vu cette session
+if(sessionStorage.getItem('volo_splash_done')==='1'){
+  const _sp=document.getElementById('splashTI');
+  if(_sp)_sp.remove();
+}else{
+  setTimeout(dismissSplash,4800);
+}
 </script>
 <!-- ══ END SPLASH ══ -->
 <div class="app" id="app"></div>
