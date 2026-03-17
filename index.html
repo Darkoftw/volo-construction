@@ -7864,11 +7864,16 @@ function doLogout(){
   // 2. Remet les vars globales JS à zéro
   lastPayload=null;cancelSeconds=0;formView='main';
   window._pickoffExpected=null;window._pickoffOriginalTx=null;
-  // 3. Efface les clés de session du localStorage
+  // 3. Efface TOUTES les clés de session du localStorage
   try{
+    localStorage.removeItem('volo_pin');
     localStorage.removeItem('volo_last_role');
     localStorage.removeItem('volo_last_user');
-    localStorage.removeItem('volo_pin');
+    localStorage.removeItem('volo_last_id');
+    localStorage.removeItem('volo_last_volo');
+    localStorage.removeItem('volo_session_ts');
+    localStorage.removeItem('volo_caisse_pin');
+    localStorage.removeItem('volo_caisse_user');
   }catch(e){}
   // 4. Reset COMPLET du state — pin vide, loggedIn false, tous les modes off
   setState({step:1,pin:'',loggedIn:false,depot:null,remorques:[],dest:null,
