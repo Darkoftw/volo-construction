@@ -263,6 +263,16 @@ const LIEUX=[
 ];
 const WEBHOOK_POINTAGE='/api/webhook-pointage';
 let state={step:'pin',pin:'',user:null,mode:null,lieu:null,lieuCustom:'',missionType:'STANDARD',ts:null,_h:'',_m:0};
+// Auto-login si pin dans URL (vient de index.html)
+(function(){
+  try{
+    const p=new URLSearchParams(window.location.search).get('pin');
+    if(p&&p.length===4){
+      const u=PERSONNEL.find(x=>x.volo==='V'+p);
+      if(u){state.pin=p;state.user=u;state.step='accueil';}
+    }
+  }catch(e){}
+})();
 let qrScanner = null;
 let clockInt;
 const LS_ONSITE='volo-ptg-onsite',LS_HIST='volo-ptg-history',LS_QUEUE='volo-ptg-queue';

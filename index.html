@@ -2764,7 +2764,7 @@ function renderAccueil(){
   ${poAlert}
 
   <!-- TD POINTAGE — Full width gold -->
-  <div class="td-pointage" onclick="window.open('pointage.html','_self')">
+  <div class="td-pointage" onclick="window.open('pointage.html?pin='+state.pin,'_self')">
     <div class="td-pointage-icon">
       <svg style="width:24px;height:24px;stroke:#C9A84C;stroke-width:1.5;fill:none;filter:drop-shadow(0 0 4px rgba(201,168,76,.3))" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
     </div>
@@ -2776,8 +2776,8 @@ function renderAccueil(){
     <svg style="width:16px;height:16px;stroke:#C9A84C;stroke-width:1.5;fill:none" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
   </div>
 
-  <!-- TD PICK ACTIONS — Side by side -->
-  ${isSurv?'':`
+  <!-- TD PICK ACTIONS — Chef only (sauveteurs utilisent EPI simplifie) -->
+  ${isChef?`
   <div class="td-picks">
     <div class="td-pick td-pick-on ${myPO.length>0?'td-pick-locked':''}" onclick="${myPO.length>0?'confirmSecondPickOn()':'startPickOn()'}">
       <svg style="width:30px;height:30px;stroke:${myPO.length>0?'#4A464F':'#27AE60'};stroke-width:1.5;fill:none" viewBox="0 0 24 24"><path d="M21 8l-2-3H5L3 8"/><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 12v4"/><path d="M9 14h6"/></svg>
@@ -2792,9 +2792,10 @@ function renderAccueil(){
       ${myPO.length>0?'<div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 0%,#C0392B 30%,#ff4444 50%,#C0392B 70%,transparent 100%);background-size:200% 100%;animation:shimmerLine 2s linear infinite"></div>':''}
     </div>
   </div>
-  `}
+  `:''}
 
-  <!-- ═══ EAGLE EYE SLIM — Horizontal HUD ═══ -->
+  <!-- ═══ EAGLE EYE + ALERTES + TRANSACTIONS — Chef only ═══ -->
+  ${isChef?`
   <div class="ee-slim">
     <div class="ee-slim-left">
       <div class="ee-mini-radar">
@@ -2848,6 +2849,7 @@ function renderAccueil(){
       </div>
     </div>
   </div>
+  `:''}
 
   <!-- RESUME WIZARD -->
   ${(function(){
@@ -2872,7 +2874,7 @@ function renderAccueil(){
   <!-- CONTENT -->
   <div style="padding:14px 16px 100px" class="accueil-anim">
 
-    ${isSurv?'':((()=>{
+    ${isChef?((()=>{
       const alerts=getEquipmentAlerts();
       const critical=alerts.filter(a=>a.severity==='critical');
       const urgent=alerts.filter(a=>a.severity==='urgent');
@@ -2962,10 +2964,10 @@ function renderAccueil(){
           '</div>'+
         '</div>'+
       '</div>';
-    })())}
+    })()):''}
 
-    <!-- DERNIÈRES TRANSACTIONS (collapsible) -->
-    ${(()=>{
+    <!-- DERNIÈRES TRANSACTIONS — Chef only -->
+    ${isChef?(()=>{
       const hist=getHistory().filter(tx=>tx.mode==='PICK-ON'||tx.mode==='PICK-OFF').slice(0,5);
       if(!hist.length) return '';
       const isOpen=localStorage.getItem('volo_tx_panel_open')!=='0';
@@ -2992,7 +2994,7 @@ function renderAccueil(){
           '</div>';
         }).join('') +
       '</div>';
-    })()}
+    })():''}
 
     <!-- ═══ QUICK GRID — Grouped Modules ═══ -->
     ${isSurv?`
