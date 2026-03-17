@@ -2,60 +2,43 @@
 //  VOLO SST — Service Worker
 //  Cache-first pour assets, network-first pour API
 // ══════════════════════════════════════════
-const CACHE_NAME = 'volo-sst-v34.0';
+const CACHE_NAME = 'volo-sst-v34.1';
 const ASSETS = [
   '/index.html',
   '/agenda.html',
-  '/command-center.html',
-  '/inventaire-sac.html',
   '/caisses-stock.html',
+  '/command-center.html',
   '/dashboard-superviseur.html',
   '/plan-travail.html',
+  '/plan-sauvetage.html',
   '/pointage.html',
+  '/presentation.html',
   '/qr.html',
   '/rapport-cnesst.html',
-  '/tracker-chantier.html',
-  '/plan-sauvetage.html',
-  '/presentation.html',
-  '/badge-tactique.html',
   '/lexique.html',
-  /* '/dashboard-rpg.html', — retiré: fichier inexistant, cassait cache.addAll() */
-  '/voice-command.html',
-  '/volo-automation.html',
+  '/mode-inspection.html',
+  '/mode-terrain.html',
+  '/asat.html',
+  '/permis-espace-clos.html',
+  '/tracker-chantier.html',
+  '/data.js',
   '/cnesst-reglements.js',
-  '/volo-crypto.js',
   '/firebase-config.js',
   '/firebase-service.js',
   '/firebase-auth.js',
+  '/volo-crypto.js',
+  '/volo-network.js',
   '/volo-usage.js',
   '/volo-chat.js',
   '/volo-announce.js',
+  '/volo-icons.js',
+  '/error-monitor.js',
   '/logo.js',
   '/king-logo.js',
-  '/volo-icons.js',
-  '/mode-inspection.html',
-  '/asat.html',
-  '/permis-espace-clos.html',
-  '/mode-terrain.html',
-  '/volo-network.js',
-  '/error-monitor.js',
-  '/data.js',
   '/eagle_tactic.png',
   '/eagle_crown.jpg',
   '/eagle.mp3',
-  '/manifest.json',
-  '/v2/index.html',
-  '/v2/caisses-stock.html',
-  '/v2/agenda.html',
-  '/v2/plan-travail.html',
-  '/v2/dashboard-superviseur.html',
-  '/v2/rapport-cnesst.html',
-  '/v2/qr.html',
-  '/v2/tracker-chantier.html',
-  '/v2/pointage.html',
-  '/v2/presentation.html',
-  '/v2/lexique.html',
-  '/v2/v2-glass.css'
+  '/manifest.json'
 ];
 
 // Install — cache les assets critiques
@@ -109,7 +92,6 @@ self.addEventListener('fetch', e => {
     caches.match(e.request).then(cached => {
       if (cached) return cached;
       return fetch(e.request).then(res => {
-        // Cache les réponses valides (pas d'erreur, pas opaque)
         if (res.ok && res.status === 200 && res.type !== 'opaque') {
           const clone = res.clone();
           caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
