@@ -6115,6 +6115,14 @@ function submitEpi(){
 
   // Dual-write Firestore
   try{if(typeof VoloData!=='undefined'&&VoloData.saveTransaction)VoloData.saveTransaction(payload);}catch(e){}
+  // Stock State Sync (EPI)
+  try{
+    if(typeof VoloData!=='undefined'&&VoloData.saveStockState){
+      var _stockMap=getCaisseStock();
+      var _statuts={};try{_statuts=JSON.parse(localStorage.getItem('volo_caisse_statuts')||'{}');}catch(e){}
+      VoloData.saveStockState(_stockMap,_statuts,localStorage.getItem('volo_last_volo')||'');
+    }
+  }catch(e){}
 
   if(navigator.vibrate)navigator.vibrate([100,50,100]);
   try{document.getElementById('eaglecry').play().catch(()=>{});}catch(e){}
@@ -6201,6 +6209,15 @@ function doValidation(){
   });
   // ── Dual-write Firestore (fire & forget) ──
   try{if(typeof VoloData!=='undefined'&&VoloData.saveTransaction){VoloData.saveTransaction(payload);VoloData.logAudit(payload.mode,{sauveteur:payload.sauveteur_nom,items:payload.nb_items,destination:payload.destination});}}catch(e){}
+  // ── Stock State Sync — sauvegarder état stock dans Firestore pour multi-device ──
+  try{
+    if(typeof VoloData!=='undefined'&&VoloData.saveStockState){
+      var _stockMap=getCaisseStock();
+      var _statuts={};try{_statuts=JSON.parse(localStorage.getItem('volo_caisse_statuts')||'{}');}catch(e){}
+      var _myVolo=localStorage.getItem('volo_last_volo')||'V'+state.pin;
+      VoloData.saveStockState(_stockMap,_statuts,_myVolo);
+    }
+  }catch(e){console.warn('[VOLO] Stock state save error:',e);}
   // V20.8: ITEM_LOG — 1 webhook PAR item (champs plats pour Make.com)
   state.scanned.forEach(function(item){
     const d=ITEMS.find(x=>x.id===item.id);
@@ -6341,6 +6358,28 @@ function _completePinLogin(profile){
         });
       }
     }catch(e){}
+    // ── STOCK SYNC — Charger état stock Firestore + listener temps réel ──
+    try{
+      if(typeof VoloData!=='undefined'&&VoloData.loadStockState){
+        VoloData.loadStockState().then(function(stateData){
+          if(stateData){
+            VoloData.applyStockState(stateData);
+            console.log('[VOLO] Stock state loaded from Firestore');
+          }
+        });
+        // Listener: sync multi-device en temps réel
+        VoloData.onStockChange(function(stateData){
+          // Ne pas écraser si c'est nous qui venons d'écrire
+          var myVolo=localStorage.getItem('volo_last_volo')||'';
+          if(stateData.updatedBy===myVolo){
+            var age=Date.now()-new Date(stateData.updatedAt).getTime();
+            if(age<3000) return; // Skip si <3s (c'est notre propre write)
+          }
+          VoloData.applyStockState(stateData);
+          showToast('Stock mis à jour — '+stateData.updatedBy,'info');
+        });
+      }
+    }catch(e){console.warn('[VOLO] Stock sync init error:',e);}
     return;
   }
   // Sinon, routing action spécifique

@@ -16,8 +16,8 @@ var VoloData = (function() {
   function _enabled() { return !!(window.VOLO_FIREBASE && window.VOLO_FIREBASE.enabled && _fs()); }
   function _primary() { return window.VOLO_FIREBASE && window.VOLO_FIREBASE.firestorePrimary; }
 
-  // --- Circuit Breaker (quota Spark 20k writes/jour) ---
-  var WRITE_LIMIT = 20000;
+  // --- Circuit Breaker (quota — 50k/jour pour Blaze, 20k pour Spark) ---
+  var WRITE_LIMIT = 50000;
   var WRITE_WARN_PCT = 0.80;  // 80% = bandeau rouge
   var WRITE_COUNT_KEY = 'volo_write_count';
   var WRITE_DATE_KEY = 'volo_write_date';
@@ -896,6 +896,133 @@ var VoloData = (function() {
   }
 
   // ══════════════════════════════════════════
+  //  STOCK STATE — Multi-device sync
+  //  Doc unique: stock_state/current
+  //  Contient items_sorti[] = IDs actuellement sortis
+  // ══════════════════════════════════════════
+
+  var STOCK_DOC = 'current';
+  var STOCK_COL = 'stock_state';
+  var _stockListenerUnsub = null;
+
+  /**
+   * Sauvegarde l'etat stock dans Firestore apres PICK-ON ou PICK-OFF
+   * @param {Object} stockMap - getCaisseStock() complet {grpId: [itemIds]}
+   * @param {Object} statuts - getCaisseStatuts() {grpId: status}
+   * @param {string} voloId - qui a fait la modif
+   */
+  function saveStockState(stockMap, statuts, voloId) {
+    if (!_enabled() || !_canWrite()) return Promise.resolve(false);
+    // Extraire la liste des items actuellement sortis
+    // Un item est "sorti" s'il n'est plus dans sa caisse stock
+    var itemsSorti = [];
+    if (typeof CAISSES !== 'undefined') {
+      CAISSES.forEach(function(c) {
+        var original = c.items_contenus || [];
+        var current = stockMap[c.id] || original;
+        original.forEach(function(itemId) {
+          if (current.indexOf(itemId) === -1) {
+            itemsSorti.push(itemId);
+          }
+        });
+      });
+    }
+    var stateDoc = {
+      items_sorti: itemsSorti,
+      statuts: statuts || {},
+      updatedAt: _tsNow(),
+      updatedBy: voloId || 'unknown',
+      org: ORG
+    };
+    return _ensureAuth().then(function() {
+      _incrementWrite();
+      return _fs().collection(STOCK_COL).doc(STOCK_DOC).set(stateDoc, { merge: true })
+        .then(function() {
+          console.log('[VoloData] Stock state saved — ' + itemsSorti.length + ' items sorti');
+          return true;
+        })
+        .catch(function(e) {
+          console.warn('[VoloData] Stock state save failed:', e.message);
+          _queuePush({ collection: STOCK_COL, docId: STOCK_DOC, data: stateDoc });
+          return false;
+        });
+    });
+  }
+
+  /**
+   * Charge l'etat stock depuis Firestore au startup
+   * Applique items_sorti au localStorage volo_caisse_stock
+   * @returns {Promise<Object|null>} items_sorti array ou null
+   */
+  function loadStockState() {
+    if (!_enabled()) return Promise.resolve(null);
+    return _ensureAuth().then(function() {
+      return _fs().collection(STOCK_COL).doc(STOCK_DOC).get()
+        .then(function(doc) {
+          if (!doc.exists) {
+            console.log('[VoloData] loadStockState — no state doc yet');
+            return null;
+          }
+          var data = doc.data();
+          console.log('[VoloData] loadStockState — ' + (data.items_sorti ? data.items_sorti.length : 0) + ' items sorti, updated by ' + data.updatedBy + ' at ' + data.updatedAt);
+          return data;
+        })
+        .catch(function(e) {
+          console.warn('[VoloData] loadStockState error:', e.message);
+          return null;
+        });
+    });
+  }
+
+  /**
+   * Applique un stock_state Firestore au localStorage
+   * Reconstruit volo_caisse_stock a partir de items_sorti
+   * @param {Object} stateData - doc Firestore {items_sorti:[], statuts:{}}
+   */
+  function applyStockState(stateData) {
+    if (!stateData || !stateData.items_sorti) return;
+    if (typeof CAISSES === 'undefined') return;
+    var sorti = new Set(stateData.items_sorti);
+    var stockMap = {};
+    CAISSES.forEach(function(c) {
+      var original = c.items_contenus || [];
+      // Garder seulement les items qui ne sont PAS sortis
+      stockMap[c.id] = original.filter(function(itemId) {
+        return !sorti.has(itemId);
+      });
+    });
+    try {
+      localStorage.setItem('volo_caisse_stock', JSON.stringify(stockMap));
+      if (stateData.statuts) {
+        localStorage.setItem('volo_caisse_statuts', JSON.stringify(stateData.statuts));
+      }
+      console.log('[VoloData] applyStockState — ' + sorti.size + ' items sorti appliques au localStorage');
+    } catch(e) {
+      console.warn('[VoloData] applyStockState localStorage error:', e.message);
+    }
+  }
+
+  /**
+   * Listener temps reel sur stock_state/current
+   * Quand un autre device fait un PICK-ON/PICK-OFF, on recoit le changement
+   * @param {Function} callback - recoit stateData a chaque changement
+   * @returns {Function} unsubscribe
+   */
+  function onStockChange(callback) {
+    if (!_enabled()) return function() {};
+    return _authThenListen(function() {
+      return _fs().collection(STOCK_COL).doc(STOCK_DOC).onSnapshot(function(doc) {
+        if (!doc.exists) return;
+        var data = doc.data();
+        console.log('[VoloData] onStockChange — update from ' + data.updatedBy + ' at ' + data.updatedAt);
+        if (callback) callback(data);
+      }, function(e) {
+        console.warn('[VoloData] Stock listener error:', e);
+      });
+    });
+  }
+
+  // ══════════════════════════════════════════
   //  STATUS
   // ══════════════════════════════════════════
 
@@ -969,6 +1096,12 @@ var VoloData = (function() {
     onForegroundMessage: onForegroundMessage,
     notifyUrgence: notifyUrgence,
     notifyUrgencyAlert: notifyUrgencyAlert,
+
+    // Stock State (multi-device sync)
+    saveStockState: saveStockState,
+    loadStockState: loadStockState,
+    applyStockState: applyStockState,
+    onStockChange: onStockChange,
 
     // Listeners
     onConfigChange: onConfigChange,
