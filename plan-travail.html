@@ -1640,9 +1640,9 @@ function handleConfirmPin(key){
   confirmPin += key;
   renderPinPad();
   if(confirmPin.length===4){
-    // Vérifier le PIN — doit être un chef d'équipe ou coordonnateur
+    // Vérifier le PIN — doit être un chef d'équipe, coordonnateur ou Jonathan (V0205 CHEF_OVERRIDE)
     const padded = confirmPin.padStart(4,'0');
-    const chef = PERSONNEL.find(p=>p.volo==='V'+padded && (p.role.includes('CHEF')||p.role.includes('COORD')));
+    const chef = PERSONNEL.find(p=>p.volo==='V'+padded && (p.role.includes('CHEF')||p.role.includes('COORD')||p.volo==='V0205'));
     if(chef){
       plan.signePar = chef.name;
       plan.signeParId = chef.id;
