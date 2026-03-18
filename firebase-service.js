@@ -16,8 +16,8 @@ var VoloData = (function() {
   function _enabled() { return !!(window.VOLO_FIREBASE && window.VOLO_FIREBASE.enabled && _fs()); }
   function _primary() { return window.VOLO_FIREBASE && window.VOLO_FIREBASE.firestorePrimary; }
 
-  // --- Circuit Breaker (quota — 50k/jour pour Blaze, 20k pour Spark) ---
-  var WRITE_LIMIT = 50000;
+  // --- Circuit Breaker (quota Spark gratuit — 20k writes/jour, usage reel ~200/jour) ---
+  var WRITE_LIMIT = 20000;
   var WRITE_WARN_PCT = 0.80;  // 80% = bandeau rouge
   var WRITE_COUNT_KEY = 'volo_write_count';
   var WRITE_DATE_KEY = 'volo_write_date';
