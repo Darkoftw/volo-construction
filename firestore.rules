@@ -179,6 +179,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ── Stock State (état stock temps réel) ──
+    match /stock_state/{docId} {
+      allow read: if isAuth();
+      allow write: if isAuth();
+    }
+
     // Bloquer tout le reste
     match /{document=**} {
       allow read, write: if false;

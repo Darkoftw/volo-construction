@@ -24,11 +24,14 @@ exports.sendPushNotification = functions.firestore
     const type = notif.type || 'INFO';
     const targetRole = notif.targetRole || 'all';
 
-    // 1. Chercher les tokens FCM
+    // 1. Chercher les tokens FCM (filtré par rôle)
     let tokensQuery = db.collection('fcm_tokens');
-    if (targetRole !== 'all') {
-      tokensQuery = tokensQuery.where('role', '==', targetRole.toUpperCase());
+    if (targetRole === 'chef') {
+      tokensQuery = tokensQuery.where('role', 'in', ['CHEF', 'ADMIN']);
+    } else if (targetRole === 'sauveteur') {
+      tokensQuery = tokensQuery.where('role', 'in', ['CHEF', 'ADMIN', 'SAUVETEUR']);
     }
+    // targetRole === 'all' → no filter, send to everyone
     const tokensSnap = await tokensQuery.get();
 
     if (tokensSnap.empty) {

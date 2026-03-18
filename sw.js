@@ -2,7 +2,7 @@
 //  VOLO SST — Service Worker
 //  Cache-first pour assets, network-first pour API
 // ══════════════════════════════════════════
-const CACHE_NAME = 'volo-sst-v34.1';
+const CACHE_NAME = 'volo-sst-v20.9';
 const ASSETS = [
   '/index.html',
   '/agenda.html',
